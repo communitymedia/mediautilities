@@ -1,0 +1,39 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+	"http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Narrative Player</title>
+	<style>
+		body { background-color:#000; }
+		#video {
+			position: absolute;
+			width: [WIDTH]px;
+			height: [HEIGHT]px;
+			top: 50%;
+			left: 50%;
+			margin-left: -[HALF-WIDTH]px;
+			margin-top: -[HALF-HEIGHT]px;
+			border: 1px solid #5e5e5e;
+		}
+	</style>
+</head>
+<body>
+	<div id="video">
+		<object classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" 
+				codebase="http://www.apple.com/qtactivex/qtplugin.cab" 
+				width="[WIDTH]" height="[HEIGHT]">
+			<param name="src" value="[SMIL-ID]">
+			<param name="autoplay" value="true">
+			<param name="pluginspage" value="http://www.apple.com/quicktime/download/">
+			<param name="controller" value="true">
+			<!--[if !IE]> <-->
+				<object type="video/quicktime" width="[WIDTH]" height="[HEIGHT]" data="[SMIL-ID]">
+					<param name="pluginurl" value="http://www.apple.com/quicktime/download/">
+					<param name="controller" value="true">
+				</object>
+			<!--> <![endif]-->
+		</object>
+	</div>
+</body>
+</html>
