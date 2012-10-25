@@ -37,6 +37,7 @@ public class CameraUtilities {
 	public static class CameraConfiguration {
 		public boolean hasFrontCamera = false;
 		public boolean usingFrontCamera = false;
+		public int numberOfCameras = 0;
 		// post-v9 orientation value; Integer rather than int so we can return null if not known
 		public Integer cameraOrientationDegrees = null;
 
@@ -53,6 +54,7 @@ public class CameraUtilities {
 		Camera camera = null;
 		cameraConfiguration.hasFrontCamera = false;
 		cameraConfiguration.usingFrontCamera = false;
+		cameraConfiguration.numberOfCameras = 0;
 		cameraConfiguration.cameraOrientationDegrees = null;
 
 		// look for front-facing camera, using the Gingerbread API (v9)
@@ -99,6 +101,8 @@ public class CameraUtilities {
 									if (cameraFacing == CUSTOM_CAMERA_FRONT) {
 										cameraConfiguration.usingFrontCamera = true;
 									}
+									
+									cameraConfiguration.numberOfCameras = cameraCount;
 
 									// Integer so that we can compare to null when checking orientation
 									cameraConfiguration.cameraOrientationDegrees = Integer.valueOf(orientationField
@@ -165,7 +169,8 @@ public class CameraUtilities {
 				if (cameraInfo.facing == CUSTOM_CAMERA_FRONT) {
 					cameraConfiguration.hasFrontCamera = true;
 				}
-				if (cameraInfo.facing == preferredFacing) {
+				// allow non-preferred camera (some devices (e.g. Nexus 7) only have front camera)
+				if (cameraInfo.facing == preferredFacing || camIdx == cameraCount - 1) {
 					if (camera == null) { // so that we continue and detect a front camera even if we aren't using it
 						try {
 							camera = Camera.open(camIdx);
