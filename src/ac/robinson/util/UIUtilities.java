@@ -129,11 +129,20 @@ public class UIUtilities {
 	}
 
 	// requires <uses-permission android:name="android.permission.WAKE_LOCK" />
+	@Deprecated
 	public static PowerManager.WakeLock acquireWakeLock(Activity activity, String tag) {
 		PowerManager powerManager = (PowerManager) activity.getSystemService(Context.POWER_SERVICE);
 		PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, tag);
 		wakeLock.acquire();
 		return wakeLock;
+	}
+
+	public static void acquireKeepScreenOn(Window window) {
+		window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+	}
+
+	public static void releaseKeepScreenOn(Window window) {
+		window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 	}
 
 	// requires <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />

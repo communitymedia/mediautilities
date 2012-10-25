@@ -71,7 +71,7 @@ public class SMILUtilities {
 	public static final String SMIL_FRONT_IMAGE_STRING = "front-";
 	
 	private static final String COMPONENT_FILE_NAME_WITH_ID = "%s-%d-%d.%s";
-	private static final String COMPONENT_FILE_NAME_WITHOUT_ID = "%s-%d-%d.%s";
+	private static final String COMPONENT_FILE_NAME_WITHOUT_ID = "%s-%d.%s";
 
 	/**
 	 * Get a list of the additional files that are part of a SMIL narrative file
