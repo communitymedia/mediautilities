@@ -91,7 +91,8 @@ public class CameraUtilities {
 					getCameraInfoMethod.invoke(null, camIdx, cameraInfo);
 					cameraFacing = facingField.getInt(cameraInfo);
 
-					if (cameraFacing == preferredFacing) {
+						// allow non-preferred camera (some devices (e.g. Nexus 7) only have front camera)
+						if (cameraFacing == preferredFacing || camIdx == cameraCount - 1) {
 						if (camera == null) { // so that we continue and detect a front camera even if we aren't using
 												// it
 							try {
@@ -155,6 +156,7 @@ public class CameraUtilities {
 		Camera camera = null;
 		cameraConfiguration.hasFrontCamera = false;
 		cameraConfiguration.usingFrontCamera = false;
+		cameraConfiguration.numberOfCameras = 0;
 		cameraConfiguration.cameraOrientationDegrees = null;
 
 		int cameraCount = Camera.getNumberOfCameras();
@@ -177,6 +179,7 @@ public class CameraUtilities {
 							if (cameraInfo.facing == CUSTOM_CAMERA_FRONT) {
 								cameraConfiguration.usingFrontCamera = true;
 							}
+							cameraConfiguration.numberOfCameras = cameraCount;
 							// Integer so that we can compare to null when checking orientation
 							cameraConfiguration.cameraOrientationDegrees = Integer.valueOf(cameraInfo.orientation);
 						} catch (RuntimeException e) {

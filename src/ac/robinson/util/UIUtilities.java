@@ -128,6 +128,18 @@ public class UIUtilities {
 		}
 	}
 
+	public static void setFullScreen(Window window) {
+		WindowManager.LayoutParams attrs = window.getAttributes();
+		attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
+		window.setAttributes(attrs);
+	}
+
+	public static void setNonFullScreen(Window window) {
+		WindowManager.LayoutParams attrs = window.getAttributes();
+		attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		window.setAttributes(attrs);
+	}
+
 	// requires <uses-permission android:name="android.permission.WAKE_LOCK" />
 	@Deprecated
 	public static PowerManager.WakeLock acquireWakeLock(Activity activity, String tag) {
