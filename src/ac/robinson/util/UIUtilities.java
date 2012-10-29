@@ -347,6 +347,40 @@ public class UIUtilities {
 	}
 
 	/**
+	 * Use reflection to hide/show the action bar
+	 * 
+	 * @param activity
+	 */
+	public static void actionBarVisibility(Activity activity, boolean visible) {
+		try {
+			Class<?> activityClass = Class.forName("android.app.Activity");
+			Method getActionBarMethod = activityClass.getMethod("getActionBar");
+			if (getActionBarMethod != null) {
+				Object actionBar = getActionBarMethod.invoke(activity, (Object[]) null);
+				Class<?> actionBarClass = actionBar.getClass();
+				Method actionBarMethod = null;
+
+				try {
+					actionBarMethod = actionBarClass.getMethod(visible ? "show" : "hide");
+					if (actionBarMethod != null) {
+						actionBarMethod.invoke(actionBar, (Object[]) null);
+					}
+				} catch (IllegalArgumentException e) {
+				} catch (IllegalAccessException e) {
+				} catch (InvocationTargetException e) {
+				}
+			}
+		} catch (ClassNotFoundException e) {
+		} catch (SecurityException e) {
+		} catch (NoSuchMethodException e) {
+			Log.d(AndroidUtilities.LOG_TAG, "ActionBar not present; not configuring");
+		} catch (IllegalArgumentException e) {
+		} catch (IllegalAccessException e) {
+		} catch (InvocationTargetException e) {
+		}
+	}
+
+	/**
 	 * Use reflection to add action bar tabs (so we can target API < 11)
 	 * 
 	 * @param activity
