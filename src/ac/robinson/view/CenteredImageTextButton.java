@@ -90,7 +90,9 @@ public class CenteredImageTextButton extends Button {
 			touchedColor = getResources().getColor(resColor);
 		}
 
-		UIUtilities.setButtonColorFilters(this, defaultColor, touchedColor);
+		if (!isInEditMode()) { // so the Eclipse visual editor can load this component
+			UIUtilities.setButtonColorFilters(this, defaultColor, touchedColor);
+		}
 	}
 
 	private void redrawButton() {

@@ -118,6 +118,7 @@ public class ImportingService extends Service {
 
 			if (!mBluetoothAdapter.isEnabled()) {
 				// removed - shouldn't be done without user permission - now start observer when bluetooth is enabled
+				// may need <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 				// mBluetoothAdapter.enable();
 			} else {
 				startBluetoothTransferObserver();
