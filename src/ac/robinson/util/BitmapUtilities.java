@@ -482,7 +482,7 @@ public class BitmapUtilities {
 	 * @param maxCharactersPerLine an approximate value - text will be split at the previous space character
 	 */
 	public static void drawScaledText(String textString, Canvas textCanvas, Paint textPaint, int textColour,
-			int backgroundColour, int backgroundPadding, float backgroundRadius, boolean alignBottom,
+			int backgroundColour, int backgroundPadding, float backgroundRadius, boolean alignBottom, float leftOffset,
 			float maxCanvasAreaWidth, float maxCanvasAreaHeight, int maxTextSize, int maxCharactersPerLine) {
 
 		// TODO: remove the need for maxCharactersPerLine
@@ -531,7 +531,7 @@ public class BitmapUtilities {
 			RectF outerTextBounds = null;
 			for (String text : textsToDraw) {
 				text = text.trim();
-				drawingX = (maxCanvasAreaWidth - textPaint.measureText(text)) / 2;
+				drawingX = ((maxCanvasAreaWidth - textPaint.measureText(text)) / 2) + leftOffset;
 				Rect textBounds = new Rect();
 				textPaint.getTextBounds(text, 0, text.length(), textBounds);
 				if (outerTextBounds == null) {
@@ -560,7 +560,7 @@ public class BitmapUtilities {
 		textPaint.setColor(textColour);
 		for (String text : textsToDraw) {
 			text = text.trim();
-			drawingX = (maxCanvasAreaWidth - textPaint.measureText(text)) / 2;
+			drawingX = ((maxCanvasAreaWidth - textPaint.measureText(text)) / 2) + leftOffset;
 			textCanvas.drawText(text, drawingX, drawingY, textPaint);
 			drawingY += lineHeight;
 		}

@@ -165,7 +165,7 @@ public class MOVUtilities {
 				if (!TextUtils.isEmpty(frame.mTextContent)) {
 					BitmapUtilities.drawScaledText(frame.mTextContent, baseCanvas, basePaint,
 							(imageLoaded ? textColourWithImage : textColourNoImage),
-							(imageLoaded ? textBackgroundColour : 0), textSpacing, textCornerRadius, imageLoaded,
+							(imageLoaded ? textBackgroundColour : 0), textSpacing, textCornerRadius, imageLoaded, 0,
 							baseBitmap.getWidth(), baseBitmap.getHeight(), textMaxFontSize, textMaxCharsPerLine);
 
 				} else if (!imageLoaded) {

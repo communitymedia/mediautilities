@@ -444,7 +444,7 @@ public class SMILUtilities {
 					// background is black by default... remove?
 					BitmapUtilities.drawScaledText(frame.mTextContent, textBitmapCanvas, textBitmapPaint,
 							(imageLoaded ? textColourWithImage : textColourNoImage),
-							(imageLoaded ? textBackgroundColour : 0), textSpacing, textCornerRadius, imageLoaded,
+							(imageLoaded ? textBackgroundColour : 0), textSpacing, textCornerRadius, imageLoaded, 0,
 							textBitmap.getWidth(), textBitmap.getHeight(), textMaxFontSize, textMaxCharsPerLine);
 
 					// savedFile = new File(outputDirectory, getFormattedFileName(narrativeName, frame.mFrameSequenceId,
