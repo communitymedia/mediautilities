@@ -69,7 +69,7 @@ public class SMILUtilities {
 	public static final String SMIL_MILLISECOND_STRING = "ms";
 	public static final String SMIL_BACK_IMAGE_STRING = "back-";
 	public static final String SMIL_FRONT_IMAGE_STRING = "front-";
-	
+
 	private static final String COMPONENT_FILE_NAME_WITH_ID = "%s-%d-%d.%s";
 	private static final String COMPONENT_FILE_NAME_WITHOUT_ID = "%s-%d.%s";
 
@@ -273,11 +273,11 @@ public class SMILUtilities {
 		File outputDirectory = outputFile.getParentFile();
 
 		String narrativeName = outputFile.getName();
-		narrativeName = narrativeName.substring(0,
-				narrativeName.length() - 1 - MediaUtilities.SMIL_FILE_EXTENSION.length());
+		narrativeName = narrativeName
+				.substring(0, narrativeName.length() - MediaUtilities.SMIL_FILE_EXTENSION.length());
 
 		// add a duplicate of the player because some devices have a pointless whitelist of incoming file extensions (!)
-		File syncFile = new File(outputDirectory, String.format("sync-%s%s", narrativeName,
+		File syncFile = new File(outputDirectory, String.format("%s%s", narrativeName,
 				MediaUtilities.SYNC_FILE_EXTENSION));
 		filesToSend.add(Uri.fromFile(syncFile));
 

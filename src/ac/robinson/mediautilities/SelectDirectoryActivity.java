@@ -40,6 +40,7 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
+// TODO: use a better picker, such as: https://github.com/iPaulPro/aFileChooser
 public class SelectDirectoryActivity extends ListActivity {
 
 	private static final String ITEM_KEY = "key";

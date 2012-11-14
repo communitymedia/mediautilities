@@ -30,6 +30,7 @@ import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.LightingColorFilter;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -206,10 +207,23 @@ public class UIUtilities {
 	 * @param touchedColor The touch colour - currently ignored. For API 11 and above the coloured filter is applied to
 	 *            the touched button; for For API 10 and below the normal platform button touch colour is used
 	 */
-	public static void setButtonColorFilters(View button, final Integer defaultColor, final int touchedColor) {
+	public static void setButtonColorFilters(View button, final int defaultColor, final int touchedColor) {
 
-		final LightingColorFilter normalColour = new LightingColorFilter(defaultColor, 0x00000000);
-		// final LightingColorFilter touchedColour = new LightingColorFilter(colourTouched, 0x00000000);
+		final LightingColorFilter normalColour;
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+			normalColour = new LightingColorFilter(defaultColor, Color.TRANSPARENT);
+		} else {
+			// use the requested colour to replace normal buttons; for white we lighten the existing colour instead
+			if (defaultColor != 0xffffffff) {
+				float[] hsv = new float[3];
+				Color.colorToHSV(defaultColor, hsv);
+				hsv[1] = 0.95f; // fully saturate and slightly darken the requested colour to improve display
+				hsv[2] *= 0.88f;
+				normalColour = new LightingColorFilter(Color.TRANSPARENT, Color.HSVToColor(hsv));
+			} else {
+				normalColour = new LightingColorFilter(0x00EAEAEA, Color.TRANSPARENT);
+			}
+		}
 
 		button.getBackground().setColorFilter(normalColour);
 		button.setOnTouchListener(new OnTouchListener() {
@@ -220,17 +234,10 @@ public class UIUtilities {
 			}
 
 			private void setTouchedColour(View v) {
-				if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.HONEYCOMB) {
-					// better colours before Honeycomb
-					// mode = PorterDuff.Mode.MULTIPLY;
+				// before Honeycomb the colour filter looks bad on a pressed button, and if we use the blanking approach
+				// (above) then we lose the gradient of a button; instead we remove the colour filter entirely
+				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
 					v.getBackground().clearColorFilter();
-				} else {
-					// TODO: colours are still bad on Honeycomb, but if we clear the colour filter there is a flicker
-					// while the display is updated.
-
-					// Make sure to use proper touched colours: AP11 uses transparent buttons, so use a different
-					// approach
-					// mode = PorterDuff.Mode.SRC_IN;
 				}
 			}
 
