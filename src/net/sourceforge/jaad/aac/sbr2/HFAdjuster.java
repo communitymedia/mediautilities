@@ -19,8 +19,6 @@
  */
 package net.sourceforge.jaad.aac.sbr2;
 
-import android.util.FloatMath;
-
 /*
  * HFAdjustment accoding to 4.6.18.7: Xhigh -> Y
  * 
@@ -236,15 +234,15 @@ class HFAdjuster implements SBRConstants, NoiseTable {
 			// level of additional HF components + gain
 			for (m = 0; m < M; m++) {
 				tmp = p.eMapped[e][m] / (1.0f + p.qMapped[e][m]);
-				Qm[e][m] = FloatMath.sqrt(tmp * p.qMapped[e][m]);
-				Sm[e][m] = p.sIndexMapped[e][m] ? FloatMath.sqrt(tmp) : 0;
+				Qm[e][m] = (float) Math.sqrt(tmp * p.qMapped[e][m]);
+				Sm[e][m] = p.sIndexMapped[e][m] ? (float) Math.sqrt(tmp) : 0;
 
 				// TODO: is epsilon==1.0f ???
 				if (p.sMapped[e][m]) {
-					gain[e][m] = FloatMath.sqrt(p.eMapped[e][m] * p.qMapped[e][m]
+					gain[e][m] = (float) Math.sqrt(p.eMapped[e][m] * p.qMapped[e][m]
 							/ ((EPSILON + eCurr[e][m]) * (1.0f + p.qMapped[e][m])));
 				} else {
-					gain[e][m] = FloatMath.sqrt(p.eMapped[e][m]
+					gain[e][m] = (float) Math.sqrt(p.eMapped[e][m]
 							/ ((EPSILON + eCurr[e][m]) * (1.0f + (delta ? p.qMapped[e][m] : 0))));
 				}
 			}
@@ -257,7 +255,7 @@ class HFAdjuster implements SBRConstants, NoiseTable {
 					eMappedSum[k] += p.eMapped[e][i];
 					tmp += eCurr[e][i];
 				}
-				gTemp[e][k] = (float) FloatMath.sqrt(eMappedSum[k] / tmp) * LIMITER_GAINS[limGain];
+				gTemp[e][k] = (float) Math.sqrt(eMappedSum[k] / tmp) * LIMITER_GAINS[limGain];
 			}
 
 			for (m = 0; m < M; m++) {
@@ -280,7 +278,7 @@ class HFAdjuster implements SBRConstants, NoiseTable {
 					tmp += (eCurr[e][i] * gain[e][i] * gain[e][i]) + (Sm[e][i] * Sm[e][i])
 							+ (delta2 ? (Qm[e][i] * Qm[e][i]) : 0);
 				}
-				gTemp[e][k] = (float) FloatMath.sqrt(eMappedSum[k] / tmp);
+				gTemp[e][k] = (float) Math.sqrt(eMappedSum[k] / tmp);
 			}
 
 			// apply boost

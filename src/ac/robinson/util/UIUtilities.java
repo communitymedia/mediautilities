@@ -149,6 +149,11 @@ public class UIUtilities {
 		wakeLock.acquire();
 		return wakeLock;
 	}
+	
+	@Deprecated
+	public static void releaseWakeLock(PowerManager.WakeLock wakeLock) {
+		wakeLock.release();
+	}
 
 	public static void acquireKeepScreenOn(Window window) {
 		window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);

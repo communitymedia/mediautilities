@@ -30,7 +30,6 @@ import net.sourceforge.jaad.aac.gain.GainControl;
 import net.sourceforge.jaad.aac.huffman.HCB;
 import net.sourceforge.jaad.aac.huffman.Huffman;
 import net.sourceforge.jaad.aac.tools.TNS;
-import android.util.FloatMath;
 
 //TODO: apply pulse data
 public class ICStream implements Constants, HCB, ScaleFactorTable, IQTable {
@@ -256,7 +255,7 @@ public class ICStream implements Constants, HCB, ScaleFactorTable, IQTable {
 							energy += data[off + k] * data[off + k];
 						}
 
-						final float scale = (float) (scaleFactors[idx] / FloatMath.sqrt(energy));
+						final float scale = (float) (scaleFactors[idx] / Math.sqrt(energy));
 						for (k = 0; k < width; k++) {
 							data[off + k] *= scale;
 						}

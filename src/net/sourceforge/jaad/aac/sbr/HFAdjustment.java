@@ -19,8 +19,6 @@
  */
 package net.sourceforge.jaad.aac.sbr;
 
-import android.util.FloatMath;
-
 class HFAdjustment implements SBRConstants, NoiseTable {
 
 	private static final float[] LIM_GAIN = { 0.5f, 1.0f, 2.0f, 1e10f };
@@ -229,9 +227,9 @@ class HFAdjustment implements SBRConstants, NoiseTable {
 
 				// apply compensation to gain, noise floor sf's and sinusoid levels
 				for (k = ml1; k < ml2; k++) {
-					adj.G_lim_boost[i][k] = FloatMath.sqrt(gLim[k] * gBoost);
-					adj.Q_M_lim_boost[i][k] = FloatMath.sqrt(qmLim[k] * gBoost);
-					adj.S_M_boost[i][k] = (float) ((sm[k] == 0) ? 0 : FloatMath.sqrt(sm[k] * gBoost));
+					adj.G_lim_boost[i][k] = (float) Math.sqrt(gLim[k] * gBoost);
+					adj.Q_M_lim_boost[i][k] = (float) Math.sqrt(qmLim[k] * gBoost);
+					adj.S_M_boost[i][k] = (float) ((sm[k] == 0) ? 0 : Math.sqrt(sm[k] * gBoost));
 				}
 			}
 		}

@@ -1,15 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="ac.robinson.mediautilities"
-    android:versionCode="1"
-    android:versionName="1.0" >
+    android:versionCode="2"
+    android:versionName="1.1" >
 
     <uses-sdk
         android:minSdkVersion="9"
-        android:targetSdkVersion="11" />
+        android:targetSdkVersion="11" /> <!-- TODO: bear in mind SVG hardware acceleration issue when updating -->
 
-    <application />
+    <application>
+        <activity
+            android:name="ac.robinson.mediautilities.SelectDirectoryActivity"
+            android:exported="true" />
+        <activity
+            android:name="ac.robinson.cropimage.CropImage"
+            android:exported="true" />
+        <activity
+            android:name="group.pals.android.lib.ui.lockpattern.LockPatternActivity"
+            android:exported="true" />
 
-    <!-- TODO: when the SDK can cope with Manifest merging, add activity/service/permission/feature details here -->
+        <service
+            android:name="ac.robinson.service.ImportingService"
+            android:exported="true" />
+    </application>
 
 </manifest>

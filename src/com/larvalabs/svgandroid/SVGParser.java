@@ -49,7 +49,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.Typeface;
-import android.util.FloatMath;
 import android.util.Log;
 
 /*
@@ -1398,8 +1397,8 @@ public class SVGParser {
 			}
 
 			if (localName.equals("svg")) {
-				int width = (int) FloatMath.ceil(getFloatAttr("width", atts));
-				int height = (int) FloatMath.ceil(getFloatAttr("height", atts));
+				int width = (int) Math.ceil(getFloatAttr("width", atts));
+				int height = (int) Math.ceil(getFloatAttr("height", atts));
 				canvas = picture.beginRecording(width, height);
 			} else if (localName.equals("defs")) {
 				inDefsElement = true;
