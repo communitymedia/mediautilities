@@ -21,6 +21,7 @@ import java.io.FileInputStream;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 
 /**
  * CheapSoundFile is the parent class of several subclasses that each do a "cheap" scan of various sound file formats,
@@ -73,7 +74,7 @@ public class CheapSoundFile {
 		if (!f.exists()) {
 			throw new java.io.FileNotFoundException(fileName);
 		}
-		String name = f.getName().toLowerCase();
+		String name = f.getName().toLowerCase(Locale.ENGLISH);
 		String[] components = name.split("\\.");
 		if (components.length < 2) {
 			return null;
@@ -89,7 +90,7 @@ public class CheapSoundFile {
 	}
 
 	public static boolean isFilenameSupported(String filename) {
-		String[] components = filename.toLowerCase().split("\\.");
+		String[] components = filename.toLowerCase(Locale.ENGLISH).split("\\.");
 		if (components.length < 2) {
 			return false;
 		}

@@ -12,12 +12,6 @@
         <activity
             android:name="ac.robinson.mediautilities.SelectDirectoryActivity"
             android:exported="true" />
-        <activity
-            android:name="ac.robinson.cropimage.CropImage"
-            android:exported="true" />
-        <activity
-            android:name="group.pals.android.lib.ui.lockpattern.LockPatternActivity"
-            android:exported="true" />
 
         <service
             android:name="ac.robinson.service.ImportingService"

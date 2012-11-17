@@ -73,7 +73,7 @@ public class StringUtilities {
 
 			byte[] digest = md.digest();
 			BigInteger bi = new BigInteger(1, digest);
-			return String.format((Locale) null, "%0" + (digest.length * 2) + "x", bi).toLowerCase();
+			return String.format((Locale) null, "%0" + (digest.length * 2) + "x", bi).toLowerCase(Locale.ENGLISH);
 		} catch (NoSuchAlgorithmException e) {
 		} catch (UnsupportedEncodingException e) {
 		}

@@ -33,6 +33,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.util.Calendar;
+import java.util.Locale;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -290,9 +291,10 @@ public class IOUtilities {
 
 		return false;
 	}
-	
+
 	public static boolean mustCreateTempDirectory(Context context) {
-		return !IOUtilities.isInstalledOnSdCard(context) || context.getCacheDir().getAbsolutePath().startsWith("/data/");
+		return !IOUtilities.isInstalledOnSdCard(context)
+				|| context.getCacheDir().getAbsolutePath().startsWith("/data/");
 	}
 
 	// TODO: move to StringUtilities
@@ -378,7 +380,8 @@ public class IOUtilities {
 	}
 
 	public static boolean fileExtensionIs(String fileName, String extension) {
-		return fileName == null ? false : fileName.toLowerCase().endsWith(extension.toLowerCase());
+		return fileName == null ? false : fileName.toLowerCase(Locale.ENGLISH).endsWith(
+				extension.toLowerCase(Locale.ENGLISH));
 	}
 
 	public static File newDatedFileName(File baseDirectory, String fileExtension) {

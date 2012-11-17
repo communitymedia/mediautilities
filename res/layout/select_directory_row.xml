@@ -5,6 +5,6 @@
     android:layout_height="35dp"
     android:gravity="center_vertical"
     android:singleLine="true"
-    android:textSize="23dp" >
+    android:textSize="23sp" >
 
 </TextView>

@@ -207,7 +207,7 @@ class ID3Frame {
 		final int i = (int) Math.floor(data.length / 3) - 1;
 		final Date date;
 		if (i >= 0 && i < VALID_TIMESTAMPS.length) {
-			final SimpleDateFormat sdf = new SimpleDateFormat(VALID_TIMESTAMPS[i]);
+			final SimpleDateFormat sdf = new SimpleDateFormat(VALID_TIMESTAMPS[i], Locale.US);
 			date = sdf.parse(new String(data), new ParsePosition(0));
 		} else
 			date = null;
@@ -215,7 +215,7 @@ class ID3Frame {
 	}
 
 	public Locale getLocale() {
-		final String s = new String(data).toLowerCase();
+		final String s = new String(data).toLowerCase(Locale.ENGLISH);
 		final Locale l;
 		if (s.equals(UNKNOWN_LANGUAGE))
 			l = null;

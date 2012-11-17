@@ -25,6 +25,7 @@ import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Locale;
 
 import net.sourceforge.jaad.mp4.MP4InputStream;
 import net.sourceforge.jaad.mp4.boxes.FullBox;
@@ -157,7 +158,7 @@ public class ITunesMetadataBox extends FullBox {
 		final int i = (int) Math.floor(data.length / 3) - 1;
 		final Date date;
 		if (i >= 0 && i < TIMESTAMPS.length) {
-			final SimpleDateFormat sdf = new SimpleDateFormat(TIMESTAMPS[i]);
+			final SimpleDateFormat sdf = new SimpleDateFormat(TIMESTAMPS[i], Locale.US);
 			date = sdf.parse(new String(data), new ParsePosition(0));
 		} else
 			date = null;

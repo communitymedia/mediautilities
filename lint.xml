@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <issue id="UnusedResources">
+        <ignore path="res/layout/custom_media_controller.xml" />
+        <ignore path="res/menu/cancel.xml" />
+        <ignore path="res/menu/save.xml" />
+        <ignore path="res/raw/ic_audio_playback.svg" />
+        <ignore path="res/raw/overlay_audio.svg" />
+        <ignore path="res/raw/silence_100ms.m4a" />
+    </issue>
+</lint>
