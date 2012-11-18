@@ -227,6 +227,8 @@ public class CustomMediaController extends FrameLayout {
 			// the canPause/canSeekXYZ methods. This is OK, it just means we
 			// assume the media can be paused and seeked, and so we don't disable
 			// the buttons.
+		} catch (NullPointerException e) {
+			// most likely we're shutting down, and mPlayer is null...
 		}
 	}
 
@@ -291,6 +293,9 @@ public class CustomMediaController extends FrameLayout {
 					hide();
 					break;
 				case SHOW_PROGRESS:
+					if (mPlayer == null) {
+						return;
+					}
 					pos = setProgress();
 					if (!mDragging && mShowing && mPlayer.isPlaying()) {
 						msg = obtainMessage(SHOW_PROGRESS);
@@ -365,7 +370,7 @@ public class CustomMediaController extends FrameLayout {
 			}
 			return true;
 		} else if (keyCode == KeyEvent.KEYCODE_MEDIA_STOP) {
-			if (mPlayer.isPlaying()) {
+			if (mPlayer != null && mPlayer.isPlaying()) {
 				mPlayer.pause();
 				updatePausePlay();
 			}
@@ -391,7 +396,7 @@ public class CustomMediaController extends FrameLayout {
 	};
 
 	public void updatePausePlay() {
-		if (mRoot == null || mPauseButton == null)
+		if (mRoot == null || mPlayer == null || mPauseButton == null)
 			return;
 
 		if (mPlayer.isPlaying()) {
@@ -402,6 +407,9 @@ public class CustomMediaController extends FrameLayout {
 	}
 
 	private void doPauseResume() {
+		if (mPlayer == null) {
+			return;
+		}
 		if (mPlayer.isPlaying()) {
 			mPlayer.pause();
 		} else {
@@ -436,7 +444,7 @@ public class CustomMediaController extends FrameLayout {
 		}
 
 		public void onProgressChanged(SeekBar bar, int progress, boolean fromuser) {
-			if (!fromuser) {
+			if (!fromuser || mPlayer == null) {
 				// We're not interested in programmatically generated changes to
 				// the progress bar's position.
 				return;
@@ -488,6 +496,9 @@ public class CustomMediaController extends FrameLayout {
 
 	private View.OnClickListener mRewListener = new View.OnClickListener() {
 		public void onClick(View v) {
+			if (mPlayer == null) {
+				return;
+			}
 			int pos = mPlayer.getCurrentPosition();
 			pos -= 5000; // milliseconds
 			mPlayer.seekTo(pos < 0 ? 0 : pos);
@@ -499,6 +510,9 @@ public class CustomMediaController extends FrameLayout {
 
 	private View.OnClickListener mFfwdListener = new View.OnClickListener() {
 		public void onClick(View v) {
+			if (mPlayer == null) {
+				return;
+			}
 			int pos = mPlayer.getCurrentPosition();
 			pos += 15000; // milliseconds
 			mPlayer.seekTo(pos > mPlayer.getDuration() ? mPlayer.getDuration() - 1 : pos);
