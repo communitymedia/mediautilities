@@ -32,6 +32,7 @@ import ac.robinson.mediautilities.MediaUtilities.FrameMediaContainer;
 import ac.robinson.mov.JPEGMovWriter;
 import ac.robinson.mov.MP4toPCMConverter;
 import ac.robinson.util.BitmapUtilities;
+import ac.robinson.util.IOUtilities;
 import ac.robinson.util.ImageCacheUtilities;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -54,6 +55,12 @@ public class MOVUtilities {
 
 	public static ArrayList<Uri> generateNarrativeMOV(Resources res, File outputFile,
 			ArrayList<FrameMediaContainer> framesToSend, Map<Integer, Object> settings) {
+
+		ArrayList<Uri> filesToSend = new ArrayList<Uri>();
+		if (framesToSend == null || framesToSend.size() <= 0) {
+			return filesToSend;
+		}
+		boolean fileError = false;
 
 		// should really do proper checking on these
 		final int outputWidth = (Integer) settings.get(MediaUtilities.KEY_OUTPUT_WIDTH);
@@ -83,7 +90,6 @@ public class MOVUtilities {
 		Bitmap imageBitmap = null;
 		SVG audioSVG = null;
 
-		ArrayList<Uri> filesToSend = new ArrayList<Uri>();
 		JPEGMovWriter outputFileWriter = null;
 		try {
 			outputFileWriter = new JPEGMovWriter(outputFile);
@@ -116,15 +122,10 @@ public class MOVUtilities {
 						pcmConverter.convertFile(pcmStream);
 					} catch (IOException e) {
 						Log.d("MOVUtilities", "Error creating audio track - IOException");
-						e.printStackTrace();
+					} catch (Throwable t) {
+						Log.d("MOVUtilities", "Error creating audio track - Throwable");
 					} finally {
-						try {
-							if (pcmStream != null) {
-								pcmStream.close();
-							}
-						} catch (IOException e) {
-							Log.d("MOVUtilities", "Error closing audio track - IOException");
-						}
+						IOUtilities.closeStream(pcmStream);
 					}
 
 					// then add to the MOV output file
@@ -183,6 +184,10 @@ public class MOVUtilities {
 			}
 		} catch (IOException e) {
 			Log.d("MOVUtilities", "Error creating movie - IOException");
+			fileError = true;
+		} catch (Throwable t) {
+			Log.d("MOVUtilities", "Error creating movie - Throwable");
+			fileError = true;
 		} finally {
 			try {
 				outputFileWriter.close(true);
@@ -191,7 +196,11 @@ public class MOVUtilities {
 			}
 		}
 
-		filesToSend.add(Uri.fromFile(outputFile));
+		if (!fileError) {
+			filesToSend.add(Uri.fromFile(outputFile));
+			return filesToSend;
+		}
+		filesToSend.clear();
 		return filesToSend;
 	}
 }

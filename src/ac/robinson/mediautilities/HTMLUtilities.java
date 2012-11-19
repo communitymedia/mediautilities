@@ -49,14 +49,18 @@ public class HTMLUtilities {
 	public static ArrayList<Uri> generateNarrativeHTML(Resources res, File outputFile,
 			ArrayList<FrameMediaContainer> framesToSend, Map<Integer, Object> settings) {
 
+		ArrayList<Uri> filesToSend = new ArrayList<Uri>();
+		if (framesToSend == null || framesToSend.size() <= 0) {
+			return filesToSend;
+		}
+		boolean fileError = false;
+		
 		// should really do proper checking on these
 		final int outputWidth = (Integer) settings.get(MediaUtilities.KEY_OUTPUT_WIDTH);
 		final int outputHeight = (Integer) settings.get(MediaUtilities.KEY_OUTPUT_HEIGHT);
 		final int playerBarAdjustment = (Integer) settings.get(MediaUtilities.KEY_PLAYER_BAR_ADJUSTMENT);
 
 		// TODO: scale image size to make sure it is small enough to fit in the container
-		ArrayList<Uri> filesToSend = new ArrayList<Uri>();
-
 		InputStream playerFileTemplateStream = res.openRawResource(R.raw.html_player);
 		BufferedReader playerFileTemplateReader = new BufferedReader(new InputStreamReader(playerFileTemplateStream));
 		BufferedWriter playerOutputFileWriter = null;
@@ -147,13 +151,20 @@ public class HTMLUtilities {
 				}
 			}
 		} catch (IOException e) {
+			fileError = true;
+		} catch (Throwable t) {
+			fileError = true;
 		} finally {
 			IOUtilities.closeStream(playerOutputFileWriter);
 			IOUtilities.closeStream(playerFileTemplateReader);
 			IOUtilities.closeStream(playerFileTemplateStream);
 		}
 
-		filesToSend.add(Uri.fromFile(outputFile));
+		if (!fileError) {
+			filesToSend.add(Uri.fromFile(outputFile));
+			return filesToSend;
+		}
+		filesToSend.clear();
 		return filesToSend;
 	}
 }

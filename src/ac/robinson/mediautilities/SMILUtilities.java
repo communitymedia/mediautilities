@@ -241,6 +241,7 @@ public class SMILUtilities {
 		if (framesToSend == null || framesToSend.size() <= 0) {
 			return filesToSend;
 		}
+		boolean fileError = false;
 
 		// should really do proper checking on these
 		final int outputWidth = (Integer) settings.get(MediaUtilities.KEY_OUTPUT_WIDTH);
@@ -264,8 +265,9 @@ public class SMILUtilities {
 		try {
 			smilFileWriter = new BufferedWriter(new FileWriter(outputFile));
 		} catch (IOException e) {
-			// error - can't write
-			return filesToSend;
+			return filesToSend; // error - can't write
+		} catch (Throwable t) {
+			return filesToSend; // error - can't write
 		}
 
 		// add the smil file first so that the receiving application can parse it before receiving the other files
@@ -290,18 +292,6 @@ public class SMILUtilities {
 		File tempAudioIconFile = new File(outputDirectory, String.format("%s-audio.png", narrativeName));
 		Bitmap audioIconBitmap = Bitmap.createBitmap(audioBitmapSize, audioBitmapSize,
 				ImageCacheUtilities.mBitmapFactoryOptions.inPreferredConfig);
-		SVG audioSVG = SVGParser.getSVGFromResource(res, audioResourceId);
-		Canvas audioIconCanvas = new Canvas(audioIconBitmap);
-		audioIconCanvas.drawPicture(audioSVG.getPicture(), new RectF(audioBitmapLeft, audioBitmapTop, audioBitmapLeft
-				+ audioBitmapSize, audioBitmapTop + audioBitmapSize));
-		FileOutputStream audioIconOutputStream;
-		try {
-			audioIconOutputStream = new FileOutputStream(tempAudioIconFile);
-			audioIconBitmap.compress(CompressFormat.PNG, 100, audioIconOutputStream); // quality is ignored
-			// add later, only if necessary
-		} catch (FileNotFoundException e) {
-		}
-		audioIconCanvas = null;
 
 		// would be better to use data:image/png URI, but this breaks Quicktime playback
 		File tempBackgroundFile = new File(outputDirectory, String.format("%s-background.png", narrativeName));
@@ -314,6 +304,8 @@ public class SMILUtilities {
 			backgroundBitmap.compress(CompressFormat.PNG, 100, backgroundOutputStream); // quality is ignored
 			filesToSend.add(Uri.fromFile(tempBackgroundFile));
 		} catch (FileNotFoundException e) {
+		} catch (Throwable t) {
+			// backgrounds will bleed through from other frames
 		}
 
 		// create the SMIL file
@@ -489,9 +481,22 @@ public class SMILUtilities {
 			smilSerializer.startTag(tagNamespace, "par");
 			smilSerializer.attribute(tagNamespace, "id", "blank");
 			if (narrativeHasAudio) {
-				addSmilTag(smilSerializer, tagNamespace, "meta-data", tempAudioIconFile.getName(), 2, "fill-area",
-						false);
-				filesToSend.add(Uri.fromFile(tempAudioIconFile));
+				SVG audioSVG = SVGParser.getSVGFromResource(res, audioResourceId);
+				Canvas audioIconCanvas = new Canvas(audioIconBitmap);
+				audioIconCanvas.drawPicture(audioSVG.getPicture(), new RectF(audioBitmapLeft, audioBitmapTop,
+						audioBitmapLeft + audioBitmapSize, audioBitmapTop + audioBitmapSize));
+				FileOutputStream audioIconOutputStream;
+				try {
+					audioIconOutputStream = new FileOutputStream(tempAudioIconFile);
+					audioIconBitmap.compress(CompressFormat.PNG, 100, audioIconOutputStream); // quality is ignored
+					addSmilTag(smilSerializer, tagNamespace, "meta-data", tempAudioIconFile.getName(), 2, "fill-area",
+							false);
+					filesToSend.add(Uri.fromFile(tempAudioIconFile));
+				} catch (FileNotFoundException e) {
+				} catch (Throwable t) {
+					// audio playback won't have an icon
+				}
+				audioIconCanvas = null;
 			}
 			addSmilTag(smilSerializer, tagNamespace, "meta-data", storyPlayerFile.getName(), 2, "fill-area", false);
 			addSmilTag(smilSerializer, tagNamespace, "meta-data", syncFile.getName(), 2, "fill-area", false);
@@ -504,6 +509,9 @@ public class SMILUtilities {
 			smilFileWriter.flush();
 
 		} catch (IOException e) {
+			fileError = true; // these are the only places where errors really matter
+		} catch (Throwable t) {
+			fileError = true; // these are the only places where errors really matter
 		} finally {
 			IOUtilities.closeStream(smilFileWriter);
 		}
@@ -511,8 +519,9 @@ public class SMILUtilities {
 		// copy the sync file
 		try {
 			IOUtilities.copyFile(outputFile, syncFile);
-		} catch (IOException e1) {
-			// nothing we can do...
+		} catch (IOException e) {
+		} catch (Throwable t) {
+			// nothing we can do (syncing to some devices will fail, but playback will be fine)
 		}
 
 		// add a player wrapper (HTML)
@@ -531,15 +540,20 @@ public class SMILUtilities {
 						.replace("[HALF-HEIGHT]", Integer.toString((outputHeight + playerBarAdjustment) / 2));
 				playerFileWriter.write(readLine + '\n');
 			}
+			filesToSend.add(Uri.fromFile(storyPlayerFile));
 		} catch (IOException e) {
+		} catch (Throwable t) {
 		} finally {
 			// can still export the smil, even if the player fails
 			IOUtilities.closeStream(playerFileWriter);
 			IOUtilities.closeStream(playerFileReader);
 			IOUtilities.closeStream(playerFileStream);
 		}
-		filesToSend.add(Uri.fromFile(storyPlayerFile));
 
+		if (!fileError) {
+			return filesToSend;
+		}
+		filesToSend.clear();
 		return filesToSend;
 	}
 
@@ -564,6 +578,7 @@ public class SMILUtilities {
 			IOUtilities.copyFile(new File(sourceFilePath), outputFile);
 			return outputFile;
 		} catch (IOException e) {
+		} catch (Throwable t) {
 		}
 		return null;
 	}
