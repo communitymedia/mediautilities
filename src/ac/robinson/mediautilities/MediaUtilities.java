@@ -51,9 +51,11 @@ public class MediaUtilities {
 
 	public static final int MSG_REGISTER_CLIENT = 5;
 	public static final int MSG_DISCONNECT_CLIENT = 6;
+	public static final int MSG_IMPORT_SERVICE_REGISTERED = 7;
 
 	public static final String KEY_OBSERVER_CLASS = "bluetooth_observer_class";
 	public static final String KEY_OBSERVER_PATH = "bluetooth_directory_path";
+	public static final String KEY_OBSERVER_REQUIRE_BT = "bluetooth_required";
 	public static final String KEY_FILE_NAME = "received_file_name";
 
 	// keys for settings map
@@ -76,7 +78,7 @@ public class MediaUtilities {
 
 	public static class FrameMediaContainer {
 
-		// TODO: convert to getters/setters
+		// TODO: convert to getters/setters? (slower, so probably not)
 		public String mParentId = null;
 		public String mFrameId;
 		public int mFrameSequenceId;

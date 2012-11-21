@@ -112,6 +112,7 @@ public class HCR implements Constants {
 	}
 
 	// sectionDataResilience = hDecoder->aacSectionDataResilienceFlag
+	@SuppressWarnings({"null", "unused"}) // TODO
 	public static void decodeReorderedSpectralData(ICStream ics, BitStream in, short[] spectralData,
 			boolean sectionDataResilience) throws AACException {
 		final ICSInfo info = ics.getInfo();

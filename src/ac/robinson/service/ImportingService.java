@@ -36,7 +36,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
-import android.os.RemoteException;
 import android.util.Log;
 
 public class ImportingService extends Service {
@@ -45,13 +44,14 @@ public class ImportingService extends Service {
 	private final Messenger mClientMessenger = new Messenger(new ClientMessageHandler());
 	private Messenger mClient = null;
 
-	private final BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+	private BluetoothAdapter mBluetoothAdapter;
 	private final BluetoothStateReceiver mBluetoothStateReceiver = new BluetoothStateReceiver();
 	private final BluetoothFileHandler mBluetoothFileHandler = new BluetoothFileHandler();
 
 	private FileObserver mBluetoothObserver = null;
 	private String mBluetoothObserverClassName = null;
 	private String mBluetoothDirectoryPath = null;
+	private boolean mRequireBluetoothEnabled = true;
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
@@ -71,8 +71,15 @@ public class ImportingService extends Service {
 
 	@Override
 	public IBinder onBind(Intent intent) {
+		try {
+			mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+		} catch (Exception e) {
+			// continue, so we don't keep binding/unbinding
+			Log.d(DebugUtilities.getLogTag(this), "Unable to instantiate BluetoothObserver - not supported");
+		}
 		mBluetoothObserverClassName = intent.getStringExtra(MediaUtilities.KEY_OBSERVER_CLASS);
 		mBluetoothDirectoryPath = intent.getStringExtra(MediaUtilities.KEY_OBSERVER_PATH);
+		mRequireBluetoothEnabled = intent.getBooleanExtra(MediaUtilities.KEY_OBSERVER_REQUIRE_BT, true);
 		updateServices();
 		return mClientMessenger.getBinder(); // for sending messages
 	}
@@ -81,9 +88,9 @@ public class ImportingService extends Service {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			// called when bluetooth state is changed
-			if (mBluetoothAdapter.isEnabled()) {
-				startBluetoothTransferObserver();
-			} else if (!mBluetoothAdapter.isEnabled()) {
+			if (mBluetoothAdapter.isEnabled() || !mRequireBluetoothEnabled) {
+				startBluetoothTransferObserver(); // may be called more than once, but this doesn't matter
+			} else if (!mBluetoothAdapter.isEnabled() && mRequireBluetoothEnabled) {
 				stopBluetoothTransferObserver();
 			}
 		}
@@ -102,12 +109,14 @@ public class ImportingService extends Service {
 				Constructor<?> constructor = activityClass.getConstructor(new Class[] { String.class, Handler.class });
 				mBluetoothObserver = (FileObserver) constructor.newInstance(mBluetoothDirectoryPath,
 						mBluetoothFileHandler);
+				forwardMessage(MediaUtilities.MSG_IMPORT_SERVICE_REGISTERED, null);
 			} catch (Exception e) {
 				Log.d(DebugUtilities.getLogTag(this), "Unable to instantiate BluetoothObserver ("
 						+ mBluetoothObserverClassName + ")");
 			}
 		} else {
 			mBluetoothObserver.startWatching();
+			forwardMessage(MediaUtilities.MSG_IMPORT_SERVICE_REGISTERED, null);
 		}
 	}
 
@@ -116,7 +125,7 @@ public class ImportingService extends Service {
 			IntentFilter filter = new IntentFilter("android.bluetooth.adapter.action.STATE_CHANGED");
 			registerReceiver(mBluetoothStateReceiver, filter);
 
-			if (!mBluetoothAdapter.isEnabled()) {
+			if (!mBluetoothAdapter.isEnabled() && mRequireBluetoothEnabled) {
 				// removed - shouldn't be done without user permission - now start observer when bluetooth is enabled
 				// may need <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 				// mBluetoothAdapter.enable();
@@ -136,7 +145,7 @@ public class ImportingService extends Service {
 		clientMessage.setData(messageBundle);
 		try {
 			mClient.send(clientMessage);
-		} catch (RemoteException e) {
+		} catch (Throwable t) {
 			// error - couldn't send message
 		}
 	}

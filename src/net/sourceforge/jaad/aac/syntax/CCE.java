@@ -73,6 +73,7 @@ class CCE extends Element implements Constants {
 		return chSelect[index];
 	}
 
+	@SuppressWarnings("null") // TODO
 	void decode(BitStream in, DecoderConfig conf) throws AACException {
 		couplingPoint = 2 * in.readBit();
 		coupledCount = in.readBits(3);
@@ -150,6 +151,7 @@ class CCE extends Element implements Constants {
 		}
 	}
 
+	@SuppressWarnings("null") // TODO
 	void applyDependentCoupling(int index, float[] data) {
 		final ICSInfo info = ics.getInfo();
 		final int[] swbOffsets = info.getSWBOffsets();

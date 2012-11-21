@@ -253,9 +253,9 @@ public class CustomMediaController extends FrameLayout {
 		// cause the progress bar to be updated even if mShowing
 		// was already true. This happens, for example, if we're
 		// paused with the progress bar showing the user hits play.
-		mHandler.sendEmptyMessage(SHOW_PROGRESS);
+		mHandler.sendMessage(mHandler.obtainMessage(SHOW_PROGRESS, CustomMediaController.this));
 
-		Message msg = mHandler.obtainMessage(FADE_OUT);
+		Message msg = mHandler.obtainMessage(FADE_OUT, CustomMediaController.this);
 		if (timeout != 0) {
 			mHandler.removeMessages(FADE_OUT);
 			mHandler.sendMessageDelayed(msg, timeout);
@@ -283,24 +283,27 @@ public class CustomMediaController extends FrameLayout {
 			mShowing = false;
 		}
 	}
+	
+	private void handleProgress(Message msg) {
+		if (mPlayer == null) {
+			return;
+		}
+		int pos = setProgress();
+		if (!mDragging && mShowing && mPlayer.isPlaying()) {
+			msg = mHandler.obtainMessage(SHOW_PROGRESS, CustomMediaController.this);
+			mHandler.sendMessageDelayed(msg, 1000 - (pos % 1000));
+		}
+	}
 
-	private Handler mHandler = new Handler() {
+	private static Handler mHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
-			int pos;
 			switch (msg.what) {
 				case FADE_OUT:
-					hide();
+					((CustomMediaController) msg.obj).hide();
 					break;
 				case SHOW_PROGRESS:
-					if (mPlayer == null) {
-						return;
-					}
-					pos = setProgress();
-					if (!mDragging && mShowing && mPlayer.isPlaying()) {
-						msg = obtainMessage(SHOW_PROGRESS);
-						sendMessageDelayed(msg, 1000 - (pos % 1000));
-					}
+					((CustomMediaController) msg.obj).handleProgress(msg);
 					break;
 			}
 		}
@@ -466,7 +469,7 @@ public class CustomMediaController extends FrameLayout {
 			// Ensure that progress is properly updated in the future,
 			// the call to show() does not guarantee this because it is a
 			// no-op if we are already showing.
-			mHandler.sendEmptyMessage(SHOW_PROGRESS);
+			mHandler.sendMessage(mHandler.obtainMessage(SHOW_PROGRESS, CustomMediaController.this));
 		}
 	};
 

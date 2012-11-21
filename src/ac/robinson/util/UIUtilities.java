@@ -24,11 +24,15 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.List;
 
 import android.app.Activity;
 import android.app.KeyguardManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.LightingColorFilter;
@@ -149,7 +153,7 @@ public class UIUtilities {
 		wakeLock.acquire();
 		return wakeLock;
 	}
-	
+
 	@Deprecated
 	public static void releaseWakeLock(PowerManager.WakeLock wakeLock) {
 		wakeLock.release();
@@ -193,6 +197,15 @@ public class UIUtilities {
 
 	public static void showFormattedToast(Context context, int id, Object... args) {
 		Toast.makeText(context, String.format(context.getText(id).toString(), args), Toast.LENGTH_LONG).show();
+	}
+
+	// whether an intent can be launched
+	// see: http://android-developers.blogspot.co.uk/2009/01/can-i-use-this-intent.html
+	public static boolean isIntentAvailable(Context context, String action) {
+		final PackageManager packageManager = context.getPackageManager();
+		final Intent intent = new Intent(action);
+		List<ResolveInfo> list = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+		return list.size() > 0;
 	}
 
 	/**

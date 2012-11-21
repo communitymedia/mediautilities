@@ -130,6 +130,8 @@ public class SMILUtilities {
 			return null;
 		} catch (IOException e) {
 			return null;
+		} catch (NullPointerException e) {
+			return null;
 		}
 
 		return smilContents;
@@ -215,6 +217,8 @@ public class SMILUtilities {
 		} catch (SAXException e) {
 			return null;
 		} catch (IOException e) {
+			return null;
+		} catch (NullPointerException e) {
 			return null;
 		}
 

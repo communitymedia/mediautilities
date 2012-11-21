@@ -32,6 +32,7 @@ public class RVLC implements RVLCTables {
 
 	private static final int ESCAPE_FLAG = 7;
 
+	@SuppressWarnings("null") // TODO
 	public void decode(BitStream in, ICStream ics, int[][] scaleFactors) throws AACException {
 		final int bits = (ics.getInfo().isEightShortFrame()) ? 11 : 9;
 		@SuppressWarnings("unused")
@@ -91,6 +92,7 @@ public class RVLC implements RVLCTables {
 			decodeEscapes(in, ics, scaleFactors);
 	}
 
+	@SuppressWarnings("null") // TODO
 	private void decodeEscapes(BitStream in, ICStream ics, int[][] scaleFactors) throws AACException {
 		final ICSInfo info = ics.getInfo();
 		final int windowGroupCount = info.getWindowGroupCount();
