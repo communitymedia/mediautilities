@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 
-import ac.robinson.mediautilities.MediaUtilities.FrameMediaContainer;
 import ac.robinson.mov.JPEGMovWriter;
 import ac.robinson.mov.MP4toPCMConverter;
 import ac.robinson.util.BitmapUtilities;

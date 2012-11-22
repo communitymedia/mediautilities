@@ -30,7 +30,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Map;
 
-import ac.robinson.mediautilities.MediaUtilities.FrameMediaContainer;
 import ac.robinson.util.BitmapUtilities;
 import ac.robinson.util.IOUtilities;
 import android.content.res.Resources;

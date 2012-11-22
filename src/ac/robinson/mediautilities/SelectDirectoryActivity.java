@@ -22,17 +22,17 @@ package ac.robinson.mediautilities;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import android.app.Activity;
 import android.app.ListActivity;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -77,6 +77,23 @@ public class SelectDirectoryActivity extends ListActivity {
 			currentPath = ROOT;
 			files = currentPath.listFiles();
 		}
+		Arrays.sort(files, new Comparator<File>() {
+			public int compare(File o1, File o2) {
+				if (o1.isDirectory()) {
+					if (o2.isDirectory()) {
+						return o1.getName().compareToIgnoreCase(o2.getName());
+					} else {
+						return -1;
+					}
+				} else if (o2.isDirectory()) {
+					return 1;
+				} else {
+					return o1.getName().compareToIgnoreCase(o2.getName());
+
+				}
+			}
+		});
+
 		mPathView.setText(getString(R.string.current_location) + currentPath);
 
 		if (!currentPath.equals(ROOT)) {
@@ -84,30 +101,17 @@ public class SelectDirectoryActivity extends ListActivity {
 			mPaths.add(currentPath.getParent());
 		}
 
-		TreeMap<String, String> dirsMap = new TreeMap<String, String>();
-		TreeMap<String, String> dirsPathMap = new TreeMap<String, String>();
-		TreeMap<String, String> filesMap = new TreeMap<String, String>();
-		TreeMap<String, String> filesPathMap = new TreeMap<String, String>();
+		// list is pre-sorted
 		for (File file : files) {
 			String fileName = file.getName();
 			if (!fileName.startsWith(".")) {
 				if (file.isDirectory()) {
-					dirsMap.put(fileName, fileName);
-					dirsPathMap.put(fileName, file.getAbsolutePath());
+					addItem("/b/" + fileName + "/");
 				} else {
-					filesMap.put(fileName, fileName);
-					filesPathMap.put(fileName, file.getAbsolutePath());
+					addItem("/i/" + fileName);
 				}
+				mPaths.add(file.getAbsolutePath());
 			}
-		}
-		mPaths.addAll(dirsPathMap.tailMap("").values());
-		mPaths.addAll(filesPathMap.tailMap("").values());
-
-		for (String dir : dirsMap.tailMap("").values()) {
-			addItem("/b/" + dir);
-		}
-		for (String file : filesMap.tailMap("").values()) {
-			addItem("/i/" + file);
 		}
 
 		StyledSimpleAdapter fileList = new StyledSimpleAdapter(this, mFileList, R.layout.select_directory_row,
@@ -129,24 +133,25 @@ public class SelectDirectoryActivity extends ListActivity {
 			if (file.canRead()) {
 				getDirectory(file);
 			} else {
-				//TODO: UIUtilities.showToast(SelectDirectoryActivity.this, R.string.error_access_denied);
+				// TODO: UIUtilities.showToast(SelectDirectoryActivity.this, R.string.error_access_denied);
 			}
 		}
 	}
 
-	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if ((keyCode == KeyEvent.KEYCODE_BACK)) {
-			if (!currentPath.equals(ROOT)) {
-				getDirectory(currentPath.getParentFile());
-			} else {
-				return super.onKeyDown(keyCode, event);
-			}
-			return true;
-		} else {
-			return super.onKeyDown(keyCode, event);
-		}
-	}
+	// TODO: do we really want to do "up" on back press?
+	// @Override
+	// public boolean onKeyDown(int keyCode, KeyEvent event) {
+	// if ((keyCode == KeyEvent.KEYCODE_BACK)) {
+	// if (!currentPath.equals(ROOT)) {
+	// getDirectory(currentPath.getParentFile());
+	// } else {
+	// return super.onKeyDown(keyCode, event);
+	// }
+	// return true;
+	// } else {
+	// return super.onKeyDown(keyCode, event);
+	// }
+	// }
 
 	public void handleButtonClicks(View currentButton) {
 		int buttonId = currentButton.getId();
