@@ -24,6 +24,7 @@ import ac.robinson.mediautilities.R;
 import ac.robinson.util.UIUtilities;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
@@ -55,8 +56,8 @@ public class CenteredImageTextButton extends Button {
 		// xmlns:util="http://util.robinson.ac/schema" vs. xmlns:util="http://schemas.android.com/apk/res-auto"
 		TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.CenteredImageTextButton);
 
-		int colourDefault = 0xfffffff;
-		int colourTouched = 0xfffffff;
+		int colourDefault = 0xffffffff;
+		int colourTouched = 0xffffffff;
 
 		for (int i = 0, n = attributes.getIndexCount(); i < n; ++i) {
 			int attr = attributes.getIndex(i);
