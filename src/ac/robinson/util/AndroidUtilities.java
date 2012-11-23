@@ -27,8 +27,6 @@ public class AndroidUtilities {
 	public static final String APPLICATION_NAME = "androidutilities";
 	public static final String LOG_TAG = APPLICATION_NAME;
 
-	public static final String XMLNS = "http://util.robinson.ac/schema";
-
 	public static <T> T[] concatenateArrays(T[] first, T[] second) {
 		T[] result = Arrays.copyOf(first, first.length + second.length);
 		System.arraycopy(second, 0, result, first.length, second.length);

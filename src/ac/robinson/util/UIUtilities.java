@@ -145,7 +145,11 @@ public class UIUtilities {
 		window.setAttributes(attrs);
 	}
 
-	// requires <uses-permission android:name="android.permission.WAKE_LOCK" />
+	/**
+	 * Use acquireKeepScreenOn instead
+	 * 
+	 * Requires <uses-permission android:name="android.permission.WAKE_LOCK" />
+	 */
 	@Deprecated
 	public static PowerManager.WakeLock acquireWakeLock(Activity activity, String tag) {
 		PowerManager powerManager = (PowerManager) activity.getSystemService(Context.POWER_SERVICE);

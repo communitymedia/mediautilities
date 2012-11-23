@@ -20,9 +20,10 @@
 
 package ac.robinson.view;
 
-import ac.robinson.util.AndroidUtilities;
+import ac.robinson.mediautilities.R;
 import ac.robinson.util.UIUtilities;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
@@ -48,50 +49,30 @@ public class CenteredImageTextButton extends Button {
 
 	// see: http://kevindion.com/2011/01/custom-xml-attributes-for-android-widgets/
 	private void setStyles(Context context, AttributeSet attrs) {
-
-		// TODO: temporarily using https://gist.github.com/1105281
-		// when SDK tools R17 is released, use methods from: http://code.google.com/p/android/issues/detail?id=9656
+		// used to use https://gist.github.com/1105281 to deal with SDK tools bug; this was fixed in r17
+		// see: http://code.google.com/p/android/issues/detail?id=9656
 		// and: http://devmaze.wordpress.com/2011/05/22/the-case-of-android-libraries-and-custom-xml-attributes-part-2/
-		// xmlns:custom="http://schemas.android.com/apk/res-auto"
-		// TypedArray attributes = context.obtainStyledAttributes(attrs,
-		// R.styleable.CenteredImageTextButton);
-		//
-		// int colourNormal = -1;
-		// int colourTouched = -1;
-		//
-		// for (int i = 0, n = attributes.getIndexCount(); i < n; ++i) {
-		// int attr = attributes.getIndex(i);
-		// switch (attr) {
-		// case R.styleable.CenteredImageTextButton_filterColorNormal:
-		// colourNormal = attributes.getColor(attr, -1);
-		// break;
-		// case R.styleable.CenteredImageTextButton_filterColorTouched:
-		// colourTouched = attributes.getColor(attr, -1);
-		// break;
-		// }
-		// }
-		// attributes.recycle();
-		//
-		// TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.CenteredImageTextButton);
-		// attrs.getAttributeValue(AndroidUtilities.XMLNS, "filterColorDefault");
+		// xmlns:util="http://util.robinson.ac/schema" vs. xmlns:util="http://schemas.android.com/apk/res-auto"
+		TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.CenteredImageTextButton);
 
-		// for no effect as default (when no value is set in XML)
-		int defaultColor = 0xffffffff;
-		int touchedColor = 0xffffffff;
+		int colourDefault = 0xfffffff;
+		int colourTouched = 0xfffffff;
 
-		int noColour = getResources().getColor(android.R.color.transparent);
-		int resColor = attrs.getAttributeResourceValue(AndroidUtilities.XMLNS, "filterColorDefault", noColour);
-		if (resColor != noColour) {
-			defaultColor = getResources().getColor(resColor);
+		for (int i = 0, n = attributes.getIndexCount(); i < n; ++i) {
+			int attr = attributes.getIndex(i);
+			switch (attr) {
+				case R.styleable.CenteredImageTextButton_filterColorDefault:
+					colourDefault = attributes.getColor(attr, colourDefault);
+					break;
+				case R.styleable.CenteredImageTextButton_filterColorTouched:
+					colourTouched = attributes.getColor(attr, colourTouched);
+					break;
+			}
 		}
-
-		resColor = attrs.getAttributeResourceValue(AndroidUtilities.XMLNS, "filterColorTouched", noColour);
-		if (resColor != noColour) {
-			touchedColor = getResources().getColor(resColor);
-		}
+		attributes.recycle();
 
 		if (!isInEditMode()) { // so the Eclipse visual editor can load this component
-			UIUtilities.setButtonColorFilters(this, defaultColor, touchedColor);
+			UIUtilities.setButtonColorFilters(this, colourDefault, colourTouched);
 		}
 	}
 

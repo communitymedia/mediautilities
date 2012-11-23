@@ -3,7 +3,7 @@
 
     <declare-styleable name="CenteredImageTextButton">
         <attr name="android:button" />
-        <attr name="filterColorNormal" format="color" />
+        <attr name="filterColorDefault" format="color" />
         <attr name="filterColorTouched" format="color" />
     </declare-styleable>
 
