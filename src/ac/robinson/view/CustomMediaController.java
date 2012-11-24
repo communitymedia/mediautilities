@@ -24,12 +24,12 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
@@ -57,21 +57,19 @@ import android.widget.TextView;
  * </ul>
  */
 
-// TODO: hide doesn't work...
 public class CustomMediaController extends FrameLayout {
+
+	public static final int DEFAULT_VISIBILITY_TIMEOUT = 3000;
 
 	private MediaPlayerControl mPlayer;
 	private Context mContext;
 	private View mAnchor;
 	private View mRoot;
-	// private WindowManager mWindowManager;
-	// private Window mWindow;
-	// private View mDecor;
 	private SeekBar mProgress;
 	private TextView mEndTime, mCurrentTime;
 	private boolean mShowing;
 	private boolean mDragging;
-	private int mDefaultTimeout = 3000;
+	private int mDefaultTimeout = DEFAULT_VISIBILITY_TIMEOUT;
 	private static final int FADE_OUT = 1;
 	private static final int SHOW_PROGRESS = 2;
 	private boolean mUseFastForward;
@@ -113,8 +111,16 @@ public class CustomMediaController extends FrameLayout {
 	}
 
 	public void setMediaPlayer(MediaPlayerControl player) {
+		boolean show = false;
+		if (mPlayer == null) {
+			show = true;
+		}
 		mPlayer = player;
-		updatePausePlay();
+		if (show) {
+			show();
+		}
+		// if we encountered an error then progress updates will have stopped - try to resume
+		mHandler.sendMessage(mHandler.obtainMessage(SHOW_PROGRESS, CustomMediaController.this));
 	}
 
 	/**
@@ -201,13 +207,6 @@ public class CustomMediaController extends FrameLayout {
 	}
 
 	/**
-	 * Show the controller on screen. It will go away automatically after 3 seconds of inactivity.
-	 */
-	public void show() {
-		show(mDefaultTimeout);
-	}
-
-	/**
 	 * Disable pause or seek buttons if the stream cannot be paused or seeked. This requires the control interface to be
 	 * a MediaPlayerControlExt
 	 */
@@ -223,13 +222,18 @@ public class CustomMediaController extends FrameLayout {
 				mFfwdButton.setEnabled(false);
 			}
 		} catch (IncompatibleClassChangeError ex) {
-			// We were given an old version of the interface, that doesn't have
-			// the canPause/canSeekXYZ methods. This is OK, it just means we
-			// assume the media can be paused and seeked, and so we don't disable
-			// the buttons.
+			// We were given an old version of the interface, that doesn't have the canPause/canSeekXYZ methods.
+			// This is OK, it just means we assume the media can be paused and seeked, and so we don't disable buttons.
 		} catch (NullPointerException e) {
 			// most likely we're shutting down, and mPlayer is null...
 		}
+	}
+
+	/**
+	 * Show the controller on screen. It will go away automatically after DEFAULT_TIMEOUT seconds of inactivity.
+	 */
+	public void show() {
+		show(mDefaultTimeout);
 	}
 
 	/**
@@ -238,7 +242,11 @@ public class CustomMediaController extends FrameLayout {
 	 * @param timeout The timeout in milliseconds. Use 0 to show the controller until hide() is called.
 	 */
 	public void show(int timeout) {
-		mDefaultTimeout = 0; // so we continue showing forever if we were started with 0
+		if (timeout >= 0) {
+			mDefaultTimeout = timeout; // so we continue showing forever if we were started with 0
+		}
+
+		updatePausePlay();
 
 		if (!mShowing && mAnchor != null) {
 			setProgress();
@@ -246,24 +254,36 @@ public class CustomMediaController extends FrameLayout {
 				mPauseButton.requestFocus();
 			}
 			disableUnsupportedButtons();
+			if (mRoot != null) {
+				mRoot.clearAnimation();
+				mRoot.setVisibility(View.VISIBLE);
+			}
 			mShowing = true;
 		}
-		updatePausePlay();
 
-		// cause the progress bar to be updated even if mShowing
-		// was already true. This happens, for example, if we're
-		// paused with the progress bar showing the user hits play.
+		// cause the progress bar to be updated even if mShowing was already true. This happens, for example, if we're
+		// paused with the progress bar showing and the user hits play
 		mHandler.sendMessage(mHandler.obtainMessage(SHOW_PROGRESS, CustomMediaController.this));
 
-		Message msg = mHandler.obtainMessage(FADE_OUT, CustomMediaController.this);
-		if (timeout != 0) {
+		if (timeout > 0) {
+			refreshShowTimeout();
+		} else {
 			mHandler.removeMessages(FADE_OUT);
-			mHandler.sendMessageDelayed(msg, timeout);
 		}
+	}
+
+	public void refreshShowTimeout() {
+		mHandler.removeMessages(FADE_OUT);
+		Message msg = mHandler.obtainMessage(FADE_OUT, CustomMediaController.this);
+		mHandler.sendMessageDelayed(msg, mDefaultTimeout);
 	}
 
 	public boolean isShowing() {
 		return mShowing;
+	}
+
+	public boolean isDragging() {
+		return mDragging;
 	}
 
 	/**
@@ -274,22 +294,21 @@ public class CustomMediaController extends FrameLayout {
 			return;
 
 		if (mShowing) {
-			try {
-				mHandler.removeMessages(SHOW_PROGRESS);
-				// mWindowManager.removeView(mDecor);
-			} catch (IllegalArgumentException ex) {
-				Log.w("MediaController", "already removed");
+			if (mRoot != null) {
+				mRoot.startAnimation(AnimationUtils.loadAnimation(mContext, android.R.anim.fade_out));
+				mRoot.setVisibility(View.GONE); // gone, rather than invisible, so we don't register button clicks
 			}
+			mHandler.removeMessages(SHOW_PROGRESS);
 			mShowing = false;
 		}
 	}
-	
+
 	private void handleProgress(Message msg) {
 		if (mPlayer == null) {
 			return;
 		}
 		int pos = setProgress();
-		if (!mDragging && mShowing && mPlayer.isPlaying()) {
+		if (!mDragging && mShowing && (mPlayer.isPlaying() || mPlayer.isLoading())) {
 			msg = mHandler.obtainMessage(SHOW_PROGRESS, CustomMediaController.this);
 			mHandler.sendMessageDelayed(msg, 1000 - (pos % 1000));
 		}
@@ -350,13 +369,13 @@ public class CustomMediaController extends FrameLayout {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		show(mDefaultTimeout);
+		show();
 		return true;
 	}
 
 	@Override
 	public boolean onTrackballEvent(MotionEvent ev) {
-		show(mDefaultTimeout);
+		show();
 		return false;
 	}
 
@@ -367,13 +386,13 @@ public class CustomMediaController extends FrameLayout {
 				&& event.getAction() == KeyEvent.ACTION_DOWN
 				&& (keyCode == KeyEvent.KEYCODE_HEADSETHOOK || keyCode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE || keyCode == KeyEvent.KEYCODE_SPACE)) {
 			doPauseResume();
-			show(mDefaultTimeout);
+			show();
 			if (mPauseButton != null) {
 				mPauseButton.requestFocus();
 			}
 			return true;
 		} else if (keyCode == KeyEvent.KEYCODE_MEDIA_STOP) {
-			if (mPlayer != null && mPlayer.isPlaying()) {
+			if (mPlayer != null && (mPlayer.isPlaying() || mPlayer.isLoading())) {
 				mPlayer.pause();
 				updatePausePlay();
 			}
@@ -386,7 +405,7 @@ public class CustomMediaController extends FrameLayout {
 			//
 			// return true;
 		} else {
-			show(mDefaultTimeout);
+			show();
 		}
 		return super.dispatchKeyEvent(event);
 	}
@@ -394,15 +413,15 @@ public class CustomMediaController extends FrameLayout {
 	private View.OnClickListener mPauseListener = new View.OnClickListener() {
 		public void onClick(View v) {
 			doPauseResume();
-			show(mDefaultTimeout);
+			show();
 		}
 	};
 
-	public void updatePausePlay() {
-		if (mRoot == null || mPlayer == null || mPauseButton == null)
+	private void updatePausePlay() {
+		if (mRoot == null || mPauseButton == null)
 			return;
 
-		if (mPlayer.isPlaying()) {
+		if (mPlayer == null || mPlayer.isPlaying() || mPlayer.isLoading()) {
 			mPauseButton.setImageResource(android.R.drawable.ic_media_pause);
 		} else {
 			mPauseButton.setImageResource(android.R.drawable.ic_media_play);
@@ -413,7 +432,7 @@ public class CustomMediaController extends FrameLayout {
 		if (mPlayer == null) {
 			return;
 		}
-		if (mPlayer.isPlaying()) {
+		if (mPlayer.isPlaying() || mPlayer.isLoading()) {
 			mPlayer.pause();
 		} else {
 			mPlayer.start();
@@ -423,33 +442,31 @@ public class CustomMediaController extends FrameLayout {
 
 	// There are two scenarios that can trigger the seekbar listener to trigger:
 	//
-	// The first is the user using the touchpad to adjust the posititon of the
-	// seekbar's thumb. In this case onStartTrackingTouch is called followed by
-	// a number of onProgressChanged notifications, concluded by onStopTrackingTouch.
-	// We're setting the field "mDragging" to true for the duration of the dragging
+	// The first is the user using the touchpad to adjust the posititon of the seekbar's thumb. In this case
+	// onStartTrackingTouch is called followed by a number of onProgressChanged notifications, concluded by
+	// onStopTrackingTouch. We're setting the field "mDragging" to true for the duration of the dragging
 	// session to avoid jumps in the position in case of ongoing playback.
 	//
-	// The second scenario involves the user operating the scroll ball, in this
-	// case there WON'T BE onStartTrackingTouch/onStopTrackingTouch notifications,
-	// we will simply apply the updated position without suspending regular updates.
+	// The second scenario involves the user operating the scroll ball, in this case there WON'T be onStartTrackingTouch
+	// /onStopTrackingTouch notifications, we will simply apply the updated position without suspending regular updates.
 	private OnSeekBarChangeListener mSeekListener = new OnSeekBarChangeListener() {
 		public void onStartTrackingTouch(SeekBar bar) {
-			show(mDefaultTimeout);
+			show(-1); // will be counted as 0, but not set to the default
+			if (mRoot != null || mPlayer != null || mPauseButton != null) { // we play by default on scroll
+				mPauseButton.setImageResource(android.R.drawable.ic_media_pause);
+			}
 
 			mDragging = true;
 
-			// By removing these pending progress messages we make sure
-			// that a) we won't update the progress while the user adjusts
-			// the seekbar and b) once the user is done dragging the thumb
-			// we will post one of these messages to the queue again and
-			// this ensures that there will be exactly one message queued up.
+			// By removing these pending progress messages we make sure that a) we won't update the progress while the
+			// user adjusts the seekbar and b) once the user is done dragging the thumb we will post one of these
+			// messages to the queue again and this ensures that there will be exactly one message queued up.
 			mHandler.removeMessages(SHOW_PROGRESS);
 		}
 
 		public void onProgressChanged(SeekBar bar, int progress, boolean fromuser) {
 			if (!fromuser || mPlayer == null) {
-				// We're not interested in programmatically generated changes to
-				// the progress bar's position.
+				// We're not interested in programmatically generated changes to the progress bar's position.
 				return;
 			}
 
@@ -463,12 +480,10 @@ public class CustomMediaController extends FrameLayout {
 		public void onStopTrackingTouch(SeekBar bar) {
 			mDragging = false;
 			setProgress();
-			updatePausePlay();
-			show(mDefaultTimeout);
+			refreshShowTimeout();
 
-			// Ensure that progress is properly updated in the future,
-			// the call to show() does not guarantee this because it is a
-			// no-op if we are already showing.
+			// Ensure that progress is properly updated in the future - the call to refreshShowTimeout() does not 
+			// guarantee this because it is a no-op if we are already showing.
 			mHandler.sendMessage(mHandler.obtainMessage(SHOW_PROGRESS, CustomMediaController.this));
 		}
 	};
@@ -507,7 +522,7 @@ public class CustomMediaController extends FrameLayout {
 			mPlayer.seekTo(pos < 0 ? 0 : pos);
 			setProgress();
 
-			show(mDefaultTimeout);
+			show();
 		}
 	};
 
@@ -521,7 +536,7 @@ public class CustomMediaController extends FrameLayout {
 			mPlayer.seekTo(pos > mPlayer.getDuration() ? mPlayer.getDuration() - 1 : pos);
 			setProgress();
 
-			show(mDefaultTimeout);
+			show();
 		}
 	};
 
@@ -567,6 +582,8 @@ public class CustomMediaController extends FrameLayout {
 		void seekTo(int pos);
 
 		boolean isPlaying();
+
+		boolean isLoading();
 
 		int getBufferPercentage();
 

@@ -11,11 +11,11 @@
     <application>
         <activity
             android:name="ac.robinson.mediautilities.SelectDirectoryActivity"
-            android:exported="true" />
+            android:exported="false" />
 
         <service
             android:name="ac.robinson.service.ImportingService"
-            android:exported="true" />
+            android:exported="false" />
     </application>
 
 </manifest>

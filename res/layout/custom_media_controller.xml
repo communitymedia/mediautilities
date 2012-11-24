@@ -89,7 +89,7 @@
 
         <SeekBar
             android:id="@+id/mediacontroller_progress"
-            style="?android:attr/progressBarStyleHorizontal"
+            style="?android:attr/seekBarStyle"
             android:layout_width="0dp"
             android:layout_height="30dp"
             android:layout_weight="1" />

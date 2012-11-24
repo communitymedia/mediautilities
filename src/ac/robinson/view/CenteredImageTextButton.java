@@ -24,7 +24,6 @@ import ac.robinson.mediautilities.R;
 import ac.robinson.util.UIUtilities;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
@@ -55,21 +54,8 @@ public class CenteredImageTextButton extends Button {
 		// and: http://devmaze.wordpress.com/2011/05/22/the-case-of-android-libraries-and-custom-xml-attributes-part-2/
 		// xmlns:util="http://util.robinson.ac/schema" vs. xmlns:util="http://schemas.android.com/apk/res-auto"
 		TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.CenteredImageTextButton);
-
-		int colourDefault = 0xffffffff;
-		int colourTouched = 0xffffffff;
-
-		for (int i = 0, n = attributes.getIndexCount(); i < n; ++i) {
-			int attr = attributes.getIndex(i);
-			switch (attr) {
-				case R.styleable.CenteredImageTextButton_filterColorDefault:
-					colourDefault = attributes.getColor(attr, colourDefault);
-					break;
-				case R.styleable.CenteredImageTextButton_filterColorTouched:
-					colourTouched = attributes.getColor(attr, colourTouched);
-					break;
-			}
-		}
+		int colourDefault = attributes.getColor(R.styleable.CenteredImageTextButton_filterColorDefault, 0xffffffff);
+		int colourTouched = attributes.getColor(R.styleable.CenteredImageTextButton_filterColorTouched, 0xffffffff);
 		attributes.recycle();
 
 		if (!isInEditMode()) { // so the Eclipse visual editor can load this component
@@ -78,16 +64,15 @@ public class CenteredImageTextButton extends Button {
 	}
 
 	private void redrawButton() {
-
 		Rect bounds = new Rect();
 		String buttonText = getText().toString().trim();
 		getPaint().getTextBounds(buttonText, 0, buttonText.length(), bounds);
 
 		Drawable buttonDrawable = getCompoundDrawables()[1]; // top
 		int newPadding;
+		int compoundPadding = getCompoundDrawablePadding();
 		if (buttonDrawable != null) {
-			newPadding = (int) ((getHeight() - bounds.height() - getCompoundDrawablePadding() - buttonDrawable
-					.getIntrinsicHeight()) / 2);
+			newPadding = (int) ((getHeight() - bounds.height() - compoundPadding - buttonDrawable.getIntrinsicHeight()) / 2);
 			setGravity(Gravity.CENTER | Gravity.TOP);
 			setPadding(getPaddingLeft(), (newPadding > 0 ? newPadding : 0), getPaddingRight(), 0);
 			return;
@@ -95,8 +80,7 @@ public class CenteredImageTextButton extends Button {
 
 		buttonDrawable = getCompoundDrawables()[0]; // left
 		if (buttonDrawable != null) {
-			newPadding = (int) ((getWidth() - bounds.width() - getCompoundDrawablePadding() - buttonDrawable
-					.getIntrinsicWidth()) / 2);
+			newPadding = (int) ((getWidth() - bounds.width() - compoundPadding - buttonDrawable.getIntrinsicWidth()) / 2);
 			setGravity(Gravity.LEFT | Gravity.CENTER);
 			setPadding((newPadding > 0 ? newPadding : 0), getPaddingTop(), 0, getPaddingBottom());
 		}
