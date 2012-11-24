@@ -265,6 +265,7 @@ public class CustomMediaController extends FrameLayout {
 		// paused with the progress bar showing and the user hits play
 		mHandler.sendMessage(mHandler.obtainMessage(SHOW_PROGRESS, CustomMediaController.this));
 
+		// check separately due to negative values
 		if (timeout > 0) {
 			refreshShowTimeout();
 		} else {
@@ -274,8 +275,10 @@ public class CustomMediaController extends FrameLayout {
 
 	public void refreshShowTimeout() {
 		mHandler.removeMessages(FADE_OUT);
-		Message msg = mHandler.obtainMessage(FADE_OUT, CustomMediaController.this);
-		mHandler.sendMessageDelayed(msg, mDefaultTimeout);
+		if (mDefaultTimeout > 0) {
+			Message msg = mHandler.obtainMessage(FADE_OUT, CustomMediaController.this);
+			mHandler.sendMessageDelayed(msg, mDefaultTimeout);
+		}
 	}
 
 	public boolean isShowing() {
@@ -482,7 +485,7 @@ public class CustomMediaController extends FrameLayout {
 			setProgress();
 			refreshShowTimeout();
 
-			// Ensure that progress is properly updated in the future - the call to refreshShowTimeout() does not 
+			// Ensure that progress is properly updated in the future - the call to refreshShowTimeout() does not
 			// guarantee this because it is a no-op if we are already showing.
 			mHandler.sendMessage(mHandler.obtainMessage(SHOW_PROGRESS, CustomMediaController.this));
 		}
