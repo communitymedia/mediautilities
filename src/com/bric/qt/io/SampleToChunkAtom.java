@@ -90,14 +90,17 @@ public class SampleToChunkAtom extends LeafAtom {
 		}
 	}
 
+	@Override
 	protected String getIdentifier() {
 		return "stsc";
 	}
 
+	@Override
 	protected long getSize() {
 		return 16 + 12 * entries.length;
 	}
 
+	@Override
 	protected void writeContents(GuardedOutputStream out) throws IOException {
 		out.write(version);
 		write24Int(out, flags);
@@ -107,6 +110,7 @@ public class SampleToChunkAtom extends LeafAtom {
 		}
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("[ ");
@@ -135,8 +139,7 @@ public class SampleToChunkAtom extends LeafAtom {
 	/**
 	 * The sample description ID for a specific chunk.
 	 * 
-	 * @param chunkIndex
-	 *            the chunk to examine
+	 * @param chunkIndex the chunk to examine
 	 * @return the sample description ID used in this chunk.
 	 */
 	public long getChunkSampleDescriptionID(int chunkIndex) {
@@ -146,8 +149,7 @@ public class SampleToChunkAtom extends LeafAtom {
 	/**
 	 * Returns how many samples are in a given chunk.
 	 * 
-	 * @param chunkIndex
-	 *            the chunk to examine
+	 * @param chunkIndex the chunk to examine
 	 * @return how many samples are in a given chunk.
 	 */
 	public long getChunkSampleCount(int chunkIndex) {
@@ -170,6 +172,7 @@ class SampleToChunkEntry {
 		sampleDescriptionID = Atom.read32Int(in);
 	}
 
+	@Override
 	public String toString() {
 		return "[ " + firstChunk + ", " + samplesPerChunk + ", " + sampleDescriptionID + "]";
 	}

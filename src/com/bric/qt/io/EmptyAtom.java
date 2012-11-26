@@ -36,18 +36,19 @@ class EmptyAtom extends Atom {
 		super(parent);
 	}
 
+	@Override
 	protected String getIdentifier() {
 		return null;
 	}
-
+	@Override
 	protected long getSize() {
 		return 0;
 	}
-
+	@Override
 	protected void writeContents(GuardedOutputStream out) {
 	}
 
-	public Enumeration<?> children() {
+	public Enumeration<Object> children() {
 		return EMPTY_ENUMERATION;
 	}
 

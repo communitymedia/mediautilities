@@ -78,16 +78,19 @@ public class SampleSizeAtom extends LeafAtom {
 		sizeTable = newArray;
 	}
 
+	@Override
 	protected String getIdentifier() {
 		return "stsz";
 	}
 
+	@Override
 	protected long getSize() {
 		if (sizeTable == null)
 			return 20;
 		return 20 + sizeTable.length * 4;
 	}
 
+	@Override
 	protected void writeContents(GuardedOutputStream out) throws IOException {
 		out.write(version);
 		write24Int(out, flags);
@@ -102,6 +105,7 @@ public class SampleSizeAtom extends LeafAtom {
 		}
 	}
 
+	@Override
 	public String toString() {
 		String entriesString;
 		if (sizeTable != null) {

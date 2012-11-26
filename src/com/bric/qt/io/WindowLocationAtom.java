@@ -40,14 +40,17 @@ class WindowLocationAtom extends LeafAtom {
 		y = read16Int(in);
 	}
 
+	@Override
 	protected String getIdentifier() {
 		return "WLOC";
 	}
 
+	@Override
 	protected long getSize() {
 		return 12;
 	}
 
+	@Override
 	protected void writeContents(GuardedOutputStream out) throws IOException {
 		write16Int(out, x);
 		write16Int(out, y);

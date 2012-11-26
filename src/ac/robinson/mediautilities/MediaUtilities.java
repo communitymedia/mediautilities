@@ -29,7 +29,7 @@ public class MediaUtilities {
 	public static final String SMIL_FILE_EXTENSION = ".smil";
 	public static final String SYNC_FILE_EXTENSION = ".sync.jpg"; // to counter ridiculous incoming filename filtering
 	public static final String HTML_FILE_EXTENSION = ".html";
-	public static final String MOV_FILE_EXTENSION = ".mp4";
+	public static final String MOV_FILE_EXTENSION = ".mov";
 
 	public static final String MOV_AUDIO_FILE_EXTENSION = ".m4a";
 	public static final String MOV_IMAGE_FILE_EXTENSION = ".jpg";

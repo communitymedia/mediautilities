@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 
-
 import com.bric.io.GuardedOutputStream;
 
 public class TrackHeaderAtom extends LeafAtom {
@@ -82,14 +81,17 @@ public class TrackHeaderAtom extends LeafAtom {
 		return flags;
 	}
 
+	@Override
 	protected String getIdentifier() {
 		return "tkhd";
 	}
 
+	@Override
 	protected long getSize() {
 		return 92;
 	}
 
+	@Override
 	protected void writeContents(GuardedOutputStream out) throws IOException {
 		out.write(version);
 		write24Int(out, flags);
@@ -109,6 +111,7 @@ public class TrackHeaderAtom extends LeafAtom {
 		write16_16Float(out, height);
 	}
 
+	@Override
 	public String toString() {
 		return "TrackHeaderAtom[ version=" + version + ", " + "flags=" + flags + ", " + "creationTime=" + creationTime
 				+ ", " + "modificationTime=" + modificationTime + ", " + "trackID=" + trackID + ", " + "duration="

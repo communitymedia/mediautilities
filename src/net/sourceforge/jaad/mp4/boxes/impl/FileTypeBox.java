@@ -32,7 +32,7 @@ public class FileTypeBox extends BoxImpl {
 	public static final String BRAND_MP4_1 = "mp41";
 	public static final String BRAND_MP4_2 = "mp42";
 	public static final String BRAND_MOBILE_MP4 = "mmp4";
-	public static final String BRAND_QUICKTIME = "qm  ";
+	public static final String BRAND_QUICKTIME = "qt  ";
 	public static final String BRAND_AVC = "avc1";
 	public static final String BRAND_AUDIO = "M4A ";
 	public static final String BRAND_AUDIO_2 = "M4B ";

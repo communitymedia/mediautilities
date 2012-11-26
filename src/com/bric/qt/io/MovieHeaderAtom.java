@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 
-
 import com.bric.io.GuardedOutputStream;
 
 /**
@@ -90,14 +89,17 @@ public class MovieHeaderAtom extends LeafAtom {
 		return nextTrackID;
 	}
 
+	@Override
 	protected String getIdentifier() {
 		return "mvhd";
 	}
 
+	@Override
 	protected long getSize() {
 		return 108;
 	}
 
+	@Override
 	protected void writeContents(GuardedOutputStream out) throws IOException {
 		out.write(version);
 		write24Int(out, flags);
@@ -120,6 +122,7 @@ public class MovieHeaderAtom extends LeafAtom {
 		write32Int(out, getRoot().getHighestTrackID() + 1);
 	}
 
+	@Override
 	public String toString() {
 		return "MovieHeaderAtom[ " + "version = " + version + ", " + "flags = " + flags + ", " + "creationTime = "
 				+ creationTime + ", " + "modificationTime = " + modificationTime + ", " + "timeScale = " + timeScale

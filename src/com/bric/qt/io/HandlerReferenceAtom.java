@@ -93,15 +93,18 @@ public class HandlerReferenceAtom extends LeafAtom {
 		return componentName;
 	}
 
+	@Override
 	protected String getIdentifier() {
 		return "hdlr";
 	}
 
+	@Override
 	protected long getSize() {
 		byte[] data = componentName.getBytes();
 		return 33 + data.length;
 	}
 
+	@Override
 	protected void writeContents(GuardedOutputStream out) throws IOException {
 		out.write(version);
 		write24Int(out, flags);
@@ -115,6 +118,7 @@ public class HandlerReferenceAtom extends LeafAtom {
 		out.write(data);
 	}
 
+	@Override
 	public String toString() {
 		return "HandlerReferenceAtom[ version=" + version + ", " + "flags=" + flags + ", " + "componentType=\""
 				+ componentType + "\", " + "componentSubtype=\"" + componentSubtype + "\", "

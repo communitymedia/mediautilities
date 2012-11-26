@@ -50,7 +50,7 @@ class AtomFactory {
 				Atom atom = read(null, in2);
 				v.add(atom);
 			}
-			return (Atom[]) v.toArray(new Atom[v.size()]);
+			return v.toArray(new Atom[v.size()]);
 		} finally {
 			try {
 				in.close();

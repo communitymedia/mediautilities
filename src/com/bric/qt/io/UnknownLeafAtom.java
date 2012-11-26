@@ -41,18 +41,22 @@ public class UnknownLeafAtom extends LeafAtom {
 		read(in, data);
 	}
 
+	@Override
 	protected String getIdentifier() {
 		return id;
 	}
 
+	@Override
 	protected long getSize() {
 		return 8 + data.length;
 	}
 
+	@Override
 	protected void writeContents(GuardedOutputStream out) throws IOException {
 		out.write(data);
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		for (int a = 0; a < Math.min(data.length, 64); a++) {

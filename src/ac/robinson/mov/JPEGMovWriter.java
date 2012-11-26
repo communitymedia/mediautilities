@@ -71,13 +71,10 @@ public class JPEGMovWriter extends MovWriter {
 	/**
 	 * Add an image to this animation using a specific jpeg compression quality.
 	 * 
-	 * @param duration
-	 *            the duration (in seconds) of this frame
-	 * @param bi
-	 *            the image to add
-	 * @param jpegQuality
-	 *            a value from [0,1] indicating the quality of this image. A value of 1 represents a losslessly encoded
-	 *            image.
+	 * @param duration the duration (in seconds) of this frame
+	 * @param bi the image to add
+	 * @param jpegQuality a value from [0,1] indicating the quality of this image. A value of 1 represents a losslessly
+	 *            encoded image.
 	 * @throws IOException
 	 */
 	@SuppressLint("UseValueOf")
@@ -89,10 +86,8 @@ public class JPEGMovWriter extends MovWriter {
 
 	@Override
 	protected void writeFrame(OutputStream out, Bitmap image, Map<String, Object> settings) throws IOException {
-		// if (image.getType() == BufferedImage.TYPE_INT_ARGB || image.getType() == BufferedImage.TYPE_INT_ARGB_PRE) {
-		// System.err
-		// .println("JPEGMovWriter Warning: a BufferedImage of type TYPE_INT_ARGB may produce unexpected results. The recommended type is TYPE_INT_RGB.");
-		// }
+		// if (image.getType() == BufferedImage.TYPE_INT_ARGB || image.getType() == BufferedImage.TYPE_INT_ARGB_PRE)
+		// Log.d(TAG, "Warning: type TYPE_INT_ARGB may produce unexpected output. Recommended type: TYPE_INT_RGB.");
 		float quality;
 		if (settings != null && settings.get(PROPERTY_QUALITY) instanceof Number) {
 			quality = ((Number) settings.get(PROPERTY_QUALITY)).floatValue();

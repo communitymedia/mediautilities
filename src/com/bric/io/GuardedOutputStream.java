@@ -35,10 +35,8 @@ public class GuardedOutputStream extends MeasuredOutputStream {
 	/**
 	 * Constructs a new <code>GuardedOutputStream</code>.
 	 * 
-	 * @param out
-	 *            the underlying <code>OutputStream</code> to send data to.
-	 * @param limit
-	 *            the number of bytes that can be written
+	 * @param out the underlying <code>OutputStream</code> to send data to.
+	 * @param limit the number of bytes that can be written
 	 */
 	public GuardedOutputStream(OutputStream out, long limit) {
 		super(out);
@@ -56,6 +54,7 @@ public class GuardedOutputStream extends MeasuredOutputStream {
 		return limit;
 	}
 
+	@Override
 	public void write(byte[] b, int off, int len) throws IOException {
 		if (len == 0)
 			return;
@@ -67,10 +66,12 @@ public class GuardedOutputStream extends MeasuredOutputStream {
 		super.write(b, off, len);
 	}
 
+	@Override
 	public void write(byte[] b) throws IOException {
 		write(b, 0, b.length);
 	}
 
+	@Override
 	public void write(int b) throws IOException {
 		if (limit == 0)
 			throw new IOException("limit exceeded");

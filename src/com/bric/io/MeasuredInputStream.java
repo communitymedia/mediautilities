@@ -36,6 +36,7 @@ public class MeasuredInputStream extends InputStream {
 		this.in = i;
 	}
 
+	@Override
 	public int available() throws IOException {
 		return in.available();
 	}
@@ -49,18 +50,22 @@ public class MeasuredInputStream extends InputStream {
 		return read;
 	}
 
+	@Override
 	public void close() throws IOException {
 		in.close();
 	}
 
+	@Override
 	public synchronized void mark(int readlimit) {
 		throw new RuntimeException();
 	}
 
+	@Override
 	public boolean markSupported() {
 		return false;
 	}
 
+	@Override
 	public int read() throws IOException {
 		int k = in.read();
 		if (k == -1)
@@ -69,6 +74,7 @@ public class MeasuredInputStream extends InputStream {
 		return k;
 	}
 
+	@Override
 	public int read(byte[] b, int off, int len) throws IOException {
 		int returnValue = in.read(b, off, len);
 		if (returnValue == -1)
@@ -78,14 +84,17 @@ public class MeasuredInputStream extends InputStream {
 		return returnValue;
 	}
 
+	@Override
 	public int read(byte[] b) throws IOException {
 		return read(b, 0, b.length);
 	}
 
+	@Override
 	public synchronized void reset() throws IOException {
 		throw new RuntimeException();
 	}
 
+	@Override
 	public long skip(long n) throws IOException {
 		long returnValue = in.skip(n);
 		if (returnValue == -1)

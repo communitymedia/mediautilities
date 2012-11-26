@@ -41,6 +41,7 @@ public class UnknownSampleDescriptionEntry extends SampleDescriptionEntry {
 		super(type, dataReference);
 	}
 
+	@Override
 	protected long getSize() {
 		return 16 + data.length;
 	}
@@ -57,6 +58,7 @@ public class UnknownSampleDescriptionEntry extends SampleDescriptionEntry {
 		return this;
 	}
 
+	@Override
 	protected void write(OutputStream out) throws IOException {
 		Atom.write32Int(out, getSize());
 		Atom.write32String(out, type);
@@ -65,6 +67,7 @@ public class UnknownSampleDescriptionEntry extends SampleDescriptionEntry {
 		out.write(data);
 	}
 
+	@Override
 	public String toString() {
 		if (data.length == 0) {
 			return "UnknownSampleDescriptionEntry[ type=\"" + type + "\", " + "dataReference=" + dataReference + " ];";

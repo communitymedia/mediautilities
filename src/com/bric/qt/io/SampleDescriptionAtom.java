@@ -62,10 +62,12 @@ public class SampleDescriptionAtom extends LeafAtom {
 		return entry.convert();
 	}
 
+	@Override
 	protected String getIdentifier() {
 		return "stsd";
 	}
 
+	@Override
 	protected long getSize() {
 		long sum = 16;
 		for (int a = 0; a < entries.length; a++) {
@@ -74,6 +76,7 @@ public class SampleDescriptionAtom extends LeafAtom {
 		return sum;
 	}
 
+	@Override
 	protected void writeContents(GuardedOutputStream out) throws IOException {
 		out.write(version);
 		write24Int(out, flags);
@@ -83,6 +86,7 @@ public class SampleDescriptionAtom extends LeafAtom {
 		}
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("[ ");

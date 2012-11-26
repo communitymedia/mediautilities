@@ -43,6 +43,8 @@ import com.bric.io.MeasuredOutputStream;
 import com.bric.qt.io.Atom;
 import com.bric.qt.io.ChunkOffsetAtom;
 import com.bric.qt.io.DataReferenceAtom;
+import com.bric.qt.io.EditAtom;
+import com.bric.qt.io.EditListAtom;
 import com.bric.qt.io.HandlerReferenceAtom;
 import com.bric.qt.io.MediaHeaderAtom;
 import com.bric.qt.io.MovieHeaderAtom;
@@ -110,23 +112,23 @@ public abstract class MovWriter {
 		SampleToChunkAtom stsc = new SampleToChunkAtom();
 		ChunkOffsetAtom stco = new ChunkOffsetAtom();
 
-		void writeToMoovRoot(ParentAtom moovRoot) {
+		void writeToMoovRoot(ParentAtom moovRoot, int trackIndex) {
 			ParentAtom trakAtom = new ParentAtom("trak");
 			moovRoot.add(trakAtom);
-			TrackHeaderAtom trackHeader = new TrackHeaderAtom(1, totalDuration, w, h);
+			TrackHeaderAtom trackHeader = new TrackHeaderAtom(trackIndex, totalDuration, w, h);
 			trackHeader.volume = 0;
 			trakAtom.add(trackHeader);
 			ParentAtom mdiaAtom = new ParentAtom("mdia");
 			trakAtom.add(mdiaAtom);
 			MediaHeaderAtom mediaHeader = new MediaHeaderAtom(DEFAULT_TIME_SCALE, totalDuration);
 			mdiaAtom.add(mediaHeader);
-			HandlerReferenceAtom handlerRef1 = new HandlerReferenceAtom("mhlr", "vide", "java");
+			HandlerReferenceAtom handlerRef1 = new HandlerReferenceAtom("mhlr", "vide", "bric");
 			mdiaAtom.add(handlerRef1);
 			ParentAtom minf = new ParentAtom("minf");
 			mdiaAtom.add(minf);
 			VideoMediaInformationHeaderAtom vmhd = new VideoMediaInformationHeaderAtom();
 			minf.add(vmhd);
-			HandlerReferenceAtom handlerRef2 = new HandlerReferenceAtom("dhlr", "alis", "java");
+			HandlerReferenceAtom handlerRef2 = new HandlerReferenceAtom("dhlr", "alis", "bric");
 			minf.add(handlerRef2);
 
 			ParentAtom dinf = new ParentAtom("dinf");
@@ -237,7 +239,13 @@ public abstract class MovWriter {
 		ChunkOffsetAtom stco = new ChunkOffsetAtom();
 		int sampleMultiplier;
 
+		/** How many seconds into the movie this audio should begin playing. */
+		float audioOffset = 0;
+		boolean useEditList = true;
+
 		AudioTrack(AudioInputStream audio, float audioOffset) throws IOException {
+			this.audioOffset = audioOffset;
+
 			// hmm... I'm not sure that this logic has ever
 			// been tested, but it seems appropriate:
 			AudioFormat audioFormat = audio.getFormat();
@@ -264,7 +272,7 @@ public abstract class MovWriter {
 			sampleMultiplier = audioIn.getFormat().getSampleSizeInBits() / 8 * numberOfChannels;
 			reverseBytePairs = bitsPerSample > 8 && (!audioIn.getFormat().isBigEndian());
 
-			if (audioOffset > 0) {
+			if (!useEditList && audioOffset > 0) {
 				/**
 				 * Previously I tried using an EditAtom to change when an audio track began playing, but that only
 				 * worked for about 1 audio track (when other audio tracks were added to the test: QT Player could play
@@ -278,6 +286,8 @@ public abstract class MovWriter {
 				 * size if you position an audio very late in the movie.
 				 * 
 				 */
+				// 25/Nov/12: reverted to EditAtom as smaller file sizes are more desirable (especially when
+				// creating a narrative with sounds toward the end)
 				long silentSamples = (long) (audioOffset * audioIn.getFormat().getFrameRate());
 				AudioInputStream silence = new SilentAudioInputStream(audioIn.getFormat(), silentSamples);
 				audioIn = new CombinedAudioInputStream(silence, audioIn);
@@ -287,8 +297,19 @@ public abstract class MovWriter {
 		void writeToMoovRoot(ParentAtom moovRoot, int trackIndex) {
 			ParentAtom trakAtom = new ParentAtom("trak");
 			moovRoot.add(trakAtom);
-			TrackHeaderAtom trackHeader = new TrackHeaderAtom(trackIndex, totalDurationInMovieTimeScale, 0, 0);
+			TrackHeaderAtom trackHeader = new TrackHeaderAtom(trackIndex,
+					(int) ((useEditList ? audioOffset : 0) * DEFAULT_TIME_SCALE) + totalDurationInMovieTimeScale, 0, 0);
 			trakAtom.add(trackHeader);
+			if (useEditList) {
+				EditAtom editAtom = new EditAtom();
+				EditListAtom editListAtom = new EditListAtom();
+				if (audioOffset > 0) {
+					editListAtom.addEditListTableEntry((int) (audioOffset * DEFAULT_TIME_SCALE), -1, 1f);
+				}
+				editListAtom.addEditListTableEntry((int) totalDurationInMovieTimeScale, 0, 1f);
+				editAtom.add(editListAtom);
+				trakAtom.add(editAtom);
+			}
 			ParentAtom mdiaAtom = new ParentAtom("mdia");
 			trakAtom.add(mdiaAtom);
 			MediaHeaderAtom mediaHeader = new MediaHeaderAtom(myTimeScale, totalSamples);
@@ -330,8 +351,7 @@ public abstract class MovWriter {
 		 * <p>
 		 * If there is no more data to write then this method will do nothing.
 		 * 
-		 * @param time
-		 *            the duration (relative to DEFAULT_TIME_SCALE) of audio to write. For example if this is 1200 and
+		 * @param time the duration (relative to DEFAULT_TIME_SCALE) of audio to write. For example if this is 1200 and
 		 *            DEFAULT_TIME_SCALE is 600: then this should write 2 seconds of audio data.
 		 * @return true if data was written, false if the AudioInputStream has been depleted.
 		 * @throws IOException
@@ -394,8 +414,7 @@ public abstract class MovWriter {
 	 * By constructing this object a <code>FileOutputStream</code> is opened for the destination file. It remains open
 	 * until <code>close()</code> is called or this object is finalized.
 	 * 
-	 * @param file
-	 *            the file data is written to. It is strongly recommended that this file name end with ".mov" (or
+	 * @param file the file data is written to. It is strongly recommended that this file name end with ".mov" (or
 	 *            ".MOV"), although this is not required.
 	 * @throws IOException
 	 */
@@ -403,6 +422,19 @@ public abstract class MovWriter {
 		dest = file;
 		file.createNewFile();
 		out = new MeasuredOutputStream(new FileOutputStream(file));
+
+		// create the file type atom - must be the first atom; essential for playback in, e.g., VLC
+		// see: http://developer.apple.com/library/mac/#documentation/QuickTime/QTFF/QTFFChap1/qtff1.html
+		Atom.write32Int(out, 32); // mdat size will be adjusted relative to this later
+		Atom.write32String(out, "ftyp");
+		Atom.write32String(out, "qt  ");
+		Atom.write32Int(out, 537331972); // 537331972 = 2007/09/04 as BCD
+		Atom.write32String(out, "qt  ");
+		Atom.write32String(out, "bric");
+		Atom.write32String(out, ""); // future
+		Atom.write32String(out, ""); // future
+
+		// TODO: should use a "wide" atom here, and use the extended atom only when needed
 
 		Atom.write32Int(out, 1); // an extended size field
 		Atom.write32String(out, "mdat");
@@ -413,6 +445,11 @@ public abstract class MovWriter {
 		// when .close() is called:
 		Atom.write32Int(out, 0);
 		Atom.write32Int(out, 0);
+
+		// necessary for some players
+		// for (int i = 0; i < 116; i++) {
+		// Atom.write32Int(out, 0); // pad to 512 bytes at the start of the file
+		// }
 	}
 
 	/**
@@ -423,15 +460,12 @@ public abstract class MovWriter {
 	 * could be inserted at any time (before calling <code>close()</code>), but currently that functionality is not
 	 * supported.
 	 * 
-	 * @param audio
-	 *            the audio to add to this movie. Preferably this should use PCM encoding, but this class uses
+	 * @param audio the audio to add to this movie. Preferably this should use PCM encoding, but this class uses
 	 *            AudioSystem to convert the stream to PCM if it is not already.
-	 * @param startTime
-	 *            the start time (in seconds) of this audio in the movie. For example: if this is 5, then this audio
-	 *            will begin 5 seconds into the movie.
+	 * @param startTime the start time (in seconds) of this audio in the movie. For example: if this is 5, then this
+	 *            audio will begin 5 seconds into the movie.
 	 * @throws IOException
-	 * @throws RuntimeException
-	 *             if you invoke this method after calling <code>addFrame()</code> or <code>close()</code>.
+	 * @throws RuntimeException if you invoke this method after calling <code>addFrame()</code> or <code>close()</code>.
 	 */
 	public synchronized void addAudioTrack(AudioInputStream audio, float startTime) throws IOException {
 		addAudioTrack(audio, startTime, Float.POSITIVE_INFINITY);
@@ -445,18 +479,14 @@ public abstract class MovWriter {
 	 * could be inserted at any time (before calling <code>close()</code>), but currently that functionality is not
 	 * supported.
 	 * 
-	 * @param audio
-	 *            the audio to add to this movie. Preferably this should use PCM encoding, but this class uses
+	 * @param audio the audio to add to this movie. Preferably this should use PCM encoding, but this class uses
 	 *            AudioSystem to convert the stream to PCM if it is not already.
-	 * @param startTime
-	 *            the start time (in seconds) of this audio in the movie. For example: if this is 5, then this audio
-	 *            will begin 5 seconds into the movie.
-	 * @param endTime
-	 *            the end time (in seconds) of this audio in the movie. If the audio would normally last past this time:
-	 *            then it is cut off. (If the audio runs out before this time: then this argument has no effect.)
+	 * @param startTime the start time (in seconds) of this audio in the movie. For example: if this is 5, then this
+	 *            audio will begin 5 seconds into the movie.
+	 * @param endTime the end time (in seconds) of this audio in the movie. If the audio would normally last past this
+	 *            time: then it is cut off. (If the audio runs out before this time: then this argument has no effect.)
 	 * @throws IOException
-	 * @throws RuntimeException
-	 *             if you invoke this method after calling <code>addFrame()</code> or <code>close()</code>.
+	 * @throws RuntimeException if you invoke this method after calling <code>addFrame()</code> or <code>close()</code>.
 	 */
 	public synchronized void addAudioTrack(AudioInputStream audio, float startTime, float endTime) throws IOException {
 		if (closed)
@@ -483,9 +513,10 @@ public abstract class MovWriter {
 		 * data is placed at the beginning of the interleaved data. This means that the sound and video data are offset
 		 * from each other in the file by one second.
 		 */
-		newTrack.writeAudio(DEFAULT_TIME_SCALE * 1);
+		newTrack.writeAudio(DEFAULT_TIME_SCALE * 2);
 	}
 
+	@Override
 	protected void finalize() throws Throwable {
 		close(false);
 	}
@@ -496,14 +527,11 @@ public abstract class MovWriter {
 	 * All images must be the same dimensions; if this image is a different size from previously added images an
 	 * exception is thrown.
 	 * 
-	 * @param duration
-	 *            the duration (in seconds) this frame should show. (This value is converted to a timescale of
+	 * @param duration the duration (in seconds) this frame should show. (This value is converted to a timescale of
 	 *            DEFAULT_TIME_SCALE.)
-	 * @param bi
-	 *            the image to add as a frame.
-	 * @param settings
-	 *            an optional map of settings subclasses may use to encode this data. For example, the JPEGMovWriter may
-	 *            consult this map to determine the image quality of the JPEG it writes.
+	 * @param bi the image to add as a frame.
+	 * @param settings an optional map of settings subclasses may use to encode this data. For example, the
+	 *            JPEGMovWriter may consult this map to determine the image quality of the JPEG it writes.
 	 * @throws IOException
 	 */
 	public synchronized void addFrame(float duration, Bitmap bi, Map<String, Object> settings) throws IOException {
@@ -532,11 +560,9 @@ public abstract class MovWriter {
 	 * files to a MovWriter that expects JPG image files, then no exception will be thrown. But the new mov file will be
 	 * unreadable.)
 	 * 
-	 * @param duration
-	 *            the duration (in seconds) this frame should show. (This value is converted to a timescale of
+	 * @param duration the duration (in seconds) this frame should show. (This value is converted to a timescale of
 	 *            DEFAULT_TIME_SCALE.)
-	 * @param image
-	 *            the image to add.
+	 * @param image the image to add.
 	 * @throws IOException
 	 */
 	public synchronized void addFrame(float duration, File image) throws IOException {
@@ -555,10 +581,9 @@ public abstract class MovWriter {
 	/**
 	 * This finishes writing the movie file.
 	 * 
-	 * @param writeRemainingAudio
-	 *            if true then unfinished AudioInputStreams continue to write to the movie file. If false then the movie
-	 *            ends immediately. If an operation is canceled you should pass false here to speed up the time it takes
-	 *            to close everything out.
+	 * @param writeRemainingAudio if true then unfinished AudioInputStreams continue to write to the movie file. If
+	 *            false then the movie ends immediately. If an operation is cancelled you should pass false here to
+	 *            speed up the time it takes to close everything out.
 	 * 
 	 * @throws IOException
 	 */
@@ -588,7 +613,7 @@ public abstract class MovWriter {
 				audio.close();
 			}
 
-			mdatSize = out.getBytesWritten();
+			mdatSize = out.getBytesWritten() - 32; // -32 for ftyp header
 
 			ParentAtom moovRoot = new ParentAtom("moov");
 
@@ -599,10 +624,11 @@ public abstract class MovWriter {
 			MovieHeaderAtom movieHeader = new MovieHeaderAtom(DEFAULT_TIME_SCALE, totalDuration);
 			moovRoot.add(movieHeader);
 
-			videoTrack.writeToMoovRoot(moovRoot);
+			videoTrack.writeToMoovRoot(moovRoot, 1);
 			for (int a = 0; a < audioTracks.length; a++) {
 				audioTracks[a].writeToMoovRoot(moovRoot, a + 2);
 			}
+
 			moovRoot.write(out);
 		} finally {
 			out.close();
@@ -615,7 +641,7 @@ public abstract class MovWriter {
 		RandomAccessFile raf = null;
 		try {
 			raf = new RandomAccessFile(dest, "rw");
-			raf.seek(8);
+			raf.seek(32 + 8); // 32 for ftyp atom; 8 for mdat header
 			byte[] array = new byte[8];
 			array[0] = (byte) ((mdatSize >> 56) & 0xff);
 			array[1] = (byte) ((mdatSize >> 48) & 0xff);
@@ -634,10 +660,8 @@ public abstract class MovWriter {
 	/**
 	 * Write a file to an OutputStream.
 	 * 
-	 * @param out
-	 *            the stream to write to.
-	 * @param file
-	 *            the file to write
+	 * @param out the stream to write to.
+	 * @param file the file to write
 	 * @return the number of bytes written.
 	 * @throws IOException
 	 */
@@ -657,12 +681,9 @@ public abstract class MovWriter {
 	/**
 	 * Write the remainder of an InputStream to an OutputStream.
 	 * 
-	 * @param out
-	 *            the stream to write to.
-	 * @param in
-	 *            the data to write
-	 * @param whether
-	 *            every two bytes should be switched (to convert from one endian to another)
+	 * @param out the stream to write to.
+	 * @param in the data to write
+	 * @param whether every two bytes should be switched (to convert from one endian to another)
 	 * @return the number of bytes written.
 	 * @throws IOException
 	 */
@@ -687,14 +708,10 @@ public abstract class MovWriter {
 	/**
 	 * Write up to a certain number of bytes from an InputStream to an OutputStream.
 	 * 
-	 * @param out
-	 *            the stream to write to.
-	 * @param in
-	 *            the data to write
-	 * @param maxBytes
-	 *            the maximum number of bytes to write
-	 * @param whether
-	 *            every two bytes should be switched (to convert from one endian to another)
+	 * @param out the stream to write to.
+	 * @param in the data to write
+	 * @param maxBytes the maximum number of bytes to write
+	 * @param whether every two bytes should be switched (to convert from one endian to another)
 	 * @return the number of bytes written.
 	 * @throws IOException
 	 */

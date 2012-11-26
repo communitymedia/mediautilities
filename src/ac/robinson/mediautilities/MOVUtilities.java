@@ -92,12 +92,13 @@ public class MOVUtilities {
 		JPEGMovWriter outputFileWriter = null;
 		try {
 			outputFileWriter = new JPEGMovWriter(outputFile);
-			float frameDuration;
+			long frameStartTime = 0;
 
 			// find all the story components - *all* audio must be added before any frames (takes a *long* time)
-			float frameStartTime = 0;
+			int frameDuration;
 			for (FrameMediaContainer frame : framesToSend) {
-				frameDuration = frame.mFrameMaxDuration / 1000; // seconds
+				// we need these values in seconds, but store in milliseconds so we don't round incorrectly later
+				frameDuration = frame.mFrameMaxDuration;
 
 				int audioLengthIndex = 0;
 				int audioDuration;
@@ -107,17 +108,17 @@ public class MOVUtilities {
 					}
 
 					audioDuration = frame.mAudioDurations.get(audioLengthIndex);
-					File inputAudioFile = new File(audioPath);
 
 					// first we need to extract PCM audio from the M4A file
+					File inputAudioFile = new File(audioPath);
 					AudioFormat audioFormat = null;
-					File tempOutputAudioFile = File.createTempFile(inputAudioFile.getName(), "pcm",
+					File tempOutputAudioFile = File.createTempFile(inputAudioFile.getName(), ".pcm",
 							outputFile.getParentFile());
 					BufferedOutputStream pcmStream = new BufferedOutputStream(new FileOutputStream(tempOutputAudioFile));
 					try {
 						MP4toPCMConverter pcmConverter = new MP4toPCMConverter(inputAudioFile);
 						audioFormat = new AudioFormat(pcmConverter.getSampleRate(), pcmConverter.getSampleSize(), 1,
-								false, true); // input is unsigned integers, big-endian
+								true, true); // output from PCM converter is signed 16-bit big-endian integers
 						pcmConverter.convertFile(pcmStream);
 					} catch (IOException e) {
 						Log.d("MOVUtilities", "Error creating audio track - IOException");
@@ -129,8 +130,9 @@ public class MOVUtilities {
 
 					// then add to the MOV output file
 					AudioInputStream pcmAudioStream = new AudioInputStream(new FileInputStream(tempOutputAudioFile),
-							audioFormat, Math.round(audioFormat.getSampleRate() * audioDuration));
-					outputFileWriter.addAudioTrack(pcmAudioStream, frameStartTime, frameStartTime + audioDuration);
+							audioFormat, (int) ((audioFormat.getSampleRate() * audioDuration) / 1000f));
+					outputFileWriter.addAudioTrack(pcmAudioStream, frameStartTime / 1000f,
+							(frameStartTime + audioDuration) / 1000f);
 
 					tempOutputAudioFile.delete();
 					audioLengthIndex += 1;
@@ -147,7 +149,6 @@ public class MOVUtilities {
 
 				imageLoaded = false;
 				baseCanvas.drawColor(backgroundColour);
-				frameDuration = frame.mFrameMaxDuration / 1000; // seconds
 
 				// TODO: can only reliably use JPG images currently
 				if (frame.mImagePath != null && frame.mImagePath.endsWith(MediaUtilities.MOV_IMAGE_FILE_EXTENSION)) {
@@ -179,7 +180,7 @@ public class MOVUtilities {
 							audioBitmapLeft + audioBitmapSize, audioBitmapTop + audioBitmapSize));
 				}
 
-				outputFileWriter.addFrame(frameDuration, baseBitmap, imageQuality);
+				outputFileWriter.addFrame(frame.mFrameMaxDuration / 1000f, baseBitmap, imageQuality);
 			}
 		} catch (IOException e) {
 			Log.d("MOVUtilities", "Error creating movie - IOException");

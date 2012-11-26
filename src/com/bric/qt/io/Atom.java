@@ -30,7 +30,6 @@ import java.util.Enumeration;
 import java.util.GregorianCalendar;
 import java.util.Vector;
 
-
 import com.bric.io.GuardedOutputStream;
 import com.bric.io.NullOutputStream;
 
@@ -48,7 +47,7 @@ public abstract class Atom implements TreeNode {
 	 */
 	protected static boolean ABBREVIATE = true;
 
-	protected static Enumeration<?> EMPTY_ENUMERATION = new Enumeration<Object>() {
+	protected static Enumeration<Object> EMPTY_ENUMERATION = new Enumeration<Object>() {
 		public boolean hasMoreElements() {
 			return false;
 		}
@@ -79,7 +78,7 @@ public abstract class Atom implements TreeNode {
 		if (answers.size() == 0)
 			return "unknown";
 		if (answers.size() == 1)
-			return (String) answers.get(0);
+			return answers.get(0);
 
 		StringBuffer sb = new StringBuffer();
 		sb.append("[");
@@ -220,14 +219,13 @@ public abstract class Atom implements TreeNode {
 
 	protected synchronized static final int read24Int(InputStream in) throws IOException {
 		read(in, array3);
-		long k = (((long) (array3[0] & 0xff)) << 16) + (((long) (array3[1] & 0xff)) << 8)
-				+ (((long) (array3[2] & 0xff)));
+		long k = (((long) (array3[0] & 0xff)) << 16) + (((long) (array3[1] & 0xff)) << 8) + (array3[2] & 0xff);
 		return (int) k;
 	}
 
 	protected synchronized static final int read8Int(InputStream in) throws IOException {
 		read(in, array1);
-		return (((int) (array1[0] & 0xff)));
+		return (array1[0] & 0xff);
 	}
 
 	protected synchronized static final long read32Int(InputStream in) throws IOException {
@@ -297,7 +295,7 @@ public abstract class Atom implements TreeNode {
 		long w = (value & 0xffff0000) >> 16;
 		long f = (value & 0xffff);
 
-		float floatValue = ((float) w) + ((float) f) / 65536f;
+		float floatValue = w + f / 65536f;
 
 		return floatValue * multiplier;
 	}
@@ -306,7 +304,7 @@ public abstract class Atom implements TreeNode {
 		int integerPart = read16Int(in);
 		int fractionPart = read16Int(in);
 
-		float floatValue = ((float) integerPart) + ((float) fractionPart) / 65536f;
+		float floatValue = integerPart + fractionPart / 65536f;
 		return floatValue;
 	}
 
@@ -326,7 +324,7 @@ public abstract class Atom implements TreeNode {
 		}
 		long f = value & 0x3FFF;
 
-		float floatValue = ((float) w) + ((float) f) / 16384f;
+		float floatValue = w + f / 16384f;
 
 		return floatValue * multiplier;
 	}
@@ -343,7 +341,7 @@ public abstract class Atom implements TreeNode {
 		long w = (value & 0xff00) >> 8;
 		long f = (value & 0xff);
 
-		float floatValue = ((float) w) + ((float) f) / 256f;
+		float floatValue = w + f / 256f;
 
 		return floatValue * multiplier;
 	}
@@ -400,12 +398,12 @@ public abstract class Atom implements TreeNode {
 			.getTimeInMillis() - (new GregorianCalendar(1904, GregorianCalendar.JANUARY, 1)).getTimeInMillis();
 
 	protected static final Date readDate(InputStream in) throws IOException {
-		return new Date(read32Int(in) * 1000 + QT_TO_JAVA_MS_CHANGE);
+		return new Date(read32Int(in) * 1000 - QT_TO_JAVA_MS_CHANGE);
 	}
 
 	protected static final void writeDate(OutputStream out, Date d) throws IOException {
 		long millis = d.getTime();
-		long qtMillis = millis - QT_TO_JAVA_MS_CHANGE;
+		long qtMillis = millis + QT_TO_JAVA_MS_CHANGE;
 		long qtSeconds = qtMillis / 1000;
 		write32Int(out, qtSeconds);
 	}
@@ -459,8 +457,7 @@ public abstract class Atom implements TreeNode {
 	 * (The first 8 bytes are always the size of this atom, and its identifier. Those are already written when this is
 	 * called.)
 	 * 
-	 * @param out
-	 *            a <code>GuardedOutputStream</code> that is restricted to write only a fixed number of bytes.
+	 * @param out a <code>GuardedOutputStream</code> that is restricted to write only a fixed number of bytes.
 	 * @throws IOException
 	 */
 	protected abstract void writeContents(GuardedOutputStream out) throws IOException;

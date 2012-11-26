@@ -29,14 +29,14 @@ public class EditListAtom extends LeafAtom {
 
 	static class EditListTableEntry {
 		/**
-		 * A 32-bit integer that specifies the duration of this edit segment in units of the movie’s time scale.
+		 * A 32-bit integer that specifies the duration of this edit segment in units of the movie's time scale.
 		 */
 		long trackDuration;
 
 		/**
 		 * A 32-bit integer containing the starting time within the media of this edit segment (in media timescale
 		 * units). If this field is set to –1, it is an empty edit. The last edit in a track should never be an empty
-		 * edit. Any difference between the movie’s duration and the track’s duration is expressed as an implicit empty
+		 * edit. Any difference between the movie's duration and the track's duration is expressed as an implicit empty
 		 * edit.
 		 */
 		long mediaTime;

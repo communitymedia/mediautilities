@@ -29,20 +29,23 @@ import java.io.OutputStream;
  * written.
  */
 public class NullOutputStream extends OutputStream {
-
+	@Override
 	public void close() {
 	}
 
+	@Override
 	public void flush() {
 	}
 
+	@Override
 	public void write(byte[] b, int off, int len) {
 	}
 
+	@Override
 	public void write(byte[] b) {
 	}
 
+	@Override
 	public void write(int b) throws IOException {
 	}
-
 }

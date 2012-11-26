@@ -48,15 +48,18 @@ public class MeasuredOutputStream extends OutputStream {
 		return written;
 	}
 
+	@Override
 	public void close() throws IOException {
 		out.close();
 		closed = true;
 	}
 
+	@Override
 	public void flush() throws IOException {
 		out.flush();
 	}
 
+	@Override
 	public void write(byte[] b, int off, int len) throws IOException {
 		if (closed)
 			throw new IOException("This OutputStream has already been closed.");
@@ -64,10 +67,12 @@ public class MeasuredOutputStream extends OutputStream {
 		out.write(b, off, len);
 	}
 
+	@Override
 	public void write(byte[] b) throws IOException {
 		write(b, 0, b.length);
 	}
 
+	@Override
 	public void write(int b) throws IOException {
 		if (closed)
 			throw new IOException("This OutputStream has already been closed.");

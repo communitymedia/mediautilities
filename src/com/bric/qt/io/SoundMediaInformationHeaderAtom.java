@@ -50,19 +50,23 @@ public class SoundMediaInformationHeaderAtom extends LeafAtom {
 		Atom.read16Int(in); // reserved unused space
 	}
 
+	@Override
 	protected String getIdentifier() {
 		return "smhd";
 	}
 
+	@Override
 	protected long getSize() {
 		return 16;
 	}
 
+	@Override
 	public String toString() {
 		return "SoundMediaInformationHeaderAtom[ version = " + version + ", flags = " + flags + ", balance = "
 				+ balance + "]";
 	}
 
+	@Override
 	protected void writeContents(GuardedOutputStream out) throws IOException {
 		out.write(version);
 		Atom.write24Int(out, flags);

@@ -76,14 +76,17 @@ public class ChunkOffsetAtom extends LeafAtom {
 		offsetTable = newArray;
 	}
 
+	@Override
 	protected String getIdentifier() {
 		return "stco";
 	}
 
+	@Override
 	protected long getSize() {
 		return 16 + offsetTable.length * 4;
 	}
 
+	@Override
 	protected void writeContents(GuardedOutputStream out) throws IOException {
 		out.write(version);
 		write24Int(out, flags);
@@ -93,6 +96,7 @@ public class ChunkOffsetAtom extends LeafAtom {
 		}
 	}
 
+	@Override
 	public String toString() {
 		String entriesString;
 		if (offsetTable.length > 50 && ABBREVIATE) {

@@ -40,13 +40,10 @@ public class GuardedInputStream extends MeasuredInputStream {
 	/**
 	 * Constructs a new <code>GuardedInputStream</code>.
 	 * 
-	 * @param in
-	 *            the underlying <code>InputStream</code> to use.
-	 * @param limit
-	 *            the maximum number of bytes that will be read.
-	 * @param canClose
-	 *            if this is <code>false</code>, then calling <code>close</code> will not actually close the underlying
-	 *            stream.
+	 * @param in the underlying <code>InputStream</code> to use.
+	 * @param limit the maximum number of bytes that will be read.
+	 * @param canClose if this is <code>false</code>, then calling <code>close</code> will not actually close the
+	 *            underlying stream.
 	 */
 	public GuardedInputStream(InputStream in, long limit, boolean canClose) {
 		super(in);
@@ -63,20 +60,24 @@ public class GuardedInputStream extends MeasuredInputStream {
 		return limit == 0;
 	}
 
+	@Override
 	public void close() throws IOException {
 		if (canClose) {
 			super.close();
 		}
 	}
 
+	@Override
 	public synchronized void mark(int readlimit) {
 		throw new RuntimeException("mark is unsupported");
 	}
 
+	@Override
 	public boolean markSupported() {
 		return false;
 	}
 
+	@Override
 	public int read() throws IOException {
 		if (limit == 0)
 			return -1;
@@ -85,6 +86,7 @@ public class GuardedInputStream extends MeasuredInputStream {
 		return super.read();
 	}
 
+	@Override
 	public int read(byte[] b, int off, int len) throws IOException {
 		if (limit == 0)
 			return -1;
@@ -114,14 +116,17 @@ public class GuardedInputStream extends MeasuredInputStream {
 		return limit;
 	}
 
+	@Override
 	public int read(byte[] b) throws IOException {
 		return read(b, 0, b.length);
 	}
 
+	@Override
 	public synchronized void reset() throws IOException {
 		throw new RuntimeException("mark is unsupported");
 	}
 
+	@Override
 	public long skip(long n) throws IOException {
 		if (limit == 0)
 			return -1;

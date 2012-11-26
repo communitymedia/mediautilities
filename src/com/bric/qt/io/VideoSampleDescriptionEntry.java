@@ -109,6 +109,7 @@ public class VideoSampleDescriptionEntry extends SampleDescriptionEntry {
 		colorTableID = Atom.read16Int(in);
 	}
 
+	@Override
 	protected void write(OutputStream out) throws IOException {
 		Atom.write32Int(out, getSize());
 		Atom.write32String(out, type);
@@ -131,10 +132,12 @@ public class VideoSampleDescriptionEntry extends SampleDescriptionEntry {
 		Atom.write16Int(out, colorTableID);
 	}
 
+	@Override
 	protected long getSize() {
 		return 86;
 	}
 
+	@Override
 	public String toString() {
 		return "VideoSampleDescriptionEntry[ type=\"" + type + "\", " + "dataReference=" + dataReference + ", "
 				+ "version=" + version + ", " + "revision=" + revision + ", " + "vendor=\"" + vendor + "\", "

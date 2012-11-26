@@ -50,6 +50,7 @@ public class CombinedInputStream extends InputStream {
 		}
 	}
 
+	@Override
 	public int available() throws IOException {
 		if (inputs.length == 0)
 			return 0;
@@ -79,6 +80,7 @@ public class CombinedInputStream extends InputStream {
 		inputs = newArray;
 	}
 
+	@Override
 	public void close() throws IOException {
 		for (int a = 0; a < inputs.length; a++) {
 			if (inputs[a].closeable) {
@@ -88,16 +90,20 @@ public class CombinedInputStream extends InputStream {
 		inputs = new Input[0];
 	}
 
+	@Override
 	public boolean markSupported() {
 		return false;
 	}
 
+	@Override
 	public synchronized void reset() throws IOException {
 	}
 
+	@Override
 	public synchronized void mark(int readlimit) {
 	}
 
+	@Override
 	public int read() throws IOException {
 		if (inputs.length == 0)
 			return -1;
@@ -109,6 +115,7 @@ public class CombinedInputStream extends InputStream {
 		return read();
 	}
 
+	@Override
 	public int read(byte[] b, int off, int len) throws IOException {
 		if (inputs.length == 0)
 			return -1;
@@ -121,10 +128,12 @@ public class CombinedInputStream extends InputStream {
 		return read(b, off, len);
 	}
 
+	@Override
 	public int read(byte[] b) throws IOException {
 		return read(b, 0, b.length);
 	}
 
+	@Override
 	public long skip(long n) throws IOException {
 		if (inputs.length == 0)
 			return -1;

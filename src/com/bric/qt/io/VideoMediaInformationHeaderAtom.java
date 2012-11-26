@@ -55,14 +55,17 @@ public class VideoMediaInformationHeaderAtom extends LeafAtom {
 		opColor = read48Int(in);
 	}
 
+	@Override
 	protected String getIdentifier() {
 		return "vmhd";
 	}
 
+	@Override
 	protected long getSize() {
 		return 20;
 	}
 
+	@Override
 	protected void writeContents(GuardedOutputStream out) throws IOException {
 		out.write(version);
 		write24Int(out, flags);
@@ -70,6 +73,7 @@ public class VideoMediaInformationHeaderAtom extends LeafAtom {
 		write48Int(out, opColor);
 	}
 
+	@Override
 	public String toString() {
 		return "VideoMediaInformationHeaderAtom[ version=" + version + ", " + "flags=" + flags + ", " + "graphicsMode="
 				+ getFieldName(GraphicsModeConstants.class, graphicsMode) + ", " + "opColor=0x"

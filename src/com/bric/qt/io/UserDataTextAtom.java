@@ -49,23 +49,26 @@ class UserDataTextAtom extends LeafAtom {
 		}
 	}
 
+	@Override
 	protected String getIdentifier() {
 		return id;
 	}
 
+	@Override
 	protected void writeContents(GuardedOutputStream out) throws IOException {
 		for (int a = 0; a < entries.size(); a++) {
-			TextEntry e = (TextEntry) entries.get(a);
+			TextEntry e = entries.get(a);
 			write16Int(out, e.data.length);
 			write16Int(out, e.language);
 			out.write(e.data);
 		}
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer("UserDataTextAtom[ ");
 		for (int a = 0; a < entries.size(); a++) {
-			TextEntry e = (TextEntry) entries.get(a);
+			TextEntry e = entries.get(a);
 			sb.append("\"" + (new String(e.data)) + "\" ");
 		}
 		sb.append("]");

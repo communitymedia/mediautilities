@@ -51,14 +51,17 @@ public class TimeToSampleAtom extends LeafAtom {
 		}
 	}
 
+	@Override
 	protected String getIdentifier() {
 		return "stts";
 	}
 
+	@Override
 	protected long getSize() {
 		return 16 + table.length * 8;
 	}
 
+	@Override
 	protected void writeContents(GuardedOutputStream out) throws IOException {
 		out.write(version);
 		write24Int(out, flags);
@@ -68,6 +71,7 @@ public class TimeToSampleAtom extends LeafAtom {
 		}
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("[ ");
@@ -86,8 +90,7 @@ public class TimeToSampleAtom extends LeafAtom {
 	/**
 	 * Add a new sample time to this atom.
 	 * 
-	 * @param duration
-	 *            the new duration, relative to the enclosing media's time scale.
+	 * @param duration the new duration, relative to the enclosing media's time scale.
 	 */
 	public void addSampleTime(long duration) {
 		addSampleTime(1, duration);
@@ -96,8 +99,7 @@ public class TimeToSampleAtom extends LeafAtom {
 	/**
 	 * Add a new sample time to this atom.
 	 * 
-	 * @param duration
-	 *            the new duration, relative to the enclosing media's time scale.
+	 * @param duration the new duration, relative to the enclosing media's time scale.
 	 */
 	public void addSampleTime(long sampleCount, long duration) {
 		if (table.length == 0 || table[table.length - 1].sampleDuration != duration) {

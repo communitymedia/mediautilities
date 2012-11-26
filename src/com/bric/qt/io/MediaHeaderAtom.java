@@ -55,14 +55,17 @@ public class MediaHeaderAtom extends LeafAtom {
 		quality = read16Int(in);
 	}
 
+	@Override
 	protected String getIdentifier() {
 		return "mdhd";
 	}
 
+	@Override
 	protected long getSize() {
 		return 32;
 	}
 
+	@Override
 	protected void writeContents(GuardedOutputStream out) throws IOException {
 		out.write(version);
 		write24Int(out, flags);
@@ -74,6 +77,7 @@ public class MediaHeaderAtom extends LeafAtom {
 		write16Int(out, quality);
 	}
 
+	@Override
 	public String toString() {
 		return "MediaHeaderAtom[ version=" + version + ", " + "flags=" + flags + ", " + "creationTime=" + creationTime
 				+ ", " + "modificationTime=" + modificationTime + ", " + "timeScale=" + timeScale + ", " + "duration="
