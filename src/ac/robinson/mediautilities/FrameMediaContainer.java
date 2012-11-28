@@ -75,21 +75,21 @@ public class FrameMediaContainer {
 				int preciseDuration = currentDuration;
 
 				// check the audio duration - having the correct duration is *critical* for narrative playback
-				// TODO: fix playback so that this isn't the case...
+				// TODO: fix playback so that this isn't the case?
 				if (validateAudioLengths) {
 					MediaPlayer mediaPlayer = new MediaPlayer();
+					FileInputStream playerInputStream = null;
 					try {
-						// can't play from data directory (they're private; permissions don't work), must use input
-						// stream
+						// can't play from data directory (it's private; permissions don't work), must use input stream
 						// mMediaPlayer = MediaPlayer.create(AudioActivity.this,
 						// Uri.fromFile(audioMediaItem.getFile()));
-						FileInputStream playerInputStream = new FileInputStream(mediaFile);
+						playerInputStream = new FileInputStream(mediaFile);
 						mediaPlayer.setDataSource(playerInputStream.getFD());
-						IOUtilities.closeStream(playerInputStream);
 						mediaPlayer.prepare();
 						preciseDuration = mediaPlayer.getDuration();
 					} catch (Exception e) {
 					} finally {
+						IOUtilities.closeStream(playerInputStream);
 						if (mediaPlayer != null) {
 							mediaPlayer.release();
 							mediaPlayer = null;

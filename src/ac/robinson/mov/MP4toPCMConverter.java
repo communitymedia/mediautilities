@@ -20,7 +20,6 @@
 
 package ac.robinson.mov;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
@@ -38,22 +37,22 @@ public class MP4toPCMConverter {
 
 	private final AudioTrack track;
 
-	public MP4toPCMConverter(File input) throws IOException {
-		final MP4Container cont = new MP4Container(new RandomAccessFile(input, "r"));
+	public MP4toPCMConverter(RandomAccessFile input) throws IOException {
+		final MP4Container cont = new MP4Container(input);
 		final Movie movie = cont.getMovie();
-		
+
 		final List<Track> tracks = movie.getTracks(AudioTrack.AudioCodec.AAC);
 		if (tracks.isEmpty()) {
 			throw new IOException("The input file does not contain an AAC audio track");
 		}
-		
-		track = (AudioTrack) tracks.get(0); //only the first track
+
+		track = (AudioTrack) tracks.get(0); // only the first track
 	}
-	
+
 	public int getSampleRate() {
 		return track.getSampleRate();
 	}
-	
+
 	public int getSampleSize() {
 		return track.getSampleSize();
 	}

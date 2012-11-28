@@ -51,11 +51,9 @@ public class JPEGMovWriter extends MovWriter {
 
 	/**
 	 * 
-	 * @param file
-	 *            the destination file to write to.
-	 * @param defaultQuality
-	 *            the default JPEG quality (from [0,1]) to use if a frame is added without otherwise specifying this
-	 *            value.
+	 * @param file the destination file to write to.
+	 * @param defaultQuality the default JPEG quality (from [0,1]) to use if a frame is added without otherwise
+	 *            specifying this value.
 	 * @throws IOException
 	 */
 	public JPEGMovWriter(File file, float defaultQuality) throws IOException {

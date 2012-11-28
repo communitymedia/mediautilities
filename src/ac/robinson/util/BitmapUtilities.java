@@ -141,6 +141,7 @@ public class BitmapUtilities {
 		options.inJustDecodeBounds = true;
 		BitmapFactory.decodeResource(res, resId, options);
 		options.inJustDecodeBounds = false;
+		// options.inPurgeable = true; // ignored for resources: http://stackoverflow.com/a/7068403
 		options.inSampleSize = calculateSampleSize(options.outWidth, options.outHeight, dstWidth, dstHeight,
 				scalingLogic);
 		Bitmap unscaledBitmap = BitmapFactory.decodeResource(res, resId, options);
@@ -165,6 +166,7 @@ public class BitmapUtilities {
 		options.inJustDecodeBounds = true;
 		BitmapFactory.decodeFile(imagePath, options);
 		options.inJustDecodeBounds = false;
+		// options.inPurgeable = true; // not appropriate for image cache; to be enabled later
 		options.inSampleSize = calculateSampleSize(options.outWidth, options.outHeight, dstWidth, dstHeight,
 				scalingLogic);
 		Bitmap unscaledBitmap = BitmapFactory.decodeFile(imagePath, options);
@@ -189,6 +191,7 @@ public class BitmapUtilities {
 			options.inJustDecodeBounds = true;
 			BitmapFactory.decodeStream(new FileInputStream(streamPath), null, options);
 			options.inJustDecodeBounds = false;
+			// options.inPurgeable = true; // not appropriate for image cache; to be enabled later
 			options.inSampleSize = calculateSampleSize(options.outWidth, options.outHeight, dstWidth, dstHeight,
 					scalingLogic);
 			Bitmap unscaledBitmap = BitmapFactory.decodeStream(new FileInputStream(streamPath), null, options);

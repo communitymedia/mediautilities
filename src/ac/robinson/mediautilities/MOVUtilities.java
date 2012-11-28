@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -111,24 +112,28 @@ public class MOVUtilities {
 
 					// first we need to extract PCM audio from the M4A file
 					File inputAudioFile = new File(audioPath);
-					AudioFormat audioFormat = null;
 					File tempOutputAudioFile = File.createTempFile(inputAudioFile.getName(), ".pcm",
 							outputFile.getParentFile());
-					BufferedOutputStream pcmStream = new BufferedOutputStream(new FileOutputStream(tempOutputAudioFile));
+					RandomAccessFile inputRandomAccessFile = null;
+					AudioFormat audioFormat = null;
+					BufferedOutputStream pcmStream = null;
 					try {
-						MP4toPCMConverter pcmConverter = new MP4toPCMConverter(inputAudioFile);
+						pcmStream = new BufferedOutputStream(new FileOutputStream(tempOutputAudioFile));
+						inputRandomAccessFile = new RandomAccessFile(inputAudioFile, "r");
+						MP4toPCMConverter pcmConverter = new MP4toPCMConverter(inputRandomAccessFile);
 						audioFormat = new AudioFormat(pcmConverter.getSampleRate(), pcmConverter.getSampleSize(), 1,
 								true, true); // output from PCM converter is signed 16-bit big-endian integers
 						pcmConverter.convertFile(pcmStream);
 					} catch (IOException e) {
 						Log.d("MOVUtilities", "Error creating audio track - IOException");
-					} catch (Throwable t) {
-						Log.d("MOVUtilities", "Error creating audio track - Throwable");
+					} catch (Exception e) {
+						Log.d("MOVUtilities", "Error creating audio track - General Exception");
 					} finally {
+						IOUtilities.closeStream(inputRandomAccessFile);
 						IOUtilities.closeStream(pcmStream);
 					}
 
-					// then add to the MOV output file
+					// then add to the MOV output file (pcmAudioStream is closed in MovWriter)
 					AudioInputStream pcmAudioStream = new AudioInputStream(new FileInputStream(tempOutputAudioFile),
 							audioFormat, (int) ((audioFormat.getSampleRate() * audioDuration) / 1000f));
 					outputFileWriter.addAudioTrack(pcmAudioStream, frameStartTime / 1000f,
@@ -183,16 +188,13 @@ public class MOVUtilities {
 				outputFileWriter.addFrame(frame.mFrameMaxDuration / 1000f, baseBitmap, imageQuality);
 			}
 		} catch (IOException e) {
-			Log.d("MOVUtilities", "Error creating movie - IOException");
-			fileError = true;
+			fileError = true; // these are the only places where errors really matter
 		} catch (Throwable t) {
-			Log.d("MOVUtilities", "Error creating movie - Throwable");
-			fileError = true;
+			fileError = true; // these are the only places where errors really matter
 		} finally {
 			try {
-				outputFileWriter.close(true);
+				outputFileWriter.close(!fileError);
 			} catch (IOException e) {
-				Log.d("MOVUtilities", "Error closing movie file - IOException");
 			}
 		}
 

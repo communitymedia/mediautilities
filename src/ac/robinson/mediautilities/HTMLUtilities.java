@@ -53,7 +53,7 @@ public class HTMLUtilities {
 			return filesToSend;
 		}
 		boolean fileError = false;
-		
+
 		// should really do proper checking on these
 		final int outputWidth = (Integer) settings.get(MediaUtilities.KEY_OUTPUT_WIDTH);
 		final int outputHeight = (Integer) settings.get(MediaUtilities.KEY_OUTPUT_HEIGHT);
@@ -150,9 +150,9 @@ public class HTMLUtilities {
 				}
 			}
 		} catch (IOException e) {
-			fileError = true;
+			fileError = true; // these are the only places where errors really matter
 		} catch (Throwable t) {
-			fileError = true;
+			fileError = true; // these are the only places where errors really matter
 		} finally {
 			IOUtilities.closeStream(playerOutputFileWriter);
 			IOUtilities.closeStream(playerFileTemplateReader);

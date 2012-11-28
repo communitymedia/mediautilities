@@ -23,7 +23,6 @@ package ac.robinson.mediautilities;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -264,12 +263,11 @@ public class SMILUtilities {
 		final boolean copyFilesToOutput = (Boolean) settings.get(MediaUtilities.KEY_COPY_FILES_TO_OUTPUT);
 
 		// start the XML (before adding so we know if there's a problem)
-		BufferedWriter smilFileWriter;
+		BufferedWriter smilFileWriter = null;
 		try {
 			smilFileWriter = new BufferedWriter(new FileWriter(outputFile));
-		} catch (IOException e) {
-			return filesToSend; // error - can't write
 		} catch (Throwable t) {
+			IOUtilities.closeStream(smilFileWriter);
 			return filesToSend; // error - can't write
 		}
 
@@ -301,14 +299,15 @@ public class SMILUtilities {
 		Bitmap backgroundBitmap = Bitmap
 				.createBitmap(2, 2, ImageCacheUtilities.mBitmapFactoryOptions.inPreferredConfig);
 		backgroundBitmap.eraseColor(backgroundColour);
-		FileOutputStream backgroundOutputStream;
+		FileOutputStream backgroundOutputStream = null;
 		try {
 			backgroundOutputStream = new FileOutputStream(tempBackgroundFile);
 			backgroundBitmap.compress(CompressFormat.PNG, 100, backgroundOutputStream); // quality is ignored
 			filesToSend.add(Uri.fromFile(tempBackgroundFile));
-		} catch (FileNotFoundException e) {
-		} catch (Throwable t) {
+		} catch (Exception e) {
 			// backgrounds will bleed through from other frames
+		} finally {
+			IOUtilities.closeStream(backgroundOutputStream);
 		}
 
 		// create the SMIL file
@@ -446,8 +445,14 @@ public class SMILUtilities {
 					// 0, "png"));
 					savedFile = new File(outputDirectory, frame.mFrameId + ".png");
 
-					FileOutputStream fileOutputStream = new FileOutputStream(savedFile);
-					textBitmap.compress(CompressFormat.PNG, 100, fileOutputStream); // quality is ignored
+					FileOutputStream fileOutputStream = null;
+					try {
+						fileOutputStream = new FileOutputStream(savedFile);
+						textBitmap.compress(CompressFormat.PNG, 100, fileOutputStream); // quality is ignored
+					} catch (Exception e) {
+					} finally {
+						IOUtilities.closeStream(fileOutputStream);
+					}
 					textBitmapCanvas = null;
 
 					filesToSend.add(Uri.fromFile(savedFile));
@@ -488,16 +493,17 @@ public class SMILUtilities {
 				Canvas audioIconCanvas = new Canvas(audioIconBitmap);
 				audioIconCanvas.drawPicture(audioSVG.getPicture(), new RectF(audioBitmapLeft, audioBitmapTop,
 						audioBitmapLeft + audioBitmapSize, audioBitmapTop + audioBitmapSize));
-				FileOutputStream audioIconOutputStream;
+				FileOutputStream audioIconOutputStream = null;
 				try {
 					audioIconOutputStream = new FileOutputStream(tempAudioIconFile);
 					audioIconBitmap.compress(CompressFormat.PNG, 100, audioIconOutputStream); // quality is ignored
 					addSmilTag(smilSerializer, tagNamespace, "meta-data", tempAudioIconFile.getName(), 2, "fill-area",
 							false);
 					filesToSend.add(Uri.fromFile(tempAudioIconFile));
-				} catch (FileNotFoundException e) {
-				} catch (Throwable t) {
+				} catch (Exception e) {
 					// audio playback won't have an icon
+				} finally {
+					IOUtilities.closeStream(audioIconOutputStream);
 				}
 				audioIconCanvas = null;
 			}
@@ -522,7 +528,6 @@ public class SMILUtilities {
 		// copy the sync file
 		try {
 			IOUtilities.copyFile(outputFile, syncFile);
-		} catch (IOException e) {
 		} catch (Throwable t) {
 			// nothing we can do (syncing to some devices will fail, but playback will be fine)
 		}
@@ -544,7 +549,6 @@ public class SMILUtilities {
 				playerFileWriter.write(readLine + '\n');
 			}
 			filesToSend.add(Uri.fromFile(storyPlayerFile));
-		} catch (IOException e) {
 		} catch (Throwable t) {
 		} finally {
 			// can still export the smil, even if the player fails
@@ -580,7 +584,6 @@ public class SMILUtilities {
 		try {
 			IOUtilities.copyFile(new File(sourceFilePath), outputFile);
 			return outputFile;
-		} catch (IOException e) {
 		} catch (Throwable t) {
 		}
 		return null;

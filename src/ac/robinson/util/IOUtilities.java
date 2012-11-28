@@ -153,6 +153,7 @@ public class IOUtilities {
 				return true;
 			} catch (IOException e) {
 				// Log.e(LOG_TAG, "Could not close stream", e);
+			} catch (Throwable t) {
 			}
 		}
 		return false;

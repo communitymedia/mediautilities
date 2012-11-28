@@ -375,6 +375,8 @@ public abstract class MovWriter {
 			stsz.setSampleSize(1);
 			stsz.setSampleCount(totalSamples);
 			stsz.setSizeTable(null);
+
+			audioIn.close();
 		}
 
 		private void closeChunk(long chunkSizeInBytes) {
