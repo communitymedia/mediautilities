@@ -85,7 +85,7 @@ import com.bric.qt.io.VideoSampleDescriptionEntry;
  */
 public abstract class MovWriter {
 
-	public static final long DEFAULT_TIME_SCALE = 600;
+	public static final long DEFAULT_TIME_SCALE = 30;
 
 	private static class VideoSample {
 		final int duration;
@@ -118,6 +118,13 @@ public abstract class MovWriter {
 			TrackHeaderAtom trackHeader = new TrackHeaderAtom(trackIndex, totalDuration, w, h);
 			trackHeader.volume = 0;
 			trakAtom.add(trackHeader);
+
+			// EditAtom editAtom = new EditAtom();
+			// EditListAtom editListAtom = new EditListAtom();
+			// editListAtom.addEditListTableEntry(totalDuration, 0, 1f);
+			// editAtom.add(editListAtom);
+			// trakAtom.add(editAtom);
+
 			ParentAtom mdiaAtom = new ParentAtom("mdia");
 			trakAtom.add(mdiaAtom);
 			MediaHeaderAtom mediaHeader = new MediaHeaderAtom(DEFAULT_TIME_SCALE, totalDuration);
@@ -157,8 +164,14 @@ public abstract class MovWriter {
 		private void addSample(VideoSample sample) throws IOException {
 			samples.add(sample);
 			totalDuration += sample.duration;
-			stts.addSampleTime(sample.duration);
-			stsz.addSampleSize(sample.fileLength);
+
+			// we only really need one sample size here, but YouTube skips frames fairly regularly, so we need to make
+			// sure that we've got enough frames so that this doesn't matter; this is done by repeatedly referring
+			// to the same entry in the chunk table
+			stts.addSampleTime(sample.duration, 1, true);
+			for (int i = 0; i < sample.duration; i++) {
+				stsz.addSampleSize(sample.fileLength); // TODO: optimise these types of functions
+			}
 
 			// now decide if the addition of this sample concluded a chunk of samples:
 			samplesInCurrentChunk++;
@@ -175,7 +188,15 @@ public abstract class MovWriter {
 		private void closeChunk() throws IOException {
 			if (samplesInCurrentChunk > 0) {
 				stsc.addChunk(currentChunkIndex + 1, samplesInCurrentChunk, 1);
-				stco.addChunkOffset(samples.get(samples.size() - samplesInCurrentChunk).dataStart);
+
+				// we only really need one sample size here, but YouTube skips frames fairly regularly, so we need to
+				// make
+				// sure that we've got enough frames so that this doesn't matter; this is done by repeatedly referring
+				// to the same entry in the chunk table
+				VideoSample sample = samples.get(samples.size() - samplesInCurrentChunk);
+				for (int i = 0; i < sample.duration; i++) {
+					stco.addChunkOffset(sample.dataStart);
+				}
 
 				for (AudioTrack audio : audioTracks) {
 					audio.writeAudio(durationOfCurrentChunk);
@@ -239,15 +260,23 @@ public abstract class MovWriter {
 		ChunkOffsetAtom stco = new ChunkOffsetAtom();
 		int sampleMultiplier;
 
-		/** How many seconds into the movie this audio should begin playing. */
-		float audioOffset = 0;
-		boolean useEditList = true;
+		/** Whether to use an Edit List (or a silent track) to arrange the audio **/
+		boolean useEditList = true; // for multi-part audio edit lists will be used regardless of this value
+		float[] audioOffsets;
+		float[] audioStarts;
+		float[] audioLengths;
 
-		AudioTrack(AudioInputStream audio, float audioOffset) throws IOException {
-			this.audioOffset = audioOffset;
+		/**
+		 * audioOffsets specifies where in the movie file each audio segment should be played; audioStarts and audioEnds
+		 * specify where in the audio file each segment is located. Each *must* be at least 1 value in length
+		 **/
+		AudioTrack(AudioInputStream audio, float[] audioOffsets, float[] audioStarts, float[] audioLengths)
+				throws IOException {
+			this.audioOffsets = audioOffsets;
+			this.audioStarts = audioStarts;
+			this.audioLengths = audioLengths;
 
-			// hmm... I'm not sure that this logic has ever
-			// been tested, but it seems appropriate:
+			// hmm... I'm not sure that this logic has ever been tested, but it seems appropriate:
 			AudioFormat audioFormat = audio.getFormat();
 			AudioFormat.Encoding encoding = audioFormat.getEncoding();
 			if (!(AudioFormat.Encoding.PCM_SIGNED.equals(encoding) || AudioFormat.Encoding.PCM_UNSIGNED
@@ -272,7 +301,7 @@ public abstract class MovWriter {
 			sampleMultiplier = audioIn.getFormat().getSampleSizeInBits() / 8 * numberOfChannels;
 			reverseBytePairs = bitsPerSample > 8 && (!audioIn.getFormat().isBigEndian());
 
-			if (!useEditList && audioOffset > 0) {
+			if (!useEditList) {
 				/**
 				 * Previously I tried using an EditAtom to change when an audio track began playing, but that only
 				 * worked for about 1 audio track (when other audio tracks were added to the test: QT Player could play
@@ -286,27 +315,49 @@ public abstract class MovWriter {
 				 * size if you position an audio very late in the movie.
 				 * 
 				 */
-				// 25/Nov/12: reverted to EditAtom as smaller file sizes are more desirable (especially when
+				// 25-Nov-12: using EditAtom instead, as smaller file sizes are more desirable (especially when
 				// creating a narrative with sounds toward the end)
-				long silentSamples = (long) (audioOffset * audioIn.getFormat().getFrameRate());
-				AudioInputStream silence = new SilentAudioInputStream(audioIn.getFormat(), silentSamples);
-				audioIn = new CombinedAudioInputStream(silence, audioIn);
+				// TODO: use the chunk table approach mentioned above, as we've done for audio, because some players
+				// (VLC, for example) have very poor edit list handling, and usually just give up (meaning we lose
+				// audio)
+				if (audioOffsets.length == 1) {
+					if (audioOffsets[0] > 0) {
+						long silentSamples = (long) (audioOffsets[0] * audioIn.getFormat().getFrameRate());
+						AudioInputStream silence = new SilentAudioInputStream(audioIn.getFormat(), silentSamples);
+						audioIn = new CombinedAudioInputStream(silence, audioIn);
+					}
+				} else {
+					useEditList = true;
+				}
 			}
+		}
+
+		long getDuration() {
+			if (useEditList) {
+				int editSizeIndex = audioOffsets.length - 1;
+				return (long) (((audioOffsets[editSizeIndex] + audioLengths[editSizeIndex]) * DEFAULT_TIME_SCALE) + .5);
+			}
+			return totalDurationInMovieTimeScale;
 		}
 
 		void writeToMoovRoot(ParentAtom moovRoot, int trackIndex) {
 			ParentAtom trakAtom = new ParentAtom("trak");
 			moovRoot.add(trakAtom);
-			TrackHeaderAtom trackHeader = new TrackHeaderAtom(trackIndex,
-					(int) ((useEditList ? audioOffset : 0) * DEFAULT_TIME_SCALE) + totalDurationInMovieTimeScale, 0, 0);
+			TrackHeaderAtom trackHeader = new TrackHeaderAtom(trackIndex, (int) getDuration(), 0, 0);
 			trakAtom.add(trackHeader);
 			if (useEditList) {
 				EditAtom editAtom = new EditAtom();
 				EditListAtom editListAtom = new EditListAtom();
-				if (audioOffset > 0) {
-					editListAtom.addEditListTableEntry((int) (audioOffset * DEFAULT_TIME_SCALE), -1, 1f);
+				float previousOffset = 0;
+				for (int i = 0, n = audioOffsets.length; i < n; i++) {
+					if (audioOffsets[i] > previousOffset) {
+						editListAtom.addEditListTableEntry(
+								(int) ((audioOffsets[i] - previousOffset) * DEFAULT_TIME_SCALE), -1, 1f);
+					}
+					editListAtom.addEditListTableEntry((int) (audioLengths[i] * DEFAULT_TIME_SCALE),
+							(int) (audioStarts[i] * myTimeScale), 1f);
+					previousOffset = audioOffsets[i] + audioLengths[i];
 				}
-				editListAtom.addEditListTableEntry((int) totalDurationInMovieTimeScale, 0, 1f);
 				editAtom.add(editListAtom);
 				trakAtom.add(editAtom);
 			}
@@ -370,7 +421,7 @@ public abstract class MovWriter {
 		}
 
 		void close() throws IOException {
-			stts.addSampleTime(totalSamples, 1);
+			stts.addSampleTime(totalSamples, 1, true);
 
 			stsz.setSampleSize(1);
 			stsz.setSampleCount(totalSamples);
@@ -462,8 +513,47 @@ public abstract class MovWriter {
 	 * could be inserted at any time (before calling <code>close()</code>), but currently that functionality is not
 	 * supported.
 	 * 
-	 * @param audio the audio to add to this movie. Preferably this should use PCM encoding, but this class uses
-	 *            AudioSystem to convert the stream to PCM if it is not already.
+	 * @param audio the audio to add to this movie, in PCM encoding.
+	 * @param audioOffsets where in the movie each segment of the audio track should be played. Values *must* increase
+	 *            throughout the array, and the array *must* be at least 1 value in length
+	 * @param audioStarts where in the audio track each segment starts
+	 * @param audioLengths the length of each segment in the audio track
+	 * @throws IOException
+	 * @throws RuntimeException if you invoke this method after calling <code>addFrame()</code> or <code>close()</code>.
+	 */
+	public synchronized void addSegmentedAudioTrack(AudioInputStream audio, float[] audioOffsets, float[] audioStarts,
+			float[] audioLengths) throws IOException {
+		if (closed)
+			throw new RuntimeException("this writer has already been closed");
+
+		if (videoTrack.isEmpty() == false)
+			throw new RuntimeException("cannot add audio after video data has been started");
+		AudioTrack newTrack;
+
+		newTrack = new AudioTrack(audio, audioOffsets, audioStarts, audioLengths);
+
+		AudioTrack[] newTracks = new AudioTrack[audioTracks.length + 1];
+		System.arraycopy(audioTracks, 0, newTracks, 0, audioTracks.length);
+		newTracks[newTracks.length - 1] = newTrack;
+		audioTracks = newTracks;
+
+		/**
+		 * The QT File Format says: In order to overcome any latencies in sound playback, at least one second of sound
+		 * data is placed at the beginning of the interleaved data. This means that the sound and video data are offset
+		 * from each other in the file by one second.
+		 */
+		newTrack.writeAudio(DEFAULT_TIME_SCALE * 1);
+	}
+
+	/**
+	 * Add an AudioInputStream to this movie. The audio data will be interleaved with the visual data in the output
+	 * movie.
+	 * <p>
+	 * This method must be called before adding frames. In a future version of this class it would be nice if audio
+	 * could be inserted at any time (before calling <code>close()</code>), but currently that functionality is not
+	 * supported.
+	 * 
+	 * @param audio the audio to add to this movie, in PCM encoding.
 	 * @param startTime the start time (in seconds) of this audio in the movie. For example: if this is 5, then this
 	 *            audio will begin 5 seconds into the movie.
 	 * @throws IOException
@@ -481,8 +571,7 @@ public abstract class MovWriter {
 	 * could be inserted at any time (before calling <code>close()</code>), but currently that functionality is not
 	 * supported.
 	 * 
-	 * @param audio the audio to add to this movie. Preferably this should use PCM encoding, but this class uses
-	 *            AudioSystem to convert the stream to PCM if it is not already.
+	 * @param audio the audio to add to this movie, in PCM encoding.
 	 * @param startTime the start time (in seconds) of this audio in the movie. For example: if this is 5, then this
 	 *            audio will begin 5 seconds into the movie.
 	 * @param endTime the end time (in seconds) of this audio in the movie. If the audio would normally last past this
@@ -503,7 +592,8 @@ public abstract class MovWriter {
 			AudioInputStream limitedAudioIn = new AudioInputStream(audio, audio.getFormat(), sampleMin);
 			audio = limitedAudioIn;
 		}
-		newTrack = new AudioTrack(audio, startTime);
+		newTrack = new AudioTrack(audio, new float[] { startTime }, new float[] { 0 }, new float[] { endTime
+				- startTime });
 
 		AudioTrack[] newTracks = new AudioTrack[audioTracks.length + 1];
 		System.arraycopy(audioTracks, 0, newTracks, 0, audioTracks.length);
@@ -515,7 +605,7 @@ public abstract class MovWriter {
 		 * data is placed at the beginning of the interleaved data. This means that the sound and video data are offset
 		 * from each other in the file by one second.
 		 */
-		newTrack.writeAudio(DEFAULT_TIME_SCALE * 2);
+		newTrack.writeAudio(DEFAULT_TIME_SCALE * 1);
 	}
 
 	@Override
@@ -621,7 +711,7 @@ public abstract class MovWriter {
 
 			long totalDuration = videoTrack.totalDuration;
 			for (AudioTrack audio : audioTracks) {
-				totalDuration = Math.max(totalDuration, audio.totalDurationInMovieTimeScale);
+				totalDuration = Math.max(totalDuration, audio.getDuration());
 			}
 			MovieHeaderAtom movieHeader = new MovieHeaderAtom(DEFAULT_TIME_SCALE, totalDuration);
 			moovRoot.add(movieHeader);

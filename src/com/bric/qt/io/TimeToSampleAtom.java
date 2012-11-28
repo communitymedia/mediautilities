@@ -93,16 +93,18 @@ public class TimeToSampleAtom extends LeafAtom {
 	 * @param duration the new duration, relative to the enclosing media's time scale.
 	 */
 	public void addSampleTime(long duration) {
-		addSampleTime(1, duration);
+		addSampleTime(1, duration, false);
 	}
 
 	/**
 	 * Add a new sample time to this atom.
 	 * 
 	 * @param duration the new duration, relative to the enclosing media's time scale.
+	 * @param forceNew whether to force a new entry in the table, regardless of whether the duration is the same as that
+	 *            of the previous entry
 	 */
-	public void addSampleTime(long sampleCount, long duration) {
-		if (table.length == 0 || table[table.length - 1].sampleDuration != duration) {
+	public void addSampleTime(long sampleCount, long duration, boolean forceNew) {
+		if (forceNew || table.length == 0 || table[table.length - 1].sampleDuration != duration) {
 			TimeToSampleEntry[] newTable = new TimeToSampleEntry[table.length + 1];
 			System.arraycopy(table, 0, newTable, 0, table.length);
 			newTable[newTable.length - 1] = new TimeToSampleEntry(sampleCount, duration);

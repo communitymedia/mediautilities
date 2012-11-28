@@ -76,6 +76,18 @@ public class ChunkOffsetAtom extends LeafAtom {
 		offsetTable = newArray;
 	}
 
+	public void addChunkOffsets(long offset, int numOffsets) {
+		long[] newArray = new long[offsetTable.length + numOffsets];
+		// System.arraycopy(offsetTable, 0, newArray, 0, offsetTable.length); // crashes - buggy for large arrays?
+		for (int i = 0; i < offsetTable.length; i++) {
+			newArray[i] = offsetTable[i];
+		}
+		for (int i = 0; i < numOffsets; i++) {
+			newArray[newArray.length - i] = offset;
+		}
+		offsetTable = newArray;
+	}
+
 	@Override
 	protected String getIdentifier() {
 		return "stco";

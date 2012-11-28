@@ -20,9 +20,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import ac.robinson.util.AndroidUtilities;
+import ac.robinson.util.IOUtilities;
 import android.annotation.SuppressLint;
 
 /**
@@ -97,9 +99,8 @@ public class CheapAAC extends CheapSoundFile {
 	private int mMdatLength;
 
 	// Additional member variables for a hacky way to combine two m4a files
-	private boolean mFileAdded;
-	private int mOriginalNumFrames;
-	private File mAdditionalInputFile;
+	private ArrayList<File> mAdditionalInputFiles;
+	private ArrayList<Integer> mOriginalFrameLengths;
 
 	public CheapAAC() {
 	}
@@ -171,9 +172,8 @@ public class CheapAAC extends CheapSoundFile {
 		mMdatOffset = -1;
 		mMdatLength = -1;
 
-		mFileAdded = false;
-		mOriginalNumFrames = 0;
-		mAdditionalInputFile = null;
+		mAdditionalInputFiles = new ArrayList<File>();
+		mOriginalFrameLengths = new ArrayList<Integer>();
 
 		mAtomMap = new HashMap<Integer, Atom>();
 
@@ -187,23 +187,36 @@ public class CheapAAC extends CheapSoundFile {
 		}
 
 		// Read the first 8 bytes
-		FileInputStream stream = new FileInputStream(mInputFile);
+		FileInputStream stream = null;
 		byte[] header = new byte[8];
-		stream.read(header, 0, 8);
+		try {
+			stream = new FileInputStream(mInputFile);
+			stream.read(header, 0, 8);
+		} finally {
+			IOUtilities.closeStream(stream);
+		}
 
 		if (header[0] == 0 && header[4] == 'f' && header[5] == 't' && header[6] == 'y' && header[7] == 'p') {
 			// Create a new stream, reset to the beginning of the file
-			stream = new FileInputStream(mInputFile);
-			parseMp4(stream, mFileSize);
+			try {
+				stream = new FileInputStream(mInputFile);
+				parseMp4(stream, mFileSize);
+			} finally {
+				IOUtilities.closeStream(stream);
+			}
 		} else {
 			throw new java.io.IOException("Unknown file format");
 		}
 
 		if (mMdatOffset > 0 && mMdatLength > 0) {
-			stream = new FileInputStream(mInputFile);
-			stream.skip(mMdatOffset);
-			mOffset = mMdatOffset;
-			parseMdat(stream, mMdatLength);
+			try {
+				stream = new FileInputStream(mInputFile);
+				stream.skip(mMdatOffset);
+				mOffset = mMdatOffset;
+				parseMdat(stream, mMdatLength);
+			} finally {
+				IOUtilities.closeStream(stream);
+			}
 		} else {
 			throw new java.io.IOException("Didn't find mdat");
 		}
@@ -534,137 +547,152 @@ public class CheapAAC extends CheapSoundFile {
 
 	public void writeFile(File outputFile, int startFrame, int numFrames) throws java.io.IOException {
 		outputFile.createNewFile();
-		FileInputStream in = new FileInputStream(mInputFile);
-		FileOutputStream out = new FileOutputStream(outputFile);
+		FileInputStream in = null;
+		FileOutputStream out = null;
+		try {
+			in = new FileInputStream(mInputFile);
+			out = new FileOutputStream(outputFile);
 
-		setAtomData(kFTYP, new byte[] { 'M', '4', 'A', ' ', 0, 0, 0, 0, 'M', '4', 'A', ' ', 'm', 'p', '4', '2', 'i',
-				's', 'o', 'm', 0, 0, 0, 0 });
+			setAtomData(kFTYP, new byte[] { 'M', '4', 'A', ' ', 0, 0, 0, 0, 'M', '4', 'A', ' ', 'm', 'p', '4', '2',
+					'i', 's', 'o', 'm', 0, 0, 0, 0 });
 
-		setAtomData(kSTTS, new byte[] { 0,
-				0,
-				0,
-				0, // version / flags
-				0,
-				0,
-				0,
-				1, // entry count
-				(byte) ((numFrames >> 24) & 0xff), (byte) ((numFrames >> 16) & 0xff), (byte) ((numFrames >> 8) & 0xff),
-				(byte) (numFrames & 0xff), (byte) ((mSamplesPerFrame >> 24) & 0xff),
-				(byte) ((mSamplesPerFrame >> 16) & 0xff), (byte) ((mSamplesPerFrame >> 8) & 0xff),
-				(byte) (mSamplesPerFrame & 0xff) });
+			setAtomData(kSTTS, new byte[] { 0,
+					0,
+					0,
+					0, // version / flags
+					0,
+					0,
+					0,
+					1, // entry count
+					(byte) ((numFrames >> 24) & 0xff), (byte) ((numFrames >> 16) & 0xff),
+					(byte) ((numFrames >> 8) & 0xff), (byte) (numFrames & 0xff),
+					(byte) ((mSamplesPerFrame >> 24) & 0xff), (byte) ((mSamplesPerFrame >> 16) & 0xff),
+					(byte) ((mSamplesPerFrame >> 8) & 0xff), (byte) (mSamplesPerFrame & 0xff) });
 
-		setAtomData(kSTSC, new byte[] { 0, 0, 0,
-				0, // version / flags
-				0, 0, 0,
-				1, // entry count
-				0, 0, 0,
-				1, // first chunk
-				(byte) ((numFrames >> 24) & 0xff), (byte) ((numFrames >> 16) & 0xff), (byte) ((numFrames >> 8) & 0xff),
-				(byte) (numFrames & 0xff), 0, 0, 0, 1 // Smaple desc index
-				});
+			setAtomData(kSTSC, new byte[] { 0, 0, 0,
+					0, // version / flags
+					0, 0, 0,
+					1, // entry count
+					0, 0, 0,
+					1, // first chunk
+					(byte) ((numFrames >> 24) & 0xff), (byte) ((numFrames >> 16) & 0xff),
+					(byte) ((numFrames >> 8) & 0xff), (byte) (numFrames & 0xff), 0, 0, 0, 1 // Smaple desc index
+					});
 
-		byte[] stszData = new byte[12 + 4 * numFrames];
-		stszData[8] = (byte) ((numFrames >> 24) & 0xff);
-		stszData[9] = (byte) ((numFrames >> 16) & 0xff);
-		stszData[10] = (byte) ((numFrames >> 8) & 0xff);
-		stszData[11] = (byte) (numFrames & 0xff);
-		for (int i = 0; i < numFrames; i++) {
-			stszData[12 + 4 * i] = (byte) ((mFrameLens[startFrame + i] >> 24) & 0xff);
-			stszData[13 + 4 * i] = (byte) ((mFrameLens[startFrame + i] >> 16) & 0xff);
-			stszData[14 + 4 * i] = (byte) ((mFrameLens[startFrame + i] >> 8) & 0xff);
-			stszData[15 + 4 * i] = (byte) (mFrameLens[startFrame + i] & 0xff);
-		}
-		setAtomData(kSTSZ, stszData);
+			byte[] stszData = new byte[12 + 4 * numFrames];
+			stszData[8] = (byte) ((numFrames >> 24) & 0xff);
+			stszData[9] = (byte) ((numFrames >> 16) & 0xff);
+			stszData[10] = (byte) ((numFrames >> 8) & 0xff);
+			stszData[11] = (byte) (numFrames & 0xff);
+			for (int i = 0; i < numFrames; i++) {
+				stszData[12 + 4 * i] = (byte) ((mFrameLens[startFrame + i] >> 24) & 0xff);
+				stszData[13 + 4 * i] = (byte) ((mFrameLens[startFrame + i] >> 16) & 0xff);
+				stszData[14 + 4 * i] = (byte) ((mFrameLens[startFrame + i] >> 8) & 0xff);
+				stszData[15 + 4 * i] = (byte) (mFrameLens[startFrame + i] & 0xff);
+			}
+			setAtomData(kSTSZ, stszData);
 
-		int mdatOffset = 144 + 4 * numFrames + mAtomMap.get(kSTSD).len + mAtomMap.get(kSTSC).len
-				+ mAtomMap.get(kMVHD).len + mAtomMap.get(kTKHD).len + mAtomMap.get(kMDHD).len + mAtomMap.get(kHDLR).len
-				+ mAtomMap.get(kSMHD).len + mAtomMap.get(kDINF).len;
+			int mdatOffset = 144 + 4 * numFrames + mAtomMap.get(kSTSD).len + mAtomMap.get(kSTSC).len
+					+ mAtomMap.get(kMVHD).len + mAtomMap.get(kTKHD).len + mAtomMap.get(kMDHD).len
+					+ mAtomMap.get(kHDLR).len + mAtomMap.get(kSMHD).len + mAtomMap.get(kDINF).len;
 
-		/* System.out.println("Mdat offset: " + mdatOffset); */
+			/* System.out.println("Mdat offset: " + mdatOffset); */
 
-		setAtomData(kSTCO, new byte[] { 0, 0, 0,
-				0, // version / flags
-				0, 0, 0,
-				1, // entry count
-				(byte) ((mdatOffset >> 24) & 0xff), (byte) ((mdatOffset >> 16) & 0xff),
-				(byte) ((mdatOffset >> 8) & 0xff), (byte) (mdatOffset & 0xff), });
+			setAtomData(kSTCO, new byte[] { 0, 0, 0,
+					0, // version / flags
+					0, 0, 0,
+					1, // entry count
+					(byte) ((mdatOffset >> 24) & 0xff), (byte) ((mdatOffset >> 16) & 0xff),
+					(byte) ((mdatOffset >> 8) & 0xff), (byte) (mdatOffset & 0xff), });
 
-		mAtomMap.get(kSTBL).len = 8 + mAtomMap.get(kSTSD).len + mAtomMap.get(kSTTS).len + mAtomMap.get(kSTSC).len
-				+ mAtomMap.get(kSTSZ).len + mAtomMap.get(kSTCO).len;
+			mAtomMap.get(kSTBL).len = 8 + mAtomMap.get(kSTSD).len + mAtomMap.get(kSTTS).len + mAtomMap.get(kSTSC).len
+					+ mAtomMap.get(kSTSZ).len + mAtomMap.get(kSTCO).len;
 
-		mAtomMap.get(kMINF).len = 8 + mAtomMap.get(kDINF).len + mAtomMap.get(kSMHD).len + mAtomMap.get(kSTBL).len;
+			mAtomMap.get(kMINF).len = 8 + mAtomMap.get(kDINF).len + mAtomMap.get(kSMHD).len + mAtomMap.get(kSTBL).len;
 
-		mAtomMap.get(kMDIA).len = 8 + mAtomMap.get(kMDHD).len + mAtomMap.get(kHDLR).len + mAtomMap.get(kMINF).len;
+			mAtomMap.get(kMDIA).len = 8 + mAtomMap.get(kMDHD).len + mAtomMap.get(kHDLR).len + mAtomMap.get(kMINF).len;
 
-		mAtomMap.get(kTRAK).len = 8 + mAtomMap.get(kTKHD).len + mAtomMap.get(kMDIA).len;
+			mAtomMap.get(kTRAK).len = 8 + mAtomMap.get(kTKHD).len + mAtomMap.get(kMDIA).len;
 
-		mAtomMap.get(kMOOV).len = 8 + mAtomMap.get(kMVHD).len + mAtomMap.get(kTRAK).len;
+			mAtomMap.get(kMOOV).len = 8 + mAtomMap.get(kMVHD).len + mAtomMap.get(kTRAK).len;
 
-		int mdatLen = 8;
-		for (int i = 0; i < numFrames; i++) {
-			mdatLen += mFrameLens[startFrame + i];
-		}
-		mAtomMap.get(kMDAT).len = mdatLen;
+			int mdatLen = 8;
+			for (int i = 0; i < numFrames; i++) {
+				mdatLen += mFrameLens[startFrame + i];
+			}
+			mAtomMap.get(kMDAT).len = mdatLen;
 
-		writeAtom(out, kFTYP);
-		startAtom(out, kMOOV);
-		{
-			writeAtom(out, kMVHD);
-			startAtom(out, kTRAK);
+			writeAtom(out, kFTYP);
+			startAtom(out, kMOOV);
 			{
-				writeAtom(out, kTKHD);
-				startAtom(out, kMDIA);
+				writeAtom(out, kMVHD);
+				startAtom(out, kTRAK);
 				{
-					writeAtom(out, kMDHD);
-					writeAtom(out, kHDLR);
-					startAtom(out, kMINF);
+					writeAtom(out, kTKHD);
+					startAtom(out, kMDIA);
 					{
-						writeAtom(out, kDINF);
-						writeAtom(out, kSMHD);
-						startAtom(out, kSTBL);
+						writeAtom(out, kMDHD);
+						writeAtom(out, kHDLR);
+						startAtom(out, kMINF);
 						{
-							writeAtom(out, kSTSD);
-							writeAtom(out, kSTTS);
-							writeAtom(out, kSTSC);
-							writeAtom(out, kSTSZ);
-							writeAtom(out, kSTCO);
+							writeAtom(out, kDINF);
+							writeAtom(out, kSMHD);
+							startAtom(out, kSTBL);
+							{
+								writeAtom(out, kSTSD);
+								writeAtom(out, kSTTS);
+								writeAtom(out, kSTSC);
+								writeAtom(out, kSTSZ);
+								writeAtom(out, kSTCO);
+							}
 						}
 					}
 				}
 			}
-		}
-		startAtom(out, kMDAT);
+			startAtom(out, kMDAT);
 
-		int maxFrameLen = 0;
-		for (int i = 0; i < numFrames; i++) {
-			if (mFrameLens[startFrame + i] > maxFrameLen)
-				maxFrameLen = mFrameLens[startFrame + i];
-		}
-		byte[] buffer = new byte[maxFrameLen];
-		int pos = 0;
-		for (int i = 0; i < numFrames; i++) {
-			if (mFileAdded && startFrame + i >= mOriginalNumFrames) {
-				in.close();
-				in = new FileInputStream(mAdditionalInputFile);
-				pos = 0;
+			int maxFrameLen = 0;
+			for (int i = 0; i < numFrames; i++) {
+				if (mFrameLens[startFrame + i] > maxFrameLen)
+					maxFrameLen = mFrameLens[startFrame + i];
 			}
+			byte[] buffer = new byte[maxFrameLen];
+			int pos = 0;
+			int nextFrameLength = Integer.MAX_VALUE;
+			boolean hasEdited = mAdditionalInputFiles.size() > 0;
+			if (hasEdited) {
+				nextFrameLength = mOriginalFrameLengths.remove(0);
+			}
+			for (int i = 0; i < numFrames; i++) {
+				if (hasEdited && startFrame + i >= nextFrameLength) {
+					in.close();
+					in = new FileInputStream(mAdditionalInputFiles.remove(0));
+					pos = 0;
 
-			int skip = mFrameOffsets[startFrame + i] - pos;
-			int len = mFrameLens[startFrame + i];
-			if (skip < 0) {
-				continue;
-			}
-			if (skip > 0) {
-				in.skip(skip);
-				pos += skip;
-			}
-			in.read(buffer, 0, len);
-			out.write(buffer, 0, len);
-			pos += len;
-		}
+					nextFrameLength = Integer.MAX_VALUE;
+					hasEdited = mAdditionalInputFiles.size() > 0;
+					if (hasEdited) {
+						nextFrameLength = mOriginalFrameLengths.remove(0);
+					}
+				}
 
-		in.close();
-		out.close();
+				int skip = mFrameOffsets[startFrame + i] - pos;
+				int len = mFrameLens[startFrame + i];
+				if (skip < 0) {
+					continue;
+				}
+				if (skip > 0) {
+					in.skip(skip);
+					pos += skip;
+				}
+				in.read(buffer, 0, len);
+				out.write(buffer, 0, len);
+				pos += len;
+			}
+		} finally {
+			IOUtilities.closeStream(in);
+			IOUtilities.closeStream(out);
+		}
 	}
 
 	private long byteToUnsignedInt(byte[] data, int start) {
@@ -684,17 +712,15 @@ public class CheapAAC extends CheapSoundFile {
 		}
 		CheapAAC newAACFile = (CheapAAC) newFile;
 
-		mFileAdded = true;
-		mOriginalNumFrames = mNumFrames;
-		mAdditionalInputFile = newAACFile.getFile();
+		mOriginalFrameLengths.add(mNumFrames);
+		mAdditionalInputFiles.add(newAACFile.getFile());
 
 		mNumFrames += newAACFile.getNumFrames();
 		mFrameOffsets = AndroidUtilities.concatenateArrays(mFrameOffsets, newAACFile.getFrameOffsets());
 		mFrameLens = AndroidUtilities.concatenateArrays(mFrameLens, newAACFile.getFrameLens());
 		mFrameGains = AndroidUtilities.concatenateArrays(mFrameGains, newAACFile.getFrameGains());
 
-		// fix the durations - we're joining the actual media, rather than editing the tracks, so just set all to the
-		// same duration
+		// fix durations - we're joining the actual media, rather than editing tracks, so just set to the same duration
 		HashMap<Integer, Atom> newAtomMap = newAACFile.getAtomMap();
 
 		Atom mvhd = mAtomMap.get(kMVHD);

@@ -78,6 +78,18 @@ public class SampleSizeAtom extends LeafAtom {
 		sizeTable = newArray;
 	}
 
+	public void addSampleSizes(long size, int numSizes) {
+		long[] newArray = new long[sizeTable.length + numSizes];
+		// System.arraycopy(sizeTable, 0, newArray, 0, sizeTable.length); // crashes - buggy for large arrays?
+		for (int i = 0; i < sizeTable.length; i++) {
+			newArray[i] = sizeTable[i];
+		}
+		for (int i = 0; i < numSizes; i++) {
+			newArray[newArray.length - i] = size;
+		}
+		sizeTable = newArray;
+	}
+
 	@Override
 	protected String getIdentifier() {
 		return "stsz";

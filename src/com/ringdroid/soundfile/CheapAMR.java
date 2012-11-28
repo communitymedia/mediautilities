@@ -22,6 +22,8 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.lang.Math;
 
+import ac.robinson.util.IOUtilities;
+
 /**
  * CheapAMR is a CheapSoundFile implementation for AMR (Adaptive Multi-Rate) encoded sound files, which is one of the
  * native formats supported by Android's MediaRecorder library. It supports files with a full 3GPP header, and also
@@ -120,30 +122,35 @@ public class CheapAMR extends CheapSoundFile {
 			throw new java.io.IOException("File too small to parse");
 		}
 
-		FileInputStream stream = new FileInputStream(mInputFile);
-		byte[] header = new byte[12];
-		stream.read(header, 0, 6);
-		mOffset += 6;
-		if (header[0] == '#' && header[1] == '!' && header[2] == 'A' && header[3] == 'M' && header[4] == 'R'
-				&& header[5] == '\n') {
-			parseAMR(stream, mFileSize - 6);
-		}
-
-		stream.read(header, 6, 6);
-		mOffset += 6;
-
-		if (header[4] == 'f' && header[5] == 't' && header[6] == 'y' && header[7] == 'p' && header[8] == '3'
-				&& header[9] == 'g' && header[10] == 'p' && header[11] == '4') {
-
-			int boxLen = ((0xff & header[0]) << 24) | ((0xff & header[1]) << 16) | ((0xff & header[2]) << 8)
-					| ((0xff & header[3]));
-
-			if (boxLen >= 4 && boxLen <= mFileSize - 8) {
-				stream.skip(boxLen - 12);
-				mOffset += boxLen - 12;
+		FileInputStream stream = null;
+		try {
+			stream = new FileInputStream(mInputFile);
+			byte[] header = new byte[12];
+			stream.read(header, 0, 6);
+			mOffset += 6;
+			if (header[0] == '#' && header[1] == '!' && header[2] == 'A' && header[3] == 'M' && header[4] == 'R'
+					&& header[5] == '\n') {
+				parseAMR(stream, mFileSize - 6);
 			}
 
-			parse3gpp(stream, mFileSize - boxLen);
+			stream.read(header, 6, 6);
+			mOffset += 6;
+
+			if (header[4] == 'f' && header[5] == 't' && header[6] == 'y' && header[7] == 'p' && header[8] == '3'
+					&& header[9] == 'g' && header[10] == 'p' && header[11] == '4') {
+
+				int boxLen = ((0xff & header[0]) << 24) | ((0xff & header[1]) << 16) | ((0xff & header[2]) << 8)
+						| ((0xff & header[3]));
+
+				if (boxLen >= 4 && boxLen <= mFileSize - 8) {
+					stream.skip(boxLen - 12);
+					mOffset += boxLen - 12;
+				}
+
+				parse3gpp(stream, mFileSize - boxLen);
+			}
+		} finally {
+			IOUtilities.closeStream(stream);
 		}
 	}
 
@@ -464,42 +471,47 @@ public class CheapAMR extends CheapSoundFile {
 
 	public void writeFile(File outputFile, int startFrame, int numFrames) throws java.io.IOException {
 		outputFile.createNewFile();
-		FileInputStream in = new FileInputStream(mInputFile);
-		FileOutputStream out = new FileOutputStream(outputFile);
+		FileInputStream in = null;
+		FileOutputStream out = null;
+		try {
+			in = new FileInputStream(mInputFile);
+			out = new FileOutputStream(outputFile);
 
-		byte[] header = new byte[6];
-		header[0] = '#';
-		header[1] = '!';
-		header[2] = 'A';
-		header[3] = 'M';
-		header[4] = 'R';
-		header[5] = '\n';
-		out.write(header, 0, 6);
+			byte[] header = new byte[6];
+			header[0] = '#';
+			header[1] = '!';
+			header[2] = 'A';
+			header[3] = 'M';
+			header[4] = 'R';
+			header[5] = '\n';
+			out.write(header, 0, 6);
 
-		int maxFrameLen = 0;
-		for (int i = 0; i < numFrames; i++) {
-			if (mFrameLens[startFrame + i] > maxFrameLen)
-				maxFrameLen = mFrameLens[startFrame + i];
-		}
-		byte[] buffer = new byte[maxFrameLen];
-		int pos = 0;
-		for (int i = 0; i < numFrames; i++) {
-			int skip = mFrameOffsets[startFrame + i] - pos;
-			int len = mFrameLens[startFrame + i];
-			if (skip < 0) {
-				continue;
+			int maxFrameLen = 0;
+			for (int i = 0; i < numFrames; i++) {
+				if (mFrameLens[startFrame + i] > maxFrameLen)
+					maxFrameLen = mFrameLens[startFrame + i];
 			}
-			if (skip > 0) {
-				in.skip(skip);
-				pos += skip;
+			byte[] buffer = new byte[maxFrameLen];
+			int pos = 0;
+			for (int i = 0; i < numFrames; i++) {
+				int skip = mFrameOffsets[startFrame + i] - pos;
+				int len = mFrameLens[startFrame + i];
+				if (skip < 0) {
+					continue;
+				}
+				if (skip > 0) {
+					in.skip(skip);
+					pos += skip;
+				}
+				in.read(buffer, 0, len);
+				out.write(buffer, 0, len);
+				pos += len;
 			}
-			in.read(buffer, 0, len);
-			out.write(buffer, 0, len);
-			pos += len;
-		}
 
-		in.close();
-		out.close();
+		} finally {
+			IOUtilities.closeStream(in);
+			IOUtilities.closeStream(out);
+		}
 	}
 
 	void getMR122Params(int[] bits, int[] adaptiveIndex, int[] adaptiveGain, int[] fixedGain, int[][] pulse) {

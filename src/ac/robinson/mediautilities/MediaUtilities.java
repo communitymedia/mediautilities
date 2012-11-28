@@ -25,6 +25,9 @@ public class MediaUtilities {
 	public static final String APPLICATION_NAME = "mediautilities";
 	public static final String LOG_TAG = APPLICATION_NAME;
 
+	// class options
+	public static final boolean MOV_USE_SEGMENTED_AUDIO = true;
+
 	// file extensions (including dots)
 	public static final String SMIL_FILE_EXTENSION = ".smil";
 	public static final String SYNC_FILE_EXTENSION = ".sync.jpg"; // to counter ridiculous incoming filename filtering
@@ -32,7 +35,6 @@ public class MediaUtilities {
 	public static final String MOV_FILE_EXTENSION = ".mov";
 
 	public static final String MOV_AUDIO_FILE_EXTENSION = ".m4a";
-	public static final String MOV_IMAGE_FILE_EXTENSION = ".jpg";
 
 	// message IDs (see: http://stackoverflow.com/questions/3432649/)
 	public static final int MSG_RECEIVED_SMIL_FILE = 1;
