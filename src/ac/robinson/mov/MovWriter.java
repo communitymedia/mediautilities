@@ -190,9 +190,8 @@ public abstract class MovWriter {
 				stsc.addChunk(currentChunkIndex + 1, samplesInCurrentChunk, 1);
 
 				// we only really need one sample size here, but YouTube skips frames fairly regularly, so we need to
-				// make
-				// sure that we've got enough frames so that this doesn't matter; this is done by repeatedly referring
-				// to the same entry in the chunk table
+				// make sure that we've got enough frames so that this doesn't matter; this is done by repeatedly
+				// referring to the same entry in the chunk table
 				VideoSample sample = samples.get(samples.size() - samplesInCurrentChunk);
 				for (int i = 0; i < sample.duration; i++) {
 					stco.addChunkOffset(sample.dataStart);

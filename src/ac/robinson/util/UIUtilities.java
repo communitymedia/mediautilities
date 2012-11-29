@@ -318,6 +318,9 @@ public class UIUtilities {
 			Method getActionBarMethod = activityClass.getMethod("getActionBar");
 			if (getActionBarMethod != null) {
 				Object actionBar = getActionBarMethod.invoke(activity, (Object[]) null);
+				if (actionBar == null) {
+					throw new NoSuchMethodException();
+				}
 				Class<?> actionBarClass = actionBar.getClass();
 				Method actionBarMethod = null;
 
@@ -372,6 +375,7 @@ public class UIUtilities {
 		} catch (IllegalArgumentException e) {
 		} catch (IllegalAccessException e) {
 		} catch (InvocationTargetException e) {
+		} catch (Throwable t) {
 		}
 	}
 
@@ -386,6 +390,9 @@ public class UIUtilities {
 			Method getActionBarMethod = activityClass.getMethod("getActionBar");
 			if (getActionBarMethod != null) {
 				Object actionBar = getActionBarMethod.invoke(activity, (Object[]) null);
+				if (actionBar == null) {
+					throw new NoSuchMethodException();
+				}
 				Class<?> actionBarClass = actionBar.getClass();
 				Method actionBarMethod = null;
 
@@ -406,6 +413,7 @@ public class UIUtilities {
 		} catch (IllegalArgumentException e) {
 		} catch (IllegalAccessException e) {
 		} catch (InvocationTargetException e) {
+		} catch (Throwable t) {
 		}
 	}
 
@@ -422,6 +430,9 @@ public class UIUtilities {
 			Method getActionBarMethod = activityClass.getMethod("getActionBar");
 			if (getActionBarMethod != null) {
 				Object actionBar = getActionBarMethod.invoke(activity, (Object[]) null);
+				if (actionBar == null) {
+					throw new NoSuchMethodException();
+				}
 				Class<?> actionBarClass = actionBar.getClass();
 				Method actionBarMethod = actionBarClass.getMethod("setNavigationMode", Integer.TYPE);
 				if (actionBarMethod != null) {
@@ -504,6 +515,7 @@ public class UIUtilities {
 		} catch (IllegalAccessException e) {
 		} catch (InvocationTargetException e) {
 		} catch (NoSuchFieldException e) {
+		} catch (Throwable t) {
 		}
 	}
 
@@ -520,6 +532,9 @@ public class UIUtilities {
 			Method getActionBarMethod = activityClass.getMethod("getActionBar");
 			if (getActionBarMethod != null) {
 				Object actionBar = getActionBarMethod.invoke(activity, (Object[]) null);
+				if (actionBar == null) {
+					throw new NoSuchMethodException();
+				}
 				Class<?> actionBarClass = actionBar.getClass();
 				Method actionBarMethod = actionBarClass.getMethod("removeAllTabs");
 				if (actionBarMethod != null) {
@@ -533,6 +548,7 @@ public class UIUtilities {
 		} catch (IllegalArgumentException e) {
 		} catch (IllegalAccessException e) {
 		} catch (InvocationTargetException e) {
+		} catch (Throwable t) {
 		}
 	}
 
