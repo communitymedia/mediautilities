@@ -34,6 +34,7 @@ import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.UUID;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -386,29 +387,34 @@ public class IOUtilities {
 	}
 
 	public static File newDatedFileName(File baseDirectory, String fileExtension) {
-		Calendar logStartTime;
+		Calendar fileDate;
 		StringBuilder newFileName = new StringBuilder();
 		File newFile = null;
-		boolean fileExists = true;
-		while (fileExists) {
-			logStartTime = Calendar.getInstance();
+		boolean fileExists = false;
+		do {
+			fileDate = Calendar.getInstance();
 			newFileName.setLength(0);
-			newFileName.append(logStartTime.get(Calendar.YEAR));
+			newFileName.append(fileDate.get(Calendar.YEAR));
 			newFileName.append("-");
-			newFileName.append(String.format("%02d", logStartTime.get(Calendar.MONTH) + 1));
+			newFileName.append(String.format("%02d", fileDate.get(Calendar.MONTH) + 1));
 			newFileName.append("-");
-			newFileName.append(String.format("%02d", logStartTime.get(Calendar.DAY_OF_MONTH)));
+			newFileName.append(String.format("%02d", fileDate.get(Calendar.DAY_OF_MONTH)));
+			newFileName.append("_");
+			newFileName.append(String.format("%02d", fileDate.get(Calendar.HOUR_OF_DAY)));
 			newFileName.append("-");
-			newFileName.append(String.format("%02d", logStartTime.get(Calendar.HOUR_OF_DAY)));
+			newFileName.append(String.format("%02d", fileDate.get(Calendar.MINUTE)));
 			newFileName.append("-");
-			newFileName.append(String.format("%02d", logStartTime.get(Calendar.MINUTE)));
-			newFileName.append("-");
-			newFileName.append(String.format("%02d", logStartTime.get(Calendar.SECOND)));
+			newFileName.append(String.format("%02d", fileDate.get(Calendar.SECOND)));
+			if (fileExists) {
+				// add random chars to avoid collisions
+				newFileName.append("_");
+				newFileName.append(UUID.randomUUID().toString().substring(0, 4));
+			}
 			newFileName.append(".");
 			newFileName.append(fileExtension);
 			newFile = new File(baseDirectory, newFileName.toString());
 			fileExists = newFile.exists();
-		}
+		} while (fileExists);
 		return newFile;
 	}
 }

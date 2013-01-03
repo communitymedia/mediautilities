@@ -2,9 +2,11 @@
 <resources>
 
     <declare-styleable name="CenteredImageTextButton">
-        <attr name="android:button" />
         <attr name="filterColorDefault" format="color" />
         <attr name="filterColorTouched" format="color" />
+    </declare-styleable>
+    <declare-styleable name="SVGView">
+        <attr name="resource" format="integer" />
     </declare-styleable>
 
 </resources>

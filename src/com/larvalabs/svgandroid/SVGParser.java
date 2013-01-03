@@ -1268,7 +1268,6 @@ public class SVGParser {
 		/**
 		 * set the path style (if any) stroke-dasharray="n1,n2,..." stroke-dashoffset=n
 		 */
-
 		private void pathStyleHelper(String style, String offset) {
 			if (style == null) {
 				return;
