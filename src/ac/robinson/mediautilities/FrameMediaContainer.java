@@ -25,9 +25,7 @@ import java.io.FileInputStream;
 import java.util.ArrayList;
 
 import ac.robinson.util.IOUtilities;
-import ac.robinson.util.StringUtilities;
 import android.media.MediaPlayer;
-import android.text.TextUtils;
 
 public class FrameMediaContainer {
 
@@ -56,23 +54,23 @@ public class FrameMediaContainer {
 		}
 	}
 
-	public void addText(String textContent, String mediaId, String mediaDuration) {
+	public void addText(String textContent, String mediaId, int mediaDuration) {
 		mTextContent = textContent;
-		getMediaDuration(mediaDuration);
+		updateFrameMaxDuration(mediaDuration);
 	}
 
-	public void addMedia(String mediaType, File mediaFile, String mediaId, String mediaDuration, String mediaRegion,
+	public void addMedia(String mediaType, File mediaFile, String mediaId, int mediaDuration, String mediaRegion,
 			boolean validateAudioLengths) {
 		if (mediaFile.exists()) {
-			int currentDuration = getMediaDuration(mediaDuration);
 			if ("img".equals(mediaType)) {
 				mImagePath = mediaFile.getAbsolutePath();
 				if (mediaRegion.startsWith(SMILUtilities.SMIL_FRONT_IMAGE_STRING)) {
 					mImageIsFrontCamera = true;
 				}
+				updateFrameMaxDuration(mediaDuration);
 			} else if ("audio".equals(mediaType)) {
 
-				int preciseDuration = currentDuration;
+				int preciseDuration = mediaDuration;
 
 				// check the audio duration - having the correct duration is *critical* for narrative playback
 				// TODO: fix playback so that this isn't the case?
@@ -97,6 +95,8 @@ public class FrameMediaContainer {
 					}
 				}
 				addAudioFile(mediaFile.getAbsolutePath(), preciseDuration);
+				
+				updateFrameMaxDuration(preciseDuration);
 			}
 		}
 	}
@@ -104,18 +104,5 @@ public class FrameMediaContainer {
 	public void addAudioFile(String fileName, int audioDuration) {
 		mAudioPaths.add(fileName);
 		mAudioDurations.add(audioDuration);
-	}
-
-	private int getMediaDuration(String mediaDuration) {
-		if (!TextUtils.isEmpty(mediaDuration)) {
-			if (mediaDuration.endsWith(SMILUtilities.SMIL_MILLISECOND_STRING)) {
-				mediaDuration = mediaDuration.substring(0, mediaDuration.length()
-						- SMILUtilities.SMIL_MILLISECOND_STRING.length());
-				int newMediaDuration = StringUtilities.safeStringToInteger(mediaDuration);
-				updateFrameMaxDuration(newMediaDuration);
-				return newMediaDuration;
-			}
-		}
-		return 0;
 	}
 }

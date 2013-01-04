@@ -46,6 +46,7 @@ import org.xmlpull.v1.XmlSerializer;
 import ac.robinson.util.BitmapUtilities;
 import ac.robinson.util.IOUtilities;
 import ac.robinson.util.ImageCacheUtilities;
+import ac.robinson.util.StringUtilities;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
@@ -178,9 +179,9 @@ public class SMILUtilities {
 					if (mediaElements.item(j).getNodeType() == Node.ELEMENT_NODE) {
 						Element mediaElement = (Element) mediaElements.item(j);
 						String elementId = mediaElement.getAttribute("id");
-						String elementDuration = mediaElement.getAttribute("dur");
 						String elementRegion = mediaElement.getAttribute("region");
 						String elementSrc = mediaElement.getAttribute("src");
+						int elementDuration = getDurationFromString(mediaElement.getAttribute("dur"));
 
 						if ("text-media".equals(mediaElements.item(j).getNodeName())) {
 							currentFrame.addText(mediaElement.getTextContent(), elementId, elementDuration);
@@ -195,6 +196,7 @@ public class SMILUtilities {
 								if (!smilContents.contains(sourceFile)) {
 									ignoredFiles.add(sourceFile);
 								}
+								currentFrame.updateFrameMaxDuration(elementDuration);
 
 							} else {
 								currentFrame.addMedia(mediaElements.item(j).getNodeName(), sourceFile, elementId,
@@ -226,6 +228,18 @@ public class SMILUtilities {
 			}
 		}
 		return smilContents;
+	}
+
+	public static int getDurationFromString(String mediaDuration) {
+		if (!TextUtils.isEmpty(mediaDuration)) {
+			if (mediaDuration.endsWith(SMILUtilities.SMIL_MILLISECOND_STRING)) {
+				mediaDuration = mediaDuration.substring(0, mediaDuration.length()
+						- SMILUtilities.SMIL_MILLISECOND_STRING.length());
+				int newMediaDuration = StringUtilities.safeStringToInteger(mediaDuration);
+				return newMediaDuration;
+			}
+		}
+		return 0;
 	}
 
 	/**
