@@ -6,7 +6,7 @@
 
     <uses-sdk
         android:minSdkVersion="9"
-        android:targetSdkVersion="11" /> <!-- TODO: bear in mind SVG hardware acceleration issue when updating -->
+        android:targetSdkVersion="17" />
 
     <application>
         <activity
