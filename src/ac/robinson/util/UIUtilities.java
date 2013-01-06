@@ -26,6 +26,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.List;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.KeyguardManager;
 import android.content.Context;
@@ -37,6 +38,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.LightingColorFilter;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Handler;
@@ -46,6 +48,7 @@ import android.util.TypedValue;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.Surface;
+import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.Window;
@@ -54,14 +57,26 @@ import android.widget.Toast;
 
 public class UIUtilities {
 
+	/**
+	 * Enable pixel dithering for this window (but only in API < 17)
+	 * 
+	 * @param window
+	 */
+	@SuppressWarnings("deprecation")
 	public static void setPixelDithering(Window window) {
-		if (window != null) {
+		if (window != null && Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) { // deprecated from API 17+
 			// better gradient drawables
 			window.setFormat(PixelFormat.RGBA_8888);
 			window.addFlags(WindowManager.LayoutParams.FLAG_DITHER);
 		}
 	}
 
+	/**
+	 * Get the current rotation of the screen, either 0, 90, 180 or 270 degrees
+	 * 
+	 * @param windowManager
+	 * @return
+	 */
 	public static int getScreenRotationDegrees(WindowManager windowManager) {
 		int degrees = 0;
 		switch (windowManager.getDefaultDisplay().getRotation()) {
@@ -81,20 +96,28 @@ public class UIUtilities {
 		return degrees;
 	}
 
+	/**
+	 * Get the "natural" screen orientation - i.e. the orientation in which this device is designed to be used most
+	 * often.
+	 * 
+	 * @param windowManager
+	 * @return either ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE or ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+	 */
 	public static int getNaturalScreenOrientation(WindowManager windowManager) {
 		Display display = windowManager.getDefaultDisplay();
+		Point screenSize = getScreenSize(windowManager);
 		int width = 0;
 		int height = 0;
 		switch (display.getRotation()) {
 			case Surface.ROTATION_0:
 			case Surface.ROTATION_180:
-				width = display.getWidth();
-				height = display.getHeight();
+				width = screenSize.x;
+				height = screenSize.y;
 				break;
 			case Surface.ROTATION_90:
 			case Surface.ROTATION_270:
-				width = display.getHeight();
-				height = display.getWidth();
+				width = screenSize.y;
+				height = screenSize.x;
 				break;
 			default:
 				break;
@@ -104,6 +127,36 @@ public class UIUtilities {
 			return ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 		}
 		return ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+	}
+
+	@SuppressWarnings("deprecation")
+	public static Point getScreenSize(WindowManager windowManager) {
+		Point screenSize = new Point();
+		Display display = windowManager.getDefaultDisplay();
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+			getPointScreenSize(display, screenSize);
+		} else {
+			screenSize.set(display.getWidth(), display.getHeight());
+		}
+		return screenSize;
+	}
+
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+	private static void getPointScreenSize(Display display, Point screenSize) {
+		display.getSize(screenSize);
+	}
+
+	/**
+	 * Set the SurfaceHolder's type to SURFACE_TYPE_PUSH_BUFFERS, but only in API < 11 (after this it is set
+	 * automatically by the system when needed)
+	 * 
+	 * @param holder
+	 */
+	@SuppressWarnings("deprecation")
+	public static void setPushBuffers(SurfaceHolder holder) {
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+			holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+		}
 	}
 
 	public static void setScreenOrientationFixed(Activity activity, boolean orientationFixed) {
@@ -171,7 +224,12 @@ public class UIUtilities {
 		window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 	}
 
-	// requires <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
+	/**
+	 * Use acquireKeepScreenOn instead
+	 * 
+	 * Requires <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
+	 */
+	@Deprecated
 	public static KeyguardManager.KeyguardLock acquireKeyguardLock(Activity activity) {
 		KeyguardManager keyguardManager = (KeyguardManager) activity.getSystemService(Activity.KEYGUARD_SERVICE);
 		KeyguardManager.KeyguardLock keyguardLock = keyguardManager.newKeyguardLock(Activity.KEYGUARD_SERVICE);

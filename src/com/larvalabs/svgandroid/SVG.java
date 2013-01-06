@@ -83,7 +83,7 @@ public class SVG {
 	}
 
 	/**
-	 * <b>Caution: do not use on the UI thread when hardware acceleration is enabled</b>
+	 * <b>Caution: do not use on views/surfaces etc in onDraw when hardware acceleration is enabled</b>
 	 * 
 	 * Get the parsed SVG picture data.
 	 * 
@@ -98,7 +98,7 @@ public class SVG {
 	 * stretched to fill the bitmap.
 	 * 
 	 * This method is particularly useful for newer devices where hardware acceleration is on by default, and so
-	 * drawPicture does not work on the UI thread.
+	 * drawPicture does not work in onDraw
 	 * 
 	 * @return the bitmap.
 	 */

@@ -20,11 +20,28 @@
 
 package ac.robinson.util;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 
 public class DebugUtilities {
 	public static String getLogTag(Object o) {
 		return o.getClass().getName();
+	}
+
+	public static String getApplicationBuildTime(PackageManager packageManager, String packageName) {
+		try {
+			ApplicationInfo applicationInfo = packageManager.getApplicationInfo(packageName, 0);
+			ZipFile zipFile = new ZipFile(applicationInfo.sourceDir);
+			ZipEntry zipEntry = zipFile.getEntry("classes.dex");
+			return SimpleDateFormat.getDateTimeInstance().format(new java.util.Date(zipEntry.getTime()));
+		} catch (Exception e) {
+		}
+		return "unknown";
 	}
 
 	// some devices cannot use SoundPool and MediaPlayer simultaneously due to a bug

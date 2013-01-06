@@ -11,20 +11,20 @@
         android:orientation="horizontal" >
 
         <Button
-            android:id="@+id/select_directory"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:onClick="handleButtonClicks"
-            android:text="@string/select_directory" />
-
-        <Button
             android:id="@+id/cancel_select"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:onClick="handleButtonClicks"
             android:text="@android:string/cancel" />
+
+        <Button
+            android:id="@+id/select_directory"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:onClick="handleButtonClicks"
+            android:text="@string/select_directory" />
     </LinearLayout>
 
     <LinearLayout
