@@ -32,6 +32,7 @@ import android.graphics.BitmapFactory;
 public class ImageCacheUtilities {
 
 	public static final FastBitmapDrawable NULL_DRAWABLE = new FastBitmapDrawable(null);
+	public static final FastBitmapDrawable LOADING_DRAWABLE = new FastBitmapDrawable(null);
 
 	// TODO: Use a concurrent HashMap to support multiple threads
 	private static final HashMap<String, SoftReference<FastBitmapDrawable>> sArtCache = new HashMap<String, SoftReference<FastBitmapDrawable>>();
@@ -84,9 +85,14 @@ public class ImageCacheUtilities {
 		sArtCache.remove(id);
 	}
 
+	public static void setLoadingIcon(String id) {
+		sArtCache.remove(id);
+		sArtCache.put(id, new SoftReference<FastBitmapDrawable>(LOADING_DRAWABLE));
+	}
+
 	/**
 	 * Retrieves a drawable from the cache, identified by the specified id. If the drawable does not exist in the cache,
-	 * it is loaded and added to the cache. If the drawable cannot be added to the cache, the specified default drwaable
+	 * it is loaded and added to the cache. If the drawable cannot be added to the cache, the specified default drawable
 	 * is returned.
 	 * 
 	 * @param id The id of the drawable to retrieve
