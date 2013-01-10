@@ -269,6 +269,7 @@ public class SMILUtilities {
 		final int textBackgroundColour = (Integer) settings.get(MediaUtilities.KEY_TEXT_BACKGROUND_COLOUR);
 		final int textSpacing = (Integer) settings.get(MediaUtilities.KEY_TEXT_SPACING);
 		final float textCornerRadius = (Float) settings.get(MediaUtilities.KEY_TEXT_CORNER_RADIUS);
+		final boolean textBackgroundSpanWidth = (Boolean) settings.get(MediaUtilities.KEY_TEXT_BACKGROUND_SPAN_WIDTH);
 		final int textMaxFontSize = (Integer) settings.get(MediaUtilities.KEY_MAX_TEXT_FONT_SIZE);
 		final int textMaxCharsPerLine = (Integer) settings.get(MediaUtilities.KEY_MAX_TEXT_CHARACTERS_PER_LINE);
 		final int textMaxHeightWithImage = (Integer) settings.get(MediaUtilities.KEY_MAX_TEXT_HEIGHT_WITH_IMAGE);
@@ -442,18 +443,28 @@ public class SMILUtilities {
 				}
 
 				if (!TextUtils.isEmpty(frame.mTextContent)) {
-					Bitmap textBitmap = Bitmap.createBitmap(outputWidth, (imageLoaded ? textMaxHeightWithImage
-							: outputHeight), ImageCacheUtilities.mBitmapFactoryOptions.inPreferredConfig);
+					Bitmap textBitmap = Bitmap.createBitmap(outputWidth, outputHeight,
+							ImageCacheUtilities.mBitmapFactoryOptions.inPreferredConfig);
 					Canvas textBitmapCanvas = new Canvas(textBitmap);
 					Paint textBitmapPaint = BitmapUtilities.getPaint(textColourNoImage, 1);
 					textBitmapPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
 
 					// TODO: the text background isn't really necessary here, as transparency breaks SMIL so all text
-					// background is black by default... remove?
-					BitmapUtilities.drawScaledText(frame.mTextContent, textBitmapCanvas, textBitmapPaint,
-							(imageLoaded ? textColourWithImage : textColourNoImage),
+					// background is black by default... remove? (but bear in mind height is only calculated properly
+					// when there's a background to draw)
+					int textHeight = BitmapUtilities.drawScaledText(frame.mTextContent, textBitmapCanvas,
+							textBitmapPaint, (imageLoaded ? textColourWithImage : textColourNoImage),
 							(imageLoaded ? textBackgroundColour : 0), textSpacing, textCornerRadius, imageLoaded, 0,
-							textBitmap.getWidth(), textBitmap.getHeight(), textMaxFontSize, textMaxCharsPerLine);
+							textBackgroundSpanWidth, textMaxHeightWithImage, textMaxFontSize, textMaxCharsPerLine);
+
+					// crop to the actual size of the text to show as much as possible of the image
+					Bitmap textBitmapCropped;
+					if (imageLoaded) {
+						textBitmapCropped = Bitmap.createBitmap(textBitmap, 0, outputHeight - textHeight - 1,
+								outputWidth, textHeight, null, false);
+					} else {
+						textBitmapCropped = textBitmap;
+					}
 
 					// savedFile = new File(outputDirectory, getFormattedFileName(narrativeName, frame.mFrameSequenceId,
 					// 0, "png"));
@@ -462,7 +473,7 @@ public class SMILUtilities {
 					FileOutputStream fileOutputStream = null;
 					try {
 						fileOutputStream = new FileOutputStream(savedFile);
-						textBitmap.compress(CompressFormat.PNG, 100, fileOutputStream); // quality is ignored
+						textBitmapCropped.compress(CompressFormat.PNG, 100, fileOutputStream); // quality is ignored
 					} catch (Exception e) {
 					} finally {
 						IOUtilities.closeStream(fileOutputStream);

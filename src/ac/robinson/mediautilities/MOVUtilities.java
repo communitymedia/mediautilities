@@ -73,6 +73,7 @@ public class MOVUtilities {
 		final int textBackgroundColour = (Integer) settings.get(MediaUtilities.KEY_TEXT_BACKGROUND_COLOUR);
 		final int textSpacing = (Integer) settings.get(MediaUtilities.KEY_TEXT_SPACING);
 		final float textCornerRadius = (Float) settings.get(MediaUtilities.KEY_TEXT_CORNER_RADIUS);
+		final boolean textBackgroundSpanWidth = (Boolean) settings.get(MediaUtilities.KEY_TEXT_BACKGROUND_SPAN_WIDTH);
 		final int textMaxFontSize = (Integer) settings.get(MediaUtilities.KEY_MAX_TEXT_FONT_SIZE);
 		final int textMaxCharsPerLine = (Integer) settings.get(MediaUtilities.KEY_MAX_TEXT_CHARACTERS_PER_LINE);
 		final int audioResourceId = (Integer) settings.get(MediaUtilities.KEY_AUDIO_RESOURCE_ID);
@@ -130,7 +131,7 @@ public class MOVUtilities {
 					BitmapUtilities.drawScaledText(frame.mTextContent, baseCanvas, basePaint,
 							(imageLoaded ? textColourWithImage : textColourNoImage),
 							(imageLoaded ? textBackgroundColour : 0), textSpacing, textCornerRadius, imageLoaded, 0,
-							baseBitmap.getWidth(), baseBitmap.getHeight(), textMaxFontSize, textMaxCharsPerLine);
+							textBackgroundSpanWidth, baseBitmap.getHeight(), textMaxFontSize, textMaxCharsPerLine);
 
 				} else if (!imageLoaded) {
 					// quicker to do this than load the SVG for narratives that have no audio

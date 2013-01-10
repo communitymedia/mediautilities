@@ -36,11 +36,12 @@ import android.graphics.BitmapFactory.Options;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Paint.FontMetricsInt;
+import android.graphics.Paint.Align;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.YuvImage;
 import android.media.ExifInterface;
+import android.text.TextUtils;
 
 /**
  * Class containing static utility methods for bitmap decoding and scaling
@@ -473,100 +474,138 @@ public class BitmapUtilities {
 	}
 
 	/**
-	 * Note: the paint's textSize will be changed...
+	 * Note: the paint's textSize and alignment will be changed...
 	 * 
 	 * @param textString
 	 * @param textCanvas
 	 * @param textPaint
+	 * @param textColour
+	 * @param backgroundColour
+	 * @param backgroundPadding
+	 * @param backgroundRadius
 	 * @param alignBottom
-	 * @param maxCanvasAreaWidth
-	 * @param maxCanvasAreaHeight
+	 * @param leftOffset
+	 * @param backgroundSpanWidth
+	 * @param maxHeight
 	 * @param maxTextSize
-	 * @param maxCharactersPerLine an approximate value - text will be split at the previous space character
+	 * @param maxCharactersPerLine
+	 * @return The height of the drawn text, including padding
 	 */
-	public static void drawScaledText(String textString, Canvas textCanvas, Paint textPaint, int textColour,
+	public static int drawScaledText(String textString, Canvas textCanvas, Paint textPaint, int textColour,
 			int backgroundColour, int backgroundPadding, float backgroundRadius, boolean alignBottom, float leftOffset,
-			float maxCanvasAreaWidth, float maxCanvasAreaHeight, int maxTextSize, int maxCharactersPerLine) {
+			boolean backgroundSpanWidth, float maxHeight, int maxTextSize, int maxCharactersPerLine) {
 
-		// TODO: remove the need for maxCharactersPerLine
-		StringBuilder formattedString = new StringBuilder(textString.length());
-		int lineLength = 0;
-		int maxLength = 0;
-		String[] stringLines = textString.split("\n");
-		for (String line : stringLines) {
-			String[] lineFragments = line.split(" ");
-			for (String fragment : lineFragments) {
-				if (lineLength + fragment.length() > maxCharactersPerLine) {
-					formattedString.append("\n");
-					lineLength = 0;
-				}
-
-				formattedString.append(fragment);
-				lineLength += fragment.length();
-				if (lineLength > maxLength) {
-					maxLength = lineLength;
-				}
-				formattedString.append(" ");
-				lineLength += 1;
-			}
-			formattedString.append("\n");
-			lineLength = 0;
+		if (TextUtils.isEmpty(textString) || "".equals(textString.trim())) {
+			return 0;
 		}
-		textString = formattedString.toString().replace(" \n", "\n");
+
+		float maxWidth = (int) Math.floor(textCanvas.getWidth() - leftOffset);
+
+		// split the text into lines
+		// TODO: respect user-created formatting more closely? (e.g., linebreaks and spaces)
+		int textLength = textString.length();
+		StringBuilder formattedString = new StringBuilder(textLength);
+		int numLines = Integer.MAX_VALUE;
+		int maxLines = (int) Math.ceil(Math.sqrt(textLength / maxCharactersPerLine)) + 1;
+		int maxLineLength = 0;
+		while (numLines > maxLines) {
+			formattedString.setLength(0); // clears
+			numLines = 0;
+			maxLineLength = 0;
+			int lineLength = 0;
+			String[] stringLines = textString.split("\n");
+			for (String line : stringLines) {
+				String[] lineFragments = line.split(" ");
+				for (String fragment : lineFragments) {
+					if (lineLength + fragment.length() > maxCharactersPerLine) {
+						formattedString.append("\n");
+						numLines += 1;
+						lineLength = 0;
+					}
+
+					formattedString.append(fragment);
+					lineLength += fragment.length();
+					if (lineLength > maxLineLength) {
+						maxLineLength = lineLength;
+					}
+					formattedString.append(" ");
+					lineLength += 1;
+				}
+				formattedString.append("\n");
+				numLines += 1;
+				lineLength = 0;
+			}
+			if (numLines > maxLines) {
+				// so we *always* increase the character count (and don't get stuck)
+				maxCharactersPerLine = (int) (maxCharactersPerLine * 1.05) + 1;
+			}
+		}
+		textString = formattedString.toString().replace(" \n", "\n"); // remove extra spaces
 		String[] textsToDraw = textString.split("\n");
 
-		textPaint = adjustTextSize(textPaint, maxLength, textsToDraw.length, maxCanvasAreaWidth, maxCanvasAreaHeight,
-				maxTextSize);
+		// scale the text size appropriately (padding intentionally ignored here)
+		textPaint = adjustTextSize(textPaint, maxLineLength, textsToDraw.length, maxWidth, maxHeight, maxTextSize);
+		backgroundPadding = (int) Math.ceil(backgroundPadding / (maxTextSize / textPaint.getTextSize())) + 1;
 
-		FontMetricsInt metrics = textPaint.getFontMetricsInt();
-		int lineHeight = metrics.descent - metrics.ascent; // TODO: this is only an estimate
-
+		// set up location for drawing
+		int lineHeight = (int) Math.ceil(Math.abs(textPaint.ascent()) + textPaint.descent());
 		float drawingX = 0;
-		float drawingY = textCanvas.getHeight() - (lineHeight * textsToDraw.length) - backgroundPadding;
-		if (!alignBottom) {
-			drawingY /= 2;
+		float drawingY;
+		if (alignBottom) {
+			drawingY = textCanvas.getHeight() - getActualDescentSize(textsToDraw[textsToDraw.length - 1], textPaint)
+					- backgroundPadding;
+		} else {
+			drawingY = ((textCanvas.getHeight() + (lineHeight * (textsToDraw.length - 1))) / 2) + textPaint.descent();
 		}
-		drawingY += Math.abs(metrics.ascent);
+		float initialX = (maxWidth / 2) + leftOffset;
 		float initialY = drawingY;
+		float finalHeight = 0;
 
 		// draw the background box
 		if (backgroundColour != 0) {
-			RectF outerTextBounds = null;
+			String firstText = textsToDraw[0].trim();
+			Rect textBounds = new Rect();
+			textPaint.getTextBounds(firstText, 0, firstText.length(), textBounds);
+			float boxTop = drawingY - (lineHeight * (textsToDraw.length - 1)) - textBounds.height()
+					+ getActualDescentSize(firstText, textPaint) - backgroundPadding;
+			float boxLeft = backgroundSpanWidth ? 0 : initialX;
+			float boxRight = backgroundSpanWidth ? textCanvas.getWidth() : initialX;
+			int totalPadding = 2 * backgroundPadding;
+			RectF outerTextBounds = new RectF(boxLeft, boxTop, boxRight, textCanvas.getHeight());
 			for (String text : textsToDraw) {
-				text = text.trim();
-				drawingX = ((maxCanvasAreaWidth - textPaint.measureText(text)) / 2) + leftOffset;
-				Rect textBounds = new Rect();
-				textPaint.getTextBounds(text, 0, text.length(), textBounds);
-				if (outerTextBounds == null) {
-					outerTextBounds = new RectF(drawingX + textBounds.left, drawingY + textBounds.top, drawingX
-							+ textBounds.right, drawingY + textBounds.bottom);
-				} else {
-					outerTextBounds.left = Math.min(outerTextBounds.left, drawingX + textBounds.left);
-					outerTextBounds.top = Math.min(outerTextBounds.top, drawingY + textBounds.right);
-					outerTextBounds.right = Math.max(outerTextBounds.right, drawingX + textBounds.right);
-					outerTextBounds.bottom = Math.max(outerTextBounds.bottom, drawingY + textBounds.bottom);
+				float newWidth = textPaint.measureText(text.trim()) + totalPadding;
+				float currentWidth = outerTextBounds.width();
+				if (newWidth > currentWidth) {
+					outerTextBounds.inset(-(newWidth - currentWidth) / 2, 0);
 				}
-				// textCanvas.drawText(text, drawingX, drawingY, textPaint);
-				drawingY += lineHeight;
 			}
+			finalHeight = outerTextBounds.height();
 			textPaint.setColor(backgroundColour);
-			outerTextBounds.left -= backgroundPadding;
-			outerTextBounds.top -= backgroundPadding;
-			outerTextBounds.right += backgroundPadding;
-			outerTextBounds.bottom += backgroundPadding;
-			backgroundRadius *= outerTextBounds.height();
 			textCanvas.drawRoundRect(outerTextBounds, backgroundRadius, backgroundRadius, textPaint);
+		} else {
+			finalHeight = lineHeight * (textsToDraw.length);
 		}
 
 		// draw the text
+		drawingX = initialX;
 		drawingY = initialY;
+		textPaint.setTextAlign(Align.CENTER);
 		textPaint.setColor(textColour);
-		for (String text : textsToDraw) {
-			text = text.trim();
-			drawingX = ((maxCanvasAreaWidth - textPaint.measureText(text)) / 2) + leftOffset;
-			textCanvas.drawText(text, drawingX, drawingY, textPaint);
-			drawingY += lineHeight;
+		for (int i = textsToDraw.length - 1; i >= 0; i--) {
+			textCanvas.drawText(textsToDraw[i].trim(), drawingX, drawingY, textPaint);
+			drawingY -= lineHeight;
 		}
+
+		return (int) Math.round(finalHeight);
+	}
+
+	public static float getActualDescentSize(String text, Paint textPaint) {
+		// find the text baseline (there seems to be no proper way to calculate *actual* (not general) descent height)
+		Rect descentBounds = new Rect();
+		textPaint.getTextBounds(text, 0, text.length(), descentBounds);
+		int textHeightNormal = descentBounds.height();
+		textPaint.getTextBounds("," + text, 0, text.length() + 1, descentBounds);
+		return (textHeightNormal < descentBounds.height()) ? 0 : textPaint.descent();
 	}
 
 	public static Paint adjustTextSize(Paint paint, int maxCharactersPerLine, int numLines, float maxWidth,
@@ -579,8 +618,7 @@ public class BitmapUtilities {
 		paint.setTextSize(newTextSize);
 
 		// do the same for height
-		FontMetricsInt metrics = paint.getFontMetricsInt();
-		float textHeight = (metrics.descent - metrics.ascent) * numLines;
+		float textHeight = Math.abs(paint.ascent() - paint.descent()) * numLines;
 		if (textHeight > maxHeight) {
 			newTextSize = Math.round(newTextSize * (maxHeight / textHeight));
 			paint.setTextSize(newTextSize);
