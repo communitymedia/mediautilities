@@ -492,7 +492,7 @@ public class BitmapUtilities {
 	 * @return The height of the drawn text, including padding
 	 */
 	public static int drawScaledText(String textString, Canvas textCanvas, Paint textPaint, int textColour,
-			int backgroundColour, int backgroundPadding, float backgroundRadius, boolean alignBottom, float leftOffset,
+			int backgroundColour, int backgroundPadding, int backgroundRadius, boolean alignBottom, float leftOffset,
 			boolean backgroundSpanWidth, float maxHeight, int maxTextSize, int maxCharactersPerLine) {
 
 		if (TextUtils.isEmpty(textString) || "".equals(textString.trim())) {
