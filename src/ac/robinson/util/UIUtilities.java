@@ -344,6 +344,13 @@ public class UIUtilities {
 		});
 	}
 
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+	public static void refreshActionBar(Activity activity) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			activity.invalidateOptionsMenu();
+		}
+	}
+
 	/**
 	 * Use reflection to configure the most common ActionBar properties (so we can target API < 11)
 	 * 

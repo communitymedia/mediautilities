@@ -50,6 +50,10 @@ import android.text.TextUtils;
  */
 public class BitmapUtilities {
 
+	// if a bitmap's width (height) is more than this many times its height (width) then the ScalingLogic.CROP option
+	// will be ignored and the bitmap will scaled to fit into the destination box to save memory
+	public static final int MAX_SAMPLE_WIDTH_HEIGHT_RATIO = 12;
+
 	public static class CacheTypeContainer {
 		public Bitmap.CompressFormat type;
 
@@ -256,23 +260,20 @@ public class BitmapUtilities {
 	 */
 	private static int calculateSampleSize(int srcWidth, int srcHeight, int dstWidth, int dstHeight,
 			ScalingLogic scalingLogic) {
+		final float srcAspect = (float) srcWidth / (float) srcHeight;
 		if (scalingLogic == ScalingLogic.FIT) {
-			final float srcAspect = (float) srcWidth / (float) srcHeight;
 			final float dstAspect = (float) dstWidth / (float) dstHeight;
-
 			if (srcAspect > dstAspect) {
-				return srcWidth / dstWidth;
+				return Math.round((float) srcWidth / (float) dstWidth);
 			} else {
-				return srcHeight / dstHeight;
+				return Math.round((float) srcHeight / (float) dstHeight);
 			}
 		} else {
-			final float srcAspect = (float) srcWidth / (float) srcHeight;
-			final float dstAspect = (float) dstWidth / (float) dstHeight;
-
-			if (srcAspect > dstAspect) {
-				return srcHeight / dstHeight;
+			boolean tooTall = (float) srcHeight / (float) srcWidth > MAX_SAMPLE_WIDTH_HEIGHT_RATIO;
+			if ((srcWidth > srcHeight && srcAspect < MAX_SAMPLE_WIDTH_HEIGHT_RATIO) || tooTall) {
+				return Math.round((float) srcHeight / (float) dstHeight);
 			} else {
-				return srcWidth / dstWidth;
+				return Math.round((float) srcWidth / (float) dstWidth);
 			}
 		}
 	}
