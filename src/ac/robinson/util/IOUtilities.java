@@ -46,6 +46,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
 import android.os.Build.VERSION;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -416,5 +417,33 @@ public class IOUtilities {
 			fileExists = newFile.exists();
 		} while (fileExists);
 		return newFile;
+	}
+
+	/**
+	 * Get the duration of an audio file using MediaPlayer
+	 * 
+	 * @param audioFile
+	 * @return the file's duration, or -1 on error
+	 */
+	public static int getAudioFileLength(File audioFile) {
+		MediaPlayer mediaPlayer = new MediaPlayer();
+		FileInputStream playerInputStream = null;
+		int audioDuration = -1;
+		try {
+			// can't play from data directory (it's private; permissions don't work), must use input stream
+			// mediaPlayer = MediaPlayer.create(activity, Uri.fromFile(audioFile));
+			playerInputStream = new FileInputStream(audioFile);
+			mediaPlayer.setDataSource(playerInputStream.getFD());
+			mediaPlayer.prepare();
+			audioDuration = mediaPlayer.getDuration();
+		} catch (Throwable t) {
+		} finally {
+			IOUtilities.closeStream(playerInputStream);
+			if (mediaPlayer != null) {
+				mediaPlayer.release();
+				mediaPlayer = null;
+			}
+		}
+		return audioDuration;
 	}
 }
