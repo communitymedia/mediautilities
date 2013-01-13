@@ -252,6 +252,9 @@ public class CustomMediaController extends FrameLayout {
 			if (mRoot != null) {
 				mRoot.clearAnimation();
 				mRoot.setVisibility(View.VISIBLE);
+				if (mPlayer != null) {
+					mPlayer.onControllerVisibilityChange(true);
+				}
 			}
 			mShowing = true;
 		} else {
@@ -298,6 +301,9 @@ public class CustomMediaController extends FrameLayout {
 			if (mRoot != null) {
 				mRoot.startAnimation(AnimationUtils.loadAnimation(mContext, android.R.anim.fade_out));
 				mRoot.setVisibility(View.GONE); // gone, rather than invisible, so we don't register button clicks
+				if (mPlayer != null) {
+					mPlayer.onControllerVisibilityChange(false);
+				}
 			}
 			mHandler.removeMessages(SHOW_PROGRESS);
 			mShowing = false;
@@ -586,5 +592,7 @@ public class CustomMediaController extends FrameLayout {
 		boolean canSeekBackward();
 
 		boolean canSeekForward();
+		
+		void onControllerVisibilityChange(boolean visible);
 	}
 }

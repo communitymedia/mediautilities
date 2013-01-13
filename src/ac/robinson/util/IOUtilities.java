@@ -349,7 +349,7 @@ public class IOUtilities {
 			textSnippet = textSnippet.substring(0, textLength > snippetLength ? snippetLength : textLength);
 		}
 
-		return textSnippet;
+		return textSnippet.trim();
 	}
 
 	public static String getFileContents(String filePath) {
