@@ -508,7 +508,11 @@ public class BitmapUtilities {
 		StringBuilder formattedString = new StringBuilder(textLength);
 		String[] stringLines = textString.split("\n");
 		int numLines = Integer.MAX_VALUE;
-		int maxLines = Math.max((int) Math.ceil(Math.sqrt(textLength / maxCharactersPerLine)) + 1, stringLines.length);
+		int maxLines = (int) Math.ceil(Math.sqrt(textLength / (float) maxCharactersPerLine));
+		if (!alignBottom) {
+			maxLines *= Math.ceil(textCanvas.getHeight() / maxHeight);
+		}
+		maxLines = Math.max(maxLines, stringLines.length) + 1;
 		int maxLineLength = 0;
 		while (numLines > maxLines) {
 			formattedString.setLength(0); // clears
