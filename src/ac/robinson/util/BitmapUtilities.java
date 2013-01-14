@@ -506,15 +506,15 @@ public class BitmapUtilities {
 		// TODO: respect user-created formatting more closely? (e.g., linebreaks and spaces)
 		int textLength = textString.length();
 		StringBuilder formattedString = new StringBuilder(textLength);
+		String[] stringLines = textString.split("\n");
 		int numLines = Integer.MAX_VALUE;
-		int maxLines = (int) Math.ceil(Math.sqrt(textLength / maxCharactersPerLine)) + 1;
+		int maxLines = Math.max((int) Math.ceil(Math.sqrt(textLength / maxCharactersPerLine)) + 1, stringLines.length);
 		int maxLineLength = 0;
 		while (numLines > maxLines) {
 			formattedString.setLength(0); // clears
 			numLines = 0;
 			maxLineLength = 0;
 			int lineLength = 0;
-			String[] stringLines = textString.split("\n");
 			for (String line : stringLines) {
 				String[] lineFragments = line.split(" ");
 				for (String fragment : lineFragments) {
