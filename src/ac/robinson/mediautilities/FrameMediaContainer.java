@@ -75,7 +75,7 @@ public class FrameMediaContainer {
 				if (validateAudioLengths) {
 					int audioDuration = IOUtilities.getAudioFileLength(mediaFile);
 					if (audioDuration > 0) {
-						preciseDuration = mediaDuration;
+						preciseDuration = audioDuration;
 					}
 				}
 				addAudioFile(mediaFile.getAbsolutePath(), preciseDuration);

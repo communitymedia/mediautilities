@@ -98,7 +98,7 @@ public class SVG {
 	 * stretched to fill the bitmap.
 	 * 
 	 * This method is particularly useful for newer devices where hardware acceleration is on by default, and so
-	 * drawPicture does not work in onDraw
+	 * drawPicture does not work in onDraw. See: https://gist.github.com/6ebe5b818652d5ccc27c
 	 * 
 	 * @return the bitmap.
 	 */
