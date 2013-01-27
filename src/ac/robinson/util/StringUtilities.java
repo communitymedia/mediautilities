@@ -30,7 +30,11 @@ public class StringUtilities {
 
 	private static final String Utf8 = "utf-8";
 	private static final String Sha1 = "sha-1";
-	
+
+	private static final String int1sd = "%01d";
+	private static final String int2sd = "%02d";
+	private static final String int3sd = "%03d";
+
 	/**
 	 * Use TextUtils.isEmpty() unless trim() is required
 	 */
@@ -53,6 +57,11 @@ public class StringUtilities {
 	}
 
 	public static String millisecondsToTimeString(long milliseconds, boolean includeMilliseconds) {
+		// simulate the old behaviour of millisecondsToTimeString (showing the full millisecond value)
+		return millisecondsToTimeString(milliseconds, includeMilliseconds, true);
+	}
+
+	public static String millisecondsToTimeString(long milliseconds, boolean includeMilliseconds, boolean highPrecision) {
 		// overestimating is better than just rounding
 		int secondsIn = (int) Math.ceil(milliseconds / 1000);
 		int millisecondsIn = ((int) milliseconds - (secondsIn * 1000));
@@ -62,10 +71,14 @@ public class StringUtilities {
 		int minutes = remainder / 60;
 		int seconds = remainder % 60;
 
-		return (hours > 0 ? hours + ":" : "") + String.format("%02d", minutes) + ":" + String.format("%02d", seconds)
-				+ (includeMilliseconds ? "." + String.format("%03d", millisecondsIn) : "");
+		return (hours > 0 ? hours + ":" : "")
+				+ (minutes > 0 ? (hours > 0 ? String.format(int2sd, minutes) : minutes) + ":" : "")
+				+ (minutes > 0 ? String.format(int2sd, seconds) : seconds)
+				+ (includeMilliseconds ? "."
+						+ (highPrecision ? String.format(int3sd, millisecondsIn) : String.format(int1sd,
+								millisecondsIn / 100)) : "");
 	}
-	
+
 	public static String sha1Hash(String input) {
 		try {
 			MessageDigest md = MessageDigest.getInstance(Sha1);
