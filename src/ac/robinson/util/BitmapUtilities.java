@@ -102,7 +102,7 @@ public class BitmapUtilities {
 		ExifInterface exifInterface;
 		try {
 			exifInterface = new ExifInterface(imagePath);
-		} catch (IOException err) {
+		} catch (IOException e) {
 			return ExifInterface.ORIENTATION_UNDEFINED;
 		}
 		return exifInterface.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
@@ -119,6 +119,38 @@ public class BitmapUtilities {
 				return 270;
 		}
 		return 0;
+	}
+
+	public static boolean rotateImage(String imagePath, boolean antiClockwise) {
+		try {
+			ExifInterface exif = new ExifInterface(imagePath);
+			int exifRotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+			int newRotation = ExifInterface.ORIENTATION_UNDEFINED;
+			switch (exifRotation) {
+				case ExifInterface.ORIENTATION_UNDEFINED: // usually means that the image's current rotation is normal
+				case ExifInterface.ORIENTATION_NORMAL:
+					newRotation = (antiClockwise ? ExifInterface.ORIENTATION_ROTATE_270
+							: ExifInterface.ORIENTATION_ROTATE_90);
+					break;
+				case ExifInterface.ORIENTATION_ROTATE_90:
+					newRotation = (antiClockwise ? ExifInterface.ORIENTATION_NORMAL
+							: ExifInterface.ORIENTATION_ROTATE_180);
+					break;
+				case ExifInterface.ORIENTATION_ROTATE_180:
+					newRotation = (antiClockwise ? ExifInterface.ORIENTATION_ROTATE_90
+							: ExifInterface.ORIENTATION_ROTATE_270);
+					break;
+				case ExifInterface.ORIENTATION_ROTATE_270:
+					newRotation = (antiClockwise ? ExifInterface.ORIENTATION_ROTATE_180
+							: ExifInterface.ORIENTATION_NORMAL);
+					break;
+			}
+			exif.setAttribute(ExifInterface.TAG_ORIENTATION, Integer.toString(newRotation));
+			exif.saveAttributes();
+			return true;
+		} catch (IOException e) {
+			return false; // couldn't read the file, or failed to set the exif attributes
+		}
 	}
 
 	public static Options getImageDimensions(String imagePath) {
