@@ -71,9 +71,11 @@ public class StringUtilities {
 		int minutes = remainder / 60;
 		int seconds = remainder % 60;
 
+		// TODO: use StringBuilder for efficiency?
 		return (hours > 0 ? hours + ":" : "")
-				+ (minutes > 0 ? (hours > 0 ? String.format(int2sd, minutes) : minutes) + ":" : "")
-				+ (minutes > 0 ? String.format(int2sd, seconds) : seconds)
+				+ (hours > 0 ? String.format(int2sd, minutes) : minutes)
+				+ ":"
+				+ String.format(int2sd, seconds)
 				+ (includeMilliseconds ? "."
 						+ (highPrecision ? String.format(int3sd, millisecondsIn) : String.format(int1sd,
 								millisecondsIn / 100)) : "");

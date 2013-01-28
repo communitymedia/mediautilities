@@ -346,7 +346,7 @@ public class CustomMediaController extends FrameLayout {
 		if (hours > 0) {
 			return mFormatter.format("%d:%02d:%02d", hours, minutes, seconds).toString();
 		} else {
-			return mFormatter.format("%02d:%02d", minutes, seconds).toString();
+			return mFormatter.format("%d:%02d", minutes, seconds).toString();
 		}
 	}
 
