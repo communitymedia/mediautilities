@@ -122,34 +122,61 @@ public class BitmapUtilities {
 	}
 
 	public static boolean rotateImage(String imagePath, boolean antiClockwise) {
-		try {
-			ExifInterface exif = new ExifInterface(imagePath);
-			int exifRotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-			int newRotation = ExifInterface.ORIENTATION_UNDEFINED;
-			switch (exifRotation) {
-				case ExifInterface.ORIENTATION_UNDEFINED: // usually means that the image's current rotation is normal
-				case ExifInterface.ORIENTATION_NORMAL:
-					newRotation = (antiClockwise ? ExifInterface.ORIENTATION_ROTATE_270
-							: ExifInterface.ORIENTATION_ROTATE_90);
-					break;
-				case ExifInterface.ORIENTATION_ROTATE_90:
-					newRotation = (antiClockwise ? ExifInterface.ORIENTATION_NORMAL
-							: ExifInterface.ORIENTATION_ROTATE_180);
-					break;
-				case ExifInterface.ORIENTATION_ROTATE_180:
-					newRotation = (antiClockwise ? ExifInterface.ORIENTATION_ROTATE_90
-							: ExifInterface.ORIENTATION_ROTATE_270);
-					break;
-				case ExifInterface.ORIENTATION_ROTATE_270:
-					newRotation = (antiClockwise ? ExifInterface.ORIENTATION_ROTATE_180
-							: ExifInterface.ORIENTATION_NORMAL);
-					break;
+		if (imagePath == null) {
+			return false;
+		}
+		// can only rotate jpeg via EXIF - must manually rotate other types of image
+		if (imagePath.endsWith(".jpg") || imagePath.endsWith(".jpeg")) {
+			try {
+				ExifInterface exif = new ExifInterface(imagePath);
+				int exifRotation = exif
+						.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+				int newRotation = ExifInterface.ORIENTATION_UNDEFINED;
+				switch (exifRotation) {
+					case ExifInterface.ORIENTATION_UNDEFINED: // usually means that the current rotation is normal
+					case ExifInterface.ORIENTATION_NORMAL:
+						newRotation = (antiClockwise ? ExifInterface.ORIENTATION_ROTATE_270
+								: ExifInterface.ORIENTATION_ROTATE_90);
+						break;
+					case ExifInterface.ORIENTATION_ROTATE_90:
+						newRotation = (antiClockwise ? ExifInterface.ORIENTATION_NORMAL
+								: ExifInterface.ORIENTATION_ROTATE_180);
+						break;
+					case ExifInterface.ORIENTATION_ROTATE_180:
+						newRotation = (antiClockwise ? ExifInterface.ORIENTATION_ROTATE_90
+								: ExifInterface.ORIENTATION_ROTATE_270);
+						break;
+					case ExifInterface.ORIENTATION_ROTATE_270:
+						newRotation = (antiClockwise ? ExifInterface.ORIENTATION_ROTATE_180
+								: ExifInterface.ORIENTATION_NORMAL);
+						break;
+				}
+				exif.setAttribute(ExifInterface.TAG_ORIENTATION, Integer.toString(newRotation));
+				exif.saveAttributes();
+				return true;
+			} catch (IOException e) {
+				return false; // couldn't read the file, or failed to set the exif attributes
 			}
-			exif.setAttribute(ExifInterface.TAG_ORIENTATION, Integer.toString(newRotation));
-			exif.saveAttributes();
-			return true;
-		} catch (IOException e) {
-			return false; // couldn't read the file, or failed to set the exif attributes
+			
+		} else {
+			// TODO: is there any way to catch potential out of memory problems here?
+			try {
+				Matrix rotationMatrix = new Matrix();
+				rotationMatrix.preRotate(antiClockwise ? -90 : 90);
+				Bitmap originalImage = BitmapFactory.decodeFile(imagePath);
+
+				if (originalImage != null) {
+					Bitmap rotatedImage = Bitmap.createBitmap(originalImage, 0, 0, originalImage.getWidth(),
+							originalImage.getHeight(), rotationMatrix, true);
+					originalImage.recycle();
+
+					boolean success = saveBitmap(rotatedImage, Bitmap.CompressFormat.PNG, 100, new File(imagePath));
+					rotatedImage.recycle();
+					return success;
+				}
+			} catch (Throwable t) {
+			}
+			return false;
 		}
 	}
 
@@ -496,6 +523,7 @@ public class BitmapUtilities {
 			bitmap.compress(format, quality, bufferedOutputStream);
 			bufferedOutputStream.flush();
 			bufferedOutputStream.close();
+			return true;
 		} catch (FileNotFoundException e) {
 			return false;
 		} catch (IOException e) {
@@ -503,7 +531,6 @@ public class BitmapUtilities {
 		} finally {
 			IOUtilities.closeStream(bufferedOutputStream);
 		}
-		return true;
 	}
 
 	/**
