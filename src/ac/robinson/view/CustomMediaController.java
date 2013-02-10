@@ -392,8 +392,8 @@ public class CustomMediaController extends FrameLayout {
 		if (event.getRepeatCount() == 0
 				&& event.getAction() == KeyEvent.ACTION_DOWN
 				&& (keyCode == KeyEvent.KEYCODE_HEADSETHOOK || keyCode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE || keyCode == KeyEvent.KEYCODE_SPACE)) {
-			doPauseResume();
 			show();
+			doPauseResume();
 			if (mPauseButton != null) {
 				mPauseButton.requestFocus();
 			}
@@ -415,8 +415,8 @@ public class CustomMediaController extends FrameLayout {
 
 	private View.OnClickListener mPauseListener = new View.OnClickListener() {
 		public void onClick(View v) {
-			doPauseResume();
 			show();
+			doPauseResume();
 		}
 	};
 
