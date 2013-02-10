@@ -20,7 +20,6 @@
 
 package ac.robinson.util;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
@@ -44,7 +43,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.os.Build.VERSION;
@@ -98,27 +96,10 @@ public class IOUtilities {
 
 	public static boolean copyResource(Resources resources, int resourceID, File targetLocation) {
 		Bitmap resourceImage = BitmapFactory.decodeResource(resources, resourceID);
-		FileOutputStream fileOutputStream = null;
-		BufferedOutputStream bufferedOutputStream = null;
-		try {
-			fileOutputStream = new FileOutputStream(targetLocation);
-			bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
-			resourceImage.compress(CompressFormat.PNG, 100, bufferedOutputStream);
-			bufferedOutputStream.flush();
-			bufferedOutputStream.close();
-		} catch (FileNotFoundException e) {
-			return false;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return false;
-		} finally {
-			try {
-				bufferedOutputStream.close();
-			} catch (NullPointerException e) {
-			} catch (IOException e) {
-			}
+		if (resourceImage != null) {
+			return BitmapUtilities.saveBitmap(resourceImage, Bitmap.CompressFormat.PNG, 100, targetLocation);
 		}
-		return true;
+		return false;
 	}
 
 	public static byte[] readFileToByteArray(String file) throws IOException {
