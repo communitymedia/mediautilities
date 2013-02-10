@@ -46,6 +46,9 @@ public class AutoResizeTextView extends TextView {
 	// Lower bounds for text size
 	private float mMinTextSize = MIN_TEXT_SIZE;
 
+	// Keep track of the max height for detecting when a resize is necessary
+	private int mMaxHeight = 0;
+
 	// Text view line spacing multiplier
 	private float mSpacingMult = 1.0f;
 
@@ -87,6 +90,17 @@ public class AutoResizeTextView extends TextView {
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		if (w != oldw || h != oldh) {
+			mNeedsResize = true;
+		}
+	}
+
+	/**
+	 * If the text view max height is changed, set the force resize flag to true
+	 */
+	@Override
+	public void setMaxHeight(int maxHeight) {
+		if (maxHeight != mMaxHeight) {
+			mMaxHeight = maxHeight;
 			mNeedsResize = true;
 		}
 	}
@@ -227,6 +241,11 @@ public class AutoResizeTextView extends TextView {
 		// Do not resize if the view does not have dimensions or there is no text
 		if (text == null || text.length() == 0 || height <= 0 || width <= 0 || mTextSize == 0) {
 			return;
+		}
+
+		// Obey the requested maximum height
+		if (mMaxHeight > 0 && height > mMaxHeight) {
+			height = mMaxHeight;
 		}
 
 		// Get the text view's paint object
