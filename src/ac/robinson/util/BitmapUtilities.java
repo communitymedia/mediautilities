@@ -157,7 +157,7 @@ public class BitmapUtilities {
 			} catch (IOException e) {
 				return false; // couldn't read the file, or failed to set the exif attributes
 			}
-			
+
 		} else {
 			// TODO: is there any way to catch potential out of memory problems here?
 			try {
@@ -421,19 +421,22 @@ public class BitmapUtilities {
 		try {
 			fileOutputStream = new FileOutputStream(saveTo);
 			boolean imageSaved = false;
-			if (flipHorizontally) { // need to flip front camera images horizontally; only done for front as we'd be out
-									// of memory for back camera
+			if (flipHorizontally) { // need to flip front camera images horizontally as the camera is reversed
 				try {
 					Bitmap newImage = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
-					Matrix flipMatrix = new Matrix();
-					flipMatrix.postScale(-1.0f, 1.0f);
-					newImage = Bitmap.createBitmap(newImage, 0, 0, newImage.getWidth(), newImage.getHeight(),
-							flipMatrix, true);
-					byteOutputStream = new BufferedOutputStream(fileOutputStream);
-					newImage.compress(CompressFormat.JPEG, quality, byteOutputStream);
-					byteOutputStream.flush();
-					byteOutputStream.close();
-					imageSaved = true;
+					if (newImage != null) {
+						Matrix flipMatrix = new Matrix();
+						flipMatrix.postScale(-1.0f, 1.0f);
+						newImage = Bitmap.createBitmap(newImage, 0, 0, newImage.getWidth(), newImage.getHeight(),
+								flipMatrix, true);
+						byteOutputStream = new BufferedOutputStream(fileOutputStream);
+						newImage.compress(CompressFormat.JPEG, quality, byteOutputStream);
+						byteOutputStream.flush();
+						byteOutputStream.close();
+						imageSaved = true;
+					} else {
+						return false;
+					}
 				} catch (OutOfMemoryError e) {
 				} // probably doesn't actually catch...
 			}
@@ -455,33 +458,32 @@ public class BitmapUtilities {
 	 */
 	public static boolean saveYUYToJPEG(byte[] imageData, File saveTo, int format, int quality, int width, int height,
 			int rotation, boolean flipHorizontally) {
-		FileOutputStream fileOutputStream = null;
 		YuvImage yuvImg = null;
 		try {
-			fileOutputStream = new FileOutputStream(saveTo);
-
 			yuvImg = new YuvImage(imageData, format, width, height, null);
 
 			ByteArrayOutputStream jpegOutput = new ByteArrayOutputStream(imageData.length);
-			yuvImg.compressToJpeg(new Rect(0, 0, width - 1, height - 1), 90, jpegOutput);
+			yuvImg.compressToJpeg(new Rect(0, 0, width - 1, height - 1), 90, jpegOutput); // TODO: extract 90 constant
 			Bitmap yuvBitmap = BitmapFactory.decodeByteArray(jpegOutput.toByteArray(), 0, jpegOutput.size());
 
-			Matrix imageMatrix = new Matrix();
-			if (rotation != 0) {
-				imageMatrix.postRotate(rotation);
-			}
-			if (flipHorizontally) {
-				// imageMatrix.postScale(-1.0f, 1.0f);
-			}
+			if (yuvBitmap != null) {
+				Matrix imageMatrix = new Matrix();
+				if (rotation != 0) {
+					imageMatrix.postRotate(rotation);
+				}
+				if (flipHorizontally) {
+					// imageMatrix.postScale(-1.0f, 1.0f);
+				}
 
-			yuvBitmap = Bitmap.createBitmap(yuvBitmap, 0, 0, yuvBitmap.getWidth(), yuvBitmap.getHeight(), imageMatrix,
-					true);
-			yuvBitmap.compress(CompressFormat.JPEG, quality, fileOutputStream);
-
-		} catch (FileNotFoundException e) {
+				yuvBitmap = Bitmap.createBitmap(yuvBitmap, 0, 0, yuvBitmap.getWidth(), yuvBitmap.getHeight(),
+						imageMatrix, true);
+				BitmapUtilities.saveBitmap(yuvBitmap, Bitmap.CompressFormat.JPEG, quality, saveTo);
+				return true;
+			}
+			return false;
+		} catch (IllegalArgumentException e) {
 			return false;
 		}
-		return true;
 	}
 
 	/**
