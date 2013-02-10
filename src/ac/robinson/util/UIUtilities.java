@@ -186,16 +186,34 @@ public class UIUtilities {
 		}
 	}
 
-	public static void setFullScreen(Window window) {
-		WindowManager.LayoutParams attrs = window.getAttributes();
-		attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
-		window.setAttributes(attrs);
+	public static void setFullScreen(final Window window) {
+		Handler handler = new Handler();
+		handler.post(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					WindowManager.LayoutParams attrs = window.getAttributes();
+					attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
+					window.setAttributes(attrs);
+				} catch (Throwable t) {
+				}
+			}
+		});
 	}
 
-	public static void setNonFullScreen(Window window) {
-		WindowManager.LayoutParams attrs = window.getAttributes();
-		attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		window.setAttributes(attrs);
+	public static void setNonFullScreen(final Window window) {
+		Handler handler = new Handler();
+		handler.post(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					WindowManager.LayoutParams attrs = window.getAttributes();
+					attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
+					window.setAttributes(attrs);
+				} catch (Throwable t) {
+				}
+			}
+		});
 	}
 
 	/**
