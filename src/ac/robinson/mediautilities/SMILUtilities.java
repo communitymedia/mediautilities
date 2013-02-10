@@ -23,7 +23,6 @@ package ac.robinson.mediautilities;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,7 +48,6 @@ import ac.robinson.util.ImageCacheUtilities;
 import ac.robinson.util.StringUtilities;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -314,16 +312,9 @@ public class SMILUtilities {
 		Bitmap backgroundBitmap = Bitmap
 				.createBitmap(2, 2, ImageCacheUtilities.mBitmapFactoryOptions.inPreferredConfig);
 		backgroundBitmap.eraseColor(backgroundColour);
-		FileOutputStream backgroundOutputStream = null;
-		try {
-			backgroundOutputStream = new FileOutputStream(tempBackgroundFile);
-			backgroundBitmap.compress(CompressFormat.PNG, 100, backgroundOutputStream); // quality is ignored
+		if (BitmapUtilities.saveBitmap(backgroundBitmap, Bitmap.CompressFormat.PNG, 100, tempBackgroundFile)) {
 			filesToSend.add(Uri.fromFile(tempBackgroundFile));
-		} catch (Exception e) {
-			// backgrounds will bleed through from other frames
-		} finally {
-			IOUtilities.closeStream(backgroundOutputStream);
-		}
+		} // if this fails, backgrounds will bleed through from other frames
 
 		// create the SMIL file
 		try {
@@ -469,15 +460,7 @@ public class SMILUtilities {
 					// savedFile = new File(outputDirectory, getFormattedFileName(narrativeName, frame.mFrameSequenceId,
 					// 0, "png"));
 					savedFile = new File(outputDirectory, frame.mFrameId + ".png");
-
-					FileOutputStream fileOutputStream = null;
-					try {
-						fileOutputStream = new FileOutputStream(savedFile);
-						textBitmapCropped.compress(CompressFormat.PNG, 100, fileOutputStream); // quality is ignored
-					} catch (Exception e) {
-					} finally {
-						IOUtilities.closeStream(fileOutputStream);
-					}
+					BitmapUtilities.saveBitmap(textBitmapCropped, Bitmap.CompressFormat.PNG, 100, savedFile);
 					textBitmapCanvas = null;
 
 					filesToSend.add(Uri.fromFile(savedFile));
@@ -518,18 +501,11 @@ public class SMILUtilities {
 				Canvas audioIconCanvas = new Canvas(audioIconBitmap);
 				audioIconCanvas.drawPicture(audioSVG.getPicture(), new RectF(audioBitmapLeft, audioBitmapTop,
 						audioBitmapLeft + audioBitmapSize, audioBitmapTop + audioBitmapSize));
-				FileOutputStream audioIconOutputStream = null;
-				try {
-					audioIconOutputStream = new FileOutputStream(tempAudioIconFile);
-					audioIconBitmap.compress(CompressFormat.PNG, 100, audioIconOutputStream); // quality is ignored
+				if (BitmapUtilities.saveBitmap(audioIconBitmap, Bitmap.CompressFormat.PNG, 100, tempAudioIconFile)) {
 					addSmilTag(smilSerializer, tagNamespace, "meta-data", tempAudioIconFile.getName(), 2, "fill-area",
 							false);
 					filesToSend.add(Uri.fromFile(tempAudioIconFile));
-				} catch (Exception e) {
-					// audio playback won't have an icon
-				} finally {
-					IOUtilities.closeStream(audioIconOutputStream);
-				}
+				} // if this fails, audio playback won't have an icon
 				audioIconCanvas = null;
 			}
 			addSmilTag(smilSerializer, tagNamespace, "meta-data", storyPlayerFile.getName(), 2, "fill-area", false);
