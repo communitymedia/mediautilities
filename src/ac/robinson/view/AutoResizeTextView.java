@@ -39,19 +39,19 @@ public class AutoResizeTextView extends TextView {
 	private float mTextSize;
 
 	// Temporary upper bounds on the starting text size
-	private float mMaxTextSize = 0;
+	private float mMaxTextSize = 0f;
 
 	// Lower bounds for text size (loaded from resizable_text_minimum_size on create)
-	private float mMinTextSize = 8;
+	private float mMinTextSize = 8f;
 
 	// Keep track of the max height for detecting when a resize is necessary
 	private int mMaxHeight = 0;
 
 	// Text view line spacing multiplier
-	private float mSpacingMult = 1.0f;
+	private float mSpacingMult = 1f;
 
 	// Text view additional line spacing
-	private float mSpacingAdd = 0.0f;
+	private float mSpacingAdd = 0f;
 
 	// Add ellipsis to text that overflows at the smallest text size
 	private boolean mAddEllipsis = true;
@@ -94,14 +94,12 @@ public class AutoResizeTextView extends TextView {
 	}
 
 	/**
-	 * If the text view max height is changed, set the force resize flag to true
+	 * Store the max height value so we can force the text to obey it
 	 */
 	@Override
 	public void setMaxHeight(int maxHeight) {
-		if (maxHeight != mMaxHeight) {
-			mMaxHeight = maxHeight;
-			mNeedsResize = true;
-		}
+		super.setMaxHeight(maxHeight);
+		mMaxHeight = maxHeight;
 	}
 
 	/**
@@ -147,9 +145,11 @@ public class AutoResizeTextView extends TextView {
 	 * @param maxTextSize
 	 */
 	public void setMaxTextSize(float maxTextSize) {
-		mMaxTextSize = maxTextSize;
-		requestLayout();
-		invalidate();
+		if (maxTextSize != mMaxTextSize) {
+			mMaxTextSize = maxTextSize;
+			requestLayout();
+			invalidate();
+		}
 	}
 
 	/**
@@ -167,9 +167,12 @@ public class AutoResizeTextView extends TextView {
 	 * @param minTextSize
 	 */
 	public void setMinTextSize(float minTextSize) {
-		mMinTextSize = minTextSize;
-		requestLayout();
-		invalidate();
+		if (minTextSize != mMinTextSize) {
+			mMinTextSize = minTextSize;
+			mNeedsResize = true;
+			requestLayout();
+			invalidate();
+		}
 	}
 
 	/**
@@ -242,7 +245,7 @@ public class AutoResizeTextView extends TextView {
 			return;
 		}
 
-		// Obey the requested maximum height
+		// Obey the requested maximum height of the view
 		if (mMaxHeight > 0 && height > mMaxHeight) {
 			height = mMaxHeight;
 		}
