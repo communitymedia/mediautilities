@@ -9,4 +9,6 @@
         <attr name="resource" format="integer" />
     </declare-styleable>
 
+    <dimen name="resizable_text_minimum_size">12sp</dimen> <!-- from http://developer.android.com/design/style/typography.html -->
+
 </resources>

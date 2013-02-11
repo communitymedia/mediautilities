@@ -10,6 +10,7 @@
 
 package ac.robinson.view;
 
+import ac.robinson.mediautilities.R;
 import android.content.Context;
 import android.text.Layout.Alignment;
 import android.text.StaticLayout;
@@ -19,9 +20,6 @@ import android.util.TypedValue;
 import android.widget.TextView;
 
 public class AutoResizeTextView extends TextView {
-
-	// Minimum text size for this text view
-	public static final float MIN_TEXT_SIZE = 20;
 
 	// Interface for resize notifications
 	public interface OnTextResizeListener {
@@ -43,8 +41,8 @@ public class AutoResizeTextView extends TextView {
 	// Temporary upper bounds on the starting text size
 	private float mMaxTextSize = 0;
 
-	// Lower bounds for text size
-	private float mMinTextSize = MIN_TEXT_SIZE;
+	// Lower bounds for text size (loaded from resizable_text_minimum_size on create)
+	private float mMinTextSize = 8;
 
 	// Keep track of the max height for detecting when a resize is necessary
 	private int mMaxHeight = 0;
@@ -72,6 +70,7 @@ public class AutoResizeTextView extends TextView {
 	public AutoResizeTextView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 		mTextSize = getTextSize();
+		mMinTextSize = context.getResources().getDimensionPixelSize(R.dimen.resizable_text_minimum_size);
 	}
 
 	/**
