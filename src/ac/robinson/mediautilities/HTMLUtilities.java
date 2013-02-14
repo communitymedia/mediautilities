@@ -54,10 +54,21 @@ public class HTMLUtilities {
 		}
 		boolean fileError = false;
 
+		final String partsIdentifier = "[PARTS]";
+		final String widthIdentifier = "[WIDTH]";
+		final String heightIdentifier = "[HEIGHT]";
+		final String halfWidthIdentifier = "[HALF-WIDTH]";
+		final String halfHeightIdentifier = "[HALF-HEIGHT]";
+		final String playerBarHeightIdentifier = "[PLAYER-BAR-HEIGHT]";
+		final String playButtonIconIdentifier = "[PLAY-BUTTON-ICON]";
+		final String pauseButtonIconIdentifier = "[PAUSE-BUTTON-ICON]";
+
 		// should really do proper checking on these
 		final int outputWidth = (Integer) settings.get(MediaUtilities.KEY_OUTPUT_WIDTH);
 		final int outputHeight = (Integer) settings.get(MediaUtilities.KEY_OUTPUT_HEIGHT);
 		int playerBarAdjustment = 0; // loaded from first line of HTML input file
+		String playButtonIcon = "";
+		String pauseButtonIcon = "";
 
 		InputStream playerFileTemplateStream = res.openRawResource(R.raw.html_player);
 		BufferedReader playerFileTemplateReader = new BufferedReader(new InputStreamReader(playerFileTemplateStream));
@@ -66,12 +77,16 @@ public class HTMLUtilities {
 		try {
 			playerOutputFileWriter = new BufferedWriter(new FileWriter(outputFile));
 			while ((readLine = playerFileTemplateReader.readLine()) != null) {
-				if (readLine.contains("[PLAYER-BAR-HEIGHT]")) {
+				if (readLine.contains(playerBarHeightIdentifier) && playerBarAdjustment == 0) {
 					try {
-						playerBarAdjustment = Integer.parseInt(readLine.replace("[PLAYER-BAR-HEIGHT]", ""));
+						playerBarAdjustment = Integer.parseInt(readLine.replace(playerBarHeightIdentifier, ""));
 					} catch (Throwable t) {
 					}
-				} else if (readLine.contains("[PARTS]")) {
+				} else if (readLine.contains(playButtonIconIdentifier) && "".equals(playButtonIcon)) {
+					playButtonIcon = readLine.replace(playButtonIconIdentifier, "");
+				} else if (readLine.contains(pauseButtonIconIdentifier) && "".equals(pauseButtonIcon)) {
+					pauseButtonIcon = readLine.replace(pauseButtonIconIdentifier, "");
+				} else if (readLine.contains(partsIdentifier)) {
 
 					// find all the story components
 					int frameId = 0;
@@ -85,7 +100,7 @@ public class HTMLUtilities {
 						textLoaded = false;
 						audioLoaded = false;
 
-						playerOutputFileWriter.write("<part id=\"" + frameId + "\">\n");
+						playerOutputFileWriter.write("<span id=\"" + frameId + "\">\n");
 
 						if (frame.mImagePath != null) {
 							playerOutputFileWriter.write("<img class=\"");
@@ -133,6 +148,7 @@ public class HTMLUtilities {
 								playerOutputFileWriter.write("<img class=\"audio-icon\" alt=\"audio-icon\">\n");
 							}
 
+							// TODO: use the correct type for other files (e.g. mp3)
 							playerOutputFileWriter.write("<audio src=\"data:audio/mpeg;base64,");
 							playerOutputFileWriter.write(Base64.encodeToString(
 									IOUtilities.readFileToByteArray(audioPath), 0));
@@ -140,16 +156,18 @@ public class HTMLUtilities {
 							audioLoaded = true;
 						}
 
-						playerOutputFileWriter.write("</part>\n");
+						playerOutputFileWriter.write("</span>\n");
 
 					}
 
 				} else {
-					readLine = readLine.replace("[WIDTH]", Integer.toString(outputWidth));
-					readLine = readLine.replace("[HEIGHT]", Integer.toString(outputHeight));
-					readLine = readLine.replace("[HALF-WIDTH]", Integer.toString(outputWidth / 2));
-					readLine = readLine.replace("[HALF-HEIGHT]",
+					readLine = readLine.replace(widthIdentifier, Integer.toString(outputWidth));
+					readLine = readLine.replace(heightIdentifier, Integer.toString(outputHeight));
+					readLine = readLine.replace(halfWidthIdentifier, Integer.toString(outputWidth / 2));
+					readLine = readLine.replace(halfHeightIdentifier,
 							Integer.toString((outputHeight + playerBarAdjustment) / 2));
+					readLine = readLine.replace(playButtonIconIdentifier, playButtonIcon);
+					readLine = readLine.replace(pauseButtonIconIdentifier, pauseButtonIcon);
 					playerOutputFileWriter.write(readLine + '\n');
 				}
 			}
