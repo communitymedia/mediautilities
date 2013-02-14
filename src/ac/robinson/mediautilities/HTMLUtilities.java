@@ -57,9 +57,8 @@ public class HTMLUtilities {
 		// should really do proper checking on these
 		final int outputWidth = (Integer) settings.get(MediaUtilities.KEY_OUTPUT_WIDTH);
 		final int outputHeight = (Integer) settings.get(MediaUtilities.KEY_OUTPUT_HEIGHT);
-		final int playerBarAdjustment = (Integer) settings.get(MediaUtilities.KEY_PLAYER_BAR_ADJUSTMENT);
+		int playerBarAdjustment = 0; // loaded from first line of HTML input file
 
-		// TODO: scale image size to make sure it is small enough to fit in the container
 		InputStream playerFileTemplateStream = res.openRawResource(R.raw.html_player);
 		BufferedReader playerFileTemplateReader = new BufferedReader(new InputStreamReader(playerFileTemplateStream));
 		BufferedWriter playerOutputFileWriter = null;
@@ -67,7 +66,12 @@ public class HTMLUtilities {
 		try {
 			playerOutputFileWriter = new BufferedWriter(new FileWriter(outputFile));
 			while ((readLine = playerFileTemplateReader.readLine()) != null) {
-				if (readLine.contains("[PARTS]")) {
+				if (readLine.contains("[PLAYER-BAR-HEIGHT]")) {
+					try {
+						playerBarAdjustment = Integer.parseInt(readLine.replace("[PLAYER-BAR-HEIGHT]", ""));
+					} catch (Throwable t) {
+					}
+				} else if (readLine.contains("[PARTS]")) {
 
 					// find all the story components
 					int frameId = 0;

@@ -1,3 +1,4 @@
+[PLAYER-BAR-HEIGHT]42
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -10,6 +11,7 @@ body {
 	font-family:sans-serif;
 	font-size:200%;
 	background-color:#000;
+	overflow:hidden;
 }
 
 narrative, part, nav {
@@ -26,15 +28,16 @@ narrative.player {
 
 narrative.player part {
 	display:none; /* so we don't get a flash of other frames at the start */
-	width:[WIDTH]px; /* to be added from actual photo sizes */
+	width:[WIDTH]px; /* added from actual photo sizes */
 	height:[HEIGHT]px;
 	position:absolute;
 	top:50%;
 	left:50%;
-	margin:-[HALF-HEIGHT]px auto auto -[HALF-WIDTH]px; /* top was -341 (rather than -319) to include playback bar height */
+	margin:-[HALF-HEIGHT]px auto auto -[HALF-WIDTH]px; /* top is larger to include playback bar height */
 	border:1px solid #525252;
 	text-align:center;
 	overflow:hidden;
+	z-index:-1;
 }
 
 narrative.player part p {
@@ -70,6 +73,7 @@ narrative.player part img.audio-icon {
 
 narrative.player nav {
 	width:100%;
+	height:37px;
 	position:absolute;
 	float:left;
 	bottom:0;
@@ -88,7 +92,8 @@ narrative.player nav {
 
 input[type='range'] {
 	-webkit-appearance: none !important;
-	width:500px;
+	width:60%;
+	max-width:600px;
 	height:12px;
 	vertical-align:middle;
 	border:1px solid #525252;
@@ -295,6 +300,21 @@ var play_narrative = function() {
 			set_current_frame(0);
 			document.getElementById('play-pause').onclick = play_pause; //TODO: also use onmouseup?
 		}
+		
+		document.onkeydown = function(event) {
+			event = event || window.event;
+			switch (event.keyCode) {
+				case 32:
+					play_pause();
+					break;
+				case 37:
+					previous_frame();
+					break;
+				case 39:
+					next_frame();
+					break;
+			}
+		};
 	};
 }();
 window.onload = play_narrative;
