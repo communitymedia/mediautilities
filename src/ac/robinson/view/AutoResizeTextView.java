@@ -27,7 +27,7 @@ public class AutoResizeTextView extends TextView {
 	}
 
 	// Our ellipse string
-	private static final String mEllipsis = "...";
+	private String mEllipsis = "É";
 
 	// Registered resize listener
 	private OnTextResizeListener mTextResizeListener;
@@ -70,6 +70,7 @@ public class AutoResizeTextView extends TextView {
 	public AutoResizeTextView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 		mTextSize = getTextSize();
+		mEllipsis = context.getString(R.string.textview_ellipsis);
 		mMinTextSize = context.getResources().getDimensionPixelSize(R.dimen.resizable_text_minimum_size);
 	}
 
