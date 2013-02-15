@@ -136,7 +136,7 @@ public class HTMLUtilities {
 							}
 
 							playerOutputFileWriter.write("<p" + textPositioning + ">");
-							playerOutputFileWriter.write(frame.mTextContent);
+							playerOutputFileWriter.write(frame.mTextContent.replace("\n", "<br>"));
 							playerOutputFileWriter.write("</p>\n");
 							textLoaded = true;
 						}
