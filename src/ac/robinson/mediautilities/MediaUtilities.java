@@ -67,6 +67,5 @@ public class MediaUtilities {
 	public static final int KEY_MAX_TEXT_HEIGHT_WITH_IMAGE = 13;
 	public static final int KEY_IMAGE_QUALITY = 14;
 	public static final int KEY_AUDIO_RESOURCE_ID = 15;
-	public static final int KEY_COPY_FILES_TO_OUTPUT = 16;
-	public static final int KEY_GENERATE_CONTAINER_ONLY = 17;
+	public static final int KEY_GENERATE_CONTAINER_ONLY = 16;
 }

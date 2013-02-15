@@ -273,8 +273,6 @@ public class SMILUtilities {
 		final int textMaxHeightWithImage = (Integer) settings.get(MediaUtilities.KEY_MAX_TEXT_HEIGHT_WITH_IMAGE);
 		final int audioResourceId = (Integer) settings.get(MediaUtilities.KEY_AUDIO_RESOURCE_ID);
 
-		final boolean copyFilesToOutput = (Boolean) settings.get(MediaUtilities.KEY_COPY_FILES_TO_OUTPUT);
-
 		// start the XML (before adding so we know if there's a problem)
 		BufferedWriter smilFileWriter = null;
 		try {
@@ -400,7 +398,8 @@ public class SMILUtilities {
 				displayMediaRegion = "audio-icon";
 
 				if (frame.mImagePath != null && new File(frame.mImagePath).exists()) {
-					if (copyFilesToOutput) { // so we can send private files
+					// output files must be in a public directory for sending (/data/ directory will *not* work)
+					if (IOUtilities.isInternalPath(frame.mImagePath)) { // so we can send private files
 						savedFile = copySmilFileToOutput(frame.mImagePath, outputDirectory, narrativeName,
 								frame.mFrameSequenceId, 0, IOUtilities.getFileExtension(frame.mImagePath));
 					} else {
@@ -417,7 +416,8 @@ public class SMILUtilities {
 				audioId = 0;
 				for (String audioPath : frame.mAudioPaths) {
 					if (audioPath != null && new File(audioPath).exists()) {
-						if (copyFilesToOutput) { // so we can send private files
+						// output files must be in a public directory for sending (/data/ directory will *not* work)
+						if (IOUtilities.isInternalPath(audioPath)) { // so we can send private files
 							savedFile = copySmilFileToOutput(audioPath, outputDirectory, narrativeName,
 									frame.mFrameSequenceId, audioId + 1, IOUtilities.getFileExtension(audioPath));
 						} else {

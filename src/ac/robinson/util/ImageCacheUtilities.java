@@ -28,6 +28,7 @@ import java.util.HashMap;
 import ac.robinson.view.FastBitmapDrawable;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.provider.MediaStore;
 
 public class ImageCacheUtilities {
 
@@ -55,7 +56,11 @@ public class ImageCacheUtilities {
 		}
 
 		try {
-			cacheDirectory = IOUtilities.ensureDirectoryExists(cacheDirectory);
+			if (!cacheDirectory.exists()) {
+				cacheDirectory.mkdirs();
+				// TODO: does this actually work for stopping the media scanner?
+				new File(cacheDirectory, MediaStore.MEDIA_IGNORE_FILENAME).createNewFile(); // prevent media scanner
+			}
 		} catch (IOException e) {
 			return false;
 		}

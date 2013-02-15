@@ -35,19 +35,15 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.UUID;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
-import android.os.Build.VERSION;
 import android.os.Environment;
-import android.provider.MediaStore;
 
 public class IOUtilities {
 	public static final int IO_BUFFER_SIZE = 4 * 1024;
@@ -112,8 +108,9 @@ public class IOUtilities {
 			// get and check length
 			long longlength = f.length();
 			int length = (int) longlength;
-			if (length != longlength)
+			if (length != longlength) {
 				throw new IOException("File size >= 2 GB");
+			}
 
 			// read file and return data
 			byte[] data = new byte[length];
@@ -134,21 +131,10 @@ public class IOUtilities {
 			try {
 				stream.close();
 				return true;
-			} catch (IOException e) {
-				// Log.e(LOG_TAG, "Could not close stream", e);
 			} catch (Throwable t) {
 			}
 		}
 		return false;
-	}
-
-	public static File ensureDirectoryExists(File directory) throws IOException {
-		if (!directory.exists()) {
-			directory.mkdirs();
-			// TODO: does this actually work for stopping the media scanner?
-			new File(directory, MediaStore.MEDIA_IGNORE_FILENAME).createNewFile(); // don't media scan
-		}
-		return directory;
 	}
 
 	public static void setFullyPublic(File file) {
@@ -157,47 +143,52 @@ public class IOUtilities {
 		file.setExecutable(true, false);
 	}
 
-	public static File getNewCachePath(Context context, String pathName) {
-		return getNewCachePath(context, pathName, false);
-	}
-
-	public static File getNewCachePath(Context context, String pathName, boolean deleteExisting) {
-		File newCacheDir = new File(context.getCacheDir(), pathName);
-		if (!newCacheDir.exists()) {
-			if (!newCacheDir.mkdirs()) {
-				return null;
-			}
-		} else if (deleteExisting) {
-			if (newCacheDir.isDirectory()) {
-				for (File child : newCacheDir.listFiles()) {
-					deleteRecursive(child);
-				}
-			}
-		}
-		return newCacheDir;
-	}
-
 	public static boolean externalStorageIsWritable() {
 		String state = Environment.getExternalStorageState();
 		if (Environment.MEDIA_MOUNTED.equals(state)) {
-			return true; // available and writeable
+			return true; // available and writable
 		} else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
 			return false; // available but read only
 		} else {
 			return false; // not available
 		}
-
 	}
 
-	// TODO: keep track of states:
-	// http://developer.android.com/reference/android/os/Environment.html#getExternalStorageDirectory()
-	public static File getNewStoragePath(Context context, String pathName, boolean preferExternal) {
-		File newFilesDir;
+	public static File getNewCachePath(Context context, String pathName, boolean preferExternal, boolean deleteExisting) {
+		File cacheDir = null;
 		if (preferExternal && externalStorageIsWritable()) {
-			newFilesDir = new File(context.getExternalFilesDir(null), pathName);
-		} else {
-			newFilesDir = new File(context.getFilesDir(), pathName);
+			cacheDir = context.getExternalCacheDir();
 		}
+		if (cacheDir == null) {
+			cacheDir = context.getCacheDir();
+		}
+		if (cacheDir == null) {
+			return null; // sometimes getCacheDir returns null - perhaps when low on space?
+		}
+		File newCacheDir = new File(cacheDir, pathName);
+		if (deleteExisting && newCacheDir.isDirectory()) {
+			deleteRecursive(newCacheDir);
+		}
+		if (!newCacheDir.exists()) {
+			if (!newCacheDir.mkdirs()) {
+				return null;
+			}
+		}
+		return newCacheDir;
+	}
+
+	public static File getNewStoragePath(Context context, String pathName, boolean preferExternal) {
+		File filesDir = null;
+		if (preferExternal && externalStorageIsWritable()) {
+			filesDir = context.getExternalFilesDir(null);
+		}
+		if (filesDir == null) {
+			filesDir = context.getFilesDir();
+		}
+		if (filesDir == null) {
+			return null; // sometimes getFilesDir returns null - perhaps when low on space?
+		}
+		File newFilesDir = new File(filesDir, pathName);
 		if (!newFilesDir.exists()) {
 			if (!newFilesDir.mkdirs()) {
 				return null;
@@ -206,19 +197,27 @@ public class IOUtilities {
 		return newFilesDir;
 	}
 
-	public static File getExternalStoragePath(Context context, String pathName) {
-		File newFilesDir;
-		if (externalStorageIsWritable()) {
-			newFilesDir = new File(context.getExternalFilesDir(null), pathName);
+	public static boolean isInstalledOnSdCard(Context context) {
+		// see: http://stackoverflow.com/questions/4004650/
+		PackageManager packageManager = context.getPackageManager();
+		try {
+			PackageInfo packageInfo = packageManager.getPackageInfo(context.getPackageName(), 0);
+			ApplicationInfo applicationInfo = packageInfo.applicationInfo;
+			return (applicationInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) == ApplicationInfo.FLAG_EXTERNAL_STORAGE;
+		} catch (Throwable t) {
+			return false;
+		}
+	}
+
+	public static boolean isInternalPath(String filePath) {
+		File dataDirectory = Environment.getDataDirectory();
+		String dataDirectoryString;
+		if (dataDirectory == null) { // can't trust anything on Android...
+			dataDirectoryString = "/data";
 		} else {
-			return null;
+			dataDirectoryString = dataDirectory.getAbsolutePath();
 		}
-		if (!newFilesDir.exists()) {
-			if (!newFilesDir.mkdirs()) {
-				return null;
-			}
-		}
-		return newFilesDir;
+		return filePath.startsWith(dataDirectoryString);
 	}
 
 	public static boolean deleteRecursive(File fileOrDirectory) {
@@ -227,58 +226,7 @@ public class IOUtilities {
 				deleteRecursive(child);
 			}
 		}
-
 		return fileOrDirectory.delete();
-	}
-
-	public static boolean deleteFiles(File file) {
-		if (file.exists()) {
-			String deleteCmd = "rm -r " + file.getAbsolutePath();
-			Runtime runtime = Runtime.getRuntime();
-			try {
-				runtime.exec(deleteCmd);
-				return true;
-			} catch (IOException e) {
-			}
-		}
-		return false;
-	}
-
-	// see:
-	// http://stackoverflow.com/questions/4004650/android-2-2-how-do-i-detect-if-i-am-installed-on-the-sdcard-or-not
-	@SuppressLint("SdCardPath")
-	public static boolean isInstalledOnSdCard(Context context) {
-
-		// better method for API level 8 and higher
-		if (VERSION.SDK_INT > android.os.Build.VERSION_CODES.ECLAIR_MR1) {
-			PackageManager packageManager = context.getPackageManager();
-			try {
-				PackageInfo packageInfo = packageManager.getPackageInfo(context.getPackageName(), 0);
-				ApplicationInfo applicationInfo = packageInfo.applicationInfo;
-				return (applicationInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) == ApplicationInfo.FLAG_EXTERNAL_STORAGE;
-			} catch (NameNotFoundException e) {
-				// ignore
-			}
-		}
-
-		// for API level 7 and below - check files directory by name
-		try {
-			String filesDir = context.getFilesDir().getAbsolutePath();
-			if (filesDir.startsWith("/data/")) {
-				return false;
-			} else if (filesDir.contains("/mnt/") || filesDir.contains("/sdcard/")) {
-				return true;
-			}
-		} catch (Throwable e) {
-			// ignore
-		}
-
-		return false;
-	}
-
-	public static boolean mustCreateTempDirectory(Context context) {
-		return !IOUtilities.isInstalledOnSdCard(context)
-				|| context.getCacheDir().getAbsolutePath().startsWith("/data/");
 	}
 
 	// TODO: move to StringUtilities
