@@ -221,7 +221,7 @@ public class UIUtilities {
 	}
 
 	/**
-	 * Use acquireKeepScreenOn instead
+	 * Use acquireKeepScreenOn instead - wake lock method left here only as a reminder
 	 * 
 	 * Requires <uses-permission android:name="android.permission.WAKE_LOCK" />
 	 */
@@ -247,7 +247,7 @@ public class UIUtilities {
 	}
 
 	/**
-	 * Use acquireKeepScreenOn instead
+	 * Use acquireKeepScreenOn instead - key guard lock method left here only as a reminder
 	 * 
 	 * Requires <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
 	 */
@@ -293,7 +293,7 @@ public class UIUtilities {
 	}
 
 	/**
-	 * Use resources.getDimensionPixelSize instead
+	 * Use resources.getDimensionPixelSize instead - manual method left here only as a reminder
 	 */
 	@Deprecated
 	public static int dipToPx(Resources resources, int dip) {
