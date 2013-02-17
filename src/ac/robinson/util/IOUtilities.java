@@ -166,7 +166,7 @@ public class IOUtilities {
 			return null; // sometimes getCacheDir returns null - perhaps when low on space?
 		}
 		File newCacheDir = new File(cacheDir, pathName);
-		if (deleteExisting && newCacheDir.isDirectory()) {
+		if (deleteExisting && newCacheDir.exists()) {
 			deleteRecursive(newCacheDir);
 		}
 		if (!newCacheDir.exists()) {
@@ -193,6 +193,8 @@ public class IOUtilities {
 			if (!newFilesDir.mkdirs()) {
 				return null;
 			}
+		} else if (!newFilesDir.isDirectory()) {
+			return null; // the directory exists as a file - could delete, but not worth the risk, so return error
 		}
 		return newFilesDir;
 	}
