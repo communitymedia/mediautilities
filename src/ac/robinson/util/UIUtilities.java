@@ -187,33 +187,37 @@ public class UIUtilities {
 	}
 
 	public static void setFullScreen(final Window window) {
-		Handler handler = new Handler();
-		handler.post(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					WindowManager.LayoutParams attrs = window.getAttributes();
-					attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
-					window.setAttributes(attrs);
-				} catch (Throwable t) {
+		if ((window.getAttributes().flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) != WindowManager.LayoutParams.FLAG_FULLSCREEN) {
+			Handler handler = new Handler();
+			handler.post(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						WindowManager.LayoutParams attrs = window.getAttributes();
+						attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
+						window.setAttributes(attrs);
+					} catch (Throwable t) {
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 
 	public static void setNonFullScreen(final Window window) {
-		Handler handler = new Handler();
-		handler.post(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					WindowManager.LayoutParams attrs = window.getAttributes();
-					attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
-					window.setAttributes(attrs);
-				} catch (Throwable t) {
+		if ((window.getAttributes().flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) == WindowManager.LayoutParams.FLAG_FULLSCREEN) {
+			Handler handler = new Handler();
+			handler.post(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						WindowManager.LayoutParams attrs = window.getAttributes();
+						attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
+						window.setAttributes(attrs);
+					} catch (Throwable t) {
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 
 	/**
