@@ -58,8 +58,11 @@ public class ImageCacheUtilities {
 		try {
 			if (!cacheDirectory.exists()) {
 				cacheDirectory.mkdirs();
-				// TODO: does this actually work for stopping the media scanner?
-				new File(cacheDirectory, MediaStore.MEDIA_IGNORE_FILENAME).createNewFile(); // prevent media scanner
+				if (!cacheDirectory.exists()) {
+					return false;
+				} else {
+					new File(cacheDirectory, MediaStore.MEDIA_IGNORE_FILENAME).createNewFile(); // prevent media scanner
+				}
 			}
 		} catch (IOException e) {
 			return false;
