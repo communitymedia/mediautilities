@@ -214,10 +214,10 @@ public class IOUtilities {
 	public static boolean isInternalPath(String filePath) {
 		File dataDirectory = Environment.getDataDirectory();
 		String dataDirectoryString;
-		if (dataDirectory == null) { // can't trust anything on Android...
-			dataDirectoryString = "/data";
-		} else {
+		if (dataDirectory != null) { // can't trust anything on Android...
 			dataDirectoryString = dataDirectory.getAbsolutePath();
+		} else {
+			dataDirectoryString = "/data";
 		}
 		return filePath.startsWith(dataDirectoryString);
 	}
