@@ -22,11 +22,13 @@ package ac.robinson.util;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.os.Build;
 
 public class DebugUtilities {
 	public static String getLogTag(Object o) {
@@ -38,18 +40,31 @@ public class DebugUtilities {
 			ApplicationInfo applicationInfo = packageManager.getApplicationInfo(packageName, 0);
 			ZipFile zipFile = new ZipFile(applicationInfo.sourceDir);
 			ZipEntry zipEntry = zipFile.getEntry("classes.dex");
-			return SimpleDateFormat.getDateTimeInstance().format(new java.util.Date(zipEntry.getTime()));
+			return SimpleDateFormat
+					.getDateTimeInstance(SimpleDateFormat.MEDIUM, SimpleDateFormat.SHORT, Locale.ENGLISH).format(
+							new java.util.Date(zipEntry.getTime()));
 		} catch (Exception e) {
 		}
 		return "unknown";
 	}
 
+	public static String getDeviceBrandProduct() {
+		return Build.BRAND + "/" + Build.PRODUCT + "/" + Build.DEVICE;
+	}
+
 	// some devices cannot use SoundPool and MediaPlayer simultaneously due to a bug
 	public static boolean hasSoundPoolBug() {
 		ArrayList<String> devices = new ArrayList<String>();
-		devices.add("samsung/GT-P7510/GT-P7510");
+		devices.add("samsung/GT-P7510/GT-P7510"); // Samsung Galaxy Tab 10.1
 
-		return devices
-				.contains(android.os.Build.BRAND + "/" + android.os.Build.PRODUCT + "/" + android.os.Build.DEVICE);
+		return devices.contains(getDeviceBrandProduct());
+	}
+
+	// some devices cannot record audio on internal memory
+	public static boolean needsSDCardToRecordAudio() {
+		ArrayList<String> devices = new ArrayList<String>();
+		devices.add("samsung/GT-S5830i/GT-S5830i"); // Samsung Galaxy Ace
+
+		return devices.contains(getDeviceBrandProduct());
 	}
 }
