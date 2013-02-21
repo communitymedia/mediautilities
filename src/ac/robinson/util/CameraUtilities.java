@@ -43,8 +43,8 @@ public class CameraUtilities {
 
 		@Override
 		public String toString() {
-			return this.getClass().getName() + "[" + hasFrontCamera + "," + usingFrontCamera + ","
-					+ cameraOrientationDegrees + "]";
+			return this.getClass().getName() + "[" + hasFrontCamera + "," + numberOfCameras + "," + usingFrontCamera
+					+ "," + cameraOrientationDegrees + "]";
 		}
 	}
 
@@ -91,8 +91,8 @@ public class CameraUtilities {
 					getCameraInfoMethod.invoke(null, camIdx, cameraInfo);
 					cameraFacing = facingField.getInt(cameraInfo);
 
-						// allow non-preferred camera (some devices (e.g. Nexus 7) only have front camera)
-						if (cameraFacing == preferredFacing || camIdx == cameraCount - 1) {
+					// allow non-preferred camera (some devices (e.g. Nexus 7) only have front camera)
+					if (cameraFacing == preferredFacing || camIdx == cameraCount - 1) {
 						if (camera == null) { // so that we continue and detect a front camera even if we aren't using
 												// it
 							try {
@@ -102,7 +102,7 @@ public class CameraUtilities {
 									if (cameraFacing == CUSTOM_CAMERA_FRONT) {
 										cameraConfiguration.usingFrontCamera = true;
 									}
-									
+
 									cameraConfiguration.numberOfCameras = cameraCount;
 
 									// Integer so that we can compare to null when checking orientation
@@ -208,6 +208,7 @@ public class CameraUtilities {
 			}
 		} else {
 			// TODO: can we detect camera orientation somehow?
+			Log.d(LOG_TAG, "Unable to detect camera orientation - setting to 0");
 			previewOrientationDegrees = 0;// (90 - screenOrientationDegrees + 360) % 360;
 		}
 
