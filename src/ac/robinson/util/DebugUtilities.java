@@ -23,6 +23,7 @@ package ac.robinson.util;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.TimeZone;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -40,9 +41,9 @@ public class DebugUtilities {
 			ApplicationInfo applicationInfo = packageManager.getApplicationInfo(packageName, 0);
 			ZipFile zipFile = new ZipFile(applicationInfo.sourceDir);
 			ZipEntry zipEntry = zipFile.getEntry("classes.dex");
-			return SimpleDateFormat
-					.getDateTimeInstance(SimpleDateFormat.MEDIUM, SimpleDateFormat.SHORT, Locale.ENGLISH).format(
-							new java.util.Date(zipEntry.getTime()));
+			SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yy HH:mm", Locale.ENGLISH);
+			dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+			return dateFormat.format(new java.util.Date(zipEntry.getTime()));
 		} catch (Exception e) {
 		}
 		return "unknown";
@@ -63,7 +64,14 @@ public class DebugUtilities {
 	// some devices cannot record audio on internal memory
 	public static boolean needsSDCardToRecordAudio() {
 		ArrayList<String> devices = new ArrayList<String>();
-		devices.add("samsung/GT-S5830i/GT-S5830i"); // Samsung Galaxy Ace
+		devices.add("samsung/GT-S5830i/GT-S5830i"); // Samsung Galaxy Ace i
+
+		return devices.contains(getDeviceBrandProduct());
+	}
+
+	public static boolean supportsLandscapeCameraOnly() {
+		ArrayList<String> devices = new ArrayList<String>();
+		devices.add("samsung/GT-S5830i/GT-S5830i"); // Samsung Galaxy Ace i
 
 		return devices.contains(getDeviceBrandProduct());
 	}
