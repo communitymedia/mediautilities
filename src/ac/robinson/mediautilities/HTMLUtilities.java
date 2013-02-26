@@ -112,10 +112,10 @@ public class HTMLUtilities {
 									.getImageDimensions(frame.mImagePath);
 							if (orientation == 0) {
 								if (imageDimensions.outWidth > imageDimensions.outHeight) {
-									displayMediaRegion += "landscape";
+									displayMediaRegion = "landscape";
 								}
 							} else if (orientation == 90 || orientation == 270) {
-								displayMediaRegion += "landscape";
+								displayMediaRegion = "landscape";
 							}
 
 							playerOutputFileWriter.write(displayMediaRegion + "\"");
