@@ -61,8 +61,8 @@ public class DebugUtilities {
 		return devices.contains(getDeviceBrandProduct());
 	}
 
-	// some devices cannot record audio on internal memory
-	public static boolean needsSDCardToRecordAudio() {
+	// some devices can only record AMR audio
+	public static boolean supportsAMRAudioRecordingOnly() {
 		ArrayList<String> devices = new ArrayList<String>();
 		devices.add("samsung/GT-S5830i/GT-S5830i"); // Samsung Galaxy Ace i
 
