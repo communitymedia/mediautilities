@@ -78,6 +78,7 @@ public class SelectDirectoryActivity extends ListActivity {
 			files = currentPath.listFiles();
 		}
 		Arrays.sort(files, new Comparator<File>() {
+			@Override
 			public int compare(File o1, File o2) {
 				if (o1.isDirectory()) {
 					if (o2.isDirectory()) {
