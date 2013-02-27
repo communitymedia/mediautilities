@@ -54,4 +54,23 @@ public class AndroidUtilities {
 		System.arraycopy(second, 0, result, first.length, second.length);
 		return result;
 	}
+
+	/**
+	 * check if an array contains the item given
+	 * 
+	 * @param array
+	 * @param item
+	 * @return
+	 */
+	public static <T> boolean arrayContains(T[] array, T item) {
+		if (item == null) {
+			return false;
+		}
+		for (T i : array) {
+			if (item.equals(i)) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

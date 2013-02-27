@@ -34,7 +34,10 @@ public class MediaUtilities {
 	public static final String HTML_FILE_EXTENSION = ".html";
 	public static final String MOV_FILE_EXTENSION = ".mov";
 
-	public static final String MOV_AUDIO_FILE_EXTENSION = ".m4a";
+	// audio file types that are compatible with our video export (no dots)
+	public static final String M4A_FILE_EXTENSION = "m4a";
+	public static final String MP3_FILE_EXTENSION = "mp3";
+	public static final String[] MOV_AUDIO_FILE_EXTENSIONS = new String[] { M4A_FILE_EXTENSION, MP3_FILE_EXTENSION };
 
 	// message IDs (see: http://stackoverflow.com/questions/3432649/)
 	public static final int MSG_RECEIVED_SMIL_FILE = 1;
