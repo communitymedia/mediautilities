@@ -94,10 +94,8 @@ public class SampleBuffer extends Obuffer {
 	 * Write the samples to the file (Random Acces).
 	 */
 	public void write_buffer(int val) {
-
 		// for (int i = 0; i < channels; ++i)
 		// bufferp[i] = (short)i;
-
 	}
 
 	public void close() {

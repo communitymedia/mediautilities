@@ -71,6 +71,8 @@ class AtomFactory {
 	}
 	private static String padding = "";
 
+	// @SuppressWarnings("resource") is to suppress complaint about stream closure (handled by in.close in readAll)
+	@SuppressWarnings("resource")
 	public static synchronized Atom read(Atom parent, InputStream in) throws IOException {
 		long size = Atom.read32Int(in);
 		/**

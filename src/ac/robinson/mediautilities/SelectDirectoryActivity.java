@@ -90,7 +90,6 @@ public class SelectDirectoryActivity extends ListActivity {
 					return 1;
 				} else {
 					return o1.getName().compareToIgnoreCase(o2.getName());
-
 				}
 			}
 		});

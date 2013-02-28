@@ -281,13 +281,14 @@ public abstract class MovWriter {
 			if (!(AudioFormat.Encoding.PCM_SIGNED.equals(encoding) || AudioFormat.Encoding.PCM_UNSIGNED
 					.equals(encoding))) {
 				if (audioFormat.getSampleSizeInBits() > 8) {
-					audio = AudioSystem.getAudioInputStream(AudioFormat.Encoding.PCM_SIGNED, audio);
+					audioIn = AudioSystem.getAudioInputStream(AudioFormat.Encoding.PCM_SIGNED, audio);
 				} else {
-					audio = AudioSystem.getAudioInputStream(AudioFormat.Encoding.PCM_UNSIGNED, audio);
+					audioIn = AudioSystem.getAudioInputStream(AudioFormat.Encoding.PCM_UNSIGNED, audio);
 				}
+			} else {
+				audioIn = audio;
 			}
-
-			audioIn = audio;
+			
 			myTimeScale = (long) (audioIn.getFormat().getFrameRate());
 			int bitsPerSample = audioIn.getFormat().getSampleSizeInBits();
 			int numberOfChannels = audioIn.getFormat().getChannels();
@@ -588,8 +589,7 @@ public abstract class MovWriter {
 
 		long sampleMin = (long) ((endTime - startTime) * audio.getFormat().getFrameRate());
 		if (sampleMin < audio.getFrameLength()) {
-			AudioInputStream limitedAudioIn = new AudioInputStream(audio, audio.getFormat(), sampleMin);
-			audio = limitedAudioIn;
+			audio = new AudioInputStream(audio, audio.getFormat(), sampleMin);
 		}
 		newTrack = new AudioTrack(audio, new float[] { startTime }, new float[] { 0 }, new float[] { endTime
 				- startTime });

@@ -55,17 +55,7 @@ public class IOUtilities {
 			}
 			File[] files = sourceLocation.listFiles();
 			for (File file : files) {
-				InputStream in = new FileInputStream(file);
-				OutputStream out = new FileOutputStream(targetLocation + "/" + file.getName());
-
-				// copy the bits from input stream to output stream
-				byte[] buf = new byte[1024];
-				int len;
-				while ((len = in.read(buf)) > 0) {
-					out.write(buf, 0, len);
-				}
-				in.close();
-				out.close();
+				copyFile(file, new File(targetLocation, file.getName()));
 			}
 		}
 	}
@@ -75,9 +65,17 @@ public class IOUtilities {
 		copyFile(in, targetLocation);
 	}
 
+	public static void copyFile(File sourceLocation, OutputStream out) throws IOException {
+		InputStream in = new FileInputStream(sourceLocation);
+		copyFile(in, out);
+	}
+
 	public static void copyFile(InputStream in, File targetLocation) throws IOException {
 		OutputStream out = new FileOutputStream(targetLocation);
+		copyFile(in, out);
+	}
 
+	public static void copyFile(InputStream in, OutputStream out) throws IOException {
 		byte[] buf = new byte[IO_BUFFER_SIZE];
 		int len;
 

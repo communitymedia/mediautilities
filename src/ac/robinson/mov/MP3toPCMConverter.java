@@ -44,7 +44,7 @@ public class MP3toPCMConverter {
 	public static class MP3Configuration {
 		public int sampleFrequency = 0;
 		public int sampleSize = 0;
-		public int numberOfChannels;
+		public int numberOfChannels = 0;
 
 		@Override
 		public String toString() {
@@ -86,6 +86,7 @@ public class MP3toPCMConverter {
 			inputStream = new BufferedInputStream(new FileInputStream(input), 8 * 1024);
 			Bitstream bitstream = new Bitstream(inputStream);
 			Decoder decoder = new Decoder();
+			SampleBuffer outputPCM;
 
 			boolean done = false;
 			while (!done) {
@@ -100,7 +101,7 @@ public class MP3toPCMConverter {
 					}
 
 					if (!seeking) {
-						SampleBuffer outputPCM = (SampleBuffer) decoder.decodeFrame(frameHeader, bitstream); // TODO
+						outputPCM = (SampleBuffer) decoder.decodeFrame(frameHeader, bitstream);
 
 						if (config.sampleFrequency == 0) {
 							config.sampleFrequency = outputPCM.getSampleFrequency();
@@ -109,13 +110,14 @@ public class MP3toPCMConverter {
 						}
 
 						if (outputPCM.getSampleFrequency() != 44100 || outputPCM.getChannelCount() != 2) {
-							throw new IOException("Mono or non-44100 MP3 - not yet supported");
+							throw new IOException("Mono or non-44100 MP3 - not yet supported"); // TODO: can we support?
 						}
 
 						short[] pcm = outputPCM.getBuffer();
 						for (short s : pcm) {
-							output.write(s & 0xff);
+							// output.write(s & 0xff); // little-endian
 							output.write((s >> 8) & 0xff);
+							output.write(s & 0xff); // we want big-endian
 						}
 					}
 

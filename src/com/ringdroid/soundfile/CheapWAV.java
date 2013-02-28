@@ -94,6 +94,8 @@ public class CheapWAV extends CheapSoundFile {
 		return "WAV";
 	}
 
+	// @SuppressWarnings("resource") is to suppress complaint about stream closure (handled by closeStream in finally)
+	@SuppressWarnings("resource")
 	public void readFile(File inputFile) throws java.io.FileNotFoundException, java.io.IOException {
 		super.readFile(inputFile);
 		mFileSize = (int) mInputFile.length();

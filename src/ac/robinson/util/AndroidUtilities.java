@@ -56,7 +56,7 @@ public class AndroidUtilities {
 	}
 
 	/**
-	 * check if an array contains the item given
+	 * Check if an array contains the item given - could use Arrays.binarySearch, but that requires a sorted array
 	 * 
 	 * @param array
 	 * @param item
