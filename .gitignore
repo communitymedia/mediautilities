@@ -16,3 +16,4 @@ gen/
 local.properties
 ant.properties
 proguard-project.txt
+custom_rules.xml

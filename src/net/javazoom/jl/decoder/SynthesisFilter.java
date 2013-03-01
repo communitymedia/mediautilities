@@ -1085,6 +1085,7 @@ final class SynthesisFilter {
 	 */
 	static private float[] load_d() {
 		try {
+			//TODO: will this always work? Could we do it in a better way (e.g., with R.raw.sfd?)
 			Object o = JavaLayerUtils.deserializeArrayResource("sfd.ser", Float.TYPE, 512);
 			return (float[]) o;
 		} catch (IOException ex) {
