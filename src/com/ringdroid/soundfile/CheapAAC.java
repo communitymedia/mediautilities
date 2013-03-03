@@ -23,7 +23,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import ac.robinson.util.AndroidUtilities;
 import ac.robinson.util.IOUtilities;
 import android.annotation.SuppressLint;
 
@@ -715,10 +714,31 @@ public class CheapAAC extends CheapSoundFile {
 		mOriginalFrameLengths.add(mNumFrames);
 		mAdditionalInputFiles.add(newAACFile.getFile());
 
-		mNumFrames += newAACFile.getNumFrames();
-		mFrameOffsets = AndroidUtilities.concatenateArrays(mFrameOffsets, newAACFile.getFrameOffsets());
-		mFrameLens = AndroidUtilities.concatenateArrays(mFrameLens, newAACFile.getFrameLens());
-		mFrameGains = AndroidUtilities.concatenateArrays(mFrameGains, newAACFile.getFrameGains());
+		// can't use System.arrayCopy or Arrays.copyOf here as we need the actual values (rather than references)
+		int newFrames = mNumFrames + newAACFile.getNumFrames();
+		int[] newOffsets = new int[newFrames];
+		int[] newLens = new int[newFrames];
+		int[] newGains = new int[newFrames];
+		for (int i = 0; i < mNumFrames; i++) {
+			newOffsets[i] = mFrameOffsets[i];
+			newLens[i] = mFrameLens[i];
+			newGains[i] = mFrameGains[i];
+		}
+		int[] addOffsets = newAACFile.getFrameOffsets();
+		int[] addLens = newAACFile.getFrameLens();
+		int[] addGains = newAACFile.getFrameGains();
+		int j = 0;
+		for (int i = mNumFrames; i < newFrames; i++) {
+			newOffsets[i] = addOffsets[j];
+			newLens[i] = addLens[j];
+			newGains[i] = addGains[j];
+			j += 1;
+		}
+		mNumFrames = newFrames;
+		mFrameOffsets = newOffsets;
+		mFrameLens = newLens;
+		mFrameGains = newGains;
+		mFileSize += newAACFile.getFileSizeBytes();
 
 		// fix durations - we're joining the actual media, rather than editing tracks, so just set to the same duration
 		HashMap<Integer, Atom> newAtomMap = newAACFile.getAtomMap();

@@ -56,6 +56,8 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 public class UIUtilities {
+	
+	private static final String LOG_TAG = "UIUtilities";
 
 	/**
 	 * Enable pixel dithering for this window (but only in API < 17)
@@ -458,7 +460,7 @@ public class UIUtilities {
 		} catch (ClassNotFoundException e) {
 		} catch (SecurityException e) {
 		} catch (NoSuchMethodException e) {
-			Log.d(AndroidUtilities.LOG_TAG, "ActionBar not present; not configuring");
+			Log.d(LOG_TAG, "ActionBar not present; not configuring");
 		} catch (IllegalArgumentException e) {
 		} catch (IllegalAccessException e) {
 		} catch (InvocationTargetException e) {
@@ -496,7 +498,7 @@ public class UIUtilities {
 		} catch (ClassNotFoundException e) {
 		} catch (SecurityException e) {
 		} catch (NoSuchMethodException e) {
-			Log.d(AndroidUtilities.LOG_TAG, "ActionBar not present; not configuring");
+			Log.d(LOG_TAG, "ActionBar not present; not configuring");
 		} catch (IllegalArgumentException e) {
 		} catch (IllegalAccessException e) {
 		} catch (InvocationTargetException e) {
@@ -597,7 +599,7 @@ public class UIUtilities {
 		} catch (ClassNotFoundException e) {
 		} catch (SecurityException e) {
 		} catch (NoSuchMethodException e) {
-			Log.d(AndroidUtilities.LOG_TAG, "ActionBar not present; not adding tabs");
+			Log.d(LOG_TAG, "ActionBar not present; not adding tabs");
 		} catch (IllegalArgumentException e) {
 		} catch (IllegalAccessException e) {
 		} catch (InvocationTargetException e) {
@@ -631,7 +633,7 @@ public class UIUtilities {
 		} catch (ClassNotFoundException e) {
 		} catch (SecurityException e) {
 		} catch (NoSuchMethodException e) {
-			Log.d(AndroidUtilities.LOG_TAG, "ActionBar not present; not removing tabs");
+			Log.d(LOG_TAG, "ActionBar not present; not removing tabs");
 		} catch (IllegalArgumentException e) {
 		} catch (IllegalAccessException e) {
 		} catch (InvocationTargetException e) {

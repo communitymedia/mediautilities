@@ -20,40 +20,7 @@
 
 package ac.robinson.util;
 
-import java.util.Arrays;
-
 public class AndroidUtilities {
-
-	public static final String APPLICATION_NAME = "androidutilities";
-	public static final String LOG_TAG = APPLICATION_NAME;
-
-	/**
-	 * Merge two arrays. BEWARE: some versions of Android (<2.2?) have a buggy System.arraycopy, so this could silently
-	 * fail, particularly on larger arrays
-	 * 
-	 * @param first
-	 * @param second
-	 * @return
-	 */
-	public static <T> T[] concatenateArrays(T[] first, T[] second) {
-		T[] result = Arrays.copyOf(first, first.length + second.length);
-		System.arraycopy(second, 0, result, first.length, second.length);
-		return result;
-	}
-
-	/**
-	 * Merge two arrays. BEWARE: some versions of Android (<2.2?) have a buggy System.arraycopy, so this could silently
-	 * fail, particularly on larger arrays
-	 * 
-	 * @param first
-	 * @param second
-	 * @return
-	 */
-	public static int[] concatenateArrays(int[] first, int[] second) {
-		int[] result = Arrays.copyOf(first, first.length + second.length);
-		System.arraycopy(second, 0, result, first.length, second.length);
-		return result;
-	}
 
 	/**
 	 * Check if an array contains the item given - could use Arrays.binarySearch, but that requires a sorted array

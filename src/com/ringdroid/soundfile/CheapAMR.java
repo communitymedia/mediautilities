@@ -20,7 +20,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.lang.Math;
+import java.util.ArrayList;
 
 import ac.robinson.util.IOUtilities;
 
@@ -59,6 +59,10 @@ public class CheapAMR extends CheapSoundFile {
 	private int mMaxFrames;
 	private int mMinGain;
 	private int mMaxGain;
+
+	// Additional member variables for a hacky way to combine two amr files
+	private ArrayList<File> mAdditionalInputFiles;
+	private ArrayList<Integer> mOriginalFrameLengths;
 
 	public CheapAMR() {
 	}
@@ -114,6 +118,9 @@ public class CheapAMR extends CheapSoundFile {
 		mMaxGain = 0;
 		mBitRate = 10;
 		mOffset = 0;
+
+		mAdditionalInputFiles = new ArrayList<File>();
+		mOriginalFrameLengths = new ArrayList<Integer>();
 
 		// No need to handle filesizes larger than can fit in a 32-bit int
 		mFileSize = (int) mInputFile.length();
@@ -493,7 +500,24 @@ public class CheapAMR extends CheapSoundFile {
 			}
 			byte[] buffer = new byte[maxFrameLen];
 			int pos = 0;
+			int nextFrameLength = Integer.MAX_VALUE;
+			boolean hasEdited = mAdditionalInputFiles.size() > 0;
+			if (hasEdited) {
+				nextFrameLength = mOriginalFrameLengths.remove(0);
+			}
 			for (int i = 0; i < numFrames; i++) {
+				if (hasEdited && startFrame + i >= nextFrameLength) {
+					in.close();
+					in = new FileInputStream(mAdditionalInputFiles.remove(0));
+					pos = 0;
+
+					nextFrameLength = Integer.MAX_VALUE;
+					hasEdited = mAdditionalInputFiles.size() > 0;
+					if (hasEdited) {
+						nextFrameLength = mOriginalFrameLengths.remove(0);
+					}
+				}
+
 				int skip = mFrameOffsets[startFrame + i] - pos;
 				int len = mFrameLens[startFrame + i];
 				if (skip < 0) {
@@ -665,6 +689,46 @@ public class CheapAMR extends CheapSoundFile {
 
 	static private int QUA_GAIN_PITCH[] = { 0, 3277, 6556, 8192, 9830, 11469, 12288, 13107, 13926, 14746, 15565, 16384,
 			17203, 18022, 18842, 19661 };
+
+	// this is a hack, destructively altering the original CheapSoundFile but it works for our purpose, so no real need
+	// to fix just yet
+	public long addSoundFile(CheapSoundFile newFile) {
+		if (!(newFile instanceof CheapAMR)) {
+			return -1l; // TODO: throw
+		}
+		CheapAMR newAMRFile = (CheapAMR) newFile;
+
+		mOriginalFrameLengths.add(mNumFrames);
+		mAdditionalInputFiles.add(newAMRFile.getFile());
+
+		// can't use System.arrayCopy or Arrays.copyOf here as we need the actual values (rather than references)
+		int newFrames = mNumFrames + newAMRFile.getNumFrames();
+		int[] newOffsets = new int[newFrames];
+		int[] newLens = new int[newFrames];
+		int[] newGains = new int[newFrames];
+		for (int i = 0; i < mNumFrames; i++) {
+			newOffsets[i] = mFrameOffsets[i];
+			newLens[i] = mFrameLens[i];
+			newGains[i] = mFrameGains[i];
+		}
+		int[] addOffsets = newAMRFile.getFrameOffsets();
+		int[] addLens = newAMRFile.getFrameLens();
+		int[] addGains = newAMRFile.getFrameGains();
+		int j = 0;
+		for (int i = mNumFrames; i < newFrames; i++) {
+			newOffsets[i] = addOffsets[j];
+			newLens[i] = addLens[j];
+			newGains[i] = addGains[j];
+			j += 1;
+		}
+		mNumFrames = newFrames;
+		mFrameOffsets = newOffsets;
+		mFrameLens = newLens;
+		mFrameGains = newGains;
+		mFileSize += newAMRFile.getFileSizeBytes();
+
+		return (mNumFrames * 1000) / (getSampleRate() / getSamplesPerFrame());
+	}
 
 	/**
 	 * For debugging public static void main(String[] argv) throws Exception { File f = new File(""); CheapAMR c = new
