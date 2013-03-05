@@ -23,7 +23,7 @@
 #include <fcntl.h>
 
 extern "C" {
-    JNIEXPORT jint JNICALL Java_ac_robinson_mov_AMRtoPCMConverter_AmrDecoderInit(JNIEnv* env, jobject obj);
+	JNIEXPORT jint JNICALL Java_ac_robinson_mov_AMRtoPCMConverter_AmrDecoderInit(JNIEnv* env, jobject obj);
 	JNIEXPORT void JNICALL Java_ac_robinson_mov_AMRtoPCMConverter_AmrDecoderDecode(JNIEnv* env, jobject obj, jint* nativePointer, jbyteArray in, jshortArray out, jint bfi);
 	JNIEXPORT void JNICALL Java_ac_robinson_mov_AMRtoPCMConverter_AmrDecoderExit(JNIEnv* env, jobject obj, jint* nativePointer);
 };
@@ -31,8 +31,6 @@ extern "C" {
 JNIEXPORT jint JNICALL Java_ac_robinson_mov_AMRtoPCMConverter_AmrDecoderInit(JNIEnv* env, jobject obj) {
 	return (jint)Decoder_Interface_init();
 }
-
-static const int SAMPLES_PER_FRAME = 8000 * 20 / 1000;
 
 JNIEXPORT void JNICALL Java_ac_robinson_mov_AMRtoPCMConverter_AmrDecoderDecode(JNIEnv* env, jobject obj, jint* nativePointer, jbyteArray in, jshortArray out, jint bfi) {
 	jsize inLen  = env->GetArrayLength(in);
