@@ -12,8 +12,13 @@
 bin/
 gen/
 
-# Local configuration file (sdk path, etc)
+# generated/imported libraries
+obj/
+external/
+
+# Local configuration files (sdk path, ndk configuration, etc)
 local.properties
 ant.properties
 proguard-project.txt
 custom_rules.xml
+jni/build-local.sh

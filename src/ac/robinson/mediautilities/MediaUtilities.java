@@ -28,6 +28,17 @@ public class MediaUtilities {
 	// class options
 	public static final boolean MOV_USE_SEGMENTED_AUDIO = true;
 
+	// capabilities (detected at load time)
+	public static boolean CAN_EXPORT_AMR = false;
+	static {
+		try {
+			System.loadLibrary("opencore-amrnb-wrapper");
+			CAN_EXPORT_AMR = true;
+		} catch (Exception e) {
+			CAN_EXPORT_AMR = false;
+		}
+	}
+
 	// file extensions (including dots)
 	public static final String SMIL_FILE_EXTENSION = ".smil";
 	public static final String SYNC_FILE_EXTENSION = ".sync.jpg"; // to counter ridiculous incoming filename filtering
@@ -35,9 +46,24 @@ public class MediaUtilities {
 	public static final String MOV_FILE_EXTENSION = ".mov";
 
 	// audio file types that are compatible with our video export (no dots)
-	public static final String M4A_FILE_EXTENSION = "m4a";
-	public static final String MP3_FILE_EXTENSION = "mp3";
-	public static final String[] MOV_AUDIO_FILE_EXTENSIONS = new String[] { M4A_FILE_EXTENSION, MP3_FILE_EXTENSION };
+	// TODO: handle this in a better way? (see CheapSoundFile, for example)
+	public static final String[] M4A_FILE_EXTENSIONS = { "m4a" }; // TODO: add to MOV_AUDIO_FILE_EXTENSIONS if editing
+	public static final String[] MP3_FILE_EXTENSIONS = { "mp3" }; // TODO: add to MOV_AUDIO_FILE_EXTENSIONS if editing
+	public static final String[] AMR_FILE_EXTENSIONS = { "amr", "3gp", "3gpp" };
+	public static String[] MOV_AUDIO_FILE_EXTENSIONS = { "m4a", "mp3" };
+	static {
+		if (CAN_EXPORT_AMR) {
+			int totalLength = MOV_AUDIO_FILE_EXTENSIONS.length + AMR_FILE_EXTENSIONS.length;
+			String[] tempExtensions = new String[totalLength];
+			for (int i = 0; i < MOV_AUDIO_FILE_EXTENSIONS.length; i++) {
+				tempExtensions[i] = MOV_AUDIO_FILE_EXTENSIONS[i];
+			}
+			for (int i = MOV_AUDIO_FILE_EXTENSIONS.length; i < totalLength; i++) {
+				tempExtensions[i] = AMR_FILE_EXTENSIONS[i - MOV_AUDIO_FILE_EXTENSIONS.length];
+			}
+			MOV_AUDIO_FILE_EXTENSIONS = tempExtensions;
+		}
+	}
 
 	// message IDs (see: http://stackoverflow.com/questions/3432649/)
 	public static final int MSG_RECEIVED_SMIL_FILE = 1;

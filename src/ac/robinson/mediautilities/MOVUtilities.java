@@ -30,6 +30,7 @@ import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Map;
 
+import ac.robinson.mov.AMRtoPCMConverter;
 import ac.robinson.mov.JPEGMovWriter;
 import ac.robinson.mov.MP3toPCMConverter;
 import ac.robinson.mov.MP3toPCMConverter.MP3Configuration;
@@ -58,6 +59,10 @@ import com.larvalabs.svgandroid.SVGParser;
 public class MOVUtilities {
 
 	private static final String LOG_TAG = "MOVUtilities";
+
+	private enum AudioType {
+		NONE, M4A, MP3, AMR
+	};
 
 	public static ArrayList<Uri> generateNarrativeMOV(Resources res, File outputFile,
 			ArrayList<FrameMediaContainer> framesToSend, Map<Integer, Object> settings) {
@@ -207,7 +212,7 @@ public class MOVUtilities {
 					outputPCMStream = new BufferedOutputStream(new FileOutputStream(outputPCMFile));
 
 					decodingError = false;
-					if (audioFileExtension.equals(MediaUtilities.M4A_FILE_EXTENSION)) {
+					if (AndroidUtilities.arrayContains(MediaUtilities.M4A_FILE_EXTENSIONS, audioFileExtension)) {
 						RandomAccessFile inputRandomAccessFile = null;
 						try {
 
@@ -222,7 +227,9 @@ public class MOVUtilities {
 
 						} catch (IOException e) {
 							decodingError = true;
-							Log.d(LOG_TAG, "Error creating individual M4A audio track - IOException");
+							Log.d(LOG_TAG,
+									"Error creating individual M4A audio track - IOException: "
+											+ e.getLocalizedMessage());
 						} catch (Exception e) {
 							decodingError = true;
 							Log.d(LOG_TAG, "Error creating individual M4A audio track - general Exception");
@@ -230,7 +237,7 @@ public class MOVUtilities {
 							IOUtilities.closeStream(inputRandomAccessFile);
 						}
 
-					} else if (audioFileExtension.equals(MediaUtilities.MP3_FILE_EXTENSION)) {
+					} else if (AndroidUtilities.arrayContains(MediaUtilities.MP3_FILE_EXTENSIONS, audioFileExtension)) {
 						try {
 
 							// first we need to extract PCM audio from the MP3 file
@@ -243,10 +250,31 @@ public class MOVUtilities {
 
 						} catch (IOException e) {
 							decodingError = true;
-							Log.d(LOG_TAG, "Error creating individual MP3 audio track - IOException");
+							Log.d(LOG_TAG,
+									"Error creating individual MP3 audio track - IOException: "
+											+ e.getLocalizedMessage());
 						} catch (Exception e) {
 							decodingError = true;
 							Log.d(LOG_TAG, "Error creating individual MP3 audio track - general Exception");
+						}
+
+					} else if (AndroidUtilities.arrayContains(MediaUtilities.AMR_FILE_EXTENSIONS, audioFileExtension)) {
+						try {
+
+							// first we need to extract PCM audio from the AMR file
+							AMRtoPCMConverter.convertFile(inputAudioFile, outputPCMStream);
+
+							// get the format of the audio - output is mono signed 16-bit big-endian integers, 8000Hz
+							audioFormat = new AudioFormat(8000, 16, 1, true, true);
+
+						} catch (IOException e) {
+							decodingError = true;
+							Log.d(LOG_TAG,
+									"Error creating individual AMR audio track - IOException: "
+											+ e.getLocalizedMessage());
+						} catch (Exception e) {
+							decodingError = true;
+							Log.d(LOG_TAG, "Error creating individual AMR audio track - general Exception");
 						}
 					}
 
@@ -289,7 +317,17 @@ public class MOVUtilities {
 			frameTypes.clear();
 			frameCounts.clear();
 			for (String path : frame.mAudioPaths) {
-				final String fileExtension = IOUtilities.getFileExtension(path);
+				String actualFileExtension = IOUtilities.getFileExtension(path);
+				final String fileExtension; // use the base file extension instead of the actual - combine same types
+				if (AndroidUtilities.arrayContains(MediaUtilities.M4A_FILE_EXTENSIONS, actualFileExtension)) {
+					fileExtension = MediaUtilities.M4A_FILE_EXTENSIONS[0];
+				} else if (AndroidUtilities.arrayContains(MediaUtilities.MP3_FILE_EXTENSIONS, actualFileExtension)) {
+					fileExtension = MediaUtilities.MP3_FILE_EXTENSIONS[0];
+				} else if (AndroidUtilities.arrayContains(MediaUtilities.AMR_FILE_EXTENSIONS, actualFileExtension)) {
+					fileExtension = MediaUtilities.AMR_FILE_EXTENSIONS[0];
+				} else {
+					fileExtension = actualFileExtension;
+				}
 				int position = frameTypes.indexOf(fileExtension);
 				if (position >= 0) {
 					frameCounts.set(position, frameCounts.get(position) + 1);
@@ -345,6 +383,7 @@ public class MOVUtilities {
 				int audioId = -1;
 				boolean audioFound = false;
 				boolean decodingError = false;
+				AudioType currentAudioType = AudioType.NONE;
 
 				for (String audioPath : frame.mAudioPaths) {
 					audioId += 1;
@@ -356,7 +395,16 @@ public class MOVUtilities {
 					}
 
 					// only use tracks of the right extension TODO: pick the longest track instead of the first one?
-					if (!currentTrackType.equals(audioFileExtension)) {
+					if (AndroidUtilities.arrayContains(MediaUtilities.M4A_FILE_EXTENSIONS, audioFileExtension)
+							&& currentTrackType.equals(MediaUtilities.M4A_FILE_EXTENSIONS[0])) {
+						currentAudioType = AudioType.M4A;
+					} else if (AndroidUtilities.arrayContains(MediaUtilities.MP3_FILE_EXTENSIONS, audioFileExtension)
+							&& currentTrackType.equals(MediaUtilities.MP3_FILE_EXTENSIONS[0])) {
+						currentAudioType = AudioType.MP3;
+					} else if (AndroidUtilities.arrayContains(MediaUtilities.AMR_FILE_EXTENSIONS, audioFileExtension)
+							&& currentTrackType.equals(MediaUtilities.AMR_FILE_EXTENSIONS[0])) {
+						currentAudioType = AudioType.AMR;
+					} else {
 						continue;
 					}
 
@@ -397,7 +445,7 @@ public class MOVUtilities {
 					}
 
 					// begin to convert the compressed audio
-					if (audioFileExtension.equals(MediaUtilities.M4A_FILE_EXTENSION)) {
+					if (currentAudioType == AudioType.M4A) {
 						RandomAccessFile inputRandomAccessFile = null;
 						try {
 
@@ -414,7 +462,9 @@ public class MOVUtilities {
 
 						} catch (IOException e) {
 							decodingError = true;
-							Log.d(LOG_TAG, "Error creating segmented M4A audio track - IOException");
+							Log.d(LOG_TAG,
+									"Error creating segmented M4A audio track - IOException: "
+											+ e.getLocalizedMessage());
 						} catch (Exception e) {
 							decodingError = true;
 							Log.d(LOG_TAG, "Error creating segmented M4A audio track - general Exception");
@@ -422,7 +472,7 @@ public class MOVUtilities {
 							IOUtilities.closeStream(inputRandomAccessFile);
 						}
 
-					} else if (audioFileExtension.equals(MediaUtilities.MP3_FILE_EXTENSION)) {
+					} else if (currentAudioType == AudioType.MP3) {
 						try {
 
 							// first we need to extract PCM audio from the MP3 file
@@ -437,10 +487,33 @@ public class MOVUtilities {
 
 						} catch (IOException e) {
 							decodingError = true;
-							Log.d(LOG_TAG, "Error creating segmented MP3 audio track - IOException");
+							Log.d(LOG_TAG,
+									"Error creating segmented MP3 audio track - IOException: "
+											+ e.getLocalizedMessage());
 						} catch (Exception e) {
 							decodingError = true;
 							Log.d(LOG_TAG, "Error creating segmented MP3 audio track - general Exception");
+						}
+
+					} else if (currentAudioType == AudioType.AMR) {
+						try {
+
+							// first we need to extract PCM audio from the AMR file
+							AMRtoPCMConverter.convertFile(inputAudioFile, outputPCMStream);
+
+							// get the format of the audio - output is mono signed 16-bit big-endian integers, 8000Hz
+							if (audioFormat == null) { // TODO: we assume all AMR components are the same format
+								audioFormat = new AudioFormat(8000, 16, 1, true, true);
+							}
+
+						} catch (IOException e) {
+							decodingError = true;
+							Log.d(LOG_TAG,
+									"Error creating segmented AMR audio track - IOException: "
+											+ e.getLocalizedMessage());
+						} catch (Exception e) {
+							decodingError = true;
+							Log.d(LOG_TAG, "Error creating segmented AMR audio track - general Exception");
 						}
 					}
 
@@ -484,7 +557,7 @@ public class MOVUtilities {
 				// move on to the next frame's start time
 				frameStartTime += frame.mFrameMaxDuration;
 			}
-
+			
 			// finally, write the combined track to the MOV (pcmAudioStream is closed in MovWriter)
 			IOUtilities.closeStream(outputPCMStream);
 			AudioInputStream pcmAudioStream;
