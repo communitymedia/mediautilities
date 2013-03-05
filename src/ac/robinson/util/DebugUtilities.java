@@ -64,14 +64,18 @@ public class DebugUtilities {
 	// some devices can only record AMR audio
 	public static boolean supportsAMRAudioRecordingOnly() {
 		ArrayList<String> devices = new ArrayList<String>();
+		devices.add("samsung/GT-S5830/GT-S5830"); // Samsung Galaxy Ace
 		devices.add("samsung/GT-S5830i/GT-S5830i"); // Samsung Galaxy Ace i
+		// devices.add("samsung/GT-S5360/GT-S5360"); // Samsung Galaxy Y - probable, but not certain
 
 		return devices.contains(getDeviceBrandProduct());
 	}
 
 	public static boolean supportsLandscapeCameraOnly() {
 		ArrayList<String> devices = new ArrayList<String>();
+		devices.add("samsung/GT-S5830/GT-S5830"); // Samsung Galaxy Ace
 		devices.add("samsung/GT-S5830i/GT-S5830i"); // Samsung Galaxy Ace i
+		// devices.add("samsung/GT-S5360/GT-S5360"); // Samsung Galaxy Y - probable, but not certain
 
 		return devices.contains(getDeviceBrandProduct());
 	}
