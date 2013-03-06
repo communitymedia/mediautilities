@@ -20,7 +20,6 @@
 
 #include <jni.h>
 #include <interf_dec.h>
-#include <fcntl.h>
 
 extern "C" {
 	JNIEXPORT jint JNICALL Java_ac_robinson_mov_AMRtoPCMConverter_AmrDecoderInit(JNIEnv* env, jobject obj);
