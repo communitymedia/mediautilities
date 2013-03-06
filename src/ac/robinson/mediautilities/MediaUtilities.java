@@ -51,7 +51,7 @@ public class MediaUtilities {
 	public static final String[] MP3_FILE_EXTENSIONS = { "mp3" }; // TODO: add to MOV_AUDIO_FILE_EXTENSIONS if editing
 	public static final String[] WAV_FILE_EXTENSIONS = { "wav" }; // TODO: add to MOV_AUDIO_FILE_EXTENSIONS if editing
 	public static final String[] AMR_FILE_EXTENSIONS = { "amr", "3gp", "3gpp" };
-	public static String[] MOV_AUDIO_FILE_EXTENSIONS = { "m4a", "aac", "mp3" };
+	public static String[] MOV_AUDIO_FILE_EXTENSIONS = { "m4a", "aac", "mp3", "wav" };
 	static {
 		if (CAN_EXPORT_AMR) {
 			int totalLength = MOV_AUDIO_FILE_EXTENSIONS.length + AMR_FILE_EXTENSIONS.length;

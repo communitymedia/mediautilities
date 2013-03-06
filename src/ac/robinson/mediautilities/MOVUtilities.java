@@ -35,6 +35,8 @@ import ac.robinson.mov.JPEGMovWriter;
 import ac.robinson.mov.MP3toPCMConverter;
 import ac.robinson.mov.MP3toPCMConverter.MP3Configuration;
 import ac.robinson.mov.MP4toPCMConverter;
+import ac.robinson.mov.WAVtoPCMConverter;
+import ac.robinson.mov.WAVtoPCMConverter.WAVConfiguration;
 import ac.robinson.util.AndroidUtilities;
 import ac.robinson.util.BitmapUtilities;
 import ac.robinson.util.IOUtilities;
@@ -61,7 +63,7 @@ public class MOVUtilities {
 	private static final String LOG_TAG = "MOVUtilities";
 
 	private enum AudioType {
-		NONE, M4A, MP3, AMR
+		NONE, M4A, MP3, WAV, AMR
 	};
 
 	public static ArrayList<Uri> generateNarrativeMOV(Resources res, File outputFile,
@@ -276,6 +278,27 @@ public class MOVUtilities {
 							decodingError = true;
 							Log.d(LOG_TAG, "Error creating individual AMR audio track - general Exception");
 						}
+
+					} else if (AndroidUtilities.arrayContains(MediaUtilities.WAV_FILE_EXTENSIONS, audioFileExtension)) {
+						try {
+
+							// first we need to extract PCM audio from the WAV file
+							WAVConfiguration wavConfig = new WAVConfiguration();
+							WAVtoPCMConverter.convertFile(inputAudioFile, outputPCMStream, wavConfig);
+
+							// get the format of the audio - output is mono/stereo signed 16-bit little-endian integers
+							audioFormat = new AudioFormat(wavConfig.sampleFrequency, wavConfig.sampleSize,
+									wavConfig.numberOfChannels, true, false);
+
+						} catch (IOException e) {
+							decodingError = true;
+							Log.d(LOG_TAG,
+									"Error creating individual WAV audio track - IOException: "
+											+ e.getLocalizedMessage());
+						} catch (Exception e) {
+							decodingError = true;
+							Log.d(LOG_TAG, "Error creating individual WAV audio track - general Exception");
+						}
 					}
 
 					// then add to the MOV output file if successful (pcmAudioStream is closed in MovWriter)
@@ -325,6 +348,8 @@ public class MOVUtilities {
 					fileExtension = MediaUtilities.MP3_FILE_EXTENSIONS[0];
 				} else if (AndroidUtilities.arrayContains(MediaUtilities.AMR_FILE_EXTENSIONS, actualFileExtension)) {
 					fileExtension = MediaUtilities.AMR_FILE_EXTENSIONS[0];
+				} else if (AndroidUtilities.arrayContains(MediaUtilities.WAV_FILE_EXTENSIONS, actualFileExtension)) {
+					fileExtension = MediaUtilities.WAV_FILE_EXTENSIONS[0];
 				} else {
 					fileExtension = actualFileExtension;
 				}
@@ -404,6 +429,9 @@ public class MOVUtilities {
 					} else if (AndroidUtilities.arrayContains(MediaUtilities.AMR_FILE_EXTENSIONS, audioFileExtension)
 							&& currentTrackType.equals(MediaUtilities.AMR_FILE_EXTENSIONS[0])) {
 						currentAudioType = AudioType.AMR;
+					} else if (AndroidUtilities.arrayContains(MediaUtilities.WAV_FILE_EXTENSIONS, audioFileExtension)
+							&& currentTrackType.equals(MediaUtilities.WAV_FILE_EXTENSIONS[0])) {
+						currentAudioType = AudioType.WAV;
 					} else {
 						continue;
 					}
@@ -515,6 +543,30 @@ public class MOVUtilities {
 							decodingError = true;
 							Log.d(LOG_TAG, "Error creating segmented AMR audio track - general Exception");
 						}
+
+					} else if (currentAudioType == AudioType.WAV) {
+						try {
+
+							// first we need to extract PCM audio from the WAV file
+							WAVConfiguration wavConfig = new WAVConfiguration();
+							WAVtoPCMConverter.convertFile(inputAudioFile, currentPCMStream, wavConfig);
+
+							// get the format - output is mono/stereo signed 16-bit little-endian integers
+							if (audioFormat == null) { // TODO: we assume all WAV components are the same format
+								audioFormat = new AudioFormat(wavConfig.sampleFrequency, wavConfig.sampleSize,
+										wavConfig.numberOfChannels, true, false);
+							}
+
+						} catch (IOException e) {
+							decodingError = true;
+							Log.d(LOG_TAG,
+									"Error creating segmented WAV audio track - IOException: "
+											+ e.getLocalizedMessage());
+						} catch (Exception e) {
+							decodingError = true;
+							Log.d(LOG_TAG, "Error creating segmented WAV audio track - general Exception");
+						}
+
 					}
 
 					// if successful, combine the streams and store locations
@@ -557,7 +609,7 @@ public class MOVUtilities {
 				// move on to the next frame's start time
 				frameStartTime += frame.mFrameMaxDuration;
 			}
-			
+
 			// finally, write the combined track to the MOV (pcmAudioStream is closed in MovWriter)
 			IOUtilities.closeStream(outputPCMStream);
 			AudioInputStream pcmAudioStream;
