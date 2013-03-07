@@ -63,6 +63,10 @@ public class DebugUtilities {
 
 	// some devices can only record AMR audio
 	public static boolean supportsAMRAudioRecordingOnly() {
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.GINGERBREAD_MR1) {
+			return true;
+		}
+
 		ArrayList<String> devices = new ArrayList<String>();
 		devices.add("samsung/GT-S5830/GT-S5830"); // Samsung Galaxy Ace
 		devices.add("samsung/GT-S5830i/GT-S5830i"); // Samsung Galaxy Ace i
