@@ -37,7 +37,9 @@ CC=arm-linux-androideabi-gcc
 CXX=arm-linux-androideabi-g++
 
 # create the custom NDK toolchain that we'll use to build the library
+if [ "$BUILD_CUSTOM_NDK_TOOLCHAIN" != "no" ]; then
 $NDK_PATH/build/tools/make-standalone-toolchain.sh --ndk-dir=$NDK_PATH --platform=android-8 --install-dir=$TOOLCHAIN
+fi
 
 # build the opencore-amr library, with amr-nb decode capability only (don't care about amr-wb at the moment)
 SHARED_LIB=

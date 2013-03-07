@@ -32,16 +32,16 @@ JNIEXPORT jint JNICALL Java_ac_robinson_mov_AMRtoPCMConverter_AmrDecoderInit(JNI
 }
 
 JNIEXPORT void JNICALL Java_ac_robinson_mov_AMRtoPCMConverter_AmrDecoderDecode(JNIEnv* env, jobject obj, jint* nativePointer, jbyteArray in, jshortArray out, jint bfi) {
-	jsize inLen  = env->GetArrayLength(in);
+	jsize inLen = env->GetArrayLength(in);
 	jbyte inBuf[inLen];
 	env->GetByteArrayRegion(in, 0, inLen, inBuf);
 	
-	jsize outLen  = env->GetArrayLength(out);
+	jsize outLen = env->GetArrayLength(out);
 	short outBuf[outLen];
 	
 	Decoder_Interface_Decode(nativePointer, (const unsigned char*)inBuf, (short*)outBuf, bfi);
 	
-	env->ReleaseByteArrayElements(in, inBuf, JNI_ABORT);
+	// env->ReleaseByteArrayElements(in, inBuf, JNI_ABORT); //no need - GetByteArrayRegion handles this
 	env->SetShortArrayRegion(out, 0, outLen, outBuf);
 }
 
