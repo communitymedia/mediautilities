@@ -22,29 +22,33 @@
 #include <interf_dec.h>
 
 extern "C" {
-	JNIEXPORT jint JNICALL Java_ac_robinson_mov_AMRtoPCMConverter_AmrDecoderInit(JNIEnv* env, jobject obj);
-	JNIEXPORT void JNICALL Java_ac_robinson_mov_AMRtoPCMConverter_AmrDecoderDecode(JNIEnv* env, jobject obj, jint* nativePointer, jbyteArray in, jshortArray out, jint bfi);
-	JNIEXPORT void JNICALL Java_ac_robinson_mov_AMRtoPCMConverter_AmrDecoderExit(JNIEnv* env, jobject obj, jint* nativePointer);
-};
-
-JNIEXPORT jint JNICALL Java_ac_robinson_mov_AMRtoPCMConverter_AmrDecoderInit(JNIEnv* env, jobject obj) {
-	return (jint)Decoder_Interface_init();
+JNIEXPORT jint JNICALL Java_ac_robinson_mov_AMRtoPCMConverter_AmrDecoderInit(JNIEnv* env, jobject obj);
+JNIEXPORT void JNICALL Java_ac_robinson_mov_AMRtoPCMConverter_AmrDecoderDecode(JNIEnv* env, jobject obj,
+		jint* nativePointer, jbyteArray in, jshortArray out, jint bfi);
+JNIEXPORT void JNICALL Java_ac_robinson_mov_AMRtoPCMConverter_AmrDecoderExit(JNIEnv* env, jobject obj,
+		jint* nativePointer);
 }
 
-JNIEXPORT void JNICALL Java_ac_robinson_mov_AMRtoPCMConverter_AmrDecoderDecode(JNIEnv* env, jobject obj, jint* nativePointer, jbyteArray in, jshortArray out, jint bfi) {
+JNIEXPORT jint JNICALL Java_ac_robinson_mov_AMRtoPCMConverter_AmrDecoderInit(JNIEnv* env, jobject obj) {
+	return (jint) Decoder_Interface_init();
+}
+
+JNIEXPORT void JNICALL Java_ac_robinson_mov_AMRtoPCMConverter_AmrDecoderDecode(JNIEnv* env, jobject obj,
+		jint* nativePointer, jbyteArray in, jshortArray out, jint bfi) {
 	jsize inLen = env->GetArrayLength(in);
 	jbyte inBuf[inLen];
 	env->GetByteArrayRegion(in, 0, inLen, inBuf);
-	
+
 	jsize outLen = env->GetArrayLength(out);
 	short outBuf[outLen];
-	
-	Decoder_Interface_Decode(nativePointer, (const unsigned char*)inBuf, (short*)outBuf, bfi);
-	
-	// env->ReleaseByteArrayElements(in, inBuf, JNI_ABORT); //no need - GetByteArrayRegion handles this
+
+	Decoder_Interface_Decode(nativePointer, (const unsigned char*) inBuf, (short*) outBuf, bfi);
+
+	// env->ReleaseByteArrayElements(in, inBuf, JNI_ABORT); // no need - GetByteArrayRegion handles this
 	env->SetShortArrayRegion(out, 0, outLen, outBuf);
 }
 
-JNIEXPORT void JNICALL Java_ac_robinson_mov_AMRtoPCMConverter_AmrDecoderExit(JNIEnv* env, jobject obj, jint* nativePointer) {
+JNIEXPORT void JNICALL Java_ac_robinson_mov_AMRtoPCMConverter_AmrDecoderExit(JNIEnv* env, jobject obj,
+		jint* nativePointer) {
 	Decoder_Interface_exit(nativePointer);
 }

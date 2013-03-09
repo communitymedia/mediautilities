@@ -158,8 +158,9 @@ public class CheapAAC extends CheapSoundFile {
 	}
 
 	@SuppressLint("UseSparseArrays")
-	public void readFile(File inputFile) throws java.io.FileNotFoundException, java.io.IOException {
-		super.readFile(inputFile);
+	public void readFile(File inputFile, boolean readHeaderOnly) throws java.io.FileNotFoundException,
+			java.io.IOException {
+		super.readFile(inputFile, readHeaderOnly);
 		mChannels = 0;
 		mSampleRate = 0;
 		mBitrate = 0;
@@ -207,17 +208,20 @@ public class CheapAAC extends CheapSoundFile {
 			throw new java.io.IOException("Unknown file format");
 		}
 
-		if (mMdatOffset > 0 && mMdatLength > 0) {
-			try {
-				stream = new FileInputStream(mInputFile);
-				stream.skip(mMdatOffset);
-				mOffset = mMdatOffset;
-				parseMdat(stream, mMdatLength);
-			} finally {
-				IOUtilities.closeStream(stream);
+		// only read the data if necessary
+		if (!readHeaderOnly) {
+			if (mMdatOffset > 0 && mMdatLength > 0) {
+				try {
+					stream = new FileInputStream(mInputFile);
+					stream.skip(mMdatOffset);
+					mOffset = mMdatOffset;
+					parseMdat(stream, mMdatLength);
+				} finally {
+					IOUtilities.closeStream(stream);
+				}
+			} else {
+				throw new java.io.IOException("Didn't find mdat");
 			}
-		} else {
-			throw new java.io.IOException("Didn't find mdat");
 		}
 
 		/*

@@ -107,8 +107,9 @@ public class CheapAMR extends CheapSoundFile {
 		return "AMR";
 	}
 
-	public void readFile(File inputFile) throws java.io.FileNotFoundException, java.io.IOException {
-		super.readFile(inputFile);
+	public void readFile(File inputFile, boolean readHeaderOnly) throws java.io.FileNotFoundException,
+			java.io.IOException {
+		super.readFile(inputFile, readHeaderOnly);
 		mNumFrames = 0;
 		mMaxFrames = 64; // This will grow as needed
 		mFrameOffsets = new int[mMaxFrames];
@@ -137,7 +138,9 @@ public class CheapAMR extends CheapSoundFile {
 			mOffset += 6;
 			if (header[0] == '#' && header[1] == '!' && header[2] == 'A' && header[3] == 'M' && header[4] == 'R'
 					&& header[5] == '\n') {
-				parseAMR(stream, mFileSize - 6);
+				if (!readHeaderOnly) {
+					parseAMR(stream, mFileSize - 6);
+				}
 			}
 
 			stream.read(header, 6, 6);
@@ -154,14 +157,14 @@ public class CheapAMR extends CheapSoundFile {
 					mOffset += boxLen - 12;
 				}
 
-				parse3gpp(stream, mFileSize - boxLen);
+				parse3gpp(stream, mFileSize - boxLen, readHeaderOnly);
 			}
 		} finally {
 			IOUtilities.closeStream(stream);
 		}
 	}
 
-	private void parse3gpp(InputStream stream, int maxLen) throws java.io.IOException {
+	private void parse3gpp(InputStream stream, int maxLen, boolean readHeaderOnly) throws java.io.IOException {
 		if (maxLen < 8)
 			return;
 
@@ -176,14 +179,16 @@ public class CheapAMR extends CheapSoundFile {
 			return;
 
 		if (boxHeader[4] == 'm' && boxHeader[5] == 'd' && boxHeader[6] == 'a' && boxHeader[7] == 't') {
-			parseAMR(stream, boxLen);
+			if (!readHeaderOnly) {
+				parseAMR(stream, boxLen);
+			}
 			return;
 		}
 
 		stream.skip(boxLen - 8);
 		mOffset += (boxLen - 8);
 
-		parse3gpp(stream, maxLen - boxLen);
+		parse3gpp(stream, maxLen - boxLen, readHeaderOnly);
 	}
 
 	void parseAMR(InputStream stream, int maxLen) throws java.io.IOException {

@@ -48,8 +48,8 @@ public class CheapSoundFile {
 		public String[] getSupportedExtensions();
 	}
 
-	static Factory[] sSubclassFactories = new Factory[] { CheapAAC.getFactory(), CheapAMR.getFactory(),
-			CheapMP3.getFactory(), CheapWAV.getFactory(), };
+	static Factory[] sSubclassFactories = new Factory[] { CheapAAC.getFactory(), CheapAMR.getFactory() };
+	// CheapMP3.getFactory(), CheapWAV.getFactory(), };
 
 	static ArrayList<String> sSupportedExtensions = new ArrayList<String>();
 	static HashMap<String, Factory> sExtensionMap = new HashMap<String, Factory>();
@@ -70,6 +70,16 @@ public class CheapSoundFile {
 	 */
 	public static CheapSoundFile create(String fileName, ProgressListener progressListener)
 			throws java.io.FileNotFoundException, java.io.IOException {
+		return create(fileName, false, progressListener);
+	}
+
+	/**
+	 * Static method to create the appropriate CheapSoundFile subclass given a filename.
+	 * 
+	 * TODO: make this more modular rather than hardcoding the logic
+	 */
+	public static CheapSoundFile create(String fileName, boolean readHeaderOnly, ProgressListener progressListener)
+			throws java.io.FileNotFoundException, java.io.IOException {
 		File f = new File(fileName);
 		if (!f.exists()) {
 			throw new java.io.FileNotFoundException(fileName);
@@ -85,7 +95,7 @@ public class CheapSoundFile {
 		}
 		CheapSoundFile soundFile = factory.create();
 		soundFile.setProgressListener(progressListener);
-		soundFile.readFile(f);
+		soundFile.readFile(f, readHeaderOnly);
 		return soundFile;
 	}
 
@@ -110,7 +120,8 @@ public class CheapSoundFile {
 	protected CheapSoundFile() {
 	}
 
-	public void readFile(File inputFile) throws java.io.FileNotFoundException, java.io.IOException {
+	public void readFile(File inputFile, boolean readHeaderOnly) throws java.io.FileNotFoundException,
+			java.io.IOException {
 		mInputFile = inputFile;
 	}
 
