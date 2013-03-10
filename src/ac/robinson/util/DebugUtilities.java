@@ -54,9 +54,12 @@ public class DebugUtilities {
 	}
 
 	// some devices cannot use SoundPool and MediaPlayer simultaneously due to a bug
+	// - currently just Galaxy Tab 10.1 with original SDK version
 	public static boolean hasSoundPoolBug() {
 		ArrayList<String> devices = new ArrayList<String>();
-		devices.add("samsung/GT-P7510/GT-P7510"); // Samsung Galaxy Tab 10.1
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+			devices.add("samsung/GT-P7510/GT-P7510"); // Samsung Galaxy Tab 10.1
+		}
 
 		return devices.contains(getDeviceBrandProduct());
 	}
@@ -64,7 +67,7 @@ public class DebugUtilities {
 	// some devices can only record AMR audio
 	public static boolean supportsAMRAudioRecordingOnly() {
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.GINGERBREAD_MR1) {
-			return true;
+			return true; // no pre-v10 devices support anything other than AMR
 		}
 
 		ArrayList<String> devices = new ArrayList<String>();
