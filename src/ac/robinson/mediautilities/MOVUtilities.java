@@ -104,6 +104,7 @@ public class MOVUtilities {
 		Bitmap imageBitmap = null;
 		SVG audioSVG = null;
 		JPEGMovWriter outputFileWriter = null;
+		ArrayList<File> filesToDelete = new ArrayList<File>();
 		try {
 			outputFileWriter = new JPEGMovWriter(outputFile);
 
@@ -111,9 +112,13 @@ public class MOVUtilities {
 			// segmented audio means we combine audio into as few tracks as possible, which increases playback
 			// compatibility (but also increases the time required to export the movie)
 			if (MediaUtilities.MOV_USE_SEGMENTED_AUDIO) {
-				addNarrativeAudioAsSegmentedTrack(framesToSend, outputFile.getParentFile(), outputFileWriter);
+				ArrayList<File> segmentFiles = addNarrativeAudioAsSegmentedTrack(framesToSend,
+						outputFile.getParentFile(), outputFileWriter);
+				filesToDelete.addAll(segmentFiles);
 			} else {
-				addNarrativeAudioAsIndividualTracks(framesToSend, outputFile.getParentFile(), outputFileWriter);
+				ArrayList<File> individualFiles = addNarrativeAudioAsIndividualTracks(framesToSend,
+						outputFile.getParentFile(), outputFileWriter);
+				filesToDelete.addAll(individualFiles);
 			}
 
 			// add the visual content
@@ -161,12 +166,21 @@ public class MOVUtilities {
 			}
 		} catch (IOException e) {
 			fileError = true; // these are the only places where errors really matter
+			Log.d(LOG_TAG, "Error creating MOV file - IOException: " + e.getLocalizedMessage());
 		} catch (Throwable t) {
 			fileError = true; // these are the only places where errors really matter
+			Log.d(LOG_TAG, "Error creating MOV file - Throwable: " + t.getLocalizedMessage());
 		} finally {
 			try {
 				outputFileWriter.close(!fileError);
 			} catch (IOException e) {
+			}
+		}
+
+		// must delete after creation because audio and video are interleaved in the MOV output
+		for (File file : filesToDelete) {
+			if (file != null && file.exists()) {
+				file.delete();
 			}
 		}
 
@@ -180,8 +194,11 @@ public class MOVUtilities {
 		return filesToSend;
 	}
 
-	private static void addNarrativeAudioAsIndividualTracks(ArrayList<FrameMediaContainer> framesToSend,
+	private static ArrayList<File> addNarrativeAudioAsIndividualTracks(ArrayList<FrameMediaContainer> framesToSend,
 			File tempDirectory, JPEGMovWriter outputFileWriter) {
+
+		// the list of files to be delete after they've been written to the movie
+		ArrayList<File> filesToDelete = new ArrayList<File>();
 
 		int frameDuration;
 		long frameStartTime = 0;
@@ -211,6 +228,7 @@ public class MOVUtilities {
 				try {
 					// both methods need a PCM file to write to
 					outputPCMFile = File.createTempFile(inputAudioFile.getName(), ".pcm", tempDirectory);
+					filesToDelete.add(outputPCMFile);
 					outputPCMStream = new BufferedOutputStream(new FileOutputStream(outputPCMFile));
 
 					decodingError = false;
@@ -313,9 +331,6 @@ public class MOVUtilities {
 					Log.d(LOG_TAG, "Error creating individual MOV audio track - general Exception");
 				} finally {
 					IOUtilities.closeStream(outputPCMStream);
-					if (outputPCMFile != null) {
-						outputPCMFile.delete();
-					}
 				}
 
 				// go to the next media item regardless
@@ -325,10 +340,15 @@ public class MOVUtilities {
 			// go to the next frame regardless
 			frameStartTime += frameDuration;
 		}
+
+		return filesToDelete;
 	}
 
-	private static void addNarrativeAudioAsSegmentedTrack(ArrayList<FrameMediaContainer> framesToSend,
+	private static ArrayList<File> addNarrativeAudioAsSegmentedTrack(ArrayList<FrameMediaContainer> framesToSend,
 			File tempDirectory, JPEGMovWriter outputFileWriter) {
+
+		// the list of files to be delete after they've been written to the movie
+		ArrayList<File> filesToDelete = new ArrayList<File>();
 
 		// see how many tracks we need to create - one per stream, but need to separate formats
 		ArrayList<String> fileTypes = new ArrayList<String>();
@@ -445,6 +465,7 @@ public class MOVUtilities {
 						try {
 							// only create one master file, shared between all audio files of the right type
 							outputPCMFile = File.createTempFile(inputAudioFile.getName(), "all.pcm", tempDirectory);
+							filesToDelete.add(outputPCMFile); // deleted after the rest of the movie has been written
 							outputPCMStream = new BufferedOutputStream(new FileOutputStream(outputPCMFile));
 						} catch (Exception e) {
 							IOUtilities.closeStream(outputPCMStream);
@@ -633,9 +654,8 @@ public class MOVUtilities {
 				Log.d(LOG_TAG, "Error creating segmented MOV audio track - couldn't create final MOV track");
 				e.printStackTrace();
 			}
-			if (outputPCMFile != null) {
-				outputPCMFile.delete();
-			}
 		}
+
+		return filesToDelete;
 	}
 }
