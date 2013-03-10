@@ -34,7 +34,7 @@ public final class AMRtoPCMConverter {
 	private static int mNativeAmrDecoder = 0; // the pointer to the native amr-nb decoder
 
 	/* From WmfDecBytesPerFrame in dec_input_format_tab.cpp */
-	private static int sizes[] = { 12, 13, 15, 17, 19, 20, 26, 31, 5, 6, 5, 5, 0, 0, 0, 0 }; // frame sizes
+	private static int mFrameSizes[] = { 12, 13, 15, 17, 19, 20, 26, 31, 5, 6, 5, 5, 0, 0, 0, 0 };
 
 	/**
 	 * Convert an AMR input file to PCM
@@ -77,17 +77,16 @@ public final class AMRtoPCMConverter {
 			mNativeAmrDecoder = AmrDecoderInit();
 
 			byte[] amrBuffer = new byte[32]; // maximum frame size (see above) is 31 (+ 1-byte length)
-			short[] outputBuffer = new short[160]; // length copied from amrnb-dec.c
-			int n, size;
+			short[] outputBuffer = new short[160]; // length copied from amrnb-dec.c; hardcoded below too
+			int i, n, size;
 			while (true) {
 				// read the mode byte
-				inputAMRStream.read(amrBuffer, 0, 1);
-				if (amrBuffer[0] <= 0) {
+				if (inputAMRStream.read(amrBuffer, 0, 1) <= 0) {
 					break;
 				}
 
 				// find the packet size
-				size = sizes[(amrBuffer[0] >> 3) & 0x0f];
+				size = mFrameSizes[(amrBuffer[0] >> 3) & 0x0f];
 				n = inputAMRStream.read(amrBuffer, 1, size);
 				if (n < size) {
 					break;
@@ -97,7 +96,7 @@ public final class AMRtoPCMConverter {
 				AmrDecoderDecode(mNativeAmrDecoder, amrBuffer, outputBuffer, 0);
 
 				// convert to byte and write to the output stream
-				for (int i = 0; i < outputBuffer.length; i++) {
+				for (i = 0; i < 160; i++) {
 					// output.write(outputBuffer[i] & 0xff); // little endian
 					output.write((outputBuffer[i] >> 8) & 0xff);
 					output.write(outputBuffer[i] & 0xff); // we want big endian
