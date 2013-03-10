@@ -115,8 +115,11 @@ public class CheapMP3 extends CheapSoundFile {
 		}
 	}
 
-	public void readFile(File inputFile) throws java.io.FileNotFoundException, java.io.IOException {
-		super.readFile(inputFile);
+	/**
+	 * Note: readHeaderOnly is currently ignored for MP3 files
+	 */
+	public void readFile(File inputFile, boolean readHeaderOnly) throws java.io.FileNotFoundException, java.io.IOException {
+		super.readFile(inputFile, readHeaderOnly);
 		mNumFrames = 0;
 		mMaxFrames = 64; // This will grow as needed
 		mFrameOffsets = new int[mMaxFrames];

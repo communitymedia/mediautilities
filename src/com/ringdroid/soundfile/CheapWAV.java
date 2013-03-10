@@ -94,10 +94,13 @@ public class CheapWAV extends CheapSoundFile {
 		return "WAV";
 	}
 
+	/**
+	 * Note: readHeaderOnly is currently ignored for WAV files
+	 */
 	// @SuppressWarnings("resource") is to suppress complaint about stream closure (handled by closeStream in finally)
 	@SuppressWarnings("resource")
-	public void readFile(File inputFile) throws java.io.FileNotFoundException, java.io.IOException {
-		super.readFile(inputFile);
+	public void readFile(File inputFile, boolean readHeaderOnly) throws java.io.FileNotFoundException, java.io.IOException {
+		super.readFile(inputFile, readHeaderOnly);
 		mFileSize = (int) mInputFile.length();
 
 		if (mFileSize < 128) {
