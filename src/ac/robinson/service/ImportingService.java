@@ -20,6 +20,7 @@
 
 package ac.robinson.service;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 
 import ac.robinson.mediautilities.MediaUtilities;
@@ -41,12 +42,12 @@ import android.util.Log;
 public class ImportingService extends Service {
 
 	// see: http://developer.android.com/reference/android/app/Service.html
-	private final Messenger mClientMessenger = new Messenger(new ClientMessageHandler());
+	private final Messenger mClientMessenger = new Messenger(new ClientMessageHandler(this));
 	private Messenger mClient = null;
 
 	private BluetoothAdapter mBluetoothAdapter;
-	private BluetoothStateReceiver mBluetoothStateReceiver = new BluetoothStateReceiver();
-	private final BluetoothFileHandler mBluetoothFileHandler = new BluetoothFileHandler();
+	private final BluetoothStateReceiver mBluetoothStateReceiver = new BluetoothStateReceiver();
+	private final BluetoothFileHandler mBluetoothFileHandler = new BluetoothFileHandler(this);
 
 	private FileObserver mBluetoothObserver = null;
 	private String mBluetoothObserverClassName = null;
@@ -64,8 +65,12 @@ public class ImportingService extends Service {
 		super.onDestroy();
 		stopBluetoothTransferObserver();
 		mBluetoothObserver = null;
-		if (mBluetoothStateReceiver != null) {
+		try {
 			unregisterReceiver(mBluetoothStateReceiver);
+		} catch (Throwable t) {
+			// on some devices (Kindle, for example) the registerReceiver call fails and returns null; however, on other
+			// devices (HTC Desire S for example) the registerReciever call succeeds and *still* returns null - because
+			// of this we must catch the inevitable Exception when we unregister a receiver that is not registered
 		}
 	}
 
@@ -120,13 +125,18 @@ public class ImportingService extends Service {
 		}
 	}
 
+	private void sendBluetoothObserverFileHint(String path) {
+		if (mBluetoothObserver != null) {
+			if (path != null) {
+				mBluetoothObserver.onEvent(FileObserver.CLOSE_WRITE, path);
+			}
+		}
+	}
+
 	private void updateServices() {
 		if (mBluetoothAdapter != null) {
 			IntentFilter filter = new IntentFilter("android.bluetooth.adapter.action.STATE_CHANGED");
-			Intent bluetoothReceiver = registerReceiver(mBluetoothStateReceiver, filter);
-			if (bluetoothReceiver == null) {
-				mBluetoothStateReceiver = null; // couldn't find a receiver so null to make sure we don't try to unbind
-			}
+			registerReceiver(mBluetoothStateReceiver, filter);
 
 			if (!mBluetoothAdapter.isEnabled() && mRequireBluetoothEnabled) {
 				// removed - shouldn't be done without user permission - now start observer when bluetooth is enabled
@@ -141,9 +151,11 @@ public class ImportingService extends Service {
 			if (!mRequireBluetoothEnabled) {
 				startBluetoothTransferObserver();
 			}
-
-			mBluetoothStateReceiver = null; // to make sure we don't try to unbind
 		}
+	}
+
+	private void setClient(Messenger client) {
+		mClient = client;
 	}
 
 	private void forwardMessage(int messageId, String fileName) {
@@ -160,7 +172,12 @@ public class ImportingService extends Service {
 	}
 
 	// the callback handler that gets bluetooth file listener results
-	private class BluetoothFileHandler extends Handler {
+	private static class BluetoothFileHandler extends Handler {
+		private final WeakReference<ImportingService> mService;
+
+		public BluetoothFileHandler(ImportingService service) {
+			mService = new WeakReference<ImportingService>(service);
+		}
 
 		@Override
 		public void handleMessage(Message msg) {
@@ -182,13 +199,21 @@ public class ImportingService extends Service {
 				case MediaUtilities.MSG_RECEIVED_HTML_FILE:
 				case MediaUtilities.MSG_RECEIVED_MOV_FILE:
 				case MediaUtilities.MSG_RECEIVED_SMIL_FILE:
-					forwardMessage(msg.what, importedFileName);
+					ImportingService service = mService.get();
+					if (service != null) {
+						service.forwardMessage(msg.what, importedFileName);
+					}
 					break;
 			}
 		}
 	}
 
-	private class ClientMessageHandler extends Handler {
+	private static class ClientMessageHandler extends Handler {
+		private final WeakReference<ImportingService> mService;
+
+		public ClientMessageHandler(ImportingService service) {
+			mService = new WeakReference<ImportingService>(service);
+		}
 
 		@Override
 		public void handleMessage(Message msg) {
@@ -196,23 +221,30 @@ public class ImportingService extends Service {
 			switch (msg.what) {
 
 				case MediaUtilities.MSG_REGISTER_CLIENT:
-					mClient = msg.replyTo;
-					updateServices();
+					ImportingService regService = mService.get();
+					if (regService != null) {
+						regService.setClient(msg.replyTo);
+						regService.updateServices();
+					}
 					break;
 
 				case MediaUtilities.MSG_HINT_NEW_FILE:
-					if (mBluetoothObserver != null) {
-						Bundle messageBundle = msg.getData();
-						if (messageBundle != null) {
-							mBluetoothObserver.onEvent(FileObserver.CLOSE_WRITE,
-									messageBundle.getString(MediaUtilities.KEY_FILE_NAME));
+					Bundle messageBundle = msg.getData();
+					if (messageBundle != null) {
+						ImportingService hintService = mService.get();
+						if (hintService != null) {
+							hintService.sendBluetoothObserverFileHint(messageBundle
+									.getString(MediaUtilities.KEY_FILE_NAME));
 						}
 					}
 					break;
 
 				case MediaUtilities.MSG_DISCONNECT_CLIENT:
-					mClient = null;
-					stopSelf();
+					ImportingService discService = mService.get();
+					if (discService != null) {
+						discService.setClient(null);
+						discService.stopSelf();
+					}
 					break;
 
 				default:
