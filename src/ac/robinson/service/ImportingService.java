@@ -45,7 +45,7 @@ public class ImportingService extends Service {
 	private Messenger mClient = null;
 
 	private BluetoothAdapter mBluetoothAdapter;
-	private final BluetoothStateReceiver mBluetoothStateReceiver = new BluetoothStateReceiver();
+	private BluetoothStateReceiver mBluetoothStateReceiver = new BluetoothStateReceiver();
 	private final BluetoothFileHandler mBluetoothFileHandler = new BluetoothFileHandler();
 
 	private FileObserver mBluetoothObserver = null;
@@ -123,7 +123,10 @@ public class ImportingService extends Service {
 	private void updateServices() {
 		if (mBluetoothAdapter != null) {
 			IntentFilter filter = new IntentFilter("android.bluetooth.adapter.action.STATE_CHANGED");
-			registerReceiver(mBluetoothStateReceiver, filter);
+			Intent bluetoothReceiver = registerReceiver(mBluetoothStateReceiver, filter);
+			if (bluetoothReceiver == null) {
+				mBluetoothStateReceiver = null; // couldn't find a receiver so null to make sure we don't try to unbind
+			}
 
 			if (!mBluetoothAdapter.isEnabled() && mRequireBluetoothEnabled) {
 				// removed - shouldn't be done without user permission - now start observer when bluetooth is enabled
@@ -132,8 +135,14 @@ public class ImportingService extends Service {
 			} else {
 				startBluetoothTransferObserver();
 			}
+
 		} else {
-			// bluetooth unavailable
+			// bluetooth unavailable - if allowed, watch the directory regardless
+			if (!mRequireBluetoothEnabled) {
+				startBluetoothTransferObserver();
+			}
+
+			mBluetoothStateReceiver = null; // to make sure we don't try to unbind
 		}
 	}
 

@@ -67,12 +67,12 @@ public class CenteredImageTextButton extends Button {
 		Rect bounds = new Rect();
 		String buttonText = getText().toString().trim();
 		getPaint().getTextBounds(buttonText, 0, buttonText.length(), bounds);
+		int compoundPadding = getCompoundDrawablePadding();
 
 		Drawable buttonDrawable = getCompoundDrawables()[1]; // top
-		int newPadding;
-		int compoundPadding = getCompoundDrawablePadding();
 		if (buttonDrawable != null) {
-			newPadding = (int) ((getHeight() - bounds.height() - compoundPadding - buttonDrawable.getIntrinsicHeight()) / 2);
+			int newPadding = (int) ((getHeight() - bounds.height() - compoundPadding - buttonDrawable
+					.getIntrinsicHeight()) / 2);
 			setGravity(Gravity.CENTER | Gravity.TOP);
 			setPadding(getPaddingLeft(), (newPadding > 0 ? newPadding : 0), getPaddingRight(), 0);
 			return;
@@ -80,7 +80,7 @@ public class CenteredImageTextButton extends Button {
 
 		buttonDrawable = getCompoundDrawables()[0]; // left
 		if (buttonDrawable != null) {
-			newPadding = (int) ((getWidth() - bounds.width() - compoundPadding - buttonDrawable.getIntrinsicWidth()) / 2);
+			int newPadding = (int) ((getWidth() - bounds.width() - compoundPadding - buttonDrawable.getIntrinsicWidth()) / 2);
 			setGravity(Gravity.LEFT | Gravity.CENTER);
 			setPadding((newPadding > 0 ? newPadding : 0), getPaddingTop(), 0, getPaddingBottom());
 		}
