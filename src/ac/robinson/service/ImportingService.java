@@ -191,6 +191,16 @@ public class ImportingService extends Service {
 					updateServices();
 					break;
 
+				case MediaUtilities.MSG_HINT_NEW_FILE:
+					if (mBluetoothObserver != null) {
+						Bundle messageBundle = msg.getData();
+						if (messageBundle != null) {
+							mBluetoothObserver.onEvent(FileObserver.CLOSE_WRITE,
+									messageBundle.getString(MediaUtilities.KEY_FILE_NAME));
+						}
+					}
+					break;
+
 				case MediaUtilities.MSG_DISCONNECT_CLIENT:
 					mClient = null;
 					stopSelf();

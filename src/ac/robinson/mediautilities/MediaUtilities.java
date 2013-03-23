@@ -73,8 +73,9 @@ public class MediaUtilities {
 	public static final int MSG_RECEIVED_IMPORT_FILE = 4;
 
 	public static final int MSG_REGISTER_CLIENT = 5;
-	public static final int MSG_DISCONNECT_CLIENT = 6;
-	public static final int MSG_IMPORT_SERVICE_REGISTERED = 7;
+	public static final int MSG_HINT_NEW_FILE = 6;
+	public static final int MSG_DISCONNECT_CLIENT = 7;
+	public static final int MSG_IMPORT_SERVICE_REGISTERED = 8;
 
 	public static final String KEY_OBSERVER_CLASS = "bluetooth_observer_class";
 	public static final String KEY_OBSERVER_PATH = "bluetooth_directory_path";
