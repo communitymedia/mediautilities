@@ -46,81 +46,27 @@ public class ITunesMetadataBox extends FullBox {
 
 	public enum DataType {
 
-		IMPLICIT(/* Object.class */), UTF8(/* String.class */), UTF16(/* String.class */), HTML(/* String.class */), XML(/*
-																													 * String
-																													 * .
-																													 * class
-																													 */), UUID(/*
-																																 * Long
-																																 * .
-																																 * class
-																																 */), ISRC(/*
-																																			 * String
-																																			 * .
-																																			 * class
-																																			 */), MI3P(/*
-																																						 * String
-																																						 * .
-																																						 * class
-																																						 */), GIF(/*
-																																								 * byte
-																																								 * [
-																																								 * ]
-																																								 * .
-																																								 * class
-																																								 */), JPEG(/*
-																																											 * byte
-																																											 * [
-																																											 * ]
-																																											 * .
-																																											 * class
-																																											 */), PNG(/*
-																																													 * byte
-																																													 * [
-																																													 * ]
-																																													 * .
-																																													 * class
-																																													 */), URL(/*
-																																															 * String
-																																															 * .
-																																															 * class
-																																															 */), DURATION(/*
-																																																			 * Long
-																																																			 * .
-																																																			 * class
-																																																			 */), DATETIME(/*
-																																																							 * Long
-																																																							 * .
-																																																							 * class
-																																																							 */), GENRE(/*
-																																																										 * Integer
-																																																										 * .
-																																																										 * class
-																																																										 */), INTEGER(/*
-																																																													 * Long
-																																																													 * .
-																																																													 * class
-																																																													 */), RIAA(/*
-																																																																 * Integer
-																																																																 * .
-																																																																 * class
-																																																																 */), UPC(/*
-																																																																		 * String
-																																																																		 * .
-																																																																		 * class
-																																																																		 */), BMP(/*
-																																																																				 * byte
-																																																																				 * [
-																																																																				 * ]
-																																																																				 * .
-																																																																				 * class
-																																																																				 */), UNDEFINED(/*
-																																																																								 * byte
-																																																																								 * [
-																																																																								 * ]
-																																																																								 * .
-																																																																								 * class
-																																																																								 */);
+		IMPLICIT(/*Object.class*/),
+		UTF8(/*String.class*/),
+		UTF16(/*String.class*/),
+		HTML(/*String.class*/),
+		XML(/*String.class*/),
+		UUID(/*Long.class*/),
+		ISRC(/*String.class*/),
+		MI3P(/*String.class*/),
+		GIF(/*byte[].class*/),
+		JPEG(/*byte[].class*/),
+		PNG(/*byte[].class*/),
+		URL(/*String.class*/),
+		DURATION(/*Long.class*/),
+		DATETIME(/*Long.class*/),
+		GENRE(/*Integer.class*/),
+		INTEGER(/*Long.class*/),
+		RIAA(/*Integer.class*/),
+		UPC(/*String.class*/),
+		BMP(/*byte[].class*/),
+		UNDEFINED(/*byte[].class*/);
+		
 		private static final DataType[] TYPES = { IMPLICIT, UTF8, UTF16, null, null, null, HTML, XML, UUID, ISRC, MI3P,
 				null, GIF, JPEG, PNG, URL, DURATION, DATETIME, GENRE, null, null, INTEGER, null, null, RIAA, UPC, null,
 				BMP };
