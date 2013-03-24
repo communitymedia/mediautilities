@@ -19,8 +19,6 @@
  */
 package net.sourceforge.jaad.aac.tools;
 
-import java.util.Arrays;
-
 import net.sourceforge.jaad.aac.AACException;
 import net.sourceforge.jaad.aac.Profile;
 import net.sourceforge.jaad.aac.SampleFrequency;
@@ -29,6 +27,7 @@ import net.sourceforge.jaad.aac.syntax.BitStream;
 import net.sourceforge.jaad.aac.syntax.Constants;
 import net.sourceforge.jaad.aac.syntax.ICSInfo;
 import net.sourceforge.jaad.aac.syntax.ICStream;
+import ac.robinson.util.AndroidUtilities;
 
 /**
  * Long-term prediction
@@ -152,9 +151,9 @@ public class LTPrediction implements Constants {
 		lag = ltp.lag;
 		lastBand = ltp.lastBand;
 		lagUpdate = ltp.lagUpdate;
-		shortUsed = Arrays.copyOf(ltp.shortUsed, ltp.shortUsed.length);
-		shortLagPresent = Arrays.copyOf(ltp.shortLagPresent, ltp.shortLagPresent.length);
-		shortLag = Arrays.copyOf(ltp.shortLag, ltp.shortLag.length);
-		longUsed = Arrays.copyOf(ltp.longUsed, ltp.longUsed.length);
+		shortUsed = AndroidUtilities.arrayCopyOf(ltp.shortUsed, ltp.shortUsed.length);
+		shortLagPresent = AndroidUtilities.arrayCopyOf(ltp.shortLagPresent, ltp.shortLagPresent.length);
+		shortLag = AndroidUtilities.arrayCopyOf(ltp.shortLag, ltp.shortLag.length);
+		longUsed = AndroidUtilities.arrayCopyOf(ltp.longUsed, ltp.longUsed.length);
 	}
 }

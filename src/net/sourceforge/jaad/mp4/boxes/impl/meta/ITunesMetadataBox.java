@@ -23,12 +23,13 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
 
 import net.sourceforge.jaad.mp4.MP4InputStream;
 import net.sourceforge.jaad.mp4.boxes.FullBox;
+import ac.robinson.util.AndroidUtilities;
+import ac.robinson.util.StringUtilities;
 
 /**
  * This box contains the data for a metadata tag. It is right below an iTunes metadata box (e.g. '@nam') or a custom
@@ -45,26 +46,81 @@ public class ITunesMetadataBox extends FullBox {
 
 	public enum DataType {
 
-		IMPLICIT(/*Object.class*/),
-		UTF8(/*String.class*/),
-		UTF16(/*String.class*/),
-		HTML(/*String.class*/),
-		XML(/*String.class*/),
-		UUID(/*Long.class*/),
-		ISRC(/*String.class*/),
-		MI3P(/*String.class*/),
-		GIF(/*byte[].class*/),
-		JPEG(/*byte[].class*/),
-		PNG(/*byte[].class*/),
-		URL(/*String.class*/),
-		DURATION(/*Long.class*/),
-		DATETIME(/*Long.class*/),
-		GENRE(/*Integer.class*/),
-		INTEGER(/*Long.class*/),
-		RIAA(/*Integer.class*/),
-		UPC(/*String.class*/),
-		BMP(/*byte[].class*/),
-		UNDEFINED(/*byte[].class*/);
+		IMPLICIT(/* Object.class */), UTF8(/* String.class */), UTF16(/* String.class */), HTML(/* String.class */), XML(/*
+																													 * String
+																													 * .
+																													 * class
+																													 */), UUID(/*
+																																 * Long
+																																 * .
+																																 * class
+																																 */), ISRC(/*
+																																			 * String
+																																			 * .
+																																			 * class
+																																			 */), MI3P(/*
+																																						 * String
+																																						 * .
+																																						 * class
+																																						 */), GIF(/*
+																																								 * byte
+																																								 * [
+																																								 * ]
+																																								 * .
+																																								 * class
+																																								 */), JPEG(/*
+																																											 * byte
+																																											 * [
+																																											 * ]
+																																											 * .
+																																											 * class
+																																											 */), PNG(/*
+																																													 * byte
+																																													 * [
+																																													 * ]
+																																													 * .
+																																													 * class
+																																													 */), URL(/*
+																																															 * String
+																																															 * .
+																																															 * class
+																																															 */), DURATION(/*
+																																																			 * Long
+																																																			 * .
+																																																			 * class
+																																																			 */), DATETIME(/*
+																																																							 * Long
+																																																							 * .
+																																																							 * class
+																																																							 */), GENRE(/*
+																																																										 * Integer
+																																																										 * .
+																																																										 * class
+																																																										 */), INTEGER(/*
+																																																													 * Long
+																																																													 * .
+																																																													 * class
+																																																													 */), RIAA(/*
+																																																																 * Integer
+																																																																 * .
+																																																																 * class
+																																																																 */), UPC(/*
+																																																																		 * String
+																																																																		 * .
+																																																																		 * class
+																																																																		 */), BMP(/*
+																																																																				 * byte
+																																																																				 * [
+																																																																				 * ]
+																																																																				 * .
+																																																																				 * class
+																																																																				 */), UNDEFINED(/*
+																																																																								 * byte
+																																																																								 * [
+																																																																								 * ]
+																																																																								 * .
+																																																																								 * class
+																																																																								 */);
 		private static final DataType[] TYPES = { IMPLICIT, UTF8, UTF16, null, null, null, HTML, XML, UUID, ISRC, MI3P,
 				null, GIF, JPEG, PNG, URL, DURATION, DATETIME, GENRE, null, null, INTEGER, null, null, RIAA, UPC, null,
 				BMP };
@@ -112,7 +168,7 @@ public class ITunesMetadataBox extends FullBox {
 	 * @return the raw metadata
 	 */
 	public byte[] getData() {
-		return Arrays.copyOf(data, data.length);
+		return AndroidUtilities.arrayCopyOf(data, data.length);
 	}
 
 	/**
@@ -122,7 +178,7 @@ public class ITunesMetadataBox extends FullBox {
 	 */
 	public String getText() {
 		// first four bytes are padding (zero)
-		return new String(data, 0, data.length, Charset.forName("UTF-8"));
+		return StringUtilities.byteToString(data, 0, data.length, Charset.forName("UTF-8"));
 	}
 
 	/**

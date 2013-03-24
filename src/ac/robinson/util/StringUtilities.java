@@ -22,9 +22,16 @@ package ac.robinson.util;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
+
+import android.annotation.TargetApi;
+import android.os.Build;
 
 public class StringUtilities {
 
@@ -54,6 +61,27 @@ public class StringUtilities {
 			}
 		}
 		return 0;
+	}
+
+	public static String byteToString(byte[] data, Charset charset) {
+		return byteToString(data, 0, data.length, charset);
+	}
+
+	@TargetApi(Build.VERSION_CODES.GINGERBREAD)
+	public static String byteToString(byte[] data, int offset, int byteCount, Charset charset) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+			return new String(data, offset, byteCount, charset);
+		} else {
+			// see: http://stackoverflow.com/questions/7376724
+			CharsetDecoder decoder = charset.newDecoder();
+			CharBuffer charBuffer;
+			try {
+				charBuffer = decoder.decode(ByteBuffer.wrap(data, offset, byteCount));
+				return charBuffer.toString();
+			} catch (Exception e) {
+				return new String(data, offset, byteCount); // last-ditch effort - ignore the encoding
+			}
+		}
 	}
 
 	public static String millisecondsToTimeString(long milliseconds, boolean includeMilliseconds) {

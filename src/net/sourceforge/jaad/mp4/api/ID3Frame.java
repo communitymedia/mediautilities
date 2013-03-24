@@ -27,6 +27,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import ac.robinson.util.StringUtilities;
+
 class ID3Frame {
 
 	static final int ALBUM_TITLE = 1413565506; // TALB
@@ -170,7 +172,7 @@ class ID3Frame {
 	}
 
 	public String getText() {
-		return new String(data, Charset.forName(TEXT_ENCODINGS[0]));
+		return StringUtilities.byteToString(data, Charset.forName(TEXT_ENCODINGS[0]));
 	}
 
 	public String getEncodedText() {
@@ -183,7 +185,7 @@ class ID3Frame {
 			if (data[i] == 0 && (enc == 0 || enc == 3 || data[i + 1] == 0))
 				t = i;
 		}
-		return new String(data, 1, t - 1, Charset.forName(TEXT_ENCODINGS[enc]));
+		return StringUtilities.byteToString(data, 1, t - 1, Charset.forName(TEXT_ENCODINGS[enc]));
 	}
 
 	public int getNumber() {
@@ -192,7 +194,7 @@ class ID3Frame {
 
 	public int[] getNumbers() {
 		// multiple numbers separated by '/'
-		final String x = new String(data, Charset.forName(TEXT_ENCODINGS[0]));
+		final String x = StringUtilities.byteToString(data, Charset.forName(TEXT_ENCODINGS[0]));
 		final int i = x.indexOf('/');
 		final int[] y;
 		if (i > 0)

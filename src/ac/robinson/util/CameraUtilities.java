@@ -72,6 +72,14 @@ public class CameraUtilities {
 		}
 	}
 
+	public static Camera initialiseCamera(boolean preferFront, CameraConfiguration cameraConfiguration) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+			return initialiseGingerbreadCamera(preferFront, cameraConfiguration);
+		} else {
+			return initialiseMultiPlatformCamera(preferFront, cameraConfiguration);
+		}
+	}
+
 	// see: http://digitaldumptruck.jotabout.com/?p=797
 	public static Camera initialiseMultiPlatformCamera(boolean preferFront, CameraConfiguration cameraConfiguration) {
 
@@ -115,32 +123,32 @@ public class CameraUtilities {
 					getCameraInfoMethod.invoke(null, camIdx, cameraInfo);
 					cameraFacing = facingField.getInt(cameraInfo);
 
-					// allow non-preferred camera (some devices (e.g. Nexus 7) only have front camera)
-					if (cameraFacing == preferredFacing || camIdx == cameraCount - 1) {
-						if (camera == null) { // so that we continue and detect a front camera even if we aren't using
-												// it
-							try {
-								Method cameraOpenMethod = cameraClass.getMethod("open", Integer.TYPE);
-								if (cameraOpenMethod != null) {
-									camera = (Camera) cameraOpenMethod.invoke(null, camIdx);
-									if (cameraFacing == CUSTOM_CAMERA_FRONT) {
-										cameraConfiguration.usingFrontCamera = true;
+					if (cameraInfo != null) {
+						if (cameraFacing == CUSTOM_CAMERA_FRONT) {
+							cameraConfiguration.hasFrontCamera = true;
+						}
+						// allow non-preferred camera (some devices (e.g. Nexus 7) only have front camera)
+						if (cameraFacing == preferredFacing || camIdx == cameraCount - 1) {
+							if (camera == null) { // so that we continue and detect a front camera even if not using it
+								try {
+									Method cameraOpenMethod = cameraClass.getMethod("open", Integer.TYPE);
+									if (cameraOpenMethod != null) {
+										camera = (Camera) cameraOpenMethod.invoke(null, camIdx);
+										if (cameraFacing == CUSTOM_CAMERA_FRONT) {
+											cameraConfiguration.usingFrontCamera = true;
+										}
+
+										cameraConfiguration.numberOfCameras = cameraCount;
+
+										// Integer so that we can compare to null when checking orientation
+										cameraConfiguration.cameraOrientationDegrees = Integer.valueOf(orientationField
+												.getInt(cameraInfo));
 									}
-
-									cameraConfiguration.numberOfCameras = cameraCount;
-
-									// Integer so that we can compare to null when checking orientation
-									cameraConfiguration.cameraOrientationDegrees = Integer.valueOf(orientationField
-											.getInt(cameraInfo));
+								} catch (RuntimeException e) {
+									Log.e(LOG_TAG, "Camera failed to open: " + e.getLocalizedMessage());
 								}
-							} catch (RuntimeException e) {
-								Log.e(LOG_TAG, "Camera failed to open: " + e.getLocalizedMessage());
 							}
 						}
-					}
-
-					if (cameraFacing == CUSTOM_CAMERA_FRONT) {
-						cameraConfiguration.hasFrontCamera = true;
 					}
 				}
 			}
@@ -166,7 +174,10 @@ public class CameraUtilities {
 		if (camera == null) {
 			try {
 				camera = Camera.open();
-				cameraConfiguration.cameraOrientationDegrees = null;
+				cameraConfiguration.hasFrontCamera = false;
+				cameraConfiguration.usingFrontCamera = false;
+				cameraConfiguration.numberOfCameras = 1;
+				cameraConfiguration.cameraOrientationDegrees = 90; // default to most common camera orientation
 			} catch (RuntimeException e) {
 				Log.e(LOG_TAG, "Camera failed to open: " + e.getLocalizedMessage());
 			}
@@ -175,7 +186,8 @@ public class CameraUtilities {
 		return camera;
 	}
 
-	public static Camera initialiseCamera(boolean preferFront, CameraConfiguration cameraConfiguration) {
+	@TargetApi(Build.VERSION_CODES.GINGERBREAD)
+	public static Camera initialiseGingerbreadCamera(boolean preferFront, CameraConfiguration cameraConfiguration) {
 
 		Camera camera = null;
 		cameraConfiguration.hasFrontCamera = false;

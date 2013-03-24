@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
@@ -28,7 +27,6 @@ import java.util.HashMap;
 import ac.robinson.view.FastBitmapDrawable;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.provider.MediaStore;
 
 public class ImageCacheUtilities {
 
@@ -55,17 +53,12 @@ public class ImageCacheUtilities {
 			return false;
 		}
 
-		try {
+		if (!cacheDirectory.exists()) {
+			cacheDirectory.mkdirs();
 			if (!cacheDirectory.exists()) {
-				cacheDirectory.mkdirs();
-				if (!cacheDirectory.exists()) {
-					return false;
-				} else {
-					new File(cacheDirectory, MediaStore.MEDIA_IGNORE_FILENAME).createNewFile(); // prevent media scanner
-				}
+				return false;
 			}
-		} catch (IOException e) {
-			return false;
+			IOUtilities.createMediaScannerIgnoreFile(cacheDirectory);
 		}
 
 		File iconFile = new File(cacheDirectory, cacheId);

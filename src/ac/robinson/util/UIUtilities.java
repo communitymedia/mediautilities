@@ -56,7 +56,7 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 public class UIUtilities {
-	
+
 	private static final String LOG_TAG = "UIUtilities";
 
 	/**
@@ -161,10 +161,17 @@ public class UIUtilities {
 		}
 	}
 
+	@TargetApi(Build.VERSION_CODES.GINGERBREAD)
 	public static void setScreenOrientationFixed(Activity activity, boolean orientationFixed) {
 		if (orientationFixed) {
 			WindowManager windowManager = activity.getWindowManager();
 			boolean naturallyPortrait = getNaturalScreenOrientation(windowManager) == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+			int reversePortrait = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+			int reverseLandscape = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+				reversePortrait = ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
+				reverseLandscape = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+			}
 			switch (windowManager.getDefaultDisplay().getRotation()) {
 				case Surface.ROTATION_0:
 					activity.setRequestedOrientation(naturallyPortrait ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
@@ -172,14 +179,13 @@ public class UIUtilities {
 					break;
 				case Surface.ROTATION_90:
 					activity.setRequestedOrientation(naturallyPortrait ? ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-							: ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT);
+							: reversePortrait);
 					break;
 				case Surface.ROTATION_180:
-					activity.setRequestedOrientation(naturallyPortrait ? ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT
-							: ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
+					activity.setRequestedOrientation(naturallyPortrait ? reversePortrait : reverseLandscape);
 					break;
 				case Surface.ROTATION_270:
-					activity.setRequestedOrientation(naturallyPortrait ? ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
+					activity.setRequestedOrientation(naturallyPortrait ? reverseLandscape
 							: ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 					break;
 			}

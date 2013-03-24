@@ -25,7 +25,7 @@ import net.sourceforge.jaad.aac.Profile;
 import net.sourceforge.jaad.aac.SampleFrequency;
 import net.sourceforge.jaad.aac.tools.ICPrediction;
 import net.sourceforge.jaad.aac.tools.LTPrediction;
-import java.util.Arrays;
+import ac.robinson.util.AndroidUtilities;
 
 public class ICSInfo implements Constants, ScaleFactorBands {
 
@@ -249,8 +249,8 @@ public class ICSInfo implements Constants, ScaleFactorBands {
 		}
 		windowCount = info.windowCount;
 		windowGroupCount = info.windowGroupCount;
-		windowGroupLength = Arrays.copyOf(info.windowGroupLength, info.windowGroupLength.length);
+		windowGroupLength = AndroidUtilities.arrayCopyOf(info.windowGroupLength, info.windowGroupLength.length);
 		swbCount = info.swbCount;
-		swbOffsets = Arrays.copyOf(info.swbOffsets, info.swbOffsets.length);
+		swbOffsets = AndroidUtilities.arrayCopyOf(info.swbOffsets, info.swbOffsets.length);
 	}
 }

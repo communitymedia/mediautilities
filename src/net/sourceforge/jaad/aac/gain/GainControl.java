@@ -22,7 +22,7 @@ package net.sourceforge.jaad.aac.gain;
 import net.sourceforge.jaad.aac.AACException;
 import net.sourceforge.jaad.aac.syntax.BitStream;
 import net.sourceforge.jaad.aac.syntax.ICSInfo.WindowSequence;
-import java.util.Arrays;
+import ac.robinson.util.AndroidUtilities;
 
 public class GainControl implements GCConstants {
 
@@ -134,8 +134,8 @@ public class GainControl implements GCConstants {
 
 					overlap[band][a] = in[b];
 				}
-				locationPrev[band][0] = Arrays.copyOf(location[band][k], location[band][k].length);
-				levelPrev[band][0] = Arrays.copyOf(level[band][k], level[band][k].length);
+				locationPrev[band][0] = AndroidUtilities.arrayCopyOf(location[band][k], location[band][k].length);
+				levelPrev[band][0] = AndroidUtilities.arrayCopyOf(level[band][k], level[band][k].length);
 			}
 			System.arraycopy(overlap[band], 0, out[band], 0, lbLong);
 			System.arraycopy(overlap[band], lbLong, overlap[band], 0, lbLong);
@@ -155,8 +155,9 @@ public class GainControl implements GCConstants {
 				overlap[band][j] = in[band * lbLong * 2 + lbLong + j];
 			}
 			final int lastBlock = winSeq.equals(WindowSequence.ONLY_LONG_SEQUENCE) ? 1 : 0;
-			locationPrev[band][0] = Arrays.copyOf(location[band][lastBlock], location[band][lastBlock].length);
-			levelPrev[band][0] = Arrays.copyOf(level[band][lastBlock], level[band][lastBlock].length);
+			locationPrev[band][0] = AndroidUtilities.arrayCopyOf(location[band][lastBlock],
+					location[band][lastBlock].length);
+			levelPrev[band][0] = AndroidUtilities.arrayCopyOf(level[band][lastBlock], level[band][lastBlock].length);
 		}
 	}
 

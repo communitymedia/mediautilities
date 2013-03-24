@@ -20,6 +20,11 @@
 
 package ac.robinson.util;
 
+import java.util.Arrays;
+
+import android.annotation.TargetApi;
+import android.os.Build;
+
 public class AndroidUtilities {
 
 	/**
@@ -39,5 +44,38 @@ public class AndroidUtilities {
 			}
 		}
 		return false;
+	}
+
+	@TargetApi(Build.VERSION_CODES.GINGERBREAD)
+	public static int[] arrayCopyOf(int[] array, int length) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+			return Arrays.copyOf(array, length);
+		} else {
+			int[] newArray = new int[length];
+			System.arraycopy(array, 0, newArray, 0, length);
+			return newArray;
+		}
+	}
+
+	@TargetApi(Build.VERSION_CODES.GINGERBREAD)
+	public static boolean[] arrayCopyOf(boolean[] array, int length) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+			return Arrays.copyOf(array, length);
+		} else {
+			boolean[] newArray = new boolean[length];
+			System.arraycopy(array, 0, newArray, 0, length);
+			return newArray;
+		}
+	}
+
+	@TargetApi(Build.VERSION_CODES.GINGERBREAD)
+	public static byte[] arrayCopyOf(byte[] array, int length) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+			return Arrays.copyOf(array, length);
+		} else {
+			byte[] newArray = new byte[length];
+			System.arraycopy(array, 0, newArray, 0, length);
+			return newArray;
+		}
 	}
 }

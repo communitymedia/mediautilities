@@ -42,7 +42,9 @@ public class AACException extends IOException {
 	}
 
 	public AACException(Throwable cause) {
-		super(cause);
+		// TODO: pre-v9 doesn't support new IOException; is there a better way to deal with this?
+		// (note: this version is only actually used once, in Decoder.java)
+		super(cause.getMessage());
 		eos = false;
 	}
 

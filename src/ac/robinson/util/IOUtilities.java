@@ -35,6 +35,7 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.UUID;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -43,7 +44,9 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.Environment;
+import android.provider.MediaStore;
 
 public class IOUtilities {
 	public static final int IO_BUFFER_SIZE = 4 * 1024;
@@ -135,10 +138,13 @@ public class IOUtilities {
 		return false;
 	}
 
+	@TargetApi(Build.VERSION_CODES.GINGERBREAD)
 	public static void setFullyPublic(File file) {
-		file.setReadable(true, false);
-		file.setWritable(true, false);
-		file.setExecutable(true, false);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+			file.setReadable(true, false);
+			file.setWritable(true, false);
+			file.setExecutable(true, false);
+		}
 	}
 
 	public static boolean externalStorageIsWritable() {
@@ -171,7 +177,10 @@ public class IOUtilities {
 			if (!newCacheDir.mkdirs()) {
 				return null;
 			}
+		} else if (!newCacheDir.isDirectory()) {
+			return null; // the directory exists as a file - could delete, but not worth the risk, so return error
 		}
+		createMediaScannerIgnoreFile(newCacheDir); // don't want our storage directory scanned
 		return newCacheDir;
 	}
 
@@ -194,6 +203,7 @@ public class IOUtilities {
 		} else if (!newFilesDir.isDirectory()) {
 			return null; // the directory exists as a file - could delete, but not worth the risk, so return error
 		}
+		createMediaScannerIgnoreFile(newFilesDir); // don't want our storage directory scanned
 		return newFilesDir;
 	}
 
@@ -227,6 +237,22 @@ public class IOUtilities {
 			}
 		}
 		return fileOrDirectory.delete();
+	}
+
+	@TargetApi(Build.VERSION_CODES.GINGERBREAD)
+	public static boolean createMediaScannerIgnoreFile(File directory) {
+		String filename;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+			filename = MediaStore.MEDIA_IGNORE_FILENAME;
+		} else {
+			filename = ".nomedia";
+		}
+		try {
+			new File(directory, filename).createNewFile(); // prevent media scanner
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
 	// TODO: move to StringUtilities
