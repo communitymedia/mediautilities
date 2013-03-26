@@ -34,6 +34,7 @@ import java.io.RandomAccessFile;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -280,31 +281,35 @@ public class IOUtilities {
 
 	// pass -1 to read the entire file
 	public static String getFileContentSnippet(String filePath, int snippetLength) {
+		final String spaceString = " ";
+		Pattern replacementPattern = Pattern.compile("\\s+");
 		StringBuilder fileString = new StringBuilder();
+		String currentLine;
 		FileInputStream fileStream = null;
 		BufferedReader bufferedReader = null;
-		String currentLine;
 		try {
 			fileStream = new FileInputStream(filePath);
 			bufferedReader = new BufferedReader(new InputStreamReader(fileStream));
 			while ((currentLine = bufferedReader.readLine()) != null && fileString.length() < snippetLength) {
-				fileString.append(currentLine);
-				fileString.append("\n");
+				currentLine = replacementPattern.matcher(currentLine).replaceAll(spaceString).trim();
+				if (currentLine.length() > 0) {
+					fileString.append(currentLine);
+					fileString.append(spaceString);
+				}
 			}
-		} catch (FileNotFoundException e) {
-		} catch (IOException e) {
+		} catch (Exception e) {
 		} finally {
 			IOUtilities.closeStream(bufferedReader);
 			IOUtilities.closeStream(fileStream);
 		}
 
-		String textSnippet = fileString.toString().trim().replace("\n", " ");
-		int textLength = textSnippet.length();
-		if (textLength > 0) {
-			textSnippet = textSnippet.substring(0, textLength > snippetLength ? snippetLength : textLength);
+		int stringLength = fileString.length();
+		if (stringLength > snippetLength) {
+			fileString.setLength(snippetLength);
+		} else if (stringLength > 0) {
+			fileString.setLength(stringLength - 1); // remove the last space we added
 		}
-
-		return textSnippet.trim();
+		return fileString.toString();
 	}
 
 	public static String getFileContents(String filePath) {
