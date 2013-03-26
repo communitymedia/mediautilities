@@ -32,6 +32,8 @@ import android.widget.Button;
 
 public class CenteredImageTextButton extends Button {
 
+	private int mCompoundDrawablePadding = 0;
+
 	public CenteredImageTextButton(Context context) {
 		super(context);
 		// TODO: initialise
@@ -63,15 +65,24 @@ public class CenteredImageTextButton extends Button {
 		}
 	}
 
-	private void redrawButton() {
+	private Rect getTextBounds() {
 		Rect bounds = new Rect();
-		String buttonText = getText().toString().trim();
+		String buttonText = getText().toString();
 		getPaint().getTextBounds(buttonText, 0, buttonText.length(), bounds);
-		int compoundPadding = getCompoundDrawablePadding();
+		return bounds;
+	}
+
+	private void alignContent() {
+		if (getWidth() == 0 || getHeight() == 0) {
+			return; // no point aligning if the view has no size
+		}
+
+		int newPadding;
+		mCompoundDrawablePadding = getCompoundDrawablePadding();
 
 		Drawable buttonDrawable = getCompoundDrawables()[1]; // top
 		if (buttonDrawable != null) {
-			int newPadding = (int) ((getHeight() - bounds.height() - compoundPadding - buttonDrawable
+			newPadding = (int) ((getHeight() - getTextBounds().height() - mCompoundDrawablePadding - buttonDrawable
 					.getIntrinsicHeight()) / 2);
 			setGravity(Gravity.CENTER | Gravity.TOP);
 			setPadding(getPaddingLeft(), (newPadding > 0 ? newPadding : 0), getPaddingRight(), 0);
@@ -80,21 +91,55 @@ public class CenteredImageTextButton extends Button {
 
 		buttonDrawable = getCompoundDrawables()[0]; // left
 		if (buttonDrawable != null) {
-			int newPadding = (int) ((getWidth() - bounds.width() - compoundPadding - buttonDrawable.getIntrinsicWidth()) / 2);
+			newPadding = (int) ((getWidth() - getTextBounds().width() - mCompoundDrawablePadding - buttonDrawable
+					.getIntrinsicWidth()) / 2);
 			setGravity(Gravity.LEFT | Gravity.CENTER);
 			setPadding((newPadding > 0 ? newPadding : 0), getPaddingTop(), 0, getPaddingBottom());
+			return;
 		}
+
+		// default to vertical centring when no image is present
+		newPadding = (int) ((getHeight() - getTextBounds().height() - mCompoundDrawablePadding) / 2);
+		setGravity(Gravity.CENTER | Gravity.TOP);
+		setPadding(getPaddingLeft(), (newPadding > 0 ? newPadding : 0), getPaddingRight(), 0);
 	}
 
 	@Override
 	public void onSizeChanged(int w, int h, int oldW, int oldH) {
 		super.onSizeChanged(w, h, oldW, oldH);
-		redrawButton();
+		alignContent();
 	}
 
 	@Override
-	public void onWindowFocusChanged(boolean hasFocus) {
-		super.onWindowFocusChanged(hasFocus);
-		redrawButton();
+	protected void onTextChanged(CharSequence text, int start, int lengthBefore, int lengthAfter) {
+		super.onTextChanged(text, start, lengthBefore, lengthAfter);
+		alignContent();
+	}
+
+	@Override
+	public void setCompoundDrawablePadding(int pad) {
+		super.setCompoundDrawablePadding(pad);
+		// only re-align if padding actually changed (as this is called during setCompoundDrawblesWithIntrinsicBounds)
+		if (pad != mCompoundDrawablePadding) {
+			alignContent();
+		}
+	}
+
+	@Override
+	public void setCompoundDrawables(Drawable left, Drawable top, Drawable right, Drawable bottom) {
+		super.setCompoundDrawables(left, top, right, bottom);
+		// alignContent(); //no need - setCompoundDrawables calls setCompoundDrawablesWithIntrinsicBounds
+	}
+
+	@Override
+	public void setCompoundDrawablesWithIntrinsicBounds(Drawable left, Drawable top, Drawable right, Drawable bottom) {
+		super.setCompoundDrawablesWithIntrinsicBounds(left, top, right, bottom);
+		alignContent();
+	}
+
+	@Override
+	public void setCompoundDrawablesWithIntrinsicBounds(int left, int top, int right, int bottom) {
+		super.setCompoundDrawablesWithIntrinsicBounds(left, top, right, bottom);
+		alignContent();
 	}
 }
