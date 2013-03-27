@@ -105,8 +105,8 @@ public class CenteredImageTextButton extends Button {
 	}
 
 	@Override
-	public void onSizeChanged(int w, int h, int oldW, int oldH) {
-		super.onSizeChanged(w, h, oldW, oldH);
+	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+		super.onLayout(changed, left, top, right, bottom);
 		alignContent();
 	}
 
