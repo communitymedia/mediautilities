@@ -149,11 +149,19 @@ public class IOUtilities {
 	}
 
 	public static boolean externalStorageIsWritable() {
-		String state = Environment.getExternalStorageState();
+		return externalStorageIsAccessible(true);
+	}
+
+	public static boolean externalStorageIsReadable() {
+		return externalStorageIsAccessible(false);
+	}
+
+	private static boolean externalStorageIsAccessible(boolean requireWritable) {
+		final String state = Environment.getExternalStorageState();
 		if (Environment.MEDIA_MOUNTED.equals(state)) {
 			return true; // available and writable
-		} else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-			return false; // available but read only
+		} else if (!requireWritable && Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+			return true; // available but read only
 		} else {
 			return false; // not available
 		}

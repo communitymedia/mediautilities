@@ -80,7 +80,7 @@ public class ImportingService extends Service {
 			mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 		} catch (Exception e) {
 			// continue, so we don't keep binding/unbinding
-			Log.d(DebugUtilities.getLogTag(this), "Unable to instantiate BluetoothObserver - not supported");
+			Log.d(DebugUtilities.getLogTag(this), "Unable to get Bluetooth adapter - not supported");
 		}
 		mBluetoothObserverClassName = intent.getStringExtra(MediaUtilities.KEY_OBSERVER_CLASS);
 		mBluetoothDirectoryPath = intent.getStringExtra(MediaUtilities.KEY_OBSERVER_PATH);
