@@ -29,7 +29,10 @@ import java.util.zip.ZipFile;
 
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.os.Build;
+import android.util.DisplayMetrics;
 
 public class DebugUtilities {
 	public static String getLogTag(Object o) {
@@ -47,6 +50,34 @@ public class DebugUtilities {
 		} catch (Exception e) {
 		}
 		return "unknown";
+	}
+
+	public static String getScreenDensityString(Resources resources) {
+		switch (resources.getDisplayMetrics().densityDpi) {
+			case DisplayMetrics.DENSITY_LOW:
+				return "ldpi";
+			case DisplayMetrics.DENSITY_HIGH:
+				return "hdpi";
+			case DisplayMetrics.DENSITY_XHIGH:
+				return "xhdpi";
+			default: // medium is the default
+				return "mdpi";
+		}
+	}
+
+	public static String getScreenSizeString(Resources resources) {
+		switch (resources.getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) {
+			case Configuration.SCREENLAYOUT_SIZE_SMALL:
+				return "small";
+			case Configuration.SCREENLAYOUT_SIZE_NORMAL:
+				return "normal";
+			case Configuration.SCREENLAYOUT_SIZE_LARGE:
+				return "large";
+			case Configuration.SCREENLAYOUT_SIZE_XLARGE:
+				return "xlarge";
+			default:
+				return "undefined";
+		}
 	}
 
 	public static String getDeviceBrandProduct() {
