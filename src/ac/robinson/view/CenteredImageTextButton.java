@@ -27,34 +27,45 @@ import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.view.Gravity;
 import android.widget.Button;
 
 public class CenteredImageTextButton extends Button {
 
-	private int mCompoundDrawablePadding = 0;
+	// for calculating the default padding
+	private int mDrawableSize;
+	private DrawablePosition mDrawablePosition;
+	private Rect mTextBounds;
+
+	// extra (optional) padding between the icon and the text
+	private int mIconPadding;
+
+	private enum DrawablePosition {
+		NONE, LEFT, TOP, RIGHT, BOTTOM
+	}
 
 	public CenteredImageTextButton(Context context) {
 		super(context);
-		// TODO: initialise
+		mTextBounds = new Rect();
+		// can't initialise styles when not loading from XML
 	}
 
 	public CenteredImageTextButton(Context context, AttributeSet attrs) {
 		super(context, attrs);
+		mTextBounds = new Rect();
 		setStyles(context, attrs);
 	}
 
 	public CenteredImageTextButton(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
+		mTextBounds = new Rect();
 		setStyles(context, attrs);
 	}
 
 	// see: http://kevindion.com/2011/01/custom-xml-attributes-for-android-widgets/
+	// used to use https://gist.github.com/1105281 to deal with SDK tools bug; this was fixed in r17
+	// see: http://code.google.com/p/android/issues/detail?id=9656 and http://devmaze.wordpress.com/2011/05/22/
+	// xmlns:util="http://util.robinson.ac/schema" vs. xmlns:util="http://schemas.android.com/apk/res-auto"
 	private void setStyles(Context context, AttributeSet attrs) {
-		// used to use https://gist.github.com/1105281 to deal with SDK tools bug; this was fixed in r17
-		// see: http://code.google.com/p/android/issues/detail?id=9656
-		// and: http://devmaze.wordpress.com/2011/05/22/the-case-of-android-libraries-and-custom-xml-attributes-part-2/
-		// xmlns:util="http://util.robinson.ac/schema" vs. xmlns:util="http://schemas.android.com/apk/res-auto"
 		TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.CenteredImageTextButton);
 		int colourDefault = attributes.getColor(R.styleable.CenteredImageTextButton_filterColorDefault, 0xffffffff);
 		int colourTouched = attributes.getColor(R.styleable.CenteredImageTextButton_filterColorTouched, 0xffffffff);
@@ -65,81 +76,140 @@ public class CenteredImageTextButton extends Button {
 		}
 	}
 
-	private Rect getTextBounds() {
-		Rect bounds = new Rect();
-		String buttonText = getText().toString();
-		getPaint().getTextBounds(buttonText, 0, buttonText.length(), bounds);
-		return bounds;
-	}
-
-	private void alignContent() {
-		if (getWidth() == 0 || getHeight() == 0) {
-			return; // no point aligning if the view has no size
-		}
-
-		int newPadding;
-		mCompoundDrawablePadding = getCompoundDrawablePadding();
-
-		Drawable buttonDrawable = getCompoundDrawables()[1]; // top
-		if (buttonDrawable != null) {
-			newPadding = (int) ((getHeight() - getTextBounds().height() - mCompoundDrawablePadding - buttonDrawable
-					.getIntrinsicHeight()) / 2);
-			setGravity(Gravity.CENTER | Gravity.TOP);
-			setPadding(getPaddingLeft(), (newPadding > 0 ? newPadding : 0), getPaddingRight(), 0);
-			return;
-		}
-
-		buttonDrawable = getCompoundDrawables()[0]; // left
-		if (buttonDrawable != null) {
-			newPadding = (int) ((getWidth() - getTextBounds().width() - mCompoundDrawablePadding - buttonDrawable
-					.getIntrinsicWidth()) / 2);
-			setGravity(Gravity.LEFT | Gravity.CENTER);
-			setPadding((newPadding > 0 ? newPadding : 0), getPaddingTop(), 0, getPaddingBottom());
-			return;
-		}
-
-		// default to vertical centring when no image is present
-		newPadding = (int) ((getHeight() - getTextBounds().height() - mCompoundDrawablePadding) / 2);
-		setGravity(Gravity.CENTER | Gravity.TOP);
-		setPadding(getPaddingLeft(), (newPadding > 0 ? newPadding : 0), getPaddingRight(), 0);
-	}
-
 	@Override
 	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
 		super.onLayout(changed, left, top, right, bottom);
-		alignContent();
-	}
 
-	@Override
-	protected void onTextChanged(CharSequence text, int start, int lengthBefore, int lengthAfter) {
-		super.onTextChanged(text, start, lengthBefore, lengthAfter);
-		alignContent();
-	}
-
-	@Override
-	public void setCompoundDrawablePadding(int pad) {
-		super.setCompoundDrawablePadding(pad);
-		// only re-align if padding actually changed (as this is called during setCompoundDrawblesWithIntrinsicBounds)
-		if (pad != mCompoundDrawablePadding) {
-			alignContent();
+		// get the text bounds
+		CharSequence buttonText = getText();
+		if (buttonText != null && buttonText.length() > 0) {
+			getPaint().getTextBounds(buttonText.toString(), 0, buttonText.length(), mTextBounds);
+		} else {
+			mTextBounds.set(0, 0, 0, 0);
 		}
-	}
 
-	@Override
-	public void setCompoundDrawables(Drawable left, Drawable top, Drawable right, Drawable bottom) {
-		super.setCompoundDrawables(left, top, right, bottom);
-		// alignContent(); //no need - setCompoundDrawables calls setCompoundDrawablesWithIntrinsicBounds
+		// get the text and window sizes, based on where the drawable is located
+		int textSize = 0;
+		int windowSize = 0;
+		switch (mDrawablePosition) {
+			case LEFT:
+			case RIGHT:
+				textSize = mTextBounds.width();
+				windowSize = getWidth();
+				break;
+			case TOP:
+			case BOTTOM:
+				textSize = mTextBounds.height();
+				windowSize = getHeight();
+				break;
+			default:
+				break;
+		}
+
+		// compound drawables aren't scaled automatically, so make sure the current drawable isn't too big for the view
+		int maxSize = windowSize - (mIconPadding + textSize);
+		if (mDrawableSize > maxSize) {
+			Drawable[] drawables = getCompoundDrawables();
+			Drawable drawable = null;
+			switch (mDrawablePosition) {
+				case LEFT:
+					drawable = drawables[0];
+					break;
+				case TOP:
+					drawable = drawables[1];
+					break;
+				case RIGHT:
+					drawable = drawables[2];
+					break;
+				case BOTTOM:
+					drawable = drawables[3];
+					break;
+				default:
+					break;
+			}
+
+			if (drawable != null) {
+				float scaleFactor = maxSize / (float) mDrawableSize;
+				int newWidth = (int) Math.floor(drawable.getIntrinsicWidth() * scaleFactor);
+				int newHeight = (int) Math.floor(drawable.getIntrinsicHeight() * scaleFactor);
+				drawable.setBounds(0, 0, newWidth, newHeight);
+
+				switch (mDrawablePosition) {
+					case LEFT:
+						mDrawableSize = newWidth;
+						setCompoundDrawables(drawable, null, null, null);
+						break;
+					case TOP:
+						mDrawableSize = newHeight;
+						setCompoundDrawables(null, drawable, null, null);
+						break;
+					case RIGHT:
+						mDrawableSize = newWidth;
+						setCompoundDrawables(null, null, drawable, null);
+						break;
+					case BOTTOM:
+						mDrawableSize = newHeight;
+						setCompoundDrawables(null, null, null, drawable);
+						break;
+					default:
+						break;
+				}
+			}
+		}
+
+		// finally, set the drawable and view padding centred within the available space
+		int contentPadding = (int) ((windowSize - (mDrawableSize + mIconPadding + textSize)) / 2f);
+		setCompoundDrawablePadding(-contentPadding + mIconPadding);
+
+		switch (mDrawablePosition) {
+			case LEFT:
+				setPadding(contentPadding, 0, 0, 0);
+				break;
+			case TOP:
+				setPadding(0, contentPadding, 0, 0);
+				break;
+			case RIGHT:
+				setPadding(0, 0, contentPadding, 0);
+				break;
+			case BOTTOM:
+				setPadding(0, 0, 0, contentPadding);
+				break;
+			default:
+				setPadding(0, 0, 0, 0);
+				break;
+		}
 	}
 
 	@Override
 	public void setCompoundDrawablesWithIntrinsicBounds(Drawable left, Drawable top, Drawable right, Drawable bottom) {
 		super.setCompoundDrawablesWithIntrinsicBounds(left, top, right, bottom);
-		alignContent();
+		if (left != null) {
+			mDrawablePosition = DrawablePosition.LEFT;
+			mDrawableSize = left.getIntrinsicWidth();
+		} else if (top != null) {
+			mDrawablePosition = DrawablePosition.TOP;
+			mDrawableSize = top.getIntrinsicHeight();
+		} else if (right != null) {
+			mDrawablePosition = DrawablePosition.RIGHT;
+			mDrawableSize = right.getIntrinsicWidth();
+		} else if (bottom != null) {
+			mDrawablePosition = DrawablePosition.BOTTOM;
+			mDrawableSize = bottom.getIntrinsicHeight();
+		} else {
+			mDrawablePosition = DrawablePosition.NONE;
+			mDrawableSize = 0;
+		}
+		requestLayout();
 	}
 
 	@Override
-	public void setCompoundDrawablesWithIntrinsicBounds(int left, int top, int right, int bottom) {
-		super.setCompoundDrawablesWithIntrinsicBounds(left, top, right, bottom);
-		alignContent();
+	protected void onTextChanged(CharSequence text, int start, int lengthBefore, int lengthAfter) {
+		super.onTextChanged(text, start, lengthBefore, lengthAfter);
+		requestLayout();
+	}
+
+	public void setIconPadding(int padding) {
+		mIconPadding = padding;
+		requestLayout();
 	}
 }
