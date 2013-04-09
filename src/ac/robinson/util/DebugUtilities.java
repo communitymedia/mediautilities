@@ -31,8 +31,10 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Point;
 import android.os.Build;
 import android.util.DisplayMetrics;
+import android.view.WindowManager;
 
 public class DebugUtilities {
 	public static String getLogTag(Object o) {
@@ -78,6 +80,14 @@ public class DebugUtilities {
 			default:
 				return "undefined";
 		}
+	}
+
+	public static String getDeviceDebugSummary(WindowManager windowManager, Resources resources) {
+		Point screenSize = UIUtilities.getScreenSize(windowManager);
+		return Build.MODEL + ", " + getDeviceBrandProduct() + ", v" + Build.VERSION.SDK_INT + " ("
+				+ Build.VERSION.RELEASE + "), " + screenSize.x + "x" + screenSize.y + "-"
+				+ getScreenDensityString(resources).replace("dpi", "") + "-"
+				+ getScreenSizeString(resources).substring(0, 1);
 	}
 
 	public static String getDeviceBrandProduct() {
