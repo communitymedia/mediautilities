@@ -163,19 +163,19 @@ public class CenteredImageTextButton extends Button {
 
 		switch (mDrawablePosition) {
 			case LEFT:
-				setPadding(contentPadding, 0, 0, 0);
+				setPadding(contentPadding, getPaddingTop(), 0, getPaddingBottom());
 				break;
 			case TOP:
-				setPadding(0, contentPadding, 0, 0);
+				setPadding(getPaddingLeft(), contentPadding, getPaddingRight(), 0);
 				break;
 			case RIGHT:
-				setPadding(0, 0, contentPadding, 0);
+				setPadding(0, getPaddingTop(), contentPadding, getPaddingBottom());
 				break;
 			case BOTTOM:
-				setPadding(0, 0, 0, contentPadding);
+				setPadding(getPaddingLeft(), 0, getPaddingRight(), contentPadding);
 				break;
 			default:
-				setPadding(0, 0, 0, 0);
+				setPadding(getPaddingLeft(), getPaddingTop(), getPaddingRight(), getPaddingBottom());
 				break;
 		}
 	}
