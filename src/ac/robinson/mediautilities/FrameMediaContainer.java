@@ -57,6 +57,11 @@ public class FrameMediaContainer {
 		updateFrameMaxDuration(mediaDuration);
 	}
 
+	public void addAudioFile(String fileName, int audioDuration) {
+		mAudioPaths.add(fileName);
+		mAudioDurations.add(audioDuration);
+	}
+
 	public void addMedia(String mediaType, File mediaFile, String mediaId, int mediaDuration, String mediaRegion,
 			boolean validateAudioLengths) {
 		if (mediaFile.exists()) {
@@ -83,10 +88,5 @@ public class FrameMediaContainer {
 				updateFrameMaxDuration(preciseDuration);
 			}
 		}
-	}
-
-	public void addAudioFile(String fileName, int audioDuration) {
-		mAudioPaths.add(fileName);
-		mAudioDurations.add(audioDuration);
 	}
 }

@@ -29,10 +29,12 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.Button;
 
+// TODO: still an issue with icon visibility when the keyboard is shown or hidden combined with rotation
 public class CenteredImageTextButton extends Button {
 
 	// for calculating the default padding
 	private int mDrawableSize;
+	private boolean mLayoutChanged;
 	private DrawablePosition mDrawablePosition;
 	private Rect mTextBounds;
 
@@ -79,6 +81,9 @@ public class CenteredImageTextButton extends Button {
 	@Override
 	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
 		super.onLayout(changed, left, top, right, bottom);
+		if (!changed && !mLayoutChanged) {
+			return; // no need to re-layout
+		}
 
 		// get the text bounds
 		CharSequence buttonText = getText();
@@ -178,6 +183,8 @@ public class CenteredImageTextButton extends Button {
 				setPadding(getPaddingLeft(), getPaddingTop(), getPaddingRight(), getPaddingBottom());
 				break;
 		}
+
+		mLayoutChanged = false;
 	}
 
 	@Override
@@ -199,17 +206,20 @@ public class CenteredImageTextButton extends Button {
 			mDrawablePosition = DrawablePosition.NONE;
 			mDrawableSize = 0;
 		}
+		mLayoutChanged = true;
 		requestLayout();
 	}
 
 	@Override
 	protected void onTextChanged(CharSequence text, int start, int lengthBefore, int lengthAfter) {
 		super.onTextChanged(text, start, lengthBefore, lengthAfter);
+		mLayoutChanged = true;
 		requestLayout();
 	}
 
 	public void setIconPadding(int padding) {
 		mIconPadding = padding;
+		mLayoutChanged = true;
 		requestLayout();
 	}
 }
