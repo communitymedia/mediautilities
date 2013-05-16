@@ -489,29 +489,30 @@ public class BitmapUtilities {
 	}
 
 	/**
-	 * Save YUV image data (NV21 or YUV420sp) as JPEG to a FileOutputStream.
+	 * Save a JPEG to a FileOutputStream.
 	 */
 	public static boolean saveJPEGToJPEG(byte[] imageData, File saveTo, boolean flipHorizontally) {
 		FileOutputStream fileOutputStream = null;
 		try {
 			fileOutputStream = new FileOutputStream(saveTo);
 			fileOutputStream.write(imageData);
-			IOUtilities.closeStream(fileOutputStream);
-
 		} catch (FileNotFoundException e) {
+			return false;
 		} catch (IOException e) {
 			return false;
+		} finally {
+			IOUtilities.closeStream(fileOutputStream);
 		}
 
 		// try {
-		if (flipHorizontally) {
-			// ExifInterface exif = new ExifInterface(saveTo.getAbsolutePath());
-			// int exifOrientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION,
-			// ExifInterface.ORIENTATION_UNDEFINED);
-			// exifOrientation |= ExifInterface.ORIENTATION_FLIP_HORIZONTAL;
-			// exif.setAttribute(ExifInterface.TAG_ORIENTATION, Integer.toString(exifOrientation));
-			// exif.saveAttributes();
-		}
+		// if (flipHorizontally) {
+		// ExifInterface exif = new ExifInterface(saveTo.getAbsolutePath());
+		// int exifOrientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION,
+		// ExifInterface.ORIENTATION_UNDEFINED);
+		// exifOrientation |= ExifInterface.ORIENTATION_FLIP_HORIZONTAL;
+		// exif.setAttribute(ExifInterface.TAG_ORIENTATION, Integer.toString(exifOrientation));
+		// exif.saveAttributes();
+		// }
 		// } catch (IOException e) {
 		// // don't return false - we saved fine, but just couldn't set the exif attributes
 		// }
