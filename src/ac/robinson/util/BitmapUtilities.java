@@ -189,6 +189,13 @@ public class BitmapUtilities {
 		return options;
 	}
 
+	public static Options getImageDimensions(Resources resources, int imageId) {
+		Options options = new Options();
+		options.inJustDecodeBounds = true;
+		BitmapFactory.decodeResource(resources, imageId, options);
+		return options;
+	}
+
 	/**
 	 * Utility function for decoding an image resource. The decoded bitmap will be optimized for further scaling to the
 	 * requested destination dimensions and scaling logic.
