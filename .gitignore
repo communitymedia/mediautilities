@@ -22,3 +22,4 @@ ant.properties
 proguard-project.txt
 custom_rules.xml
 jni/build-local.sh
+assets/
