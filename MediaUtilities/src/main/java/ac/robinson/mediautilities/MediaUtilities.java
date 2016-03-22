@@ -34,7 +34,7 @@ public class MediaUtilities {
 		try {
 			System.loadLibrary("opencore-amrnb-wrapper");
 			CAN_EXPORT_AMR = true;
-		} catch (Exception e) {
+		} catch (Throwable t) {
 			CAN_EXPORT_AMR = false;
 		}
 	}
