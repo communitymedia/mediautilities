@@ -19,6 +19,112 @@
  */
 package net.sourceforge.jaad.mp4.boxes;
 
+import net.sourceforge.jaad.mp4.MP4InputStream;
+import net.sourceforge.jaad.mp4.boxes.impl.AppleLosslessBox;
+import net.sourceforge.jaad.mp4.boxes.impl.BinaryXMLBox;
+import net.sourceforge.jaad.mp4.boxes.impl.BitRateBox;
+import net.sourceforge.jaad.mp4.boxes.impl.ChapterBox;
+import net.sourceforge.jaad.mp4.boxes.impl.ChunkOffsetBox;
+import net.sourceforge.jaad.mp4.boxes.impl.CleanApertureBox;
+import net.sourceforge.jaad.mp4.boxes.impl.CompositionTimeToSampleBox;
+import net.sourceforge.jaad.mp4.boxes.impl.CopyrightBox;
+import net.sourceforge.jaad.mp4.boxes.impl.DataEntryUrlBox;
+import net.sourceforge.jaad.mp4.boxes.impl.DataEntryUrnBox;
+import net.sourceforge.jaad.mp4.boxes.impl.DataReferenceBox;
+import net.sourceforge.jaad.mp4.boxes.impl.DecodingTimeToSampleBox;
+import net.sourceforge.jaad.mp4.boxes.impl.DegradationPriorityBox;
+import net.sourceforge.jaad.mp4.boxes.impl.ESDBox;
+import net.sourceforge.jaad.mp4.boxes.impl.EditListBox;
+import net.sourceforge.jaad.mp4.boxes.impl.FileTypeBox;
+import net.sourceforge.jaad.mp4.boxes.impl.FreeSpaceBox;
+import net.sourceforge.jaad.mp4.boxes.impl.HandlerBox;
+import net.sourceforge.jaad.mp4.boxes.impl.HintMediaHeaderBox;
+import net.sourceforge.jaad.mp4.boxes.impl.IPMPControlBox;
+import net.sourceforge.jaad.mp4.boxes.impl.IPMPInfoBox;
+import net.sourceforge.jaad.mp4.boxes.impl.ItemInformationBox;
+import net.sourceforge.jaad.mp4.boxes.impl.ItemInformationEntry;
+import net.sourceforge.jaad.mp4.boxes.impl.ItemLocationBox;
+import net.sourceforge.jaad.mp4.boxes.impl.ItemProtectionBox;
+import net.sourceforge.jaad.mp4.boxes.impl.MediaDataBox;
+import net.sourceforge.jaad.mp4.boxes.impl.MediaHeaderBox;
+import net.sourceforge.jaad.mp4.boxes.impl.MetaBox;
+import net.sourceforge.jaad.mp4.boxes.impl.MetaBoxRelationBox;
+import net.sourceforge.jaad.mp4.boxes.impl.MovieExtendsHeaderBox;
+import net.sourceforge.jaad.mp4.boxes.impl.MovieFragmentHeaderBox;
+import net.sourceforge.jaad.mp4.boxes.impl.MovieFragmentRandomAccessOffsetBox;
+import net.sourceforge.jaad.mp4.boxes.impl.MovieHeaderBox;
+import net.sourceforge.jaad.mp4.boxes.impl.ObjectDescriptorBox;
+import net.sourceforge.jaad.mp4.boxes.impl.OriginalFormatBox;
+import net.sourceforge.jaad.mp4.boxes.impl.PaddingBitBox;
+import net.sourceforge.jaad.mp4.boxes.impl.PixelAspectRatioBox;
+import net.sourceforge.jaad.mp4.boxes.impl.PrimaryItemBox;
+import net.sourceforge.jaad.mp4.boxes.impl.ProgressiveDownloadInformationBox;
+import net.sourceforge.jaad.mp4.boxes.impl.SampleDependencyBox;
+import net.sourceforge.jaad.mp4.boxes.impl.SampleDependencyTypeBox;
+import net.sourceforge.jaad.mp4.boxes.impl.SampleDescriptionBox;
+import net.sourceforge.jaad.mp4.boxes.impl.SampleGroupDescriptionBox;
+import net.sourceforge.jaad.mp4.boxes.impl.SampleScaleBox;
+import net.sourceforge.jaad.mp4.boxes.impl.SampleSizeBox;
+import net.sourceforge.jaad.mp4.boxes.impl.SampleToChunkBox;
+import net.sourceforge.jaad.mp4.boxes.impl.SampleToGroupBox;
+import net.sourceforge.jaad.mp4.boxes.impl.SchemeTypeBox;
+import net.sourceforge.jaad.mp4.boxes.impl.ShadowSyncSampleBox;
+import net.sourceforge.jaad.mp4.boxes.impl.SoundMediaHeaderBox;
+import net.sourceforge.jaad.mp4.boxes.impl.SubSampleInformationBox;
+import net.sourceforge.jaad.mp4.boxes.impl.SyncSampleBox;
+import net.sourceforge.jaad.mp4.boxes.impl.TrackExtendsBox;
+import net.sourceforge.jaad.mp4.boxes.impl.TrackFragmentHeaderBox;
+import net.sourceforge.jaad.mp4.boxes.impl.TrackFragmentRandomAccessBox;
+import net.sourceforge.jaad.mp4.boxes.impl.TrackFragmentRunBox;
+import net.sourceforge.jaad.mp4.boxes.impl.TrackHeaderBox;
+import net.sourceforge.jaad.mp4.boxes.impl.TrackReferenceBox;
+import net.sourceforge.jaad.mp4.boxes.impl.TrackSelectionBox;
+import net.sourceforge.jaad.mp4.boxes.impl.VideoMediaHeaderBox;
+import net.sourceforge.jaad.mp4.boxes.impl.XMLBox;
+import net.sourceforge.jaad.mp4.boxes.impl.drm.FairPlayDataBox;
+import net.sourceforge.jaad.mp4.boxes.impl.fd.FDItemInformationBox;
+import net.sourceforge.jaad.mp4.boxes.impl.fd.FDSessionGroupBox;
+import net.sourceforge.jaad.mp4.boxes.impl.fd.FECReservoirBox;
+import net.sourceforge.jaad.mp4.boxes.impl.fd.FilePartitionBox;
+import net.sourceforge.jaad.mp4.boxes.impl.fd.GroupIDToNameBox;
+import net.sourceforge.jaad.mp4.boxes.impl.meta.EncoderBox;
+import net.sourceforge.jaad.mp4.boxes.impl.meta.GenreBox;
+import net.sourceforge.jaad.mp4.boxes.impl.meta.ID3TagBox;
+import net.sourceforge.jaad.mp4.boxes.impl.meta.ITunesMetadataBox;
+import net.sourceforge.jaad.mp4.boxes.impl.meta.ITunesMetadataMeanBox;
+import net.sourceforge.jaad.mp4.boxes.impl.meta.ITunesMetadataNameBox;
+import net.sourceforge.jaad.mp4.boxes.impl.meta.NeroMetadataTagsBox;
+import net.sourceforge.jaad.mp4.boxes.impl.meta.RatingBox;
+import net.sourceforge.jaad.mp4.boxes.impl.meta.RequirementBox;
+import net.sourceforge.jaad.mp4.boxes.impl.meta.ThreeGPPAlbumBox;
+import net.sourceforge.jaad.mp4.boxes.impl.meta.ThreeGPPKeywordsBox;
+import net.sourceforge.jaad.mp4.boxes.impl.meta.ThreeGPPLocationBox;
+import net.sourceforge.jaad.mp4.boxes.impl.meta.ThreeGPPMetadataBox;
+import net.sourceforge.jaad.mp4.boxes.impl.meta.ThreeGPPRecordingYearBox;
+import net.sourceforge.jaad.mp4.boxes.impl.oma.OMAAccessUnitFormatBox;
+import net.sourceforge.jaad.mp4.boxes.impl.oma.OMACommonHeadersBox;
+import net.sourceforge.jaad.mp4.boxes.impl.oma.OMAContentIDBox;
+import net.sourceforge.jaad.mp4.boxes.impl.oma.OMAContentObjectBox;
+import net.sourceforge.jaad.mp4.boxes.impl.oma.OMADiscreteMediaHeadersBox;
+import net.sourceforge.jaad.mp4.boxes.impl.oma.OMARightsObjectBox;
+import net.sourceforge.jaad.mp4.boxes.impl.oma.OMATransactionTrackingBox;
+import net.sourceforge.jaad.mp4.boxes.impl.oma.OMAURLBox;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.AudioSampleEntry;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.FDHintSampleEntry;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.MPEGSampleEntry;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.RTPHintSampleEntry;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.TextMetadataSampleEntry;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.VideoSampleEntry;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.XMLMetadataSampleEntry;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.AC3SpecificBox;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.AMRSpecificBox;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.AVCSpecificBox;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.EAC3SpecificBox;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.EVRCSpecificBox;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.H263SpecificBox;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.QCELPSpecificBox;
+import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.SMVSpecificBox;
+
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
@@ -27,15 +133,6 @@ import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.sourceforge.jaad.mp4.MP4InputStream;
-import net.sourceforge.jaad.mp4.boxes.impl.*;
-import net.sourceforge.jaad.mp4.boxes.impl.fd.*;
-import net.sourceforge.jaad.mp4.boxes.impl.meta.*;
-import net.sourceforge.jaad.mp4.boxes.impl.oma.*;
-import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.*;
-import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.*;
-import net.sourceforge.jaad.mp4.boxes.impl.ESDBox;
-import net.sourceforge.jaad.mp4.boxes.impl.drm.FairPlayDataBox;
 
 public class BoxFactory implements BoxTypes {
 
@@ -362,6 +459,17 @@ public class BoxFactory implements BoxTypes {
 			size = in.readBytes(8);
 		if (type == EXTENDED_TYPE)
 			in.skipBytes(16);
+
+		// ignore "bad" (i.e., not set up for us to handle) meta/udta boxes in newer Android devices
+		// TODO: is there a better way to deal with this?
+		if (type == 1835365473 || type == 1969517665) { // or: "meta".equals(typeToString(type)) // (& "udta")
+			long skipBytes = size - 8;
+			Logger.getLogger("MP4 Boxes").finest("Skipping bad " + typeToString(type) + " box with size " + skipBytes);
+			in.skipBytes(skipBytes);
+			BoxImpl badMetaBox = new UnknownBox();
+			badMetaBox.setParams(parent, size, type, offset);
+			return badMetaBox;
+		}
 
 		// error protection
 		if (parent != null) {
