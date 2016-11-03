@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- TODO: remove these strings into individual projects to make translation easier -->
+    <!-- directory selector -->
+    <string name="current_location">Courant</string>
+    <string name="select_directory">Sélectionner</string>
+    <string name="parent_directory">[Dossier parent]</string>
+
+    <!-- menu item -->
+    <string name="menu_save">Sauvegarder</string>
+
+    <!-- media controller -->
+    <string name="back_description">Retour</string>
+    <string name="rew_description">Rembobiner</string>
+    <string name="play_description">Jouer/pause</string>
+    <string name="ffwd_description">Avance rapide</string>
+    <string name="export_description">Exporter ce récit</string> <!-- doesn't matter about narrative/media - only used in MediaPhone -->
+
+</resources>

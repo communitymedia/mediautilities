@@ -41,6 +41,7 @@ public class DebugUtilities {
 		return o.getClass().getName();
 	}
 
+	@Deprecated // does not work with recent Android Studio - see: https://code.google.com/p/android/issues/detail?id=220039
 	public static String getApplicationBuildTime(PackageManager packageManager, String packageName) {
 		try {
 			ApplicationInfo applicationInfo = packageManager.getApplicationInfo(packageName, 0);
