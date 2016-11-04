@@ -399,6 +399,7 @@ public class UIUtilities {
 	}
 
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+	@Deprecated
 	public static void refreshActionBar(Activity activity) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 			activity.invalidateOptionsMenu();
@@ -414,6 +415,7 @@ public class UIUtilities {
 	 * @param setTitle
 	 * @param setSubtitle
 	 */
+	@Deprecated
 	public static void configureActionBar(Activity activity, boolean setDisplayHomeAsUpEnabled,
 			boolean setDisplayShowTitleEnabled, int setTitle, int setSubtitle) {
 		configureActionBar(activity, setDisplayHomeAsUpEnabled, setDisplayShowTitleEnabled,
@@ -430,6 +432,7 @@ public class UIUtilities {
 	 * @param setTitle
 	 * @param setSubtitle
 	 */
+	@Deprecated
 	public static void configureActionBar(Activity activity, boolean setDisplayHomeAsUpEnabled,
 			boolean setDisplayShowTitleEnabled, String setTitle, String setSubtitle) {
 		try {
@@ -503,6 +506,7 @@ public class UIUtilities {
 	 * 
 	 * @param activity
 	 */
+	@Deprecated
 	public static void actionBarVisibility(Activity activity, boolean visible) {
 		try {
 			Class<?> activityClass = Class.forName("android.app.Activity");
@@ -543,6 +547,7 @@ public class UIUtilities {
 	 * @param tabs
 	 * @param listener
 	 */
+	@Deprecated
 	public static void addActionBarTabs(Activity activity, ReflectionTab[] tabs, final ReflectionTabListener listener) {
 		try {
 			Class<?> activityClass = Class.forName("android.app.Activity");
@@ -645,6 +650,7 @@ public class UIUtilities {
 	 * @param tabs
 	 * @param listener
 	 */
+	@Deprecated
 	public static void removeActionBarTabs(Activity activity) {
 		try {
 			Class<?> activityClass = Class.forName("android.app.Activity");
@@ -671,6 +677,7 @@ public class UIUtilities {
 		}
 	}
 
+	@Deprecated
 	public static class ReflectionTab {
 		public Integer mTabId = 0;
 		public int mDrawableId = 0;
@@ -701,6 +708,7 @@ public class UIUtilities {
 		}
 	}
 
+	@Deprecated
 	public interface ReflectionTabListener {
 
 		void onTabSelected(int tabId);
