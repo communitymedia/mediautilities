@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="media_controller_background">#cc666666</color>
+    <color name="media_controller_text">#ffffffff</color>
+
+</resources>

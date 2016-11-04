@@ -1,25 +1,11 @@
-# built application files
-*.apk
-*.ap_
+*.iml
+.gradle
+/local.properties
+/.idea/workspace.xml
+/.idea/libraries
+.DS_Store
+/build
+/captures
+.externalNativeBuild
 
-# files for the dex VM
-*.dex
-
-# Java class files
-*.class
-
-# generated files
-bin/
-gen/
-
-# generated/imported libraries
-obj/
-external/
-
-# Local configuration files (sdk path, ndk configuration, etc)
-local.properties
-ant.properties
-proguard-project.txt
-custom_rules.xml
-jni/build-local.sh
-assets/
+/versions

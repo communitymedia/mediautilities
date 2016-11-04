@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="AutoResizeTextView">
+        <attr name="minTextSize" format="dimension" />
+        <attr name="maxTextSize" format="dimension" />
+        <attr name="maxTextHeight" format="dimension" />
+        <attr name="ellipsize" format="boolean" />
+    </declare-styleable>
+    <declare-styleable name="CenteredImageTextButton">
+        <attr name="filterColorDefault" format="color" />
+        <attr name="filterColorTouched" format="color" />
+    </declare-styleable>
+    <declare-styleable name="SVGView">
+        <attr name="resource" format="integer" />
+    </declare-styleable>
+
+</resources>

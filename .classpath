@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<classpath>
-	<classpathentry excluding="net/sourceforge/jaad/Main.java|net/sourceforge/jaad/MP4Info.java|net/sourceforge/jaad/Play.java|net/sourceforge/jaad/Radio.java|com/ringdroid/soundfile/CheapMP3.java|com/ringdroid/soundfile/CheapWAV.java" kind="src" path="src"/>
-	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
-	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
-	<classpathentry kind="src" path="gen"/>
-	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
-	<classpathentry kind="output" path="bin/classes"/>
-</classpath>
