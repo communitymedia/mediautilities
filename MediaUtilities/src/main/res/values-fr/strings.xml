@@ -7,9 +7,6 @@
 	<string name="select_directory">Sélectionner</string>
 	<string name="parent_directory">[Dossier parent]</string>
 
-	<!-- auto resize textview -->
-	<string name="textview_ellipsis" translatable="false">…</string>
-
 	<!-- menu item -->
 	<string name="menu_save">Enregistrer</string>
 
