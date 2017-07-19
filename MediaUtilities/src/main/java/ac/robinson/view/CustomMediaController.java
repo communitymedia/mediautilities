@@ -16,10 +16,6 @@
 
 package ac.robinson.view;
 
-import java.util.Formatter;
-import java.util.Locale;
-
-import ac.robinson.mediautilities.R;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
@@ -36,6 +32,11 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
+import java.util.Formatter;
+import java.util.Locale;
+
+import ac.robinson.mediautilities.R;
+
 /**
  * A view containing controls for a MediaPlayer. Typically contains the buttons like "Play/Pause", "Rewind",
  * "Fast Forward" and a progress slider. It takes care of synchronizing the controls with the state of the MediaPlayer.
@@ -46,7 +47,7 @@ import android.widget.TextView;
  * user touches the anchor view.
  * <p>
  * Functions like show() and hide() have no effect when MediaController is created in an xml layout.
- * 
+ * <p>
  * MediaController will hide and show the buttons according to these rules:
  * <ul>
  * <li>The "previous" and "next" buttons are hidden until setPrevNextListeners() has been called
@@ -94,8 +95,10 @@ public class CustomMediaController extends FrameLayout {
 
 	@Override
 	public void onFinishInflate() {
-		if (mRoot != null)
+		super.onFinishInflate();
+		if (mRoot != null) {
 			initControllerView(mRoot);
+		}
 	}
 
 	public CustomMediaController(Context context, boolean useFastForward) {
@@ -123,14 +126,14 @@ public class CustomMediaController extends FrameLayout {
 	/**
 	 * Set the view that acts as the anchor for the control view. This can for example be a VideoView, or your
 	 * Activity's main view.
-	 * 
+	 *
 	 * @param view The view to which to anchor the controller when it is visible.
 	 */
 	public void setAnchorView(View view) {
 		mAnchor = view;
 
-		FrameLayout.LayoutParams frameParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-				ViewGroup.LayoutParams.MATCH_PARENT);
+		FrameLayout.LayoutParams frameParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup
+				.LayoutParams.MATCH_PARENT);
 
 		removeAllViews();
 		View v = makeControllerView();
@@ -140,7 +143,7 @@ public class CustomMediaController extends FrameLayout {
 	/**
 	 * Create the view that holds the widgets that control playback. Derived classes can override this to create their
 	 * own.
-	 * 
+	 *
 	 * @return The controller view.
 	 * @hide This doesn't work as advertised
 	 */
@@ -235,7 +238,7 @@ public class CustomMediaController extends FrameLayout {
 
 	/**
 	 * Show the controller on screen. It will go away automatically after 'timeout' milliseconds of inactivity.
-	 * 
+	 *
 	 * @param timeout The timeout in milliseconds. Use 0 to show the controller until hide() is called.
 	 */
 	public void show(int timeout) {
@@ -294,8 +297,7 @@ public class CustomMediaController extends FrameLayout {
 	 * Remove the controller from the screen.
 	 */
 	public void hide() {
-		if (mAnchor == null)
-			return;
+		if (mAnchor == null) return;
 
 		if (mShowing) {
 			if (mRoot != null) {
@@ -366,10 +368,8 @@ public class CustomMediaController extends FrameLayout {
 			mProgress.setSecondaryProgress(percent * 10);
 		}
 
-		if (mEndTime != null)
-			mEndTime.setText(stringForTime(duration));
-		if (mCurrentTime != null)
-			mCurrentTime.setText(stringForTime(position));
+		if (mEndTime != null) mEndTime.setText(stringForTime(duration));
+		if (mCurrentTime != null) mCurrentTime.setText(stringForTime(position));
 
 		return position;
 	}
@@ -389,9 +389,8 @@ public class CustomMediaController extends FrameLayout {
 	@Override
 	public boolean dispatchKeyEvent(KeyEvent event) {
 		int keyCode = event.getKeyCode();
-		if (event.getRepeatCount() == 0
-				&& event.getAction() == KeyEvent.ACTION_DOWN
-				&& (keyCode == KeyEvent.KEYCODE_HEADSETHOOK || keyCode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE || keyCode == KeyEvent.KEYCODE_SPACE)) {
+		if (event.getRepeatCount() == 0 && event.getAction() == KeyEvent.ACTION_DOWN && (keyCode == KeyEvent.KEYCODE_HEADSETHOOK
+				|| keyCode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE || keyCode == KeyEvent.KEYCODE_SPACE)) {
 			show();
 			doPauseResume();
 			if (mPauseButton != null) {
@@ -421,8 +420,7 @@ public class CustomMediaController extends FrameLayout {
 	};
 
 	private void updatePausePlay() {
-		if (mRoot == null || mPauseButton == null)
-			return;
+		if (mRoot == null || mPauseButton == null) return;
 
 		if (mPlayer == null || mPlayer.isPlaying() || mPlayer.isLoading()) {
 			mPauseButton.setImageResource(R.drawable.ic_menu_pause);
@@ -473,8 +471,7 @@ public class CustomMediaController extends FrameLayout {
 			long duration = mPlayer.getDuration();
 			long newposition = (duration * progress) / 1000L;
 			mPlayer.seekTo((int) newposition);
-			if (mCurrentTime != null)
-				mCurrentTime.setText(stringForTime((int) newposition));
+			if (mCurrentTime != null) mCurrentTime.setText(stringForTime((int) newposition));
 		}
 
 		public void onStopTrackingTouch(SeekBar bar) {

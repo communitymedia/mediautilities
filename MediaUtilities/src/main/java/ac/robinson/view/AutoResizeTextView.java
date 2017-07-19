@@ -20,6 +20,7 @@
 
 package ac.robinson.view;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -132,6 +133,7 @@ public class AutoResizeTextView extends TextView {
 	 * @param height the maximum allowed height
 	 * @return a Point containing the new minimum width (x) and height (y) of the text view
 	 */
+	@SuppressLint("SetTextI18n") // caused by adding our ellipsis, so no way to use a resource string here
 	private Point resizeTextToFit(int width, int height) {
 		CharSequence text = getText();
 		Point fittedTextSize = new Point(width, height);

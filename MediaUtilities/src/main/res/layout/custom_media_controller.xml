@@ -40,7 +40,7 @@
 			android:layout_height="match_parent"
 			android:layout_weight="1"
 			android:background="@null"
-			android:gravity="left"
+			android:gravity="start"
 			android:orientation="horizontal">
 
 			<ImageButton
@@ -78,7 +78,7 @@
 			android:layout_height="match_parent"
 			android:layout_weight="1"
 			android:background="@null"
-			android:gravity="right"
+			android:gravity="end"
 			android:orientation="horizontal">
 
 			<ImageButton

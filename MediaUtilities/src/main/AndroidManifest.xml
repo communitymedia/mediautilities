@@ -3,7 +3,7 @@
 	package="ac.robinson.mediautilities"
 	xmlns:android="http://schemas.android.com/apk/res/android">
 
-	<application>
+	<application android:supportsRtl="true">
 		<activity
 			android:name="ac.robinson.mediautilities.SelectDirectoryActivity"
 			android:exported="false"/>

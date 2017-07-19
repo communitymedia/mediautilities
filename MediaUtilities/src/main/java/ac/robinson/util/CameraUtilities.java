@@ -20,15 +20,15 @@
 
 package ac.robinson.util;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
 import android.annotation.TargetApi;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.os.Build;
 import android.util.Log;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 public class CameraUtilities {
 
@@ -60,9 +60,7 @@ public class CameraUtilities {
 	// @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1) is for PackageManager.FEATURE_CAMERA_ANY
 	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
 	public static boolean deviceHasCamera(PackageManager packageManager) {
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ECLAIR_MR1) {
-			return true;
-		} else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.GINGERBREAD) {
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.GINGERBREAD) {
 			return packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA);
 		} else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
 			return packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA)

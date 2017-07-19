@@ -20,11 +20,6 @@
 
 package ac.robinson.service;
 
-import java.lang.ref.WeakReference;
-import java.lang.reflect.Constructor;
-
-import ac.robinson.mediautilities.MediaUtilities;
-import ac.robinson.util.DebugUtilities;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
@@ -38,6 +33,12 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.util.Log;
+
+import java.lang.ref.WeakReference;
+import java.lang.reflect.Constructor;
+
+import ac.robinson.mediautilities.MediaUtilities;
+import ac.robinson.util.DebugUtilities;
 
 public class ImportingService extends Service {
 
@@ -90,6 +91,7 @@ public class ImportingService extends Service {
 	}
 
 	private class BluetoothStateReceiver extends BroadcastReceiver {
+		@SuppressWarnings("MissingPermission") // not all applications that use this library need its Bluetooth functionality
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			// called when bluetooth state is changed
@@ -138,6 +140,7 @@ public class ImportingService extends Service {
 			IntentFilter filter = new IntentFilter("android.bluetooth.adapter.action.STATE_CHANGED");
 			registerReceiver(mBluetoothStateReceiver, filter);
 
+			//noinspection MissingPermission - not all applications that use this library need its Bluetooth functionality
 			if (!mBluetoothAdapter.isEnabled() && mRequireBluetoothEnabled) {
 				// removed - shouldn't be done without user permission - now start observer when bluetooth is enabled
 				// may need <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />

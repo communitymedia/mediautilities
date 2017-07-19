@@ -20,32 +20,6 @@
 
 package ac.robinson.mediautilities;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-import org.xmlpull.v1.XmlSerializer;
-
-import ac.robinson.util.BitmapUtilities;
-import ac.robinson.util.IOUtilities;
-import ac.robinson.util.ImageCacheUtilities;
-import ac.robinson.util.StringUtilities;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -60,6 +34,34 @@ import android.util.Xml;
 
 import com.larvalabs.svgandroid.SVG;
 import com.larvalabs.svgandroid.SVGParser;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+import org.xmlpull.v1.XmlSerializer;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import ac.robinson.util.BitmapUtilities;
+import ac.robinson.util.IOUtilities;
+import ac.robinson.util.ImageCacheUtilities;
+import ac.robinson.util.StringUtilities;
 
 public class SMILUtilities {
 
@@ -569,10 +571,10 @@ public class SMILUtilities {
 		String componentNameFormat;
 		if (mediaId > 0) {
 			componentNameFormat = COMPONENT_FILE_NAME_WITH_ID;
-			return String.format(componentNameFormat, narrativeName, frameId, mediaId, fileExtension);
+			return String.format(Locale.US, componentNameFormat, narrativeName, frameId, mediaId, fileExtension);
 		} else {
 			componentNameFormat = COMPONENT_FILE_NAME_WITHOUT_ID;
-			return String.format(componentNameFormat, narrativeName, frameId, fileExtension);
+			return String.format(Locale.US, componentNameFormat, narrativeName, frameId, fileExtension);
 		}
 	}
 

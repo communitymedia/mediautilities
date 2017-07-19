@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<!-- TODO: remove these strings into individual projects to make translation easier -->
+	<!-- directory selector -->
+	<string name="current_location">Obecnie: %1$s</string>
+	<string name="select_directory">Wybierz</string>
+	<string name="parent_directory">[Ścieżka nadrzędna]</string>
+	<string name="directory_browser_error">Błąd: nie można odnaleźć tymczasowego folderu – proszę upewnić się że karta pamięci nie jest pełna</string>
+
+	<!-- menu item -->
+	<string name="menu_save">Zapisz</string>
+
+	<!-- media controller -->
+	<string name="back_description">Cofnij</string>
+	<string name="rew_description">Przewiń</string>
+	<string name="play_description">Odtwarzaj/pauzuj</string>
+	<string name="ffwd_description">Szybko do przodu</string>
+	<string name="export_description">Eksportuj tą narrację</string> <!-- doesn't matter about narrative/media - only used in MediaPhone -->
+
+</resources>

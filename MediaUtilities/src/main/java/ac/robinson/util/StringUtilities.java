@@ -20,6 +20,9 @@
 
 package ac.robinson.util;
 
+import android.annotation.TargetApi;
+import android.os.Build;
+
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -29,9 +32,6 @@ import java.nio.charset.CharsetDecoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
-
-import android.annotation.TargetApi;
-import android.os.Build;
 
 public class StringUtilities {
 
@@ -101,12 +101,10 @@ public class StringUtilities {
 
 		// TODO: use StringBuilder for efficiency?
 		return (hours > 0 ? hours + ":" : "")
-				+ (hours > 0 ? String.format(int2sd, minutes) : minutes)
-				+ ":"
-				+ String.format(int2sd, seconds)
+				+ (hours > 0 ? String.format(Locale.US, int2sd, minutes) : minutes) + ":"
+				+ String.format(Locale.US, int2sd, seconds)
 				+ (includeMilliseconds ? "."
-						+ (highPrecision ? String.format(int3sd, millisecondsIn) : String.format(int1sd,
-								millisecondsIn / 100)) : "");
+				+ (highPrecision ? String.format(Locale.US, int3sd, millisecondsIn) : String.format(Locale.US, int1sd, millisecondsIn / 100)) : "");
 	}
 
 	public static String sha1Hash(String input) {

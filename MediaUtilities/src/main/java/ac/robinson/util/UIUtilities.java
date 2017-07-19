@@ -256,19 +256,6 @@ public class UIUtilities {
 		window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 	}
 
-	/**
-	 * Use acquireKeepScreenOn instead - key guard lock method left here only as a reminder
-	 * 
-	 * Requires <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
-	 */
-	@Deprecated
-	public static KeyguardManager.KeyguardLock acquireKeyguardLock(Activity activity) {
-		KeyguardManager keyguardManager = (KeyguardManager) activity.getSystemService(Activity.KEYGUARD_SERVICE);
-		KeyguardManager.KeyguardLock keyguardLock = keyguardManager.newKeyguardLock(Activity.KEYGUARD_SERVICE);
-		keyguardLock.disableKeyguard();
-		return keyguardLock;
-	}
-
 	public static void showToast(Context context, int id) {
 		showToast(context, id, false);
 	}
