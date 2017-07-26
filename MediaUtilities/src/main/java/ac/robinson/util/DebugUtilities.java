@@ -20,13 +20,6 @@
 
 package ac.robinson.util;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Locale;
-import java.util.TimeZone;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -35,6 +28,13 @@ import android.graphics.Point;
 import android.os.Build;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Locale;
+import java.util.TimeZone;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 public class DebugUtilities {
 	public static String getLogTag(Object o) {
@@ -98,11 +98,19 @@ public class DebugUtilities {
 	// some devices cannot use SoundPool and MediaPlayer simultaneously due to a bug
 	// - currently just Galaxy Tab 10.1 with original SDK version
 	public static boolean hasSoundPoolBug() {
-		ArrayList<String> devices = new ArrayList<String>();
+		ArrayList<String> devices = new ArrayList<>();
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			devices.add("samsung/GT-P7510/GT-P7510"); // Samsung Galaxy Tab 10.1
 		}
 
+		return devices.contains(getDeviceBrandProduct());
+	}
+
+	// some devices have a bug where the internal storage folder requires storage permission to be granted
+	// - currently just Galaxy Tab A 10.1 (6.0.1, v23)
+	public static boolean hasAppDataFolderPermissionBug() {
+		ArrayList<String> devices = new ArrayList<>();
+		devices.add("samsung/gt510wifixx/gt510wifi"); // Samsung Galaxy Tab A 10.1
 		return devices.contains(getDeviceBrandProduct());
 	}
 
