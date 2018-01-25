@@ -415,6 +415,7 @@ public class MOVUtilities {
 			File inputAudioFile = null;
 			File outputPCMFile = null;
 			BufferedOutputStream outputPCMStream = null;
+			boolean audioWritten = false;
 			File currentPCMFile = null;
 			BufferedOutputStream currentPCMStream = null;
 			AudioFormat audioFormat = null;
@@ -512,7 +513,7 @@ public class MOVUtilities {
 							MP4toPCMConverter pcmConverter = new MP4toPCMConverter(inputRandomAccessFile);
 							pcmConverter.convertFile(currentPCMStream);
 
-							// get the format - output from PCM converter is mono signed 16-bit big-endian ints
+							// get the format - output from PCM converter is mono signed 16-bit big-endian integers
 							if (audioFormat == null) { // TODO: we assume all MP4 components are the same format
 								audioFormat = new AudioFormat(pcmConverter.getSampleRate(),
 										pcmConverter.getSampleSize(), 1, true, true);
@@ -611,6 +612,7 @@ public class MOVUtilities {
 							while ((len = in.read(buf)) > 0) {
 								outputPCMStream.write(buf, 0, len);
 							}
+							audioWritten = true;
 						} catch (IOException e) {
 							Log.d(LOG_TAG, "Error creating segmented MOV audio track - combining failed");
 						} finally {
@@ -643,26 +645,28 @@ public class MOVUtilities {
 
 			// finally, write the combined track to the MOV (pcmAudioStream is closed in MovWriter)
 			IOUtilities.closeStream(outputPCMStream);
-			AudioInputStream pcmAudioStream;
-			try {
-				pcmAudioStream = new AudioInputStream(new FileInputStream(outputPCMFile), audioFormat,
-						(int) ((audioFormat.getSampleRate() * audioTotalDuration) / 1000f));
+			if (audioWritten) { // only write if at least one part of the stream succeeded
+				AudioInputStream pcmAudioStream;
+				try {
+					pcmAudioStream = new AudioInputStream(new FileInputStream(outputPCMFile), audioFormat,
+							(int) ((audioFormat.getSampleRate() * audioTotalDuration) / 1000f));
 
-				int arraySize = audioOffsetsList.size();
-				float[] audioOffsets = new float[arraySize];
-				float[] audioStarts = new float[arraySize];
-				float[] audioLengths = new float[arraySize];
-				for (int j = 0; j < arraySize; j++) {
-					audioOffsets[j] = audioOffsetsList.get(j);
-					audioStarts[j] = audioStartsList.get(j);
-					audioLengths[j] = audioLengthsList.get(j);
+					int arraySize = audioOffsetsList.size();
+					float[] audioOffsets = new float[arraySize];
+					float[] audioStarts = new float[arraySize];
+					float[] audioLengths = new float[arraySize];
+					for (int j = 0; j < arraySize; j++) {
+						audioOffsets[j] = audioOffsetsList.get(j);
+						audioStarts[j] = audioStartsList.get(j);
+						audioLengths[j] = audioLengthsList.get(j);
+					}
+
+					outputFileWriter.addSegmentedAudioTrack(pcmAudioStream, audioOffsets, audioStarts, audioLengths);
+
+				} catch (Exception e) {
+					Log.d(LOG_TAG, "Error creating segmented MOV audio track - couldn't create final MOV track");
+					e.printStackTrace();
 				}
-
-				outputFileWriter.addSegmentedAudioTrack(pcmAudioStream, audioOffsets, audioStarts, audioLengths);
-
-			} catch (Exception e) {
-				Log.d(LOG_TAG, "Error creating segmented MOV audio track - couldn't create final MOV track");
-				e.printStackTrace();
 			}
 		}
 

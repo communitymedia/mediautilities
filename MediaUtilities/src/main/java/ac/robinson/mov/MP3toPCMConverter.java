@@ -20,6 +20,13 @@
 
 package ac.robinson.mov;
 
+import net.javazoom.jl.decoder.Bitstream;
+import net.javazoom.jl.decoder.BitstreamException;
+import net.javazoom.jl.decoder.Decoder;
+import net.javazoom.jl.decoder.DecoderException;
+import net.javazoom.jl.decoder.Header;
+import net.javazoom.jl.decoder.SampleBuffer;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,12 +35,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import net.javazoom.jl.decoder.Bitstream;
-import net.javazoom.jl.decoder.BitstreamException;
-import net.javazoom.jl.decoder.Decoder;
-import net.javazoom.jl.decoder.DecoderException;
-import net.javazoom.jl.decoder.Header;
-import net.javazoom.jl.decoder.SampleBuffer;
 import ac.robinson.util.IOUtilities;
 
 public class MP3toPCMConverter {
@@ -57,8 +58,7 @@ public class MP3toPCMConverter {
 	 * 
 	 * @param input the input MP3 file
 	 * @param output a stream to write the PCM to
-	 * @param startMs time to start reading the MP3 from, 0 for the start
-	 * @param endMs time to stop reading the MP3 from, or 0 for the end
+	 * @param config an MP3Configuration instance that will be configured with the stream's properties
 	 * @throws IOException
 	 */
 	public static void convertFile(File input, OutputStream output, MP3Configuration config) throws IOException {
@@ -72,6 +72,7 @@ public class MP3toPCMConverter {
 	 * 
 	 * @param input the input MP3 file
 	 * @param output a stream to write the PCM to
+	 * @param config an MP3Configuration instance that will be configured with the stream's properties
 	 * @param startMs time to start reading the MP3 from, 0 for the start
 	 * @param endMs time to stop reading the MP3 from, or -1 for the end
 	 * @throws IOException
@@ -109,15 +110,18 @@ public class MP3toPCMConverter {
 							config.numberOfChannels = outputPCM.getChannelCount();
 						}
 
-						if (outputPCM.getSampleFrequency() != 44100 || outputPCM.getChannelCount() != 2) {
-							throw new IOException("Mono or non-44100 MP3 - not yet supported"); // TODO: can we support?
+						if (outputPCM.getSampleFrequency() != 44100) {
+							throw new IOException("Non-44100Hz MP3 - not yet supported"); // TODO: can we support?
 						}
 
+						// for mono inputs the buffer is half-full - earlier versions had a bug here where the for loop
+						// was "optimised" into a foreach, but this meant that we had outputs of half silence for mono
+						// audio, as the whole buffer was always used in the output
 						short[] pcm = outputPCM.getBuffer();
-						for (short s : pcm) {
+						for (int i = 0, n = outputPCM.getBufferLength(); i < n; i += 1) {
 							// output.write(s & 0xff); // little-endian
-							output.write((s >> 8) & 0xff);
-							output.write(s & 0xff); // we want big-endian
+							output.write((pcm[i] >> 8) & 0xff);
+							output.write(pcm[i] & 0xff); // we want big-endian
 						}
 					}
 
