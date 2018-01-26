@@ -8,8 +8,8 @@ android {
 		//noinspection MinSdkTooLow
 		minSdkVersion 8 // we *want* to support low SDK versions (older devices)
 		targetSdkVersion 27
-		versionCode 12
-		versionName '1.5.6'
+		versionCode 13
+		versionName '1.5.7'
 
 		// TODO: not yet working - fix
 		// ndk {

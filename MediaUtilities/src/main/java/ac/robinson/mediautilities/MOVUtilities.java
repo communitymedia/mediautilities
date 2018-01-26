@@ -270,7 +270,7 @@ public class MOVUtilities {
 							MP3Configuration mp3Config = new MP3Configuration();
 							MP3toPCMConverter.convertFile(inputAudioFile, outputPCMStream, mp3Config);
 
-							// get the format of the audio - output is mono/stereo signed 16-bit big-endian integers
+							// get the format of the audio - output is stereo signed 16-bit big-endian integers
 							audioFormat = new AudioFormat(mp3Config.sampleFrequency, mp3Config.sampleSize,
 									mp3Config.numberOfChannels, true, true);
 
