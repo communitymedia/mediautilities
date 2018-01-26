@@ -55,8 +55,8 @@ public class MP3toPCMConverter {
 
 	/**
 	 * Convert an MP3 input file to PCM
-	 * 
-	 * @param input the input MP3 file
+	 *
+	 * @param input  the input MP3 file
 	 * @param output a stream to write the PCM to
 	 * @param config an MP3Configuration instance that will be configured with the stream's properties
 	 * @throws IOException
@@ -67,14 +67,14 @@ public class MP3toPCMConverter {
 
 	/**
 	 * Convert an MP3 input file to PCM
-	 * 
+	 * <p>
 	 * See: http://mindtherobot.com/blog/624/android-audio-play-an-mp3-file-on-an-audiotrack/
-	 * 
-	 * @param input the input MP3 file
-	 * @param output a stream to write the PCM to
-	 * @param config an MP3Configuration instance that will be configured with the stream's properties
+	 *
+	 * @param input   the input MP3 file
+	 * @param output  a stream to write the PCM to
+	 * @param config  an MP3Configuration instance that will be configured with the stream's properties
 	 * @param startMs time to start reading the MP3 from, 0 for the start
-	 * @param endMs time to stop reading the MP3 from, or -1 for the end
+	 * @param endMs   time to stop reading the MP3 from, or -1 for the end
 	 * @throws IOException
 	 */
 	public static void convertFile(File input, OutputStream output, MP3Configuration config, int startMs, int endMs)
@@ -106,12 +106,8 @@ public class MP3toPCMConverter {
 
 						if (config.sampleFrequency == 0) {
 							config.sampleFrequency = outputPCM.getSampleFrequency();
-							config.sampleSize = 16; // TODO: do we always end up with 16-bit (even if, eg 24-bit input?)
+							config.sampleSize = 16; // output should always be 16-bit, even if, say, 24 or 32-bit input
 							config.numberOfChannels = outputPCM.getChannelCount();
-						}
-
-						if (outputPCM.getSampleFrequency() != 44100) {
-							throw new IOException("Non-44100Hz MP3 - not yet supported"); // TODO: can we support?
 						}
 
 						// for mono inputs the buffer is half-full - earlier versions had a bug here where the for loop

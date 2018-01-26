@@ -504,6 +504,10 @@ public class MOVUtilities {
 					}
 
 					// begin to convert the compressed audio
+					// TODO: we assume that if we load, say, one MP3 at 44100Hz Joint-Stereo VBR then any other MP3s
+					// TODO: will be in the same format - i.e., no resampling or other adjustments are taken. At the
+					// TODO: moment, this means that loading multiple tracks of different formats leads to the first
+					// TODO: one being output correctly, and others being, e.g., slowed down or sped up.
 					if (currentAudioType == AudioType.M4A) {
 						RandomAccessFile inputRandomAccessFile = null;
 						try {
