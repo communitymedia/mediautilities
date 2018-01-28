@@ -1,8 +1,8 @@
 apply plugin: 'com.android.library'
 
 android {
-	compileSdkVersion 26
-	buildToolsVersion '26.0.2'
+	compileSdkVersion 27
+	buildToolsVersion '27.0.3'
 
 	defaultConfig {
 		//noinspection MinSdkTooLow
@@ -25,7 +25,7 @@ android {
 	buildTypes {
 		release {
 			minifyEnabled false
-			proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+			consumerProguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-mediautilities.txt'
 		}
 	}
 
