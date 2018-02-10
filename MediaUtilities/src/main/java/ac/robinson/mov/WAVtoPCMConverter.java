@@ -52,7 +52,7 @@ public final class WAVtoPCMConverter {
 	public static void convertFile(File input, OutputStream output, WAVConfiguration config) throws IOException {
 		int fileSize = (int) input.length();
 		if (fileSize < 128) {
-			throw new java.io.IOException("File too small to parse");
+			throw new IOException("File too small to parse");
 		}
 
 		FileInputStream inputWAVStream = null;
@@ -65,7 +65,7 @@ public final class WAVtoPCMConverter {
 			offset += 12;
 			if (header[0] != 'R' || header[1] != 'I' || header[2] != 'F' || header[3] != 'F' || header[8] != 'W'
 					|| header[9] != 'A' || header[10] != 'V' || header[11] != 'E') {
-				throw new java.io.IOException("Not a WAV file");
+				throw new IOException("Not a WAV file");
 			}
 
 			while (offset + 8 <= fileSize) {
@@ -78,7 +78,7 @@ public final class WAVtoPCMConverter {
 
 				if (chunkHeader[0] == 'f' && chunkHeader[1] == 'm' && chunkHeader[2] == 't' && chunkHeader[3] == ' ') {
 					if (chunkLen < 16 || chunkLen > 1024) {
-						throw new java.io.IOException("WAV file has bad fmt chunk");
+						throw new IOException("WAV file has bad fmt chunk");
 					}
 
 					byte[] fmt = new byte[chunkLen];
@@ -87,7 +87,7 @@ public final class WAVtoPCMConverter {
 
 					int format = ((0xff & fmt[1]) << 8) | ((0xff & fmt[0]));
 					if (format != 1) {
-						throw new java.io.IOException("Unsupported WAV file encoding");
+						throw new IOException("Unsupported WAV file encoding (only 16-bit PCM is supported)");
 					}
 
 					config.numberOfChannels = ((0xff & fmt[3]) << 8) | ((0xff & fmt[2]));
@@ -98,13 +98,16 @@ public final class WAVtoPCMConverter {
 				} else if (chunkHeader[0] == 'd' && chunkHeader[1] == 'a' && chunkHeader[2] == 't'
 						&& chunkHeader[3] == 'a') {
 					if (config.numberOfChannels == 0 || config.sampleFrequency == 0) {
-						throw new java.io.IOException("Bad WAV file: data chunk before fmt chunk");
+						throw new IOException("Bad WAV file: data chunk before fmt chunk");
 					}
 
 					// copy the bits from input stream to output stream
 					byte[] buf = new byte[IOUtilities.IO_BUFFER_SIZE];
+					//byte[] bebuf = new byte[IOUtilities.IO_BUFFER_SIZE];
 					int len;
 					while ((len = inputWAVStream.read(buf)) > 0) {
+						// convert to big endian
+						// ByteBuffer.wrap(buf, 0, len).order(ByteOrder.BIG_ENDIAN).get(bebuf, 0, len);
 						output.write(buf, 0, len);
 					}
 

@@ -20,13 +20,16 @@
 
 package ac.robinson.mediautilities;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PipedInputStream;
 import java.io.RandomAccessFile;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -41,6 +44,8 @@ import ac.robinson.util.AndroidUtilities;
 import ac.robinson.util.BitmapUtilities;
 import ac.robinson.util.IOUtilities;
 import ac.robinson.util.ImageCacheUtilities;
+import vavi.sound.pcm.resampling.ssrc.SSRC;
+
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -48,6 +53,7 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.net.Uri;
+import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -89,6 +95,7 @@ public class MOVUtilities {
 		final int textMaxFontSize = (Integer) settings.get(MediaUtilities.KEY_MAX_TEXT_FONT_SIZE);
 		final int textMaxCharsPerLine = (Integer) settings.get(MediaUtilities.KEY_MAX_TEXT_CHARACTERS_PER_LINE);
 		final int audioResourceId = (Integer) settings.get(MediaUtilities.KEY_AUDIO_RESOURCE_ID);
+		final int audioResamplingRate = (Integer) settings.get(MediaUtilities.KEY_RESAMPLE_AUDIO);
 
 		// all frames *must* be the same dimensions, so we work from a base bitmap for everything
 		Bitmap baseBitmap = Bitmap.createBitmap(outputWidth, outputHeight,
@@ -109,16 +116,25 @@ public class MOVUtilities {
 			outputFileWriter = new JPEGMovWriter(outputFile);
 
 			// find all the story audio - *all* audio must be added before any frames (takes a *long* time)
+			// resampling audio is slowest, but most compatible with external players other than QuickTime
 			// segmented audio means we combine audio into as few tracks as possible, which increases playback
 			// compatibility (but also increases the time required to export the movie)
-			if (MediaUtilities.MOV_USE_SEGMENTED_AUDIO) {
-				ArrayList<File> segmentFiles = addNarrativeAudioAsSegmentedTrack(framesToSend,
+			// individual tracks is similar in speed to segmented tracks, but typically only works with QuickTime
+			// Player (hence this is not a user editable preference)
+			if (audioResamplingRate > 0) {
+				ArrayList<File> combinedFiles = addNarrativeAudioAsCombinedTrack(framesToSend, audioResamplingRate,
 						outputFile.getParentFile(), outputFileWriter);
-				filesToDelete.addAll(segmentFiles);
+				filesToDelete.addAll(combinedFiles);
 			} else {
-				ArrayList<File> individualFiles = addNarrativeAudioAsIndividualTracks(framesToSend,
+				if (MediaUtilities.MOV_USE_SEGMENTED_AUDIO) {
+					ArrayList<File> segmentFiles = addNarrativeAudioAsSegmentedTrack(framesToSend,
 						outputFile.getParentFile(), outputFileWriter);
-				filesToDelete.addAll(individualFiles);
+					filesToDelete.addAll(segmentFiles);
+				} else {
+					ArrayList<File> individualFiles = addNarrativeAudioAsIndividualTracks(framesToSend,
+							outputFile.getParentFile(), outputFileWriter);
+					filesToDelete.addAll(individualFiles);
+				}
 			}
 
 			// add the visual content
@@ -197,7 +213,9 @@ public class MOVUtilities {
 	private static ArrayList<File> addNarrativeAudioAsIndividualTracks(ArrayList<FrameMediaContainer> framesToSend,
 			File tempDirectory, JPEGMovWriter outputFileWriter) {
 
-		// the list of files to be delete after they've been written to the movie
+		Log.d(LOG_TAG, "Exporting individual track MOV audio");
+
+		// the list of files to be deleted after they've been written to the movie
 		ArrayList<File> filesToDelete = new ArrayList<File>();
 
 		int frameDuration;
@@ -247,9 +265,11 @@ public class MOVUtilities {
 							MP4toPCMConverter pcmConverter = new MP4toPCMConverter(inputRandomAccessFile);
 							pcmConverter.convertFile(outputPCMStream);
 
-							// get the format of the audio
+							// get the format of the audio - PCM output is mono signed 16-bit little-endian integers
 							audioFormat = new AudioFormat(pcmConverter.getSampleRate(), pcmConverter.getSampleSize(),
-									1, true, true); // output from PCM converter is mono signed 16-bit big-endian ints
+									1, true, false);
+							Log.d(LOG_TAG, "Outputting M4A: " + pcmConverter.getSampleRate() +
+									", " + pcmConverter.getSampleSize() + ", 1, signed, little endian");
 
 						} catch (IOException e) {
 							decodingError = true;
@@ -270,9 +290,12 @@ public class MOVUtilities {
 							MP3Configuration mp3Config = new MP3Configuration();
 							MP3toPCMConverter.convertFile(inputAudioFile, outputPCMStream, mp3Config);
 
-							// get the format of the audio - output is stereo signed 16-bit big-endian integers
+							// get the format of the audio - PCM output is mono signed 16-bit little-endian integers
 							audioFormat = new AudioFormat(mp3Config.sampleFrequency, mp3Config.sampleSize,
-									mp3Config.numberOfChannels, true, true);
+									mp3Config.numberOfChannels, true, false);
+							Log.d(LOG_TAG, "Outputting MP3: " + mp3Config.sampleFrequency +
+									", " + mp3Config.sampleSize + ", " + mp3Config.numberOfChannels +
+									", signed, little endian");
 
 						} catch (IOException e) {
 							decodingError = true;
@@ -292,6 +315,7 @@ public class MOVUtilities {
 
 							// get the format of the audio - output is mono signed 16-bit big-endian integers, 8000Hz
 							audioFormat = new AudioFormat(8000, 16, 1, true, true);
+							Log.d(LOG_TAG, "Outputting AMR: 8000, 16, 1, signed, big endian");
 
 						} catch (IOException e) {
 							decodingError = true;
@@ -313,6 +337,9 @@ public class MOVUtilities {
 							// get the format of the audio - output is mono/stereo signed 16-bit little-endian integers
 							audioFormat = new AudioFormat(wavConfig.sampleFrequency, wavConfig.sampleSize,
 									wavConfig.numberOfChannels, true, false);
+							Log.d(LOG_TAG, "Outputting WAV: " + wavConfig.sampleFrequency +
+									", " + wavConfig.sampleSize + ", " + wavConfig.numberOfChannels +
+									", signed, little endian");
 
 						} catch (IOException e) {
 							decodingError = true;
@@ -348,9 +375,11 @@ public class MOVUtilities {
 	}
 
 	private static ArrayList<File> addNarrativeAudioAsSegmentedTrack(ArrayList<FrameMediaContainer> framesToSend,
-			File tempDirectory, JPEGMovWriter outputFileWriter) {
+																	 File tempDirectory, JPEGMovWriter outputFileWriter) {
 
-		// the list of files to be delete after they've been written to the movie
+		Log.d(LOG_TAG, "Exporting segmented MOV audio");
+
+		// the list of files to be deleted after they've been written to the movie
 		ArrayList<File> filesToDelete = new ArrayList<File>();
 
 		// see how many tracks we need to create - one per stream, but need to separate formats
@@ -517,10 +546,12 @@ public class MOVUtilities {
 							MP4toPCMConverter pcmConverter = new MP4toPCMConverter(inputRandomAccessFile);
 							pcmConverter.convertFile(currentPCMStream);
 
-							// get the format - output from PCM converter is mono signed 16-bit big-endian integers
+							// get the format - output from PCM converter is mono signed 16-bit little-endian integers
 							if (audioFormat == null) { // TODO: we assume all MP4 components are the same format
 								audioFormat = new AudioFormat(pcmConverter.getSampleRate(),
-										pcmConverter.getSampleSize(), 1, true, true);
+										pcmConverter.getSampleSize(), 1, true, false);
+								Log.d(LOG_TAG, "Outputting M4A: " + pcmConverter.getSampleRate() +
+										", " + pcmConverter.getSampleSize() + ", 1, signed, little endian");
 							}
 
 						} catch (IOException e) {
@@ -542,10 +573,13 @@ public class MOVUtilities {
 							MP3Configuration mp3Config = new MP3Configuration();
 							MP3toPCMConverter.convertFile(inputAudioFile, currentPCMStream, mp3Config);
 
-							// get the format - output is mono/stereo signed 16-bit big-endian integers
+							// get the format - output from PCM converter is mono signed 16-bit little-endian integers
 							if (audioFormat == null) { // TODO: we assume all MP3 components are the same format
 								audioFormat = new AudioFormat(mp3Config.sampleFrequency, mp3Config.sampleSize,
-										mp3Config.numberOfChannels, true, true);
+										mp3Config.numberOfChannels, true, false);
+								Log.d(LOG_TAG, "Outputting MP3: " + mp3Config.sampleFrequency +
+										", " + mp3Config.sampleSize + ", " + mp3Config.numberOfChannels +
+										", signed, little endian");
 							}
 
 						} catch (IOException e) {
@@ -567,6 +601,7 @@ public class MOVUtilities {
 							// get the format of the audio - output is mono signed 16-bit big-endian integers, 8000Hz
 							if (audioFormat == null) { // TODO: we assume all AMR components are the same format
 								audioFormat = new AudioFormat(8000, 16, 1, true, true);
+								Log.d(LOG_TAG, "Outputting AMR: 8000, 16, 1, signed, big endian");
 							}
 
 						} catch (IOException e) {
@@ -590,6 +625,9 @@ public class MOVUtilities {
 							if (audioFormat == null) { // TODO: we assume all WAV components are the same format
 								audioFormat = new AudioFormat(wavConfig.sampleFrequency, wavConfig.sampleSize,
 										wavConfig.numberOfChannels, true, false);
+								Log.d(LOG_TAG, "Outputting WAV: " + wavConfig.sampleFrequency +
+										", " + wavConfig.sampleSize + ", " + wavConfig.numberOfChannels +
+										", signed, little endian");
 							}
 
 						} catch (IOException e) {
@@ -669,8 +707,327 @@ public class MOVUtilities {
 
 				} catch (Exception e) {
 					Log.d(LOG_TAG, "Error creating segmented MOV audio track - couldn't create final MOV track");
-					e.printStackTrace();
 				}
+			}
+		}
+
+		return filesToDelete;
+	}
+
+	private static ArrayList<File> addNarrativeAudioAsCombinedTrack(ArrayList<FrameMediaContainer> framesToSend, int sampleRate,
+																	File tempDirectory, JPEGMovWriter outputFileWriter) {
+
+		Log.d(LOG_TAG, "Exporting combined MOV audio (" + sampleRate + ")");
+
+		// the list of files to be deleted after they've been written to the movie
+		ArrayList<File> filesToDelete = new ArrayList<File>();
+
+		// see how many tracks we need to create - find the maximum number of (compatible) audio items per frame
+		int trackCount = 0;
+		for (FrameMediaContainer frame : framesToSend) {
+			int localCount = 0;
+			for (String type : frame.mAudioPaths) {
+				String actualFileExtension = IOUtilities.getFileExtension(type);
+				final String fileExtension; // use the base file extension instead of the actual - combine same types
+				if (AndroidUtilities.arrayContains(MediaUtilities.M4A_FILE_EXTENSIONS, actualFileExtension)) {
+					fileExtension = MediaUtilities.M4A_FILE_EXTENSIONS[0];
+				} else if (AndroidUtilities.arrayContains(MediaUtilities.MP3_FILE_EXTENSIONS, actualFileExtension)) {
+					fileExtension = MediaUtilities.MP3_FILE_EXTENSIONS[0];
+				} else if (AndroidUtilities.arrayContains(MediaUtilities.AMR_FILE_EXTENSIONS, actualFileExtension)) {
+					fileExtension = MediaUtilities.AMR_FILE_EXTENSIONS[0];
+				} else if (AndroidUtilities.arrayContains(MediaUtilities.WAV_FILE_EXTENSIONS, actualFileExtension)) {
+					fileExtension = MediaUtilities.WAV_FILE_EXTENSIONS[0];
+				} else {
+					fileExtension = actualFileExtension;
+				}
+				if (AndroidUtilities.arrayContains(MediaUtilities.MOV_AUDIO_FILE_EXTENSIONS, fileExtension)) {
+					localCount += 1;
+				}
+			}
+			trackCount = Math.max(trackCount, localCount);
+		}
+
+		if (trackCount <= 0) {
+			return filesToDelete; // no audio present - nothing to do
+		}
+
+		// all audio parts are combined into one track with these properties
+		AudioFormat audioFormat = new AudioFormat(sampleRate, 16, 1, true, false);
+
+		// prepare the global audio track
+		boolean globalAudioWritten = false;
+		long globalAudioDuration = 0;
+		File globalPCMFile;
+		try {
+			globalPCMFile = File.createTempFile("export", "all.pcm", tempDirectory);
+		} catch (IOException e) {
+			return filesToDelete; // not much else we can do
+		}
+		filesToDelete.add(globalPCMFile); // deleted after the rest of the movie has been written
+
+		// create a separate temporary PCM file for each parallel audio track
+		File[] pcmFiles = new File[trackCount];
+		long[] pcmFileDurations = new long[trackCount];
+		for (int i = 0; i < pcmFiles.length; i++) {
+			BufferedOutputStream outputPCMStream = null;
+			try {
+				pcmFiles[i] = File.createTempFile("export-" + i, ".pcm", tempDirectory);
+				outputPCMStream = new BufferedOutputStream(new FileOutputStream(pcmFiles[i]));
+			} catch (Exception e) {
+				IOUtilities.closeStream(outputPCMStream);
+				if (pcmFiles[i] != null) {
+					pcmFiles[i].delete();
+				}
+				pcmFiles[i] = null;
+				Log.d(LOG_TAG, "Error creating segmented MOV audio track - couldn't create stream " + i + " PCM file");
+				continue;
+			}
+
+			File inputAudioFile;
+			boolean audioWritten = false;
+			File currentPCMFile = null;
+			BufferedOutputStream currentPCMStream = null;
+			File temporaryPCMFile = null;
+			BufferedInputStream temporaryPCMInputStream = null;
+			BufferedOutputStream temporaryPCMOutputStream = null;
+
+			// get the available tracks of the right type from each frame, then remove when done
+			long frameStartTime = 0;
+			for (FrameMediaContainer frame : framesToSend) {
+
+				boolean audioFound = false;
+				boolean decodingError = false;
+				AudioType currentAudioType;
+
+				int audioId = -1;
+				for (String audioPath : frame.mAudioPaths) {
+					audioId += 1;
+
+					// don't need to add inherited spanning audio items - they've already been processed
+					if (frame.mSpanningAudioIndex == audioId && !frame.mSpanningAudioRoot) {
+						frame.mSpanningAudioIndex = -1; // this frame no longer has any spanning audio
+						audioFound = true;
+						break; // no more items in this frame can be added, as the spanning item overlaps them
+					}
+
+					String audioFileExtension = IOUtilities.getFileExtension(audioPath);
+					if (!AndroidUtilities.arrayContains(MediaUtilities.MOV_AUDIO_FILE_EXTENSIONS, audioFileExtension)) {
+						continue; // skip incompatible files
+					}
+
+					// only use tracks of the right extension TODO: pick the longest track instead of the first one?
+					if (AndroidUtilities.arrayContains(MediaUtilities.M4A_FILE_EXTENSIONS, audioFileExtension)) {
+						currentAudioType = AudioType.M4A;
+					} else if (AndroidUtilities.arrayContains(MediaUtilities.MP3_FILE_EXTENSIONS, audioFileExtension)) {
+						currentAudioType = AudioType.MP3;
+					} else if (AndroidUtilities.arrayContains(MediaUtilities.AMR_FILE_EXTENSIONS, audioFileExtension)) {
+						currentAudioType = AudioType.AMR;
+					} else if (AndroidUtilities.arrayContains(MediaUtilities.WAV_FILE_EXTENSIONS, audioFileExtension)) {
+						currentAudioType = AudioType.WAV;
+					} else {
+						continue;
+					}
+
+					Log.d(LOG_TAG, "Processing " + audioPath);
+
+					// if we get here it's the right type of audio, so begin to get PCM from the compressed source
+					inputAudioFile = new File(audioPath);
+					audioFound = true;
+
+					// create temporary files per-track, so that one corrupt track doesn't break everything
+					try {
+						currentPCMFile = File.createTempFile(inputAudioFile.getName(), ".pcm", tempDirectory);
+						currentPCMStream = new BufferedOutputStream(new FileOutputStream(currentPCMFile));
+					} catch (Exception e) {
+						IOUtilities.closeStream(currentPCMStream);
+						if (currentPCMFile != null) {
+							currentPCMFile.delete();
+						}
+						Log.d(LOG_TAG, "Error creating combined MOV audio track - couldn't create individual "
+								+ audioFileExtension + " files");
+						continue;
+					}
+
+					// begin to convert the compressed audio
+					if (currentAudioType == AudioType.M4A) {
+						RandomAccessFile inputRandomAccessFile = null;
+						try {
+							// first we need to extract PCM audio from the M4A file
+							// output from PCM converter is mono signed 16-bit little-endian integers
+							inputRandomAccessFile = new RandomAccessFile(inputAudioFile, "r");
+							MP4toPCMConverter pcmConverter = new MP4toPCMConverter(inputRandomAccessFile);
+							pcmConverter.convertFile(currentPCMStream);
+
+							// if the sample rate or sample size don't match our output, use SSRC to resample the audio
+							if (pcmConverter.getSampleRate() != audioFormat.getSampleRate() ||
+									pcmConverter.getSampleSize() != audioFormat.getSampleSizeInBits()) {
+
+								Log.d(LOG_TAG, "Resampling M4A audio");
+								try {
+									temporaryPCMInputStream = new BufferedInputStream(new FileInputStream(currentPCMFile));
+									temporaryPCMFile = File.createTempFile(inputAudioFile.getName(), ".temp.pcm", tempDirectory);
+									temporaryPCMOutputStream = new BufferedOutputStream(new FileOutputStream(temporaryPCMFile));
+
+									// use SSRC to resample PCM audio - note that two passes are required for accuracy
+									new SSRC(tempDirectory, temporaryPCMInputStream, temporaryPCMOutputStream, ByteOrder.LITTLE_ENDIAN,
+											pcmConverter.getSampleRate(), (int) audioFormat.getSampleRate(),
+											pcmConverter.getSampleSize(), audioFormat.getSampleSizeInBits(),
+											1, (int) currentPCMFile.length(), 0, 0, 0,
+											true, false, false, true);
+
+									// this is now the PCM file to use
+									if (currentPCMFile != null) {
+										currentPCMFile.delete();
+									}
+									currentPCMFile = temporaryPCMFile;
+
+								} catch (Exception e) {
+									if (temporaryPCMFile != null) {
+										temporaryPCMFile.delete();
+									}
+								} finally {
+									IOUtilities.closeStream(temporaryPCMInputStream);
+									IOUtilities.closeStream(temporaryPCMOutputStream);
+								}
+							}
+
+							Log.d(LOG_TAG, "Outputting M4A: " + audioFormat.getSampleRate() + ", " + audioFormat.getSampleSizeInBits() +
+									" from " + pcmConverter.getSampleRate() + ", " + pcmConverter.getSampleSize());
+						} catch (Exception e) {
+							decodingError = true;
+							Log.d(LOG_TAG, "Error creating combined M4A audio track: " + e.getLocalizedMessage());
+						} finally {
+							IOUtilities.closeStream(inputRandomAccessFile);
+						}
+
+					} else if (currentAudioType == AudioType.MP3) {
+						try {
+
+							// first we need to extract PCM audio from the MP3 file
+							// output from PCM converter is mono signed 16-bit little-endian integers
+							MP3Configuration mp3Config = new MP3Configuration();
+							MP3toPCMConverter.convertFile(inputAudioFile, currentPCMStream, mp3Config);
+
+							// if the sample rate or sample size don't match our output, use SSRC to resample the audio
+							if (mp3Config.sampleFrequency != audioFormat.getSampleRate() ||
+									mp3Config.sampleSize != audioFormat.getSampleSizeInBits()) {
+
+								Log.d(LOG_TAG, "Resampling MP3 audio");
+								try {
+									temporaryPCMInputStream = new BufferedInputStream(new FileInputStream(currentPCMFile));
+									temporaryPCMFile = File.createTempFile(inputAudioFile.getName(), ".temp.pcm", tempDirectory);
+									temporaryPCMOutputStream = new BufferedOutputStream(new FileOutputStream(temporaryPCMFile));
+
+									// use SSRC to resample PCM audio - note that two passes are required for accuracy
+									new SSRC(tempDirectory, temporaryPCMInputStream, temporaryPCMOutputStream, ByteOrder.LITTLE_ENDIAN,
+											mp3Config.sampleFrequency, (int) audioFormat.getSampleRate(),
+											mp3Config.sampleSize, audioFormat.getSampleSizeInBits(),
+											1, (int) currentPCMFile.length(), 0, 0, 0,
+											true, false, false, true);
+
+									// this is now the PCM file to use
+									if (currentPCMFile != null) {
+										currentPCMFile.delete();
+									}
+									currentPCMFile = temporaryPCMFile;
+
+								} catch (Exception e) {
+									if (temporaryPCMFile != null) {
+										temporaryPCMFile.delete();
+									}
+								} finally {
+									IOUtilities.closeStream(temporaryPCMInputStream);
+									IOUtilities.closeStream(temporaryPCMOutputStream);
+								}
+							}
+
+							Log.d(LOG_TAG, "Outputting MP3: " + audioFormat.getSampleRate() + ", " + audioFormat.getSampleSizeInBits() +
+									" from " + mp3Config.sampleFrequency + ", " + mp3Config.sampleSize);
+
+						} catch (Exception e) {
+							decodingError = true;
+							Log.d(LOG_TAG, "Error creating combined MP3 audio track: " + e.getLocalizedMessage());
+						}
+
+					} else {
+						decodingError = true;
+						Log.d(LOG_TAG, "TODO: resample AMR / WAV audio");
+					}
+
+					// if successful, combine the streams and store locations
+					IOUtilities.closeStream(currentPCMStream);
+					if (!decodingError) {
+
+						// pad any gaps in audio (i.e., frames that don't have sound) with silence
+						long silenceNeeded = (long)(audioFormat.getSampleRate() * (audioFormat.getSampleSizeInBits() / 8)
+								* (frameStartTime - pcmFileDurations[i])) / 1000;
+
+						// copy from input file to pcmStream - don't use IOUtilities so we can keep the stream open
+						InputStream in = null;
+						try {
+							in = new FileInputStream(currentPCMFile);
+							for (int s = 0; s < silenceNeeded; s++) {
+								outputPCMStream.write(0); // fill with silence to span the gap in audio files
+							}
+							byte[] buf = new byte[IOUtilities.IO_BUFFER_SIZE];
+							int len;
+							while ((len = in.read(buf)) > 0) {
+								outputPCMStream.write(buf, 0, len); // add the new data
+							}
+							audioWritten = true;
+						} catch (IOException e) {
+							Log.d(LOG_TAG, "Error creating combined MOV audio track - combining failed");
+						} finally {
+							IOUtilities.closeStream(in);
+						}
+
+						pcmFileDurations[i] = frameStartTime + frame.mAudioDurations.get(audioId);
+					}
+					if (currentPCMFile != null) {
+						currentPCMFile.delete();
+					}
+
+					break; // we're done with this frame - we only ever add one audio track to the stream per frame
+				}
+
+				// we've processed this file (any error that occurred is irrelevant at this point - remove track anyway)
+				if (audioFound) {
+					frame.mAudioPaths.remove(audioId);
+					frame.mAudioDurations.remove(audioId);
+				}
+
+				// move on to the next frame's start time
+				frameStartTime += frame.mFrameMaxDuration;
+			}
+
+			IOUtilities.closeStream(outputPCMStream);
+
+			globalAudioWritten |= audioWritten;
+			globalAudioDuration = Math.max(pcmFileDurations[i], globalAudioDuration);
+		}
+
+		// finally, write the combined PCM stream to the MOV file
+		if (globalAudioWritten) { // only write if at least one part of the stream succeeded
+
+			// if we have parallel audio, average the streams
+			if (pcmFiles.length > 1) {
+				Log.d(LOG_TAG, "TODO: Average " + pcmFiles.length + " streams");
+			} else {
+				globalPCMFile = pcmFiles[0]; // most of the time we have only one track
+			}
+
+			// TODO: VLC still fails to play even resampled and mixed audio streams - do we need a WAV header to fix?
+			AudioInputStream pcmAudioStream;
+			try {
+				// output from converters and/or SSRC is mono signed 16-bit little-endian integers
+				pcmAudioStream = new AudioInputStream(new FileInputStream(globalPCMFile), audioFormat,
+						(int) ((audioFormat.getSampleRate() * globalAudioDuration) / 1000f));
+
+				// new source: pumpernickel/pump-quicktime/src/main/java/com/pump/animation/quicktime/MovWriter.java
+				outputFileWriter.addAudioTrack(pcmAudioStream, 0, globalAudioDuration / 1000f);
+
+			} catch (Exception e) {
+				Log.d(LOG_TAG, "Error creating combined MOV audio track - couldn't create final MOV track");
 			}
 		}
 

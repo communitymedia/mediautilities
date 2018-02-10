@@ -64,6 +64,7 @@ public class MP4toPCMConverter {
 		while (track.hasMoreFrames()) {
 			audioFrame = track.readNextFrame();
 			dec.decodeFrame(audioFrame.getData(), buf);
+			buf.setBigEndian(false); // we need little endian
 			output.write(buf.getData());
 		}
 	}

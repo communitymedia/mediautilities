@@ -107,11 +107,11 @@ public class MP3toPCMConverter {
 						if (config.sampleFrequency == 0) {
 							config.sampleFrequency = outputPCM.getSampleFrequency();
 							config.sampleSize = 16; // output should always be 16-bit, even if, say, 24 or 32-bit input
-							config.numberOfChannels = 2; // outputPCM.getChannelCount(); // see mono fix, below
+							config.numberOfChannels = 1; // outputPCM.getChannelCount(); // see mono/stereo fix, below
 						}
 
-						// always output in stereo, as mixing mono and stereo MP3s is fairly common amongst our users
-						// (e.g., audio track + dictaphone output), and this is an easy fix (i.e., duplicate channel 1)
+						// always output in mono, as mixing mono and stereo MP3s is fairly common amongst our users
+						// (e.g, audio track + dictaphone output), and this is an easy fix (i.e., average to 1 channel)
 						boolean mono = outputPCM.getChannelCount() == 1;
 
 						// for mono inputs the buffer is half-full - earlier versions had a bug here where the for loop
@@ -119,12 +119,17 @@ public class MP3toPCMConverter {
 						// audio, as the whole buffer was always used in the output
 						short[] pcm = outputPCM.getBuffer();
 						for (int i = 0, n = outputPCM.getBufferLength(); i < n; i += 1) {
-							// output.write(s & 0xff); // little-endian
-							output.write((pcm[i] >> 8) & 0xff);
-							output.write(pcm[i] & 0xff); // we want big-endian
 							if (mono) {
+								output.write(pcm[i] & 0xff); // little-endian
 								output.write((pcm[i] >> 8) & 0xff);
-								output.write(pcm[i] & 0xff);
+								// output.write(pcm[i] & 0xff); // big-endian
+							} else {
+								// see: https://stackoverflow.com/questions/3816446/
+								short average = (short) ((pcm[i] >> 1) + (pcm[i + 1] >> 1) + (pcm[i] & pcm[i + 1] &
+										0x1));
+								output.write(average & 0xff);
+								output.write((average >> 8) & 0xff);
+								i += 1;
 							}
 						}
 					}
