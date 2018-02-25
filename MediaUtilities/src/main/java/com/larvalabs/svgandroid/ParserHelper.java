@@ -99,6 +99,8 @@ public class ParserHelper {
 				// fallthrough
 			case '+':
 				current = read();
+			default:
+				break;
 		}
 		m1: switch (current) {
 			default:

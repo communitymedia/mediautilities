@@ -30,6 +30,7 @@ public class MediaUtilities {
 
 	// capabilities (detected at load time)
 	public static boolean CAN_EXPORT_AMR = false;
+
 	static {
 		try {
 			System.loadLibrary("opencore-amrnb-wrapper");
@@ -40,28 +41,35 @@ public class MediaUtilities {
 	}
 
 	// file extensions (including dots)
+	// .sync.jpg is to counter Android's ridiculous incoming filename filtering
 	public static final String SMIL_FILE_EXTENSION = ".smil";
-	public static final String SYNC_FILE_EXTENSION = ".sync.jpg"; // to counter ridiculous incoming filename filtering
+	public static final String SYNC_FILE_EXTENSION = ".sync.jpg";
 	public static final String HTML_FILE_EXTENSION = ".html";
 	public static final String MOV_FILE_EXTENSION = ".mov";
 
 	// audio file types that are compatible with our video export (no dots)
 	// TODO: handle this in a better way? (see CheapSoundFile, for example)
-	public static final String[] M4A_FILE_EXTENSIONS = { "m4a", "aac" }; // TODO: to MOV_AUDIO_FILE_EXTENSIONS on edit
-	public static final String[] MP3_FILE_EXTENSIONS = { "mp3" }; // TODO: add to MOV_AUDIO_FILE_EXTENSIONS if editing
-	public static final String[] WAV_FILE_EXTENSIONS = { "wav" }; // TODO: add to MOV_AUDIO_FILE_EXTENSIONS if editing
+	public static final String[] M4A_FILE_EXTENSIONS = { "m4a", "aac" };
+	public static final String[] MP3_FILE_EXTENSIONS = { "mp3" };
+	public static final String[] WAV_FILE_EXTENSIONS = { "wav" };
 	public static final String[] AMR_FILE_EXTENSIONS = { "amr", "3gp", "3gpp" };
-	public static String[] MOV_AUDIO_FILE_EXTENSIONS = { "m4a", "aac", "mp3", "wav" };
+	public static String[] MOV_AUDIO_FILE_EXTENSIONS;
+
 	static {
+		int totalLength = M4A_FILE_EXTENSIONS.length + MP3_FILE_EXTENSIONS.length + WAV_FILE_EXTENSIONS.length;
+		String[] tempExtensions = new String[totalLength];
+		System.arraycopy(M4A_FILE_EXTENSIONS, 0, tempExtensions, 0, M4A_FILE_EXTENSIONS.length);
+		System.arraycopy(MP3_FILE_EXTENSIONS, 0, tempExtensions, M4A_FILE_EXTENSIONS.length, MP3_FILE_EXTENSIONS
+				.length);
+		System.arraycopy(WAV_FILE_EXTENSIONS, 0, tempExtensions,
+				M4A_FILE_EXTENSIONS.length + MP3_FILE_EXTENSIONS.length, WAV_FILE_EXTENSIONS.length);
+		MOV_AUDIO_FILE_EXTENSIONS = tempExtensions;
 		if (CAN_EXPORT_AMR) {
-			int totalLength = MOV_AUDIO_FILE_EXTENSIONS.length + AMR_FILE_EXTENSIONS.length;
-			String[] tempExtensions = new String[totalLength];
-			for (int i = 0; i < MOV_AUDIO_FILE_EXTENSIONS.length; i++) {
-				tempExtensions[i] = MOV_AUDIO_FILE_EXTENSIONS[i];
-			}
-			for (int i = MOV_AUDIO_FILE_EXTENSIONS.length; i < totalLength; i++) {
-				tempExtensions[i] = AMR_FILE_EXTENSIONS[i - MOV_AUDIO_FILE_EXTENSIONS.length];
-			}
+			totalLength = MOV_AUDIO_FILE_EXTENSIONS.length + AMR_FILE_EXTENSIONS.length;
+			tempExtensions = new String[totalLength];
+			System.arraycopy(MOV_AUDIO_FILE_EXTENSIONS, 0, tempExtensions, 0, MOV_AUDIO_FILE_EXTENSIONS.length);
+			System.arraycopy(AMR_FILE_EXTENSIONS, 0, tempExtensions, MOV_AUDIO_FILE_EXTENSIONS.length,
+					AMR_FILE_EXTENSIONS.length);
 			MOV_AUDIO_FILE_EXTENSIONS = tempExtensions;
 		}
 	}

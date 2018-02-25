@@ -336,6 +336,8 @@ public final class Bitstream implements BitstreamErrors {
 			case 4:
 				sync = isSyncMark(headerstring, syncmode, syncword);
 				break;
+			default:
+				break;
 		}
 
 		return sync;

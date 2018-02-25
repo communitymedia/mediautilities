@@ -196,7 +196,6 @@ public class Decoder implements DecoderErrors {
 					l3decoder = new LayerIIIDecoder(stream, header, filter1, filter2, output,
 							OutputChannels.BOTH_CHANNELS);
 				}
-
 				decoder = l3decoder;
 				break;
 			case 2:
@@ -212,6 +211,8 @@ public class Decoder implements DecoderErrors {
 					l1decoder.create(stream, header, filter1, filter2, output, OutputChannels.BOTH_CHANNELS);
 				}
 				decoder = l1decoder;
+				break;
+			default:
 				break;
 		}
 

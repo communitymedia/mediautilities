@@ -81,14 +81,16 @@ public abstract class Atom implements TreeNode {
 			return answers.get(0);
 
 		StringBuffer sb = new StringBuffer();
-		sb.append("[");
+		sb.append('[');
 		for (int a = 0; a < answers.size(); a++) {
 			if (a != 0) {
 				sb.append(", ");
 			}
-			sb.append("\"" + answers.get(a) + "\"");
+			sb.append('"');
+			sb.append(answers.get(a));
+			sb.append('"');
 		}
-		sb.append("]");
+		sb.append(']');
 		return sb.toString();
 	}
 

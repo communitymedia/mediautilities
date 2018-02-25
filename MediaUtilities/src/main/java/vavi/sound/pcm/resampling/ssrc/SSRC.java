@@ -1651,6 +1651,7 @@ public class SSRC {
 					buf.flip();
 					f = (1 / (double) 0x7f) * (buf.get(0) - 128);
 					break;
+
 				case 2:
 					buf.position(0);
 					buf.limit(2);
@@ -1664,6 +1665,7 @@ public class SSRC {
 					s = buf.order(byteOrder).asShortBuffer().get(0);
 					f = (1 / (double) 0x7fff) * s;
 					break;
+
 				case 3:
 					buf.position(0);
 					buf.limit(3);
@@ -1677,6 +1679,7 @@ public class SSRC {
 					f = (1 / (double) 0x7fffff) * (((buf.get(0) & 0xff) << 0) | ((buf.get(1) & 0xff) << 8) | ((buf.get
 							(2) & 0xff) << 16));
 					break;
+
 				case 4:
 					buf.position(0);
 					buf.limit(4);
@@ -1690,8 +1693,10 @@ public class SSRC {
 					s = buf.order(byteOrder).asIntBuffer().get(0);
 					f = (1 / (double) 0x7fffffff) * s;
 					break;
+
+				default:
+					break;
 			}
-			;
 
 			if (fpi.available() == 0) {
 //            if (fpi.position() == fpi.size()) {
@@ -2189,6 +2194,8 @@ public class SSRC {
 						gain = (normalize || peak[0] >= (0x7fffff - samp) / (double) 0x7fffff) ? 1 / peak[0] *
 								(0x7fffff - samp) : 1 / peak[0] * 0x7fffff;
 						break;
+					default:
+						break;
 				}
 			} else {
 				switch (dbps) {
@@ -2200,6 +2207,8 @@ public class SSRC {
 						break;
 					case 3:
 						gain = 1 / peak[0] * 0x7fffff;
+						break;
+					default:
 						break;
 				}
 			}
@@ -2507,6 +2516,8 @@ public class SSRC {
 						gain = (normalize || peak[0] >= (0x7fffff - samp) / (double) 0x7fffff) ? 1 / peak[0] *
 								(0x7fffff - samp) : 1 / peak[0] * 0x7fffff;
 						break;
+					default:
+						break;
 				}
 			} else {
 				switch (dbps) {
@@ -2518,6 +2529,8 @@ public class SSRC {
 						break;
 					case 3:
 						gain = 1 / peak[0] * 0x7fffff;
+						break;
+					default:
 						break;
 				}
 			}

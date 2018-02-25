@@ -1222,23 +1222,23 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 		StringBuffer sb = new StringBuffer();
 		sb.append("Perspective transform matrix\n");
 		sb.append(this.m00);
-		sb.append("\t");
+		sb.append('\t');
 		sb.append(this.m01);
-		sb.append("\t");
+		sb.append('\t');
 		sb.append(this.m02);
-		sb.append("\n");
+		sb.append('\n');
 		sb.append(this.m10);
-		sb.append("\t");
+		sb.append('\t');
 		sb.append(this.m11);
-		sb.append("\t");
+		sb.append('\t');
 		sb.append(this.m12);
-		sb.append("\n");
+		sb.append('\n');
 		sb.append(this.m20);
-		sb.append("\t");
+		sb.append('\t');
 		sb.append(this.m21);
-		sb.append("\t");
+		sb.append('\t');
 		sb.append(this.m22);
-		sb.append("\n");
+		sb.append('\n');
 		return new String(sb);
 	}
 

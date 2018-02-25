@@ -622,6 +622,8 @@ class LayerIIDecoder extends LayerIDecoder implements FrameDecoder {
 						scalefactor1 = scalefactors[stream.get_bits(6)];
 						scalefactor2 = scalefactor3 = scalefactors[stream.get_bits(6)];
 						break;
+					default:
+						break;
 				}
 				prepare_sample_reading(header, allocation, 0, factor, codelength, c, d);
 			}
@@ -757,6 +759,9 @@ class LayerIIDecoder extends LayerIDecoder implements FrameDecoder {
 					case 3:
 						channel2_scalefactor1 = scalefactors[stream.get_bits(6)];
 						channel2_scalefactor2 = channel2_scalefactor3 = scalefactors[stream.get_bits(6)];
+						break;
+
+					default:
 						break;
 				}
 			}
@@ -897,6 +902,9 @@ class LayerIIDecoder extends LayerIDecoder implements FrameDecoder {
 					case 3:
 						channel2_scalefactor1 = scalefactors[stream.get_bits(6)];
 						channel2_scalefactor2 = channel2_scalefactor3 = scalefactors[stream.get_bits(6)];
+						break;
+
+					default:
 						break;
 				}
 				prepare_sample_reading(header, channel2_allocation, 1, channel2_factor, channel2_codelength,

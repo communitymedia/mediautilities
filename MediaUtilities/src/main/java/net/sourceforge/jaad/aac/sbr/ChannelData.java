@@ -181,6 +181,9 @@ class ChannelData implements SBRConstants, HuffmanTables {
 				// n_rel_lead = bs_num_rel_0;
 				// n_rel_trail = bs_num_rel_1;
 				break;
+
+			default:
+				break;
 		}
 
 		if (frameClass == VARVAR)
@@ -449,6 +452,8 @@ class ChannelData implements SBRConstants, HuffmanTables {
 					r = L_E + 1 - pointer;
 				else
 					r = L_E - 1;
+				break;
+			default:
 				break;
 		}
 

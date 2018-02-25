@@ -90,6 +90,8 @@ public class UIUtilities {
 			case Surface.ROTATION_270:
 				degrees = 270;
 				break;
+			default:
+				break;
 		}
 		return degrees;
 	}
@@ -183,6 +185,8 @@ public class UIUtilities {
 				case Surface.ROTATION_270:
 					activity.setRequestedOrientation(naturallyPortrait ? reverseLandscape
 							: ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+					break;
+				default:
 					break;
 			}
 		} else {

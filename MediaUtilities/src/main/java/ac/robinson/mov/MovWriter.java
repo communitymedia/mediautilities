@@ -234,7 +234,7 @@ public abstract class MovWriter {
 		}
 
 		boolean isEmpty() {
-			return samples.size() == 0;
+			return samples.isEmpty();
 		}
 	}
 

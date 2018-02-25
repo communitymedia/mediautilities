@@ -148,6 +148,8 @@ public class CrossFadeDrawable extends Drawable {
 					}
 				}
 				break;
+			default:
+				break;
 		}
 
 		final int alpha = mAlpha;

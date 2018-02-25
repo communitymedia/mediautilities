@@ -356,6 +356,8 @@ public class MetaData {
 					case ID3Frame.ALBUM_SORT_ORDER:
 						put(Field.ALBUM_SORT_TEXT, frame.getEncodedText());
 						break;
+					default:
+						break;
 				}
 			}
 		} catch (IOException e) {

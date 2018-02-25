@@ -198,6 +198,8 @@ public abstract class Track {
 					case Descriptor.TYPE_DECODER_SPECIFIC_INFO:
 						decoderSpecificInfo = (DecoderSpecificInfo) e2;
 						break;
+					default:
+						break;
 				}
 			}
 		}

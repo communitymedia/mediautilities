@@ -333,6 +333,8 @@ public class CustomMediaController extends FrameLayout {
 				case SHOW_PROGRESS:
 					((CustomMediaController) msg.obj).handleProgress(msg);
 					break;
+				default:
+					break;
 			}
 		}
 	};

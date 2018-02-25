@@ -207,6 +207,8 @@ public class ImportingService extends Service {
 						service.forwardMessage(msg.what, importedFileName);
 					}
 					break;
+				default:
+					break;
 			}
 		}
 	}

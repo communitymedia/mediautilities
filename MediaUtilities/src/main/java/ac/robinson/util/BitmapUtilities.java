@@ -155,6 +155,8 @@ public class BitmapUtilities {
 						newRotation = (antiClockwise ? ExifInterface.ORIENTATION_ROTATE_180
 								: ExifInterface.ORIENTATION_NORMAL);
 						break;
+					default:
+						break;
 				}
 				exif.setAttribute(ExifInterface.TAG_ORIENTATION, Integer.toString(newRotation));
 				exif.saveAttributes();
@@ -220,9 +222,7 @@ public class BitmapUtilities {
 		// options.inPurgeable = true; // ignored for resources: http://stackoverflow.com/a/7068403
 		options.inSampleSize = calculateSampleSize(options.outWidth, options.outHeight, dstWidth, dstHeight,
 				scalingLogic);
-		Bitmap unscaledBitmap = BitmapFactory.decodeResource(res, resId, options);
-
-		return unscaledBitmap;
+		return BitmapFactory.decodeResource(res, resId, options);
 	}
 
 	/**
@@ -246,8 +246,7 @@ public class BitmapUtilities {
 		options.inInputShareable = true; // as above
 		options.inSampleSize = calculateSampleSize(options.outWidth, options.outHeight, dstWidth, dstHeight,
 				scalingLogic);
-		Bitmap unscaledBitmap = BitmapFactory.decodeFile(imagePath, options);
-		return unscaledBitmap;
+		return BitmapFactory.decodeFile(imagePath, options);
 	}
 
 	/**
@@ -272,9 +271,7 @@ public class BitmapUtilities {
 			options.inInputShareable = true; // as above
 			options.inSampleSize = calculateSampleSize(options.outWidth, options.outHeight, dstWidth, dstHeight,
 					scalingLogic);
-			Bitmap unscaledBitmap = BitmapFactory.decodeStream(new FileInputStream(streamPath), null, options);
-
-			return unscaledBitmap;
+			return BitmapFactory.decodeStream(new FileInputStream(streamPath), null, options);
 		} catch (FileNotFoundException e) {
 			return null;
 		}
@@ -641,7 +638,7 @@ public class BitmapUtilities {
 				String[] lineFragments = line.split(" ");
 				for (String fragment : lineFragments) {
 					if (lineLength + fragment.length() > maxCharactersPerLine) {
-						formattedString.append("\n");
+						formattedString.append('\n');
 						numLines += 1;
 						lineLength = 0;
 					}
@@ -651,10 +648,10 @@ public class BitmapUtilities {
 					if (lineLength > maxLineLength) {
 						maxLineLength = lineLength;
 					}
-					formattedString.append(" ");
+					formattedString.append(' ');
 					lineLength += 1;
 				}
-				formattedString.append("\n");
+				formattedString.append('\n');
 				numLines += 1;
 				lineLength = 0;
 			}

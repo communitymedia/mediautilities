@@ -1460,6 +1460,8 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 			case 3:
 				rotate270();
 				break;
+			default:
+				break;
 		}
 	}
 
@@ -1499,6 +1501,8 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 				m02 += anchorx * (m00 + m01) + anchory * (m01 - m00);
 				m12 += anchorx * (m10 + m11) + anchory * (m11 - m10);
 				rotate270();
+				break;
+			default:
 				break;
 		}
 		if (m02 == 0.0 && m12 == 0.0) {
@@ -1915,6 +1919,8 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 				state = APPLY_SHEAR;
 				type = TYPE_QUADRANT_ROTATION;
 				break;
+			default:
+				break;
 		}
 	}
 
@@ -1992,6 +1998,8 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 					state = APPLY_SHEAR | APPLY_TRANSLATE;
 					type = TYPE_QUADRANT_ROTATION | TYPE_TRANSLATION;
 				}
+				break;
+			default:
 				break;
 		}
 	}

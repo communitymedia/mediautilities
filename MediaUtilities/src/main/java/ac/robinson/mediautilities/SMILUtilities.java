@@ -235,8 +235,7 @@ public class SMILUtilities {
 			if (mediaDuration.endsWith(SMILUtilities.SMIL_MILLISECOND_STRING)) {
 				mediaDuration = mediaDuration.substring(0, mediaDuration.length()
 						- SMILUtilities.SMIL_MILLISECOND_STRING.length());
-				int newMediaDuration = StringUtilities.safeStringToInteger(mediaDuration);
-				return newMediaDuration;
+				return StringUtilities.safeStringToInteger(mediaDuration);
 			}
 		}
 		return 0;

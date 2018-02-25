@@ -283,7 +283,7 @@ public class IOUtilities {
 		}
 
 		// Remove the extension.
-		int extensionIndex = filename.lastIndexOf(".");
+		int extensionIndex = filename.lastIndexOf('.');
 		if (extensionIndex == -1) return filename;
 
 		return filename.substring(0, extensionIndex);
@@ -349,7 +349,7 @@ public class IOUtilities {
 	}
 
 	public static String getFileExtension(String fileName) {
-		return fileName == null ? null : fileName.substring(fileName.lastIndexOf(".") + 1);
+		return fileName == null ? null : fileName.substring(fileName.lastIndexOf('.') + 1);
 	}
 
 	public static boolean fileExtensionIs(String fileName, String extension) {
@@ -365,22 +365,22 @@ public class IOUtilities {
 			fileDate = Calendar.getInstance();
 			newFileName.setLength(0);
 			newFileName.append(fileDate.get(Calendar.YEAR));
-			newFileName.append("-");
+			newFileName.append('-');
 			newFileName.append(String.format(Locale.US, "%02d", fileDate.get(Calendar.MONTH) + 1));
-			newFileName.append("-");
+			newFileName.append('-');
 			newFileName.append(String.format(Locale.US, "%02d", fileDate.get(Calendar.DAY_OF_MONTH)));
-			newFileName.append("_");
+			newFileName.append('_');
 			newFileName.append(String.format(Locale.US, "%02d", fileDate.get(Calendar.HOUR_OF_DAY)));
-			newFileName.append("-");
+			newFileName.append('-');
 			newFileName.append(String.format(Locale.US, "%02d", fileDate.get(Calendar.MINUTE)));
-			newFileName.append("-");
+			newFileName.append('-');
 			newFileName.append(String.format(Locale.US, "%02d", fileDate.get(Calendar.SECOND)));
 			if (fileExists) {
 				// add random chars to avoid collisions
-				newFileName.append("_");
+				newFileName.append('_');
 				newFileName.append(UUID.randomUUID().toString().substring(0, 4));
 			}
-			newFileName.append(".");
+			newFileName.append('.');
 			newFileName.append(fileExtension);
 			newFile = new File(baseDirectory, newFileName.toString());
 			fileExists = newFile.exists();

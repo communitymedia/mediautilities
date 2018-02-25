@@ -994,6 +994,8 @@ final class SynthesisFilter {
 			case 15:
 				compute_pcm_samples15(buffer);
 				break;
+			default:
+				break;
 		}
 
 		if (buffer != null) {

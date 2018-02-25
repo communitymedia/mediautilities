@@ -107,6 +107,8 @@ public class SyntacticElements implements Constants {
 						decodeFIL(in, prev);
 						prev = null;
 						break;
+					default:
+						break;
 				}
 			}
 			LOGGER.finest("END");

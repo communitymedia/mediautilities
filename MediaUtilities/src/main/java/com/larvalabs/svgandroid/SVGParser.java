@@ -341,7 +341,7 @@ public class SVGParser {
 		while (true) {
 			parseTransformItem(s, matrix);
 			// Log.i(TAG, "Transformed: (" + s + ") " + matrix);
-			int rparen = s.indexOf(")");
+			int rparen = s.indexOf(')');
 			if (rparen > 0 && s.length() > rparen + 1) {
 				s = s.substring(rparen + 1).replaceFirst("[\\s,]*", "");
 			} else {
@@ -963,16 +963,16 @@ public class SVGParser {
 		 */
 		private void appendElementString(StringBuilder sb, String namespaceURI, String localName, String qName,
 				Attributes atts) {
-			sb.append("<");
+			sb.append('<');
 			sb.append(localName);
 			for (int i = 0; i < atts.getLength(); i++) {
-				sb.append(" ");
+				sb.append(' ');
 				sb.append(atts.getQName(i));
 				sb.append("='");
 				sb.append(escape(atts.getValue(i)));
-				sb.append("'");
+				sb.append('\'');
 			}
-			sb.append(">");
+			sb.append('>');
 		}
 
 		@Override
@@ -995,7 +995,7 @@ public class SVGParser {
 				IdRecording ir = idRecordingStack.lastElement();
 				ir.sb.append("</");
 				ir.sb.append(localName);
-				ir.sb.append(">");
+				ir.sb.append('>');
 				ir.level--;
 				if (ir.level == 0) {
 					String xml = ir.sb.toString();
@@ -1452,11 +1452,11 @@ public class SVGParser {
 						if (attX != null || attY != null) {
 							sb.append("translate(");
 							sb.append(attX != null ? escape(attX) : "0");
-							sb.append(",");
+							sb.append(',');
 							sb.append(attY != null ? escape(attY) : "0");
-							sb.append(")");
+							sb.append(')');
 						}
-						sb.append("'");
+						sb.append('\'');
 					}
 
 					for (int i = 0; i < atts.getLength(); i++) {
@@ -1465,15 +1465,15 @@ public class SVGParser {
 								&& !"height".equals(attrQName) && !"xlink:href".equals(attrQName)
 								&& !"transform".equals(attrQName)) {
 
-							sb.append(" ");
+							sb.append(' ');
 							sb.append(attrQName);
 							sb.append("='");
 							sb.append(escape(atts.getValue(i)));
-							sb.append("'");
+							sb.append('\'');
 						}
 					}
 
-					sb.append(">");
+					sb.append('>');
 
 					sb.append(idXml.get(href.substring(1)));
 

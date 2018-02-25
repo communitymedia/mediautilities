@@ -39,4 +39,11 @@ android {
 
 dependencies {
 	// compile files('libs/libopencore-wrapper_armeabi.jar') // no-longer needed - jniLibs are automatically imported
+
+	compile 'com.google.code.findbugs:annotations:3.0.1', {
+		// Need to exclude these, or build is broken by:
+		//   com.android.dex.DexException: Multiple dex files define Ljavax/annotation/CheckForNull
+		exclude module: 'jsr305'
+		exclude module: 'jcip-annotations'
+	}
 }

@@ -115,6 +115,8 @@ class Base64Decoder {
 				b = CHAR_CONVERT_ARRAY[buf[1] & 0xff];
 				a = CHAR_CONVERT_ARRAY[buf[0] & 0xff];
 				break;
+			default:
+				break;
 		}
 
 		switch (rem) {
@@ -129,6 +131,8 @@ class Base64Decoder {
 				out.write((byte) (((a << 2) & 0xfc) | ((b >>> 4) & 3)));
 				out.write((byte) (((b << 4) & 0xf0) | ((c >>> 2) & 0xf)));
 				out.write((byte) (((c << 6) & 0xc0) | (d & 0x3f)));
+				break;
+			default:
 				break;
 		}
 		return;

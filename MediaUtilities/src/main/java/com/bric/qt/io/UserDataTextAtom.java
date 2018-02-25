@@ -69,9 +69,11 @@ class UserDataTextAtom extends LeafAtom {
 		StringBuffer sb = new StringBuffer("UserDataTextAtom[ ");
 		for (int a = 0; a < entries.size(); a++) {
 			TextEntry e = entries.get(a);
-			sb.append("\"" + (new String(e.data)) + "\" ");
+			sb.append('"');
+			sb.append(new String(e.data));
+			sb.append("\" ");
 		}
-		sb.append("]");
+		sb.append(']');
 		return sb.toString();
 	}
 }

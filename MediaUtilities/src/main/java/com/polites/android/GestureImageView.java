@@ -270,6 +270,9 @@ public class GestureImageView extends ImageView  {
 					startingScale = fitScaleVertical;
 				}
 				break;
+
+			default:
+				break;
 		}
 	}
 
