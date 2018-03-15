@@ -1,16 +1,16 @@
 /*
  *  Copyright (C) 2012 Simon Robinson
- * 
+ *
  *  This file is part of Com-Me.
- * 
- *  Com-Me is free software; you can redistribute it and/or modify it 
- *  under the terms of the GNU Lesser General Public License as 
- *  published by the Free Software Foundation; either version 3 of the 
+ *
+ *  Com-Me is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License as
+ *  published by the Free Software Foundation; either version 3 of the
  *  License, or (at your option) any later version.
  *
- *  Com-Me is distributed in the hope that it will be useful, but WITHOUT 
- *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General 
+ *  Com-Me is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General
  *  Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public
@@ -22,6 +22,7 @@ package ac.robinson.util;
 
 import android.annotation.TargetApi;
 import android.os.Build;
+import android.text.TextUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
@@ -42,22 +43,11 @@ public class StringUtilities {
 	private static final String int2sd = "%02d";
 	private static final String int3sd = "%03d";
 
-	/**
-	 * Use TextUtils.isEmpty() unless trim() is required
-	 */
-	@Deprecated
-	public static boolean stringContentCheck(String s) {
-		if (s != null) {
-			return (s.trim().length() > 0); // note: was also !s.equals("null") && for SMIL import; now changed
-		}
-		return false;
-	}
-
 	public static int safeStringToInteger(String s) {
-		if (stringContentCheck(s)) {
+		if (!TextUtils.isEmpty(s)) {
 			try {
 				return Integer.parseInt(s);
-			} catch (NumberFormatException e) {
+			} catch (NumberFormatException ignored) {
 			}
 		}
 		return 0;

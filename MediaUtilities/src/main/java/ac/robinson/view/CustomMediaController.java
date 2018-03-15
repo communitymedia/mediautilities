@@ -16,6 +16,7 @@
 
 package ac.robinson.view;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
@@ -58,6 +59,7 @@ import ac.robinson.mediautilities.R;
  * </ul>
  */
 
+// TODO: this class and PlaybackController should be combined (lots of duplicate code)
 public class CustomMediaController extends FrameLayout {
 
 	public static final int DEFAULT_VISIBILITY_TIMEOUT = 3000;
@@ -376,16 +378,17 @@ public class CustomMediaController extends FrameLayout {
 		return position;
 	}
 
+	@SuppressLint("ClickableViewAccessibility") // we don't override - we always return super.onTouchEvent
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		show();
-		return true;
+		return super.onTouchEvent(event);
 	}
 
 	@Override
-	public boolean onTrackballEvent(MotionEvent ev) {
+	public boolean onTrackballEvent(MotionEvent event) {
 		show();
-		return false;
+		return super.onTrackballEvent(event);
 	}
 
 	@Override
@@ -464,16 +467,16 @@ public class CustomMediaController extends FrameLayout {
 			mHandler.removeMessages(SHOW_PROGRESS);
 		}
 
-		public void onProgressChanged(SeekBar bar, int progress, boolean fromuser) {
-			if (!fromuser || mPlayer == null) {
+		public void onProgressChanged(SeekBar bar, int progress, boolean fromUser) {
+			if (!fromUser || mPlayer == null) {
 				// we're not interested in programmatically generated changes to the progress bar's position.
 				return;
 			}
 
 			long duration = mPlayer.getDuration();
-			long newposition = (duration * progress) / 1000L;
-			mPlayer.seekTo((int) newposition);
-			if (mCurrentTime != null) mCurrentTime.setText(stringForTime((int) newposition));
+			long newPosition = (duration * progress) / 1000L;
+			mPlayer.seekTo((int) newPosition);
+			if (mCurrentTime != null) mCurrentTime.setText(stringForTime((int) newPosition));
 		}
 
 		public void onStopTrackingTouch(SeekBar bar) {

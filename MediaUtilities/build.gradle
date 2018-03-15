@@ -6,10 +6,10 @@ android {
 
 	defaultConfig {
 		//noinspection MinSdkTooLow
-		minSdkVersion 8 // we *want* to support low SDK versions (older devices)
+		minSdkVersion 9 // we *want* to support low SDK versions (older devices)
 		targetSdkVersion 27
-		versionCode 13
-		versionName '1.5.7'
+		versionCode 14
+		versionName '1.5.8'
 
 		// TODO: not yet working - fix
 		// ndk {
@@ -39,6 +39,9 @@ android {
 
 dependencies {
 	// compile files('libs/libopencore-wrapper_armeabi.jar') // no-longer needed - jniLibs are automatically imported
+
+	//noinspection GradleDependency
+	compile 'com.android.support:exifinterface:25.4.0'  // need to stick with older library to support SDKs 9 to 13 :-(
 
 	compile 'com.google.code.findbugs:annotations:3.0.1', {
 		// Need to exclude these, or build is broken by:

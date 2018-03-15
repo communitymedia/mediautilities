@@ -3,10 +3,10 @@ package com.sonyericsson.zoom;
 /*
  * Copyright (c) 2010, Sony Ericsson Mobile Communication AB. All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without modification, 
+ * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  *
- *    * Redistributions of source code must retain the above copyright notice, this 
+ *    * Redistributions of source code must retain the above copyright notice, this
  *      list of conditions and the following disclaimer.
  *    * Redistributions in binary form must reproduce the above copyright notice,
  *      this list of conditions and the following disclaimer in the documentation
@@ -16,7 +16,7 @@ package com.sonyericsson.zoom;
  *      this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
  * IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
  * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
@@ -36,7 +36,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.widget.ImageView;
 
 /**
@@ -113,7 +112,7 @@ public class ImageZoomView extends ImageView implements Observer {
 
 	/**
 	 * Set image drawable
-	 * 
+	 *
 	 * @param drawable The drawable to view and zoom into
 	 */
 	public void setFullSizeImageDrawable(Drawable drawable) {
@@ -148,7 +147,7 @@ public class ImageZoomView extends ImageView implements Observer {
 
 	/**
 	 * Set object holding the zoom state that should be used
-	 * 
+	 *
 	 * @param state The zoom state
 	 */
 	public void setZoomState(ZoomState state) {
@@ -164,7 +163,7 @@ public class ImageZoomView extends ImageView implements Observer {
 
 	/**
 	 * Gets reference to object holding aspect quotient
-	 * 
+	 *
 	 * @return Object holding aspect quotient
 	 */
 	public AspectQuotient getAspectQuotient() {
@@ -176,7 +175,6 @@ public class ImageZoomView extends ImageView implements Observer {
 	@Override
 	protected void onDraw(Canvas canvas) {
 		if (mDrawable != null && mState != null) {
-			Log.d("blah", "drawing zoom");
 			final float aspectQuotient = mAspectQuotient.get();
 
 			final int viewWidth = getWidth();
@@ -229,7 +227,6 @@ public class ImageZoomView extends ImageView implements Observer {
 			// original method - drawing a subsection of a bitmap
 			// canvas.drawBitmap(((BitmapDrawable)mBitmap).getBitmap(), mRectSrc, mRectDst, mPaint);
 		} else {
-			Log.d("blah", "drawing normal " + (mDrawable == null) + "," + (mState == null));
 			Drawable drawable = getDrawable();
 			if (drawable != null) {
 				if (drawable instanceof BitmapDrawable) {

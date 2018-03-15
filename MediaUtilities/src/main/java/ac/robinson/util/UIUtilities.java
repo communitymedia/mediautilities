@@ -1,16 +1,16 @@
 /*
  *  Copyright (C) 2012 Simon Robinson
- * 
+ *
  *  This file is part of Com-Me.
- * 
- *  Com-Me is free software; you can redistribute it and/or modify it 
- *  under the terms of the GNU Lesser General Public License as 
- *  published by the Free Software Foundation; either version 3 of the 
+ *
+ *  Com-Me is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License as
+ *  published by the Free Software Foundation; either version 3 of the
  *  License, or (at your option) any later version.
  *
- *  Com-Me is distributed in the hope that it will be useful, but WITHOUT 
- *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General 
+ *  Com-Me is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General
  *  Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public
@@ -57,7 +57,7 @@ public class UIUtilities {
 
 	/**
 	 * Enable pixel dithering for this window (but only in API < 17)
-	 * 
+	 *
 	 * @param window
 	 */
 	@SuppressWarnings("deprecation")
@@ -71,7 +71,7 @@ public class UIUtilities {
 
 	/**
 	 * Get the current rotation of the screen, either 0, 90, 180 or 270 degrees
-	 * 
+	 *
 	 * @param windowManager
 	 * @return
 	 */
@@ -99,7 +99,7 @@ public class UIUtilities {
 	/**
 	 * Get the "natural" screen orientation - i.e. the orientation in which this device is designed to be used most
 	 * often.
-	 * 
+	 *
 	 * @param windowManager
 	 * @return either ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE or ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 	 */
@@ -149,7 +149,7 @@ public class UIUtilities {
 	/**
 	 * Set the SurfaceHolder's type to SURFACE_TYPE_PUSH_BUFFERS, but only in API < 11 (after this it is set
 	 * automatically by the system when needed)
-	 * 
+	 *
 	 * @param holder
 	 */
 	@SuppressWarnings("deprecation")
@@ -228,24 +228,6 @@ public class UIUtilities {
 		}
 	}
 
-	/**
-	 * Use acquireKeepScreenOn instead - wake lock method left here only as a reminder
-	 * 
-	 * Requires <uses-permission android:name="android.permission.WAKE_LOCK" />
-	 */
-	@Deprecated
-	public static PowerManager.WakeLock acquireWakeLock(Activity activity, String tag) {
-		PowerManager powerManager = (PowerManager) activity.getSystemService(Context.POWER_SERVICE);
-		PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, tag);
-		wakeLock.acquire();
-		return wakeLock;
-	}
-
-	@Deprecated
-	public static void releaseWakeLock(PowerManager.WakeLock wakeLock) {
-		wakeLock.release();
-	}
-
 	public static void acquireKeepScreenOn(Window window) {
 		window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 	}
@@ -298,7 +280,7 @@ public class UIUtilities {
 
 	/**
 	 * Set colour filters for a button so that the standard resources can be used in different colours
-	 * 
+	 *
 	 * @param button The button to set colour filters for
 	 * @param defaultColor The normal (untouched) colour for the button
 	 * @param touchedColor The touch colour - currently ignored. For API 11 and above the coloured filter is applied to

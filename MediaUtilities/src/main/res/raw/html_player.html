@@ -2,12 +2,12 @@
 [PLAY-BUTTON-ICON]'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWBAMAAAA2mnEIAAAABGdBTUEAALGPC/xhBQAAADBQTFRFREREWFhYZWZlVFRUMTAxREVEBQQFUVBRYGBgKysrSktKAAAAAAAAcXFxaGhobGxsxjR9NgAAAA10Uk5Tk9H3uFl+KpvmQ5oHAFSYzXoAAABySURBVBjTYziDAAyo7Klz4OzTa1tz4Oza+5Z74Oy/N6Lh7P931XNg6v//vy+yB87+f4MNwf7/eTaYvR7I/Pe3BSL+7t3/d+8h7PXv3r17/3g2nP0DqhfI/gczc/2793C71r/7gXDDP4TbkNyM7Bfs/gUAHT66kyR6uAoAAAAASUVORK5CYII='
 [PAUSE-BUTTON-ICON]'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWBAMAAAA2mnEIAAAABGdBTUEAALGPC/xhBQAAADBQTFRFSEhIXV1dT09PWFhYZWVlCAkIVlVWYmJiBQYFAQIBLzAvBQAFAAAAAAAAc3NzbGtsbF2N1wAAAA50Uk5TcsqTyvY2tOkaC1ACAQBe5GtDAAAATklEQVQY02O4e/fO3bt3zwLxXYa7CABk71LiuL1IYe5ZIPvstHdeN+Sex+4lmv0eD/s7lP3f64Y9Ddjy3xHusYPaC/TLzUUKvWfR/QgHAFEGqbF3aLOjAAAAAElFTkSuQmCC'
 <!DOCTYPE html>
-<!--[if lt IE 9]> <html lang="en" class="lt-ie9"> <![endif]-->
-<!--[if gt IE 8]><!--> <html lang="en"> <!--<![endif]-->
+<!--[if lt IE 9]><html lang="en" class="lt-ie9"><![endif]-->
+<!--[if gte IE 9]><!--><html lang="en"><!--<![endif]-->
 <head>
 <meta charset="utf-8">
 <title>Narrative player</title>
-<style>
+<style type="text/css">
 body {
 	margin:0;
 	padding:0;
@@ -200,7 +200,7 @@ var play_narrative = function() {
 		try {
 			for (var i = 0; i < audio_elements.length; i++) {
 				if (play_audio) {
-					//compatibility with browsers that can't cope with audio 
+					//compatibility with browsers that can't cope with audio
 					if(!!document.createElement('audio').canPlayType) {
 						audio_elements[i].play();
 					}
@@ -220,21 +220,21 @@ var play_narrative = function() {
 		}
 		return max_duration * 1000; //convert to milliseconds
 	}
-	
+
 	function set_current_frame(index) {
 		current_frame = parseInt(index.toString(), 10); //for coping with index strings from the progress bar
 		clearTimeout(next_frame_timer);
-		
+
 		hide_other_frames(current_frame);
 
 		progress_bar.value = current_frame;
-		
+
 		if (playing && audio_elements) {
 			load_audio(audio_elements, false); //stop previous audio
 		}
-		
+
 		var frame = frames[current_frame];
-		
+
 		//enforce max-width and height for older browsers
 		if (typeof document.body.style.maxHeight === "undefined" || typeof document.body.style.minHeight === "undefined") {
 			var frame_images = frame.getElementsByTagName('img');
@@ -257,13 +257,13 @@ var play_narrative = function() {
 		}
 
 		audio_elements = frame.getElementsByTagName('audio');
-		
+
 		var frame_duration = 2500; //TODO: fix default frame duration and incorporate text length
 		var audio_duration = load_audio(audio_elements, playing);
 		if (audio_duration > 0) {
 			frame_duration = audio_duration;
 		}
-		
+
 		if (playing && current_frame < num_frames) {
 			next_frame_timer = setTimeout(next_frame, frame_duration);
 		} else {
@@ -303,7 +303,7 @@ var play_narrative = function() {
 		set_current_frame(current_frame);
 		return false;
 	}
-	
+
 	function update_play_button() {
 		if (playing) {
 			document.getElementById('play-pause').className = 'pause';
@@ -311,7 +311,7 @@ var play_narrative = function() {
 			document.getElementById('play-pause').className = 'play';
 		}
 	}
-	
+
 	function manual_frame_change() {
 		set_current_frame(progress_bar.value);
 		return false;
@@ -320,11 +320,11 @@ var play_narrative = function() {
 	return function() {
 		var javascript_warning = document.getElementById('no-javascript');
 		javascript_warning.parentNode.removeChild(javascript_warning);
-	
+
 		frames = document.getElementsByTagName('span');
 		num_frames = frames.length;
 		progress_bar = document.getElementById('play-progress');
-		
+
 		//add audio icons and correct sizes
 		for (var i = 0; i < frames.length; i++) {
 			var frame_images = frames[i].getElementsByTagName('img');
@@ -337,14 +337,14 @@ var play_narrative = function() {
 				}
 			}
 		}
-		
+
 		if (num_frames > 0) {
 			progress_bar.onchange = manual_frame_change;
 			progress_bar.max = num_frames - 1;
 			set_current_frame(0);
 			document.getElementById('play-pause').onclick = play_pause; //TODO: also use onmouseup?
 		}
-		
+
 		document.onkeydown = function(event) {
 			event = event || window.event;
 			switch (event.keyCode) {

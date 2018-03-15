@@ -17,6 +17,7 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
+import java.util.Locale;
 import java.util.Random;
 
 import vavi.util.I0Bessel;
@@ -488,7 +489,7 @@ public class SSRC {
 			} else if (fs1 / dfrq % 3 == 0) {
 				osf = 3;
 			} else {
-				throw new IllegalArgumentException(String.format("Resampling from %dHz to %dHz is not supported.\n" +
+				throw new IllegalArgumentException(String.format(Locale.US, "Resampling from %dHz to %dHz is not supported.\n" +
 						"%d/gcd(%d,%d)=%d must be divided by 2 or 3.\n", sfrq, dfrq, sfrq, sfrq, dfrq, fs1 / dfrq));
 			}
 
@@ -1063,7 +1064,7 @@ public class SSRC {
 			} else if (dfrq / frqgcd % 3 == 0) {
 				osf = 3;
 			} else {
-				throw new IllegalArgumentException(String.format("Resampling from %dHz to %dHz is not supported.\n" +
+				throw new IllegalArgumentException(String.format(Locale.US,"Resampling from %dHz to %dHz is not supported.\n" +
 						"%d/gcd(%d,%d)=%d must be divided by 2 or 3.", sfrq, dfrq, dfrq, sfrq, dfrq, dfrq / frqgcd));
 			}
 

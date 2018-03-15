@@ -4,7 +4,7 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<title>Narrative Player</title>
-	<style>
+	<style type="text/css">
 		body { background-color:#000; }
 		#video {
 			position: absolute;
@@ -20,19 +20,19 @@
 </head>
 <body>
 	<div id="video">
-		<object classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" 
-				codebase="http://www.apple.com/qtactivex/qtplugin.cab" 
+		<object classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B"
+				codebase="http://www.apple.com/qtactivex/qtplugin.cab"
 				width="[WIDTH]" height="[HEIGHT]">
 			<param name="src" value="[SMIL-ID]">
 			<param name="autoplay" value="true">
 			<param name="pluginspage" value="http://www.apple.com/quicktime/download/">
 			<param name="controller" value="true">
-			<!--[if !IE]> <-->
+            <!--[if !IE]><!-->
 				<object type="video/quicktime" width="[WIDTH]" height="[HEIGHT]" data="[SMIL-ID]">
 					<param name="pluginurl" value="http://www.apple.com/quicktime/download/">
 					<param name="controller" value="true">
 				</object>
-			<!--> <![endif]-->
+            <!--<![endif]-->
 		</object>
 	</div>
 </body>

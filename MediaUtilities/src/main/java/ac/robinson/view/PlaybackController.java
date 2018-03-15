@@ -1,16 +1,16 @@
 /*
  *  Copyright (C) 2012 Simon Robinson
- * 
+ *
  *  This file is part of Com-Me.
- * 
- *  Com-Me is free software; you can redistribute it and/or modify it 
- *  under the terms of the GNU Lesser General Public License as 
- *  published by the Free Software Foundation; either version 3 of the 
+ *
+ *  Com-Me is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License as
+ *  published by the Free Software Foundation; either version 3 of the
  *  License, or (at your option) any later version.
  *
- *  Com-Me is distributed in the hope that it will be useful, but WITHOUT 
- *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General 
+ *  Com-Me is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General
  *  Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public
@@ -24,6 +24,8 @@ import java.util.Formatter;
 import java.util.Locale;
 
 import ac.robinson.mediautilities.R;
+
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
 import android.util.AttributeSet;
@@ -38,6 +40,7 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
+// TODO: this class and CustomMediaController should be combined (lots of duplicate code)
 public class PlaybackController extends FrameLayout {
 
 	private static final int UPDATE_INTERVAL_MILLIS = 250;
@@ -216,16 +219,17 @@ public class PlaybackController extends FrameLayout {
 		return position;
 	}
 
+	@SuppressLint("ClickableViewAccessibility") // we don't override - we always return super.onTouchEvent
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		refreshController();
-		return true;
+		return super.onTouchEvent(event);
 	}
 
 	@Override
-	public boolean onTrackballEvent(MotionEvent ev) {
+	public boolean onTrackballEvent(MotionEvent event) {
 		refreshController();
-		return false;
+		return super.onTrackballEvent(event);
 	}
 
 	@Override
@@ -297,17 +301,17 @@ public class PlaybackController extends FrameLayout {
 			mProgressHandler.removeCallbacks(mProgressRunnable);
 		}
 
-		public void onProgressChanged(SeekBar bar, int progress, boolean fromuser) {
-			if (!fromuser || mPlayerControl == null) {
+		public void onProgressChanged(SeekBar bar, int progress, boolean fromUser) {
+			if (!fromUser || mPlayerControl == null) {
 				// we're not interested in programmatically generated changes to the progress bar's position.
 				return;
 			}
 
 			long duration = mPlayerControl.getDuration();
-			long newposition = (duration * progress) / (long) PROGRESS_BAR_STEPS;
-			mPlayerControl.seekTo((int) newposition);
+			long newPosition = (duration * progress) / (long) PROGRESS_BAR_STEPS;
+			mPlayerControl.seekTo((int) newPosition);
 			if (mCurrentTime != null) {
-				mCurrentTime.setText(stringForTime((int) newposition));
+				mCurrentTime.setText(stringForTime((int) newPosition));
 			}
 		}
 
@@ -406,7 +410,7 @@ public class PlaybackController extends FrameLayout {
 
 		/**
 		 * Note: seekTo will always be called instead of this unless you do setUseCustomSeekButtons(true)
-		 * 
+		 *
 		 * @param direction
 		 */
 		void seekButton(int direction);
