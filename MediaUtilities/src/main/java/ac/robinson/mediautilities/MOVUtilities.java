@@ -1,16 +1,16 @@
 /*
  *  Copyright (C) 2012 Simon Robinson
- * 
+ *
  *  This file is part of Com-Me.
- * 
- *  Com-Me is free software; you can redistribute it and/or modify it 
- *  under the terms of the GNU Lesser General Public License as 
- *  published by the Free Software Foundation; either version 3 of the 
+ *
+ *  Com-Me is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License as
+ *  published by the Free Software Foundation; either version 3 of the
  *  License, or (at your option) any later version.
  *
- *  Com-Me is distributed in the hope that it will be useful, but WITHOUT 
- *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General 
+ *  Com-Me is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General
  *  Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public
@@ -972,26 +972,35 @@ public class MOVUtilities {
 
 						// pad any gaps in audio (i.e., frames that don't have sound) with silence
 						long silenceNeeded =
-								(long) (audioFormat.getSampleRate() * (audioFormat.getSampleSizeInBits() / 8) *
+								((long) audioFormat.getSampleRate() * (long) (audioFormat.getSampleSizeInBits() / 8) *
 										(frameStartTime - pcmFileDurations[i])) / 1000;
+						Log.d(LOG_TAG, "Adding " + silenceNeeded + " samples of silence");
 
 						// copy from input file to pcmStream - don't use IOUtilities so we can keep the stream open
-						InputStream in = null;
+						InputStream inputStream = null;
 						try {
-							in = new FileInputStream(currentPCMFile);
-							for (int s = 0; s < silenceNeeded; s++) {
-								outputPCMStream.write(0); // fill with silence to span the gap in audio files
+							// fill with silence to span the gap in audio files - first pad to multiple of buffer
+							// (int cast is fine as long as IOUtilities.IO_BUFFER_SIZE is less than Integer.MAX_VALUE)
+							int remainingSamples = (int) (silenceNeeded % IOUtilities.IO_BUFFER_SIZE);
+							byte[] buffer = new byte[remainingSamples];
+							outputPCMStream.write(buffer, 0, remainingSamples);
+							buffer = new byte[IOUtilities.IO_BUFFER_SIZE];
+							for (int s = 0; s < silenceNeeded / IOUtilities.IO_BUFFER_SIZE; s++) {
+								outputPCMStream.write(buffer, 0, IOUtilities.IO_BUFFER_SIZE);
 							}
-							byte[] buf = new byte[IOUtilities.IO_BUFFER_SIZE];
-							int len;
-							while ((len = in.read(buf)) > 0) {
-								outputPCMStream.write(buf, 0, len); // add the new data
+
+							// now add the new audio data
+							int numSamples;
+							inputStream = new FileInputStream(currentPCMFile);
+							while ((numSamples = inputStream.read(buffer)) > 0) {
+								outputPCMStream.write(buffer, 0, numSamples);
 							}
+
 							audioWritten = true;
 						} catch (IOException e) {
 							Log.d(LOG_TAG, "Error creating combined MOV audio track - combining failed");
 						} finally {
-							IOUtilities.closeStream(in);
+							IOUtilities.closeStream(inputStream);
 						}
 
 						pcmFileDurations[i] = frameStartTime + frame.mAudioDurations.get(audioId);
