@@ -18,7 +18,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:onClick="handleButtonClicks"
-            android:text="@android:string/cancel" />
+            android:text="@string/menu_cancel" />
 
         <Button
             android:id="@+id/select_directory"

@@ -10,6 +10,7 @@
 
 	<!-- menu item -->
 	<string name="menu_save">Salvar</string>
+	<string name="menu_cancel">Cancelar</string>
 
 	<!-- media controller -->
 	<string name="back_description">Voltar</string>

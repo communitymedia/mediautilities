@@ -13,6 +13,7 @@
 
 	<!-- menu item -->
 	<string name="menu_save">Save</string>
+	<string name="menu_cancel">Cancel</string>
 
 	<!-- media controller -->
 	<string name="back_description">Back</string>

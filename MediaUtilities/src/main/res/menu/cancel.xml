@@ -5,6 +5,6 @@
         android:id="@+id/menu_cancel"
         android:icon="@android:drawable/ic_menu_revert"
         android:showAsAction="ifRoom|withText"
-        android:title="@android:string/cancel"/>
+        android:title="@string/menu_cancel"/>
 
 </menu>
