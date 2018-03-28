@@ -29,6 +29,7 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.SparseIntArray;
 
 import com.bric.audio.AudioFormat;
 import com.bric.audio.AudioInputStream;
@@ -46,6 +47,8 @@ import java.io.RandomAccessFile;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Map;
 
 import ac.robinson.mov.AMRtoPCMConverter;
@@ -118,7 +121,7 @@ public class MOVUtilities {
 			// compatibility (but also increases the time required to export the movie)
 			// individual tracks is similar in speed to segmented tracks, but typically only works with QuickTime
 			// Player (hence this is not a user editable preference)
-			if (audioResamplingRate > 0) {
+			if (audioResamplingRate != 0) {
 				ArrayList<File> combinedFiles = addNarrativeAudioAsCombinedTrack(framesToSend, audioResamplingRate,
 						outputFile
 						.getParentFile(), outputFileWriter);
@@ -723,19 +726,68 @@ public class MOVUtilities {
 
 		// see how many tracks we need to create - find the maximum number of (compatible) audio items per frame
 		int trackCount = 0;
+		boolean automaticSampleRate = sampleRate == -1;
+		final SparseIntArray fileSampleRates = new SparseIntArray();
 		for (FrameMediaContainer frame : framesToSend) {
 			int localCount = 0;
+			int audioId = -1;
 			for (String type : frame.mAudioPaths) {
+				audioId += 1;
+				int audioDuration = frame.mAudioDurations.get(audioId);
 				String actualFileExtension = IOUtilities.getFileExtension(type);
+				File inputAudioFile = new File(type);
 				final String fileExtension; // use the base file extension instead of the actual - combine same types
 				if (AndroidUtilities.arrayContains(MediaUtilities.M4A_FILE_EXTENSIONS, actualFileExtension)) {
 					fileExtension = MediaUtilities.M4A_FILE_EXTENSIONS[0];
+					if (automaticSampleRate) {
+						RandomAccessFile inputRandomAccessFile = null;
+						try {
+							inputRandomAccessFile = new RandomAccessFile(inputAudioFile, "r");
+							MP4toPCMConverter pcmConverter = new MP4toPCMConverter(inputRandomAccessFile);
+							fileSampleRates.put(pcmConverter.getSampleRate(),
+									audioDuration + fileSampleRates.get(pcmConverter.getSampleRate(), 0));
+							Log.d(LOG_TAG, "M4A type: " + pcmConverter.getSampleRate() + ", " + audioDuration);
+						} catch (Exception ignored) {
+						} finally {
+							IOUtilities.closeStream(inputRandomAccessFile);
+						}
+					}
+
 				} else if (AndroidUtilities.arrayContains(MediaUtilities.MP3_FILE_EXTENSIONS, actualFileExtension)) {
 					fileExtension = MediaUtilities.MP3_FILE_EXTENSIONS[0];
+					if (automaticSampleRate) {
+						try {
+							MP3Configuration mp3Config = new MP3Configuration();
+							MP3toPCMConverter.getFileConfig(inputAudioFile, mp3Config);
+							fileSampleRates.put(mp3Config.sampleFrequency,
+									audioDuration + fileSampleRates.get(mp3Config.sampleFrequency, 0));
+							Log.d(LOG_TAG, "MP3 type: " + mp3Config.sampleFrequency + ", " + audioDuration);
+						} catch (Exception ignored) {
+						}
+					}
+
 				} else if (AndroidUtilities.arrayContains(MediaUtilities.AMR_FILE_EXTENSIONS, actualFileExtension)) {
 					fileExtension = MediaUtilities.AMR_FILE_EXTENSIONS[0];
+					if (automaticSampleRate) {
+						AudioFormat amrFormat = new AudioFormat(8000, 16, 1, true, false);
+						fileSampleRates.put((int) amrFormat.getSampleRate(),
+								audioDuration + fileSampleRates.get((int) amrFormat.getSampleRate(), 0));
+						Log.d(LOG_TAG, "AMR type: " + amrFormat.getSampleRate() + ", " + audioDuration);
+					}
+
 				} else if (AndroidUtilities.arrayContains(MediaUtilities.WAV_FILE_EXTENSIONS, actualFileExtension)) {
 					fileExtension = MediaUtilities.WAV_FILE_EXTENSIONS[0];
+					if (automaticSampleRate) {
+						try {
+							WAVConfiguration wavConfig = new WAVConfiguration();
+							WAVtoPCMConverter.getFileConfig(inputAudioFile, wavConfig);
+							fileSampleRates.put(wavConfig.sampleFrequency,
+									audioDuration + fileSampleRates.get(wavConfig.sampleFrequency, 0));
+							Log.d(LOG_TAG, "WAV type: " + wavConfig.sampleFrequency + ", " + audioDuration);
+						} catch (Exception ignored) {
+						}
+					}
+
 				} else {
 					fileExtension = actualFileExtension;
 				}
@@ -748,6 +800,23 @@ public class MOVUtilities {
 
 		if (trackCount <= 0) {
 			return filesToDelete; // no audio present - nothing to do
+		}
+
+		// find the most common sample rate
+		if (automaticSampleRate) {
+			ArrayList<Integer> sortedSampleRates = new ArrayList<>();
+			for (int i = 0, n = fileSampleRates.size(); i < n; i++) {
+				sortedSampleRates.add(fileSampleRates.keyAt(i));
+			}
+			Collections.sort(sortedSampleRates, new Comparator<Integer>() {
+				public int compare(Integer i1, Integer i2) {
+					return fileSampleRates.get(i1) > fileSampleRates.get(i2) ? -1 : 1; // if equal, just pick any
+				}
+			});
+
+			sampleRate = sortedSampleRates.get(0);
+			Log.d(LOG_TAG,
+					"Chosen most common sample rate: " + sampleRate + " (" + fileSampleRates.get(sampleRate) + " ms)");
 		}
 
 		// all audio parts are combined into one track with these properties

@@ -1,16 +1,16 @@
 /*
  *  Copyright (C) 2012 Simon Robinson
- * 
+ *
  *  This file is part of Com-Me.
- * 
- *  Com-Me is free software; you can redistribute it and/or modify it 
- *  under the terms of the GNU Lesser General Public License as 
- *  published by the Free Software Foundation; either version 3 of the 
+ *
+ *  Com-Me is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License as
+ *  published by the Free Software Foundation; either version 3 of the
  *  License, or (at your option) any later version.
  *
- *  Com-Me is distributed in the hope that it will be useful, but WITHOUT 
- *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General 
+ *  Com-Me is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General
  *  Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public
@@ -125,8 +125,8 @@ public class MP3toPCMConverter {
 								// output.write(pcm[i] & 0xff); // big-endian
 							} else {
 								// see: https://stackoverflow.com/questions/3816446/
-								short average = (short) ((pcm[i] >> 1) + (pcm[i + 1] >> 1) + (pcm[i] & pcm[i + 1] &
-										0x1));
+								short average = (short) ((pcm[i] >> 1) + (pcm[i + 1] >> 1) +
+										(pcm[i] & pcm[i + 1] & 0x1));
 								output.write(average & 0xff);
 								output.write((average >> 8) & 0xff);
 								i += 1;
@@ -135,6 +135,52 @@ public class MP3toPCMConverter {
 					}
 
 					if (endMs != FILE_END && totalMs >= (startMs + endMs)) {
+						done = true;
+					}
+				}
+				bitstream.closeFrame();
+			}
+		} catch (BitstreamException e) {
+			throw new IOException("Bitstream error: " + e);
+		} catch (DecoderException e) {
+			throw new IOException("Decoder exception: " + e);
+		} catch (FileNotFoundException e) {
+			throw new IOException("File not found: " + e);
+		} finally {
+			IOUtilities.closeStream(inputStream);
+		}
+	}
+
+	public static void getFileConfig(File input, MP3Configuration config) throws IOException {
+		float totalMs = 0;
+		boolean seeking = true;
+
+		InputStream inputStream = null;
+		try {
+			inputStream = new BufferedInputStream(new FileInputStream(input), 8 * 1024);
+			Bitstream bitstream = new Bitstream(inputStream);
+			Decoder decoder = new Decoder();
+			SampleBuffer outputPCM;
+
+			boolean done = false;
+			while (!done) {
+				Header frameHeader = bitstream.readFrame();
+				if (frameHeader == null) {
+					done = true;
+				} else {
+					totalMs += frameHeader.ms_per_frame();
+
+					if (totalMs >= 0) {
+						seeking = false;
+					}
+
+					if (!seeking) {
+						outputPCM = (SampleBuffer) decoder.decodeFrame(frameHeader, bitstream);
+						if (config.sampleFrequency == 0) {
+							config.sampleFrequency = outputPCM.getSampleFrequency();
+							config.sampleSize = 16; // output should always be 16-bit, even if, say, 24 or 32-bit input
+							config.numberOfChannels = 1; // outputPCM.getChannelCount(); // see mono/stereo fix, above
+						}
 						done = true;
 					}
 				}
