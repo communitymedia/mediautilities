@@ -45,6 +45,7 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 
 import ac.robinson.mov.AMRtoPCMConverter;
@@ -751,7 +752,7 @@ public class MOVUtilities {
 		}
 
 		// all audio parts are combined into one track with these properties
-		AudioFormat audioFormat = new AudioFormat(sampleRate, 16, 1, true, false);
+		AudioFormat globalAudioFormat = new AudioFormat(sampleRate, 16, 1, true, false);
 
 		// prepare the global audio track
 		boolean globalAudioWritten = false;
@@ -862,8 +863,8 @@ public class MOVUtilities {
 							pcmConverter.convertFile(currentPCMStream);
 
 							// if the sample rate or sample size don't match our output, use SSRC to resample the audio
-							if (pcmConverter.getSampleRate() != audioFormat.getSampleRate() ||
-									pcmConverter.getSampleSize() != audioFormat.getSampleSizeInBits()) {
+							if (pcmConverter.getSampleRate() != globalAudioFormat.getSampleRate() ||
+									pcmConverter.getSampleSize() != globalAudioFormat.getSampleSizeInBits()) {
 
 								Log.d(LOG_TAG, "Resampling M4A audio");
 								try {
@@ -877,8 +878,8 @@ public class MOVUtilities {
 									// use SSRC to resample PCM audio - note that two passes are required for accuracy
 									new SSRC(tempDirectory, temporaryPCMInputStream, temporaryPCMOutputStream,
 											ByteOrder.LITTLE_ENDIAN, pcmConverter
-											.getSampleRate(), (int) audioFormat.getSampleRate(), pcmConverter
-											.getSampleSize(), audioFormat
+											.getSampleRate(), (int) globalAudioFormat.getSampleRate(), pcmConverter
+											.getSampleSize(), globalAudioFormat
 											.getSampleSizeInBits(), 1, (int) currentPCMFile.length(), 0, 0, 0, true,
 											false, false, true);
 
@@ -898,9 +899,9 @@ public class MOVUtilities {
 								}
 							}
 
-							Log.d(LOG_TAG, "Outputting M4A: " + audioFormat.getSampleRate() + ", " +
-									audioFormat.getSampleSizeInBits() + " from " + pcmConverter.getSampleRate() + "," +
-									" " + pcmConverter.getSampleSize());
+							Log.d(LOG_TAG, "Outputting M4A: " + globalAudioFormat.getSampleRate() + ", " +
+									globalAudioFormat.getSampleSizeInBits() + " from " + pcmConverter.getSampleRate() +
+									"," + " " + pcmConverter.getSampleSize());
 						} catch (Exception e) {
 							decodingError = true;
 							Log.d(LOG_TAG, "Error creating combined M4A audio track: " + e.getLocalizedMessage());
@@ -917,8 +918,8 @@ public class MOVUtilities {
 							MP3toPCMConverter.convertFile(inputAudioFile, currentPCMStream, mp3Config);
 
 							// if the sample rate or sample size don't match our output, use SSRC to resample the audio
-							if (mp3Config.sampleFrequency != audioFormat.getSampleRate() ||
-									mp3Config.sampleSize != audioFormat.getSampleSizeInBits()) {
+							if (mp3Config.sampleFrequency != globalAudioFormat.getSampleRate() ||
+									mp3Config.sampleSize != globalAudioFormat.getSampleSizeInBits()) {
 
 								Log.d(LOG_TAG, "Resampling MP3 audio");
 								try {
@@ -931,9 +932,9 @@ public class MOVUtilities {
 
 									// use SSRC to resample PCM audio - note that two passes are required for accuracy
 									new SSRC(tempDirectory, temporaryPCMInputStream, temporaryPCMOutputStream,
-											ByteOrder.LITTLE_ENDIAN, mp3Config.sampleFrequency, (int) audioFormat
-											.getSampleRate(), mp3Config.sampleSize, audioFormat.getSampleSizeInBits(),
-											1, (int) currentPCMFile
+											ByteOrder.LITTLE_ENDIAN, mp3Config.sampleFrequency, (int) globalAudioFormat
+											.getSampleRate(), mp3Config.sampleSize, globalAudioFormat
+											.getSampleSizeInBits(), 1, (int) currentPCMFile
 											.length(), 0, 0, 0, true, false, false, true);
 
 									// this is now the PCM file to use
@@ -952,9 +953,9 @@ public class MOVUtilities {
 								}
 							}
 
-							Log.d(LOG_TAG, "Outputting MP3: " + audioFormat.getSampleRate() + ", " +
-									audioFormat.getSampleSizeInBits() + " from " + mp3Config.sampleFrequency + ", " +
-									mp3Config.sampleSize);
+							Log.d(LOG_TAG, "Outputting MP3: " + globalAudioFormat.getSampleRate() + ", " +
+									globalAudioFormat.getSampleSizeInBits() + " from " + mp3Config.sampleFrequency +
+									", " + mp3Config.sampleSize);
 
 						} catch (Exception e) {
 							decodingError = true;
@@ -971,9 +972,13 @@ public class MOVUtilities {
 					if (!decodingError) {
 
 						// pad any gaps in audio (i.e., frames that don't have sound) with silence
-						long silenceNeeded =
-								((long) audioFormat.getSampleRate() * (long) (audioFormat.getSampleSizeInBits() / 8) *
-										(frameStartTime - pcmFileDurations[i])) / 1000;
+						// TODO: will we ever overflow Long.MAX_VALUE with this?
+						long silenceNeeded = ((long) globalAudioFormat.getSampleRate() *
+								(long) (globalAudioFormat.getSampleSizeInBits() / 8) *
+								(frameStartTime - pcmFileDurations[i])) / 1000;
+						if (silenceNeeded % 2 != 0) {
+							silenceNeeded += 1; // must be an even number: two bytes for each sample
+						}
 						Log.d(LOG_TAG, "Adding " + silenceNeeded + " samples of silence");
 
 						// copy from input file to pcmStream - don't use IOUtilities so we can keep the stream open
@@ -1031,10 +1036,148 @@ public class MOVUtilities {
 		// finally, write the combined PCM stream to the MOV file
 		if (globalAudioWritten) { // only write if at least one part of the stream succeeded
 
+			// remove any streams that had errors
+			File[] nonNullPCMFiles = new File[pcmFiles.length];
+			int arrayIndex = 0;
+			for (File file : pcmFiles) {
+				if (file != null) {
+					nonNullPCMFiles[arrayIndex] = file;
+					arrayIndex += 1;
+				}
+			}
+			if (arrayIndex < pcmFiles.length) {
+				Log.d(LOG_TAG, "Error stream found - trimming length to " + arrayIndex);
+				pcmFiles = Arrays.copyOf(nonNullPCMFiles, arrayIndex);
+			}
+
 			// if we have parallel audio, average the streams
 			if (pcmFiles.length > 1) {
-				Log.d(LOG_TAG, "TODO: Average " + pcmFiles.length + " streams");
+
+				// TODO: a better way might be to intelligently combine (e.g., pick one stream when others are blank)
+				// pad files with silence so they are all the same length - this simplifies combining
+				long totalBytes = 0;
+				for (File file : pcmFiles) {
+					totalBytes = Math.max(totalBytes, file.length());
+				}
+
+				boolean streamLengthsNormalised = true;
+				for (int i = 0; i < pcmFiles.length; i++) {
+					if (pcmFiles[i].length() < totalBytes) {
+						// fill with silence to span the gap in audio files - first pad to multiple of buffer
+						// (int cast is fine as long as IOUtilities.IO_BUFFER_SIZE is less than Integer.MAX_VALUE)
+						long silenceNeeded = totalBytes - pcmFiles[i].length();
+						Log.d(LOG_TAG, "Extending stream " + i + " with " + silenceNeeded + " samples of silence");
+						BufferedOutputStream silencePCMStream = null;
+						try {
+							silencePCMStream = new BufferedOutputStream(new FileOutputStream(pcmFiles[i], true));
+							int remainingSamples = (int) (silenceNeeded % IOUtilities.IO_BUFFER_SIZE);
+							byte[] buffer = new byte[remainingSamples];
+							silencePCMStream.write(buffer, 0, remainingSamples);
+							buffer = new byte[IOUtilities.IO_BUFFER_SIZE];
+							for (int s = 0; s < silenceNeeded / IOUtilities.IO_BUFFER_SIZE; s++) {
+								silencePCMStream.write(buffer, 0, IOUtilities.IO_BUFFER_SIZE);
+							}
+						} catch (Exception e) {
+							streamLengthsNormalised = false;
+							globalPCMFile.delete(); // delete the existing global file, and fall back to track 1
+							globalPCMFile = pcmFiles[0];
+							Log.d(LOG_TAG, "Error creating segmented MOV audio track - couldn't normalise stream " +
+									"lengths");
+							break;
+						} finally {
+							IOUtilities.closeStream(silencePCMStream);
+						}
+					}
+				}
+
+				// average the 2 or 3 streams
+				if (streamLengthsNormalised) {
+					Log.d(LOG_TAG, "Stream lengths normalised; averaging " + pcmFiles.length + ": " + totalBytes);
+					InputStream[] pcmStreams = new InputStream[pcmFiles.length];
+					byte[][] streamBuffers = new byte[pcmFiles.length][];
+					int[] streamOffsets = new int[pcmFiles.length];
+					int[] streamBytesRead = new int[pcmFiles.length];
+					short[] streamAverages = new short[pcmFiles.length];
+					BufferedOutputStream outputPCMStream = null;
+					try {
+						for (int i = 0; i < pcmStreams.length; i++) {
+							pcmStreams[i] = new FileInputStream(pcmFiles[i]);
+							streamBuffers[i] = new byte[IOUtilities.IO_BUFFER_SIZE];
+						}
+						outputPCMStream = new BufferedOutputStream(new FileOutputStream(globalPCMFile));
+
+						// read the same size buffer from each file, averaging over all 2 or 3 of them
+						int totalBytesRead = 0;
+						int bytesToWrite;
+						short averageValue;
+						while (totalBytesRead < totalBytes) {
+							for (int i = 0; i < pcmStreams.length; i++) {
+								// see: https://goo.gl/1k7cZ1
+								while ((streamBytesRead[i] = pcmStreams[i].read(streamBuffers[i], streamOffsets[i],
+										streamBuffers[i].length - streamOffsets[i])) != -1) {
+									streamOffsets[i] += streamBytesRead[i];
+									if (streamOffsets[i] >= streamBuffers[i].length) {
+										break;
+									}
+								}
+							}
+
+							totalBytesRead += streamOffsets[0];
+							bytesToWrite = Integer.MAX_VALUE;
+							for (int i = 0; i < pcmStreams.length; i++) {
+								bytesToWrite = Math.min(bytesToWrite, streamOffsets[i]);
+							}
+
+							// average the 2 or 3 buffers, then write to the global output stream
+							for (int i = 0; i < bytesToWrite; i += 2) {
+								for (int s = 0; s < pcmStreams.length; s++) {
+									streamAverages[s] = (short) (((streamBuffers[s][i + 1] & 0xff) << 8) |
+											(streamBuffers[s][i] & 0xff));
+								}
+
+								// TODO: if we ever make the number of streams flexible, this will need updating
+								// see: https://stackoverflow.com/questions/3816446/
+								if (pcmStreams.length == 3) {
+									averageValue = (short) ((streamAverages[0] >> 1) + (streamAverages[1] >> 1) +
+											(streamAverages[2] >> 1) +
+											(streamAverages[0] & streamAverages[1] & streamAverages[2] & 0x1));
+								} else {
+									averageValue = (short) ((streamAverages[0] >> 1) + (streamAverages[1] >> 1) +
+											(streamAverages[0] & streamAverages[1] & 0x1));
+								}
+
+								// our output is little-endian
+								outputPCMStream.write(averageValue & 0xff);
+								outputPCMStream.write((averageValue >> 8) & 0xff);
+							}
+
+							// shift any bytes between bytesToWrite and streamOffsets to start of buffer, then repeat
+							for (int i = 0; i < pcmStreams.length; i++) {
+								if (streamOffsets[i] > bytesToWrite) {
+									Log.d(LOG_TAG, "Correcting offset read: " + (streamOffsets[i] - bytesToWrite));
+									System.arraycopy(streamBuffers, bytesToWrite, streamBuffers, 0,
+											streamOffsets[i] - bytesToWrite);
+									streamOffsets[i] -= bytesToWrite;
+								} else {
+									streamOffsets[i] = 0;
+								}
+							}
+						}
+
+					} catch (Exception e) {
+						globalPCMFile.delete(); // delete the existing global file, and fall back to track 1
+						globalPCMFile = pcmFiles[0];
+						Log.d(LOG_TAG, "Error creating segmented MOV audio track - couldn't create combined stream");
+					} finally {
+						for (InputStream pcmStream : pcmStreams) {
+							IOUtilities.closeStream(pcmStream);
+						}
+						IOUtilities.closeStream(outputPCMStream);
+					}
+				}
+
 			} else {
+				globalPCMFile.delete(); // delete the existing global file, and just use our first stream
 				globalPCMFile = pcmFiles[0]; // most of the time we have only one track
 			}
 
@@ -1042,8 +1185,8 @@ public class MOVUtilities {
 			AudioInputStream pcmAudioStream;
 			try {
 				// output from converters and/or SSRC is mono signed 16-bit little-endian integers
-				pcmAudioStream = new AudioInputStream(new FileInputStream(globalPCMFile), audioFormat, (int) (
-						(audioFormat.getSampleRate() * globalAudioDuration) / 1000f));
+				pcmAudioStream = new AudioInputStream(new FileInputStream(globalPCMFile), globalAudioFormat, (int) (
+						(globalAudioFormat.getSampleRate() * globalAudioDuration) / 1000f));
 
 				// new source: pumpernickel/pump-quicktime/src/main/java/com/pump/animation/quicktime/MovWriter.java
 				outputFileWriter.addAudioTrack(pcmAudioStream, 0, globalAudioDuration / 1000f);
