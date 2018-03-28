@@ -262,7 +262,7 @@ public class MOVUtilities {
 							MP4toPCMConverter pcmConverter = new MP4toPCMConverter(inputRandomAccessFile);
 							pcmConverter.convertFile(outputPCMStream);
 
-							// get the format of the audio - PCM output is mono signed 16-bit little-endian integers
+							// get the format of the audio - PCM output is mono signed little-endian integers
 							audioFormat = new AudioFormat(pcmConverter.getSampleRate(), pcmConverter.getSampleSize(),
 									1, true, false);
 							Log.d(LOG_TAG, "Outputting M4A: " + pcmConverter.getSampleRate() + ", " +
@@ -310,9 +310,9 @@ public class MOVUtilities {
 							// first we need to extract PCM audio from the AMR file
 							AMRtoPCMConverter.convertFile(inputAudioFile, outputPCMStream);
 
-							// get the format of the audio - output is mono signed 16-bit big-endian integers, 8000Hz
-							audioFormat = new AudioFormat(8000, 16, 1, true, true);
-							Log.d(LOG_TAG, "Outputting AMR: 8000, 16, 1, signed, big endian");
+							// get the audio format - output is mono signed 16-bit little-endian integers, 8000Hz
+							audioFormat = new AudioFormat(8000, 16, 1, true, false);
+							Log.d(LOG_TAG, "Outputting AMR: 8000, 16, 1, signed, little endian");
 
 						} catch (IOException e) {
 							decodingError = true;
@@ -331,7 +331,7 @@ public class MOVUtilities {
 							WAVConfiguration wavConfig = new WAVConfiguration();
 							WAVtoPCMConverter.convertFile(inputAudioFile, outputPCMStream, wavConfig);
 
-							// get the format of the audio - output is mono/stereo signed 16-bit little-endian integers
+							// get the format of the audio - output is mono signed little-endian integers
 							audioFormat = new AudioFormat(wavConfig.sampleFrequency, wavConfig.sampleSize, wavConfig
 									.numberOfChannels, true, false);
 							Log.d(LOG_TAG,
@@ -546,7 +546,7 @@ public class MOVUtilities {
 							MP4toPCMConverter pcmConverter = new MP4toPCMConverter(inputRandomAccessFile);
 							pcmConverter.convertFile(currentPCMStream);
 
-							// get the format - output from PCM converter is mono signed 16-bit little-endian integers
+							// get the format - output from PCM converter is mono signed little-endian integers
 							if (audioFormat == null) { // TODO: we assume all MP4 components are the same
 								// format
 								audioFormat = new AudioFormat(pcmConverter.getSampleRate(), pcmConverter.getSampleSize
@@ -598,11 +598,10 @@ public class MOVUtilities {
 							// first we need to extract PCM audio from the AMR file
 							AMRtoPCMConverter.convertFile(inputAudioFile, outputPCMStream);
 
-							// get the format of the audio - output is mono signed 16-bit big-endian integers, 8000Hz
-							if (audioFormat == null) { // TODO: we assume all AMR components are the same
-								// format
-								audioFormat = new AudioFormat(8000, 16, 1, true, true);
-								Log.d(LOG_TAG, "Outputting AMR: 8000, 16, 1, signed, big endian");
+							// get the audio format - output is mono signed 16-bit little-endian integers, 8000Hz
+							if (audioFormat == null) { // TODO: we assume all AMR components are the same format
+								audioFormat = new AudioFormat(8000, 16, 1, true, false);
+								Log.d(LOG_TAG, "Outputting AMR: 8000, 16, 1, signed, little endian");
 							}
 
 						} catch (IOException e) {
@@ -621,7 +620,7 @@ public class MOVUtilities {
 							WAVConfiguration wavConfig = new WAVConfiguration();
 							WAVtoPCMConverter.convertFile(inputAudioFile, currentPCMStream, wavConfig);
 
-							// get the format - output is mono/stereo signed 16-bit little-endian integers
+							// get the format - output is mono signed little-endian integers
 							if (audioFormat == null) { // TODO: we assume all WAV components are the same
 								// format
 								audioFormat = new AudioFormat(wavConfig.sampleFrequency, wavConfig.sampleSize,
@@ -857,7 +856,7 @@ public class MOVUtilities {
 						RandomAccessFile inputRandomAccessFile = null;
 						try {
 							// first we need to extract PCM audio from the M4A file
-							// output from PCM converter is mono signed 16-bit little-endian integers
+							// output from PCM converter is mono signed little-endian integers
 							inputRandomAccessFile = new RandomAccessFile(inputAudioFile, "r");
 							MP4toPCMConverter pcmConverter = new MP4toPCMConverter(inputRandomAccessFile);
 							pcmConverter.convertFile(currentPCMStream);
@@ -911,7 +910,6 @@ public class MOVUtilities {
 
 					} else if (currentAudioType == AudioType.MP3) {
 						try {
-
 							// first we need to extract PCM audio from the MP3 file
 							// output from PCM converter is mono signed 16-bit little-endian integers
 							MP3Configuration mp3Config = new MP3Configuration();
@@ -962,9 +960,110 @@ public class MOVUtilities {
 							Log.d(LOG_TAG, "Error creating combined MP3 audio track: " + e.getLocalizedMessage());
 						}
 
-					} else {
-						decodingError = true;
-						Log.d(LOG_TAG, "TODO: resample AMR / WAV audio");
+					} else if (currentAudioType == AudioType.AMR) {
+						try {
+							// first we need to extract PCM audio from the AMR file
+							// output from PCM converter is mono signed 16-bit little-endian integers, always 8000Hz
+							AMRtoPCMConverter.convertFile(inputAudioFile, currentPCMStream);
+							AudioFormat amrFormat = new AudioFormat(8000, 16, 1, true, false);
+
+							// if the sample rate or sample size don't match our output, use SSRC to resample the audio
+							if (amrFormat.getSampleRate() != globalAudioFormat.getSampleRate() ||
+									amrFormat.getSampleSizeInBits() != globalAudioFormat.getSampleSizeInBits()) {
+
+								Log.d(LOG_TAG, "Resampling AMR audio");
+								try {
+									temporaryPCMInputStream = new BufferedInputStream(new FileInputStream
+											(currentPCMFile));
+									temporaryPCMFile = File.createTempFile(inputAudioFile.getName(), ".temp.pcm",
+											tempDirectory);
+									temporaryPCMOutputStream = new BufferedOutputStream(new FileOutputStream
+											(temporaryPCMFile));
+
+									// use SSRC to resample PCM audio - note that two passes are required for accuracy
+									new SSRC(tempDirectory, temporaryPCMInputStream, temporaryPCMOutputStream,
+											ByteOrder.LITTLE_ENDIAN, (int) amrFormat
+											.getSampleRate(), (int) globalAudioFormat.getSampleRate(), amrFormat
+											.getSampleSizeInBits(), globalAudioFormat
+											.getSampleSizeInBits(), 1, (int) currentPCMFile.length(), 0, 0, 0, true,
+											false, false, true);
+
+									// this is now the PCM file to use
+									if (currentPCMFile != null) {
+										currentPCMFile.delete();
+									}
+									currentPCMFile = temporaryPCMFile;
+
+								} catch (Exception e) {
+									if (temporaryPCMFile != null) {
+										temporaryPCMFile.delete();
+									}
+								} finally {
+									IOUtilities.closeStream(temporaryPCMInputStream);
+									IOUtilities.closeStream(temporaryPCMOutputStream);
+								}
+							}
+
+							Log.d(LOG_TAG, "Outputting AMR: " + globalAudioFormat.getSampleRate() + ", " +
+									globalAudioFormat.getSampleSizeInBits() + " from " + amrFormat.getSampleRate() +
+									", " + amrFormat.getSampleSizeInBits());
+
+						} catch (Exception e) {
+							decodingError = true;
+							Log.d(LOG_TAG, "Error creating combined AMR audio track: " + e.getLocalizedMessage());
+						}
+
+					} else if (currentAudioType == AudioType.WAV) {
+						try {
+							// first we need to extract PCM audio from the WAV file
+							// output from PCM converter is mono signed little-endian integers
+							WAVConfiguration wavConfig = new WAVConfiguration();
+							WAVtoPCMConverter.convertFile(inputAudioFile, currentPCMStream, wavConfig);
+
+							// if the sample rate or sample size don't match our output, use SSRC to resample the audio
+							if (wavConfig.sampleFrequency != globalAudioFormat.getSampleRate() ||
+									wavConfig.sampleSize != globalAudioFormat.getSampleSizeInBits()) {
+
+								Log.d(LOG_TAG, "Resampling WAV audio");
+								try {
+									temporaryPCMInputStream = new BufferedInputStream(new FileInputStream
+											(currentPCMFile));
+									temporaryPCMFile = File.createTempFile(inputAudioFile.getName(), ".temp.pcm",
+											tempDirectory);
+									temporaryPCMOutputStream = new BufferedOutputStream(new FileOutputStream
+											(temporaryPCMFile));
+
+									// use SSRC to resample PCM audio - note that two passes are required for accuracy
+									new SSRC(tempDirectory, temporaryPCMInputStream, temporaryPCMOutputStream,
+											ByteOrder.LITTLE_ENDIAN, wavConfig.sampleFrequency, (int) globalAudioFormat
+											.getSampleRate(), wavConfig.sampleSize, globalAudioFormat
+											.getSampleSizeInBits(), 1, (int) currentPCMFile
+											.length(), 0, 0, 0, true, false, false, true);
+
+									// this is now the PCM file to use
+									if (currentPCMFile != null) {
+										currentPCMFile.delete();
+									}
+									currentPCMFile = temporaryPCMFile;
+
+								} catch (Exception e) {
+									if (temporaryPCMFile != null) {
+										temporaryPCMFile.delete();
+									}
+								} finally {
+									IOUtilities.closeStream(temporaryPCMInputStream);
+									IOUtilities.closeStream(temporaryPCMOutputStream);
+								}
+							}
+
+							Log.d(LOG_TAG, "Outputting WAV: " + globalAudioFormat.getSampleRate() + ", " +
+									globalAudioFormat.getSampleSizeInBits() + " from " + wavConfig.sampleFrequency +
+									", " + wavConfig.sampleSize);
+
+						} catch (Exception e) {
+							decodingError = true;
+							Log.d(LOG_TAG, "Error creating combined WAV audio track: " + e.getLocalizedMessage());
+						}
 					}
 
 					// if successful, combine the streams and store locations

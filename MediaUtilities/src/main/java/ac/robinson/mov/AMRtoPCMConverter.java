@@ -1,16 +1,16 @@
 /*
  *  Copyright (C) 2012 Simon Robinson
- * 
+ *
  *  This file is part of Com-Me.
- * 
- *  Com-Me is free software; you can redistribute it and/or modify it 
- *  under the terms of the GNU Lesser General Public License as 
- *  published by the Free Software Foundation; either version 3 of the 
+ *
+ *  Com-Me is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License as
+ *  published by the Free Software Foundation; either version 3 of the
  *  License, or (at your option) any later version.
  *
- *  Com-Me is distributed in the hope that it will be useful, but WITHOUT 
- *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General 
+ *  Com-Me is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General
  *  Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public
@@ -38,7 +38,7 @@ public final class AMRtoPCMConverter {
 
 	/**
 	 * Convert an AMR input file to PCM
-	 * 
+	 *
 	 * @param input the input file to convert
 	 * @param output the output stream to write to
 	 * @throws IOException
@@ -97,9 +97,9 @@ public final class AMRtoPCMConverter {
 
 				// convert to byte and write to the output stream
 				for (i = 0; i < 160; i++) {
-					// output.write(outputBuffer[i] & 0xff); // little endian
+					output.write(outputBuffer[i] & 0xff); // we want little endian
 					output.write((outputBuffer[i] >> 8) & 0xff);
-					output.write(outputBuffer[i] & 0xff); // we want big endian
+					// output.write(outputBuffer[i] & 0xff); // big endian
 				}
 			}
 

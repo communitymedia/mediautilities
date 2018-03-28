@@ -1,16 +1,16 @@
 /*
  *  Copyright (C) 2012 Simon Robinson
- * 
+ *
  *  This file is part of Com-Me.
- * 
- *  Com-Me is free software; you can redistribute it and/or modify it 
- *  under the terms of the GNU Lesser General Public License as 
- *  published by the Free Software Foundation; either version 3 of the 
+ *
+ *  Com-Me is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License as
+ *  published by the Free Software Foundation; either version 3 of the
  *  License, or (at your option) any later version.
  *
- *  Com-Me is distributed in the hope that it will be useful, but WITHOUT 
- *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General 
+ *  Com-Me is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General
  *  Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public
@@ -19,6 +19,8 @@
  */
 
 package ac.robinson.mov;
+
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -42,8 +44,8 @@ public final class WAVtoPCMConverter {
 
 	/**
 	 * Convert a WAV input file to PCM
-	 * 
-	 * @param input the input file to convert
+	 *
+	 * @param input  the input file to convert
 	 * @param output the output stream to write to
 	 * @throws IOException
 	 */
@@ -63,8 +65,8 @@ public final class WAVtoPCMConverter {
 			byte[] header = new byte[12];
 			inputWAVStream.read(header, 0, 12);
 			offset += 12;
-			if (header[0] != 'R' || header[1] != 'I' || header[2] != 'F' || header[3] != 'F' || header[8] != 'W'
-					|| header[9] != 'A' || header[10] != 'V' || header[11] != 'E') {
+			if (header[0] != 'R' || header[1] != 'I' || header[2] != 'F' || header[3] != 'F' || header[8] != 'W' ||
+					header[9] != 'A' || header[10] != 'V' || header[11] != 'E') {
 				throw new IOException("Not a WAV file");
 			}
 
@@ -73,8 +75,8 @@ public final class WAVtoPCMConverter {
 				inputWAVStream.read(chunkHeader, 0, 8);
 				offset += 8;
 
-				int chunkLen = ((0xff & chunkHeader[7]) << 24) | ((0xff & chunkHeader[6]) << 16)
-						| ((0xff & chunkHeader[5]) << 8) | ((0xff & chunkHeader[4]));
+				int chunkLen = ((0xff & chunkHeader[7]) << 24) | ((0xff & chunkHeader[6]) << 16) |
+						((0xff & chunkHeader[5]) << 8) | ((0xff & chunkHeader[4]));
 
 				if (chunkHeader[0] == 'f' && chunkHeader[1] == 'm' && chunkHeader[2] == 't' && chunkHeader[3] == ' ') {
 					if (chunkLen < 16 || chunkLen > 1024) {
@@ -91,24 +93,44 @@ public final class WAVtoPCMConverter {
 					}
 
 					config.numberOfChannels = ((0xff & fmt[3]) << 8) | ((0xff & fmt[2]));
-					config.sampleSize = 16; // TODO: always 16-bit?
-					config.sampleFrequency = ((0xff & fmt[7]) << 24) | ((0xff & fmt[6]) << 16) | ((0xff & fmt[5]) << 8)
-							| ((0xff & fmt[4]));
+					config.sampleSize = ((0xff & fmt[15]) << 8) | ((0xff & fmt[14]));
+					config.sampleFrequency =
+							((0xff & fmt[7]) << 24) | ((0xff & fmt[6]) << 16) | ((0xff & fmt[5]) << 8) |
+									((0xff & fmt[4]));
 
-				} else if (chunkHeader[0] == 'd' && chunkHeader[1] == 'a' && chunkHeader[2] == 't'
-						&& chunkHeader[3] == 'a') {
+				} else if (chunkHeader[0] == 'd' && chunkHeader[1] == 'a' && chunkHeader[2] == 't' &&
+						chunkHeader[3] == 'a') {
 					if (config.numberOfChannels == 0 || config.sampleFrequency == 0) {
 						throw new IOException("Bad WAV file: data chunk before fmt chunk");
 					}
 
-					// copy the bits from input stream to output stream
-					byte[] buf = new byte[IOUtilities.IO_BUFFER_SIZE];
-					//byte[] bebuf = new byte[IOUtilities.IO_BUFFER_SIZE];
-					int len;
-					while ((len = inputWAVStream.read(buf)) > 0) {
-						// convert to big endian
-						// ByteBuffer.wrap(buf, 0, len).order(ByteOrder.BIG_ENDIAN).get(bebuf, 0, len);
-						output.write(buf, 0, len);
+					// always output in mono, as mixing mono and stereo WAVs is fairly common amongst our users
+					// (e.g, audio track + dictaphone output), and this is an easy fix (i.e., average to 1 channel)
+					boolean mono = config.numberOfChannels == 1;
+
+					int numSamples;
+					byte[] buffer = new byte[IOUtilities.IO_BUFFER_SIZE];
+					while ((numSamples = inputWAVStream.read(buffer)) > 0) {
+						if (mono) {
+							output.write(buffer, 0, numSamples);
+						} else {
+							if (config.sampleSize == 8) {
+								for (int i = 0; i < numSamples; i += 2) {
+									short average = (short) ((buffer[i] >> 1) + (buffer[i + 1] >> 1) +
+											(buffer[i] & buffer[i + 1] & 0x1));
+									output.write(average & 0xff);
+									output.write((average >> 8) & 0xff);
+								}
+							} else { // 16-bit
+								for (int i = 0; i < numSamples; i += 4) {
+									short left = (short) (((buffer[i + 1] & 0xff) << 8) | (buffer[i] & 0xff));
+									short right = (short) (((buffer[i + 3] & 0xff) << 8) | (buffer[i + 2] & 0xff));
+									short average = (short) ((left >> 1) + (right >> 1) + (left & right & 0x1));
+									output.write(average & 0xff);
+									output.write((average >> 8) & 0xff);
+								}
+							}
+						}
 					}
 
 				} else {
