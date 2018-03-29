@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<resources>
+
+	<!-- TODO: remove these strings into individual projects to make translation easier -->
+	<!-- directory selector -->
+	<string name="current_location">Actual: %1$s</string>
+	<string name="select_directory">Seleccionar</string>
+	<string name="parent_directory">[Directorio raíz]</string>
+	<string name="directory_browser_error">Error: no se puede abrir la carpeta - por favor, inténtelo de nuevo</string>
+
+	<!-- menu item -->
+	<string name="menu_save">Guardar</string>
+
+	<!-- media controller -->
+	<string name="back_description">Atrás</string>
+	<string name="rew_description">Retroceder</string>
+	<string name="play_description">Reproducir/ pausar</string>
+	<string name="ffwd_description">Adelantar</string>
+	<string name="export_description">Exportar esta narrativa</string><!--doesn't matter about narrative/media - only used in MediaPhone-->
+</resources>
