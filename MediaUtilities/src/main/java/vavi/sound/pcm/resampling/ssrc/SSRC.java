@@ -450,7 +450,7 @@ public class SSRC {
 	 * @throws IOException
 	 */
 	public double upsample(InputStream fpi, OutputStream fpo, int nch, int bps, int dbps, int sfrq, int dfrq, double
-			gain, int chanklen, boolean twopass, int dither) throws IOException {
+			gain, long chanklen, boolean twopass, int dither) throws IOException {
 		int frqgcd, osf = 0, fs1, fs2;
 		double[][] stage1;
 		double[] stage2;
@@ -640,14 +640,15 @@ public class SSRC {
 			sumread = sumwrite = 0;
 
 			while (true) {
-				int nsmplread, toberead, toberead2;
+				int nsmplread;
+				long toberead, toberead2;
 
 				toberead2 = toberead = (int) (Math.ceil((double) n2b2 * sfrq / (dfrq * osf)) + 1 + n1x - inbuflen);
 				if (toberead + sumread > chanklen) {
 					toberead = chanklen - sumread;
 				}
 
-				rawinbuf = ByteBuffer.allocate(bps * nch * toberead);
+				rawinbuf = ByteBuffer.allocate((int)(bps * nch * toberead));
 
 				byte[] tempData = new byte[rawinbuf.limit()];
 				int pos = 0;
@@ -1027,7 +1028,7 @@ public class SSRC {
 
 	/** */
 	public double downsample(InputStream fpi, OutputStream fpo, int nch, int bps, int dbps, int sfrq, int dfrq, double
-			gain, int chanklen, boolean twopass, int dither) throws IOException {
+			gain, long chanklen, boolean twopass, int dither) throws IOException {
 		int frqgcd, osf = 0, fs1, fs2;
 		double[] stage1;
 		double[][] stage2;
@@ -1256,7 +1257,7 @@ public class SSRC {
 
 			while (true) {
 				int nsmplread;
-				int toberead;
+				long toberead;
 				rps = 0;   //TODO settings this parameter to zero fixed a lot of problems
 				toberead = (n1b2 - rps - 1) / osf + 1;
 				if (toberead + sumread > chanklen) {
@@ -1264,7 +1265,7 @@ public class SSRC {
 				}
 
 				rawinbuf.position(0);
-				rawinbuf.limit(bps * nch * toberead);
+				rawinbuf.limit((int)(bps * nch * toberead));
 
 				byte[] tempData = new byte[rawinbuf.limit()];
 				nsmplread = fpi.read(tempData);
@@ -1621,7 +1622,7 @@ public class SSRC {
 	}
 
 	/** */
-	public double no_src(InputStream fpi, OutputStream fpo, int nch, int bps, int dbps, double gain, int chanklen,
+	public double no_src(InputStream fpi, OutputStream fpo, int nch, int bps, int dbps, double gain, long chanklen,
 						 boolean twopass, int dither) throws IOException {
 		double[] peak = new double[]{0};
 		int ch = 0, sumread = 0;
@@ -2350,7 +2351,7 @@ public class SSRC {
 	}
 
 	public SSRC(File tempDirectory, InputStream fpi, OutputStream fpo, java.nio.ByteOrder byteOrder_, int sfrq, int
-			dfrq, int bps, int dbps, int nch, int length, double att, int pdf, int dither, boolean twopass, boolean
+			dfrq, int bps, int dbps, int nch, long length, double att, int pdf, int dither, boolean twopass, boolean
 			normalize, boolean fast, boolean quiet_) throws IOException {
 		File ft;
 		FileOutputStream fpto = null;
