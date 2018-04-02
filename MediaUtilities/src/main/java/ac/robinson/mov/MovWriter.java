@@ -6,14 +6,14 @@
  * Copyright (c) 2011 by Jeremy Wood.
  * All rights reserved.
  *
- * The copyright of this software is owned by Jeremy Wood. 
- * You may not use, copy or modify this software, except in  
- * accordance with the license agreement you entered into with  
+ * The copyright of this software is owned by Jeremy Wood.
+ * You may not use, copy or modify this software, except in
+ * accordance with the license agreement you entered into with
  * Jeremy Wood. For details see accompanying license terms.
- * 
+ *
  * This software is probably, but not necessarily, discussed here:
  * http://javagraphics.java.net/
- * 
+ *
  * That site should also contain the most recent official version
  * of this software.  (See the SVN repository for more details.)
  */
@@ -33,6 +33,7 @@ import java.util.Vector;
 import ac.robinson.util.BitmapUtilities;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
 import com.bric.audio.AudioFormat;
 import com.bric.audio.AudioInputStream;
@@ -55,6 +56,7 @@ import com.bric.qt.io.SampleToChunkAtom;
 import com.bric.qt.io.SoundMediaInformationHeaderAtom;
 import com.bric.qt.io.SoundSampleDescriptionAtom;
 import com.bric.qt.io.SoundSampleDescriptionEntry;
+import com.bric.qt.io.SyncSampleAtom;
 import com.bric.qt.io.TimeToSampleAtom;
 import com.bric.qt.io.TrackHeaderAtom;
 import com.bric.qt.io.VideoMediaInformationHeaderAtom;
@@ -71,7 +73,7 @@ import com.bric.qt.io.VideoSampleDescriptionEntry;
  * This actually writes to a movie file in 2 passes: the first pass writes all the video and audio data to a
  * <code>FileOutputStream</code>. When <code>close()</code> is called, the movie structure is added and a
  * <code>RandomAccessFile</code> is used to correctly set the size headers.
- * 
+ *
  * @name MovWriter
  * @title Movies: Writing MOV Files Without QuickTime
  * @release June 2008
@@ -81,9 +83,11 @@ import com.bric.qt.io.VideoSampleDescriptionEntry;
  *        not subject to nasty patent/royalty issues.
  * @see <a href="http://javagraphics.blogspot.com/2008/06/movies-writing-mov-files-without.html">Movies: Writing MOV
  *      Files Without QuickTime</a>
- * 
+ *
  */
 public abstract class MovWriter {
+
+	private static final String LOG_TAG = "MovWriter";
 
 	public static final long DEFAULT_TIME_SCALE = 30;
 
@@ -111,6 +115,7 @@ public abstract class MovWriter {
 		SampleSizeAtom stsz = new SampleSizeAtom();
 		SampleToChunkAtom stsc = new SampleToChunkAtom();
 		ChunkOffsetAtom stco = new ChunkOffsetAtom();
+		SyncSampleAtom stss = new SyncSampleAtom();
 
 		void writeToMoovRoot(ParentAtom moovRoot, int trackIndex) {
 			ParentAtom trakAtom = new ParentAtom("trak");
@@ -155,6 +160,7 @@ public abstract class MovWriter {
 			stbl.add(stsc);
 			stbl.add(stsz);
 			stbl.add(stco);
+			stbl.add(stss);
 		}
 
 		int samplesInCurrentChunk = 0;
@@ -165,13 +171,15 @@ public abstract class MovWriter {
 			samples.add(sample);
 			totalDuration += sample.duration;
 
-			// we only really need one sample size here, but YouTube skips frames fairly regularly, so we need to make
-			// sure that we've got enough frames so that this doesn't matter; this is done by repeatedly referring
+			// we only really need one sample size here, but YouTube/VLC skip frames fairly regularly, so we need to
+			// make sure that we've got enough frames so that this doesn't matter; this is done by repeatedly referring
 			// to the same entry in the chunk table
+			// TODO: can we somehow make stss work instead of duplicating these entries?
 			stts.addSampleTime(sample.duration, 1, true);
 			for (int i = 0; i < sample.duration; i++) {
-				stsz.addSampleSize(sample.fileLength); // TODO: optimise these types of functions
+				stsz.addSampleSize(sample.fileLength);
 			}
+			stss.addSample(sample.duration);
 
 			// now decide if the addition of this sample concluded a chunk of samples:
 			samplesInCurrentChunk++;
@@ -189,9 +197,10 @@ public abstract class MovWriter {
 			if (samplesInCurrentChunk > 0) {
 				stsc.addChunk(currentChunkIndex + 1, samplesInCurrentChunk, 1);
 
-				// we only really need one sample size here, but YouTube skips frames fairly regularly, so we need to
-				// make sure that we've got enough frames so that this doesn't matter; this is done by repeatedly
+				// we only really need one sample size here, but YouTube/VLC skips frames fairly regularly, so we need
+				// to make sure that we've got enough frames so that this doesn't matter; this is done by repeatedly
 				// referring to the same entry in the chunk table
+				// TODO: can we somehow make stss work instead of duplicating these entries?
 				VideoSample sample = samples.get(samples.size() - samplesInCurrentChunk);
 				for (int i = 0; i < sample.duration; i++) {
 					stco.addChunkOffset(sample.dataStart);
@@ -260,7 +269,7 @@ public abstract class MovWriter {
 		int sampleMultiplier;
 
 		/** Whether to use an Edit List (or a silent track) to arrange the audio **/
-		boolean useEditList = true; // for multi-part audio edit lists will be used regardless of this value
+		boolean useEditList = false; // edit lists will be used for multi-part audio regardless of this value
 		float[] audioOffsets;
 		float[] audioStarts;
 		float[] audioLengths;
@@ -288,7 +297,7 @@ public abstract class MovWriter {
 			} else {
 				audioIn = audio;
 			}
-			
+
 			myTimeScale = (long) (audioIn.getFormat().getFrameRate());
 			int bitsPerSample = audioIn.getFormat().getSampleSizeInBits();
 			int numberOfChannels = audioIn.getFormat().getChannels();
@@ -306,14 +315,14 @@ public abstract class MovWriter {
 				 * Previously I tried using an EditAtom to change when an audio track began playing, but that only
 				 * worked for about 1 audio track (when other audio tracks were added to the test: QT Player could play
 				 * the movie back fine but a MovieExporter would drop other tracks).
-				 * 
+				 *
 				 * This approach is simple: start every sound at t=0, and pad the AudioInputStream with silence until
 				 * it's supposed to start.
-				 * 
+				 *
 				 * TODO: A better approach is to only write one small chunk of silence, and then use the chunk lookup
 				 * tables to continually reference the same silent chunk of data. This will dramatically improve file
 				 * size if you position an audio very late in the movie.
-				 * 
+				 *
 				 */
 				// 25-Nov-12: using EditAtom instead, as smaller file sizes are more desirable (especially when
 				// creating a narrative with sounds toward the end)
@@ -325,8 +334,11 @@ public abstract class MovWriter {
 						long silentSamples = (long) (audioOffsets[0] * audioIn.getFormat().getFrameRate());
 						AudioInputStream silence = new SilentAudioInputStream(audioIn.getFormat(), silentSamples);
 						audioIn = new CombinedAudioInputStream(silence, audioIn);
+						Log.d(LOG_TAG, "Padding audio with silence");
 					}
+					Log.d(LOG_TAG, "Using input audio unedited");
 				} else {
+					Log.d(LOG_TAG, "Forcing use of edit list");
 					useEditList = true;
 				}
 			}
@@ -401,7 +413,7 @@ public abstract class MovWriter {
 		 * Write audio data to the target file.
 		 * <p>
 		 * If there is no more data to write then this method will do nothing.
-		 * 
+		 *
 		 * @param time the duration (relative to DEFAULT_TIME_SCALE) of audio to write. For example if this is 1200 and
 		 *            DEFAULT_TIME_SCALE is 600: then this should write 2 seconds of audio data.
 		 * @return true if data was written, false if the AudioInputStream has been depleted.
@@ -466,7 +478,7 @@ public abstract class MovWriter {
 	 * <P>
 	 * By constructing this object a <code>FileOutputStream</code> is opened for the destination file. It remains open
 	 * until <code>close()</code> is called or this object is finalized.
-	 * 
+	 *
 	 * @param file the file data is written to. It is strongly recommended that this file name end with ".mov" (or
 	 *            ".MOV"), although this is not required.
 	 * @throws IOException
@@ -512,7 +524,7 @@ public abstract class MovWriter {
 	 * This method must be called before adding frames. In a future version of this class it would be nice if audio
 	 * could be inserted at any time (before calling <code>close()</code>), but currently that functionality is not
 	 * supported.
-	 * 
+	 *
 	 * @param audio the audio to add to this movie, in PCM encoding.
 	 * @param audioOffsets where in the movie each segment of the audio track should be played. Values *must* increase
 	 *            throughout the array, and the array *must* be at least 1 value in length
@@ -552,7 +564,7 @@ public abstract class MovWriter {
 	 * This method must be called before adding frames. In a future version of this class it would be nice if audio
 	 * could be inserted at any time (before calling <code>close()</code>), but currently that functionality is not
 	 * supported.
-	 * 
+	 *
 	 * @param audio the audio to add to this movie, in PCM encoding.
 	 * @param startTime the start time (in seconds) of this audio in the movie. For example: if this is 5, then this
 	 *            audio will begin 5 seconds into the movie.
@@ -570,7 +582,7 @@ public abstract class MovWriter {
 	 * This method must be called before adding frames. In a future version of this class it would be nice if audio
 	 * could be inserted at any time (before calling <code>close()</code>), but currently that functionality is not
 	 * supported.
-	 * 
+	 *
 	 * @param audio the audio to add to this movie, in PCM encoding.
 	 * @param startTime the start time (in seconds) of this audio in the movie. For example: if this is 5, then this
 	 *            audio will begin 5 seconds into the movie.
@@ -617,7 +629,7 @@ public abstract class MovWriter {
 	 * <P>
 	 * All images must be the same dimensions; if this image is a different size from previously added images an
 	 * exception is thrown.
-	 * 
+	 *
 	 * @param duration the duration (in seconds) this frame should show. (This value is converted to a timescale of
 	 *            DEFAULT_TIME_SCALE.)
 	 * @param bi the image to add as a frame.
@@ -650,7 +662,7 @@ public abstract class MovWriter {
 	 * check the images, or convert images that are not of the correct file type. (For example: if you add TIFF image
 	 * files to a MovWriter that expects JPG image files, then no exception will be thrown. But the new mov file will be
 	 * unreadable.)
-	 * 
+	 *
 	 * @param duration the duration (in seconds) this frame should show. (This value is converted to a timescale of
 	 *            DEFAULT_TIME_SCALE.)
 	 * @param image the image to add.
@@ -671,11 +683,11 @@ public abstract class MovWriter {
 
 	/**
 	 * This finishes writing the movie file.
-	 * 
+	 *
 	 * @param writeRemainingAudio if true then unfinished AudioInputStreams continue to write to the movie file. If
 	 *            false then the movie ends immediately. If an operation is cancelled you should pass false here to
 	 *            speed up the time it takes to close everything out.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	public void close(boolean writeRemainingAudio) throws IOException {
@@ -750,7 +762,7 @@ public abstract class MovWriter {
 
 	/**
 	 * Write a file to an OutputStream.
-	 * 
+	 *
 	 * @param out the stream to write to.
 	 * @param file the file to write
 	 * @return the number of bytes written.
@@ -771,7 +783,7 @@ public abstract class MovWriter {
 
 	/**
 	 * Write the remainder of an InputStream to an OutputStream.
-	 * 
+	 *
 	 * @param out the stream to write to.
 	 * @param in the data to write
 	 * @param whether every two bytes should be switched (to convert from one endian to another)
@@ -798,7 +810,7 @@ public abstract class MovWriter {
 
 	/**
 	 * Write up to a certain number of bytes from an InputStream to an OutputStream.
-	 * 
+	 *
 	 * @param out the stream to write to.
 	 * @param in the data to write
 	 * @param maxBytes the maximum number of bytes to write
@@ -832,7 +844,7 @@ public abstract class MovWriter {
 
 	/**
 	 * Reads bytes from an InputStream. This will always return an even number of bytes.
-	 * 
+	 *
 	 * @param bytesToRead
 	 * @return
 	 */

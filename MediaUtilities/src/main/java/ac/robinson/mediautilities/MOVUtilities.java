@@ -353,7 +353,7 @@ public class MOVUtilities {
 
 					// then add to the MOV output file if successful (pcmAudioStream is closed in MovWriter)
 					if (!decodingError) {
-						pcmAudioStream = new AudioInputStream(new FileInputStream(outputPCMFile), audioFormat, (int) (
+						pcmAudioStream = new AudioInputStream(new FileInputStream(outputPCMFile), audioFormat, (long) (
 								(audioFormat.getSampleRate() * audioDuration) / 1000f));
 						outputFileWriter.addAudioTrack(pcmAudioStream,
 								frameStartTime / 1000f, (frameStartTime + audioDuration) / 1000f);
@@ -692,7 +692,7 @@ public class MOVUtilities {
 			if (audioWritten) { // only write if at least one part of the stream succeeded
 				AudioInputStream pcmAudioStream;
 				try {
-					pcmAudioStream = new AudioInputStream(new FileInputStream(outputPCMFile), audioFormat, (int) (
+					pcmAudioStream = new AudioInputStream(new FileInputStream(outputPCMFile), audioFormat, (long) (
 							(audioFormat.getSampleRate() * audioTotalDuration) / 1000f));
 
 					int arraySize = audioOffsetsList.size();
@@ -847,7 +847,7 @@ public class MOVUtilities {
 					pcmFiles[i].delete();
 				}
 				pcmFiles[i] = null;
-				Log.d(LOG_TAG, "Error creating segmented MOV audio track - couldn't create stream " + i + " PCM file");
+				Log.d(LOG_TAG, "Error creating combined MOV audio track - couldn't create stream " + i + " PCM file");
 				continue;
 			}
 
@@ -948,8 +948,8 @@ public class MOVUtilities {
 											ByteOrder.LITTLE_ENDIAN, pcmConverter
 											.getSampleRate(), (int) globalAudioFormat.getSampleRate(), pcmConverter
 											.getSampleSize(), globalAudioFormat
-											.getSampleSizeInBits(), 1, (int) currentPCMFile.length(), 0, 0, 0, true,
-											false, false, true);
+											.getSampleSizeInBits(), 1, currentPCMFile.length(), 0, 0, 0, true, false,
+											false, true);
 
 									// this is now the PCM file to use
 									if (currentPCMFile != null) {
@@ -1001,7 +1001,7 @@ public class MOVUtilities {
 									new SSRC(tempDirectory, temporaryPCMInputStream, temporaryPCMOutputStream,
 											ByteOrder.LITTLE_ENDIAN, mp3Config.sampleFrequency, (int) globalAudioFormat
 											.getSampleRate(), mp3Config.sampleSize, globalAudioFormat
-											.getSampleSizeInBits(), 1, (int) currentPCMFile
+											.getSampleSizeInBits(), 1, currentPCMFile
 											.length(), 0, 0, 0, true, false, false, true);
 
 									// this is now the PCM file to use
@@ -1054,8 +1054,8 @@ public class MOVUtilities {
 											ByteOrder.LITTLE_ENDIAN, (int) amrFormat
 											.getSampleRate(), (int) globalAudioFormat.getSampleRate(), amrFormat
 											.getSampleSizeInBits(), globalAudioFormat
-											.getSampleSizeInBits(), 1, (int) currentPCMFile.length(), 0, 0, 0, true,
-											false, false, true);
+											.getSampleSizeInBits(), 1, currentPCMFile.length(), 0, 0, 0, true, false,
+											false, true);
 
 									// this is now the PCM file to use
 									if (currentPCMFile != null) {
@@ -1106,7 +1106,7 @@ public class MOVUtilities {
 									new SSRC(tempDirectory, temporaryPCMInputStream, temporaryPCMOutputStream,
 											ByteOrder.LITTLE_ENDIAN, wavConfig.sampleFrequency, (int) globalAudioFormat
 											.getSampleRate(), wavConfig.sampleSize, globalAudioFormat
-											.getSampleSizeInBits(), 1, (int) currentPCMFile
+											.getSampleSizeInBits(), 1, currentPCMFile
 											.length(), 0, 0, 0, true, false, false, true);
 
 									// this is now the PCM file to use
@@ -1249,7 +1249,7 @@ public class MOVUtilities {
 							streamLengthsNormalised = false;
 							globalPCMFile.delete(); // delete the existing global file, and fall back to track 1
 							globalPCMFile = pcmFiles[0];
-							Log.d(LOG_TAG, "Error creating segmented MOV audio track - couldn't normalise stream " +
+							Log.d(LOG_TAG, "Error creating combined MOV audio track - couldn't normalise stream " +
 									"lengths");
 							break;
 						} finally {
@@ -1335,7 +1335,7 @@ public class MOVUtilities {
 					} catch (Exception e) {
 						globalPCMFile.delete(); // delete the existing global file, and fall back to track 1
 						globalPCMFile = pcmFiles[0];
-						Log.d(LOG_TAG, "Error creating segmented MOV audio track - couldn't create combined stream");
+						Log.d(LOG_TAG, "Error creating combined MOV audio track - couldn't create combined stream");
 					} finally {
 						for (InputStream pcmStream : pcmStreams) {
 							IOUtilities.closeStream(pcmStream);
@@ -1349,11 +1349,10 @@ public class MOVUtilities {
 				globalPCMFile = pcmFiles[0]; // most of the time we have only one track
 			}
 
-			// TODO: VLC still fails to play even resampled and mixed audio streams - do we need a WAV header to fix?
 			AudioInputStream pcmAudioStream;
 			try {
 				// output from converters and/or SSRC is mono signed 16-bit little-endian integers
-				pcmAudioStream = new AudioInputStream(new FileInputStream(globalPCMFile), globalAudioFormat, (int) (
+				pcmAudioStream = new AudioInputStream(new FileInputStream(globalPCMFile), globalAudioFormat, (long) (
 						(globalAudioFormat.getSampleRate() * globalAudioDuration) / 1000f));
 
 				// new source: pumpernickel/pump-quicktime/src/main/java/com/pump/animation/quicktime/MovWriter.java

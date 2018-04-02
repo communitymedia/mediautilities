@@ -6,14 +6,14 @@
  * Copyright (c) 2011 by Jeremy Wood.
  * All rights reserved.
  *
- * The copyright of this software is owned by Jeremy Wood. 
- * You may not use, copy or modify this software, except in  
- * accordance with the license agreement you entered into with  
+ * The copyright of this software is owned by Jeremy Wood.
+ * You may not use, copy or modify this software, except in
+ * accordance with the license agreement you entered into with
  * Jeremy Wood. For details see accompanying license terms.
- * 
+ *
  * This software is probably, but not necessarily, discussed here:
  * http://javagraphics.java.net/
- * 
+ *
  * That site should also contain the most recent official version
  * of this software.  (See the SVN repository for more details.)
  */
@@ -29,11 +29,11 @@ import com.bric.io.GuardedOutputStream;
  * As samples are added to a media, they are collected into chunks that allow optimized data access. A chunk contains
  * one or more samples. Chunks in a media may have different sizes, and the samples within a chunk may have different
  * sizes. The sample-to-chunk atom stores chunk information for the samples in a media.
- * 
+ *
  * Sample-to-chunk atoms have an atom type of 'stsc'. The sample-to-chunk atom contains a table that maps samples to
  * chunks in the media data stream. By examining the sample-to-chunk atom, you can determine the chunk that contains a
  * specific sample.
- * 
+ *
  */
 public class SampleToChunkAtom extends LeafAtom {
 	int version = 0;
@@ -75,8 +75,7 @@ public class SampleToChunkAtom extends LeafAtom {
 					// this is where this chunk belongs:
 					if (entries[a].samplesPerChunk == samplesPerChunk
 							&& entries[a].sampleDescriptionID == sampleDescriptionID) {
-						// this new entry is implied; it doesn't need to be
-						// written.
+						// this new entry is implied; it doesn't need to be written.
 						return;
 					} else {
 						SampleToChunkEntry[] newTable = new SampleToChunkEntry[entries.length + 1];
@@ -138,7 +137,7 @@ public class SampleToChunkAtom extends LeafAtom {
 
 	/**
 	 * The sample description ID for a specific chunk.
-	 * 
+	 *
 	 * @param chunkIndex the chunk to examine
 	 * @return the sample description ID used in this chunk.
 	 */
@@ -148,7 +147,7 @@ public class SampleToChunkAtom extends LeafAtom {
 
 	/**
 	 * Returns how many samples are in a given chunk.
-	 * 
+	 *
 	 * @param chunkIndex the chunk to examine
 	 * @return how many samples are in a given chunk.
 	 */
