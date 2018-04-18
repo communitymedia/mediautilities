@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<resources>
+
+	<!-- TODO: remove these strings into individual projects to make translation easier -->
+	<!-- directory selector -->
+	<string name="current_location">Текущий: %1$s</string>
+	<string name="select_directory">Выбрать</string>
+	<string name="parent_directory">[Директория предыдущего уровня]</string>
+	<string name="directory_browser_error">Ошибка: папка не открывается - повторите попытку</string>
+
+	<!-- menu item -->
+	<string name="menu_save">Сохранить</string>
+
+	<!-- media controller -->
+	<string name="back_description">Вернуться</string>
+	<string name="rew_description">Перемотать назад</string>
+	<string name="play_description">Воспроизвести / пауза</string>
+	<string name="ffwd_description">Перемотать вперед</string>
+	<string name="export_description">Экспортировать настоящую историю</string> <!--doesn't matter about narrative/media - only used in MediaPhone-->
+
+</resources>

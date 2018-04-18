@@ -17,5 +17,5 @@
 	<string name="rew_description">Retroceder</string>
 	<string name="play_description">Reproducir/ pausar</string>
 	<string name="ffwd_description">Adelantar</string>
-	<string name="export_description">Exportar esta narrativa</string><!--doesn't matter about narrative/media - only used in MediaPhone-->
+	<string name="export_description">Exportar esta narrativa</string> <!--doesn't matter about narrative/media - only used in MediaPhone-->
 </resources>
