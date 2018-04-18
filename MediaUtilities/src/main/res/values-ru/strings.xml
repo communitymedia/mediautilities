@@ -10,6 +10,7 @@
 
 	<!-- menu item -->
 	<string name="menu_save">Сохранить</string>
+	<string name="menu_cancel">Отменить</string>
 
 	<!-- media controller -->
 	<string name="back_description">Вернуться</string>
