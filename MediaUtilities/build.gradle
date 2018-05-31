@@ -40,8 +40,9 @@ android {
 dependencies {
 	// compile files('libs/libopencore-wrapper_armeabi.jar') // no-longer needed - jniLibs are automatically imported
 
+	// TODO: we need to stick with the older library to support SDKs 9 to 13 :-(
 	//noinspection GradleDependency
-	compile 'com.android.support:exifinterface:25.4.0'  // need to stick with older library to support SDKs 9 to 13 :-(
+	compile 'com.android.support:exifinterface:25.4.0'
 
 	compile 'com.google.code.findbugs:annotations:3.0.1', {
 		// Need to exclude these, or build is broken by:
