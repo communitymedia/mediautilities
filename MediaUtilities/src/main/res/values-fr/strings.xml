@@ -6,7 +6,7 @@
 	<string name="current_location">En cours : %1$s</string>
 	<string name="select_directory">Sélectionner</string>
 	<string name="parent_directory">[Dossier parent]</string>
-	<string name="directory_browser_error">Erreur : impossible de trouver le dossier temporaire – merci de vous assurer qu\'il vous reste de l\'espace de stockage disponible sur votre appareil ou votre carte SD</string>
+	<string name="directory_browser_error">Erreur : impossible d\'ouvrir le dossier – veuillez réessayer</string>
 
 	<!-- menu item -->
 	<string name="menu_save">Enregistrer</string>

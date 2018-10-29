@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<!-- TODO: remove these strings into individual projects to make translation easier -->
+	<!-- directory selector -->
+	<string name="current_location">Huidig: %1$s</string>
+	<string name="select_directory">Kiezen</string>
+	<string name="parent_directory">[Bovenliggende map]</string>
+	<string name="directory_browser_error">Fout: map kan niet worden geopend – probeer het opnieuw</string>
+
+	<!-- menu item -->
+	<string name="menu_save">Opslaan</string>
+	<string name="menu_cancel">Annuleren</string>
+
+	<!-- media controller -->
+	<string name="back_description">Terug</string>
+	<string name="rew_description">Terugspoelen</string>
+	<string name="play_description">Afspelen/pauzeren</string>
+	<string name="ffwd_description">Vooruitspoelen</string>
+	<string name="export_description">Deze verhaallijn exporteren</string> <!-- doesn't matter about narrative/media - only used in MediaPhone -->
+
+</resources>
