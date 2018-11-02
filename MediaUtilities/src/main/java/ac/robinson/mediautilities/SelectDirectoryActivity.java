@@ -25,6 +25,7 @@ import android.app.ListActivity;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,7 +47,7 @@ import ac.robinson.util.UIUtilities;
 public class SelectDirectoryActivity extends ListActivity {
 
 	private static final String ITEM_KEY = "key";
-	private static final File ROOT = new File("/");
+	private static final File ROOT = Environment.getExternalStorageDirectory();
 
 	public static final String START_PATH = "start_path";
 	public static final String RESULT_PATH = "result_path";
