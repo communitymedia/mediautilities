@@ -66,8 +66,7 @@ public class BitmapUtilities {
 		}
 	}
 
-	// get screen size by: Display display =
-	// ((WindowManager)getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+	// get screen size by: Display display = ((WindowManager)getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
 	// if using an ImageView etc, remember that the size is zero initially before inflation
 	public static Bitmap loadAndCreateScaledBitmap(String imagePath, int dstWidth, int dstHeight,
 			ScalingLogic scalingLogic, boolean rotateImage) {

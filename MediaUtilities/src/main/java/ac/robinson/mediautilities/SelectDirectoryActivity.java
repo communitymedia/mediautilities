@@ -23,12 +23,17 @@ package ac.robinson.mediautilities;
 import android.app.Activity;
 import android.app.ListActivity;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.HorizontalScrollView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -43,7 +48,7 @@ import java.util.Map;
 
 import ac.robinson.util.UIUtilities;
 
-// TODO: use a better picker, such as: https://github.com/iPaulPro/aFileChooser
+// TODO: use a better picker option? (such as: https://github.com/iPaulPro/aFileChooser or ScopedDirectoryAccess)
 public class SelectDirectoryActivity extends ListActivity {
 
 	private static final String ITEM_KEY = "key";
@@ -52,11 +57,16 @@ public class SelectDirectoryActivity extends ListActivity {
 	public static final String START_PATH = "start_path";
 	public static final String RESULT_PATH = "result_path";
 
+	private static String[] SYSTEM_PATHS = {
+			"/storage/emulated/0" // TODO: are there others?
+	};
+
+	private HorizontalScrollView mPathViewHolder;
 	private TextView mPathView;
 	private ArrayList<HashMap<String, String>> mFileList = new ArrayList<>();
 	private List<String> mPaths = new ArrayList<>();
 
-	private File currentPath = ROOT;
+	private File mCurrentPath = ROOT;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -64,21 +74,24 @@ public class SelectDirectoryActivity extends ListActivity {
 		setResult(Activity.RESULT_CANCELED, getIntent());
 
 		setContentView(R.layout.select_directory_main);
-		mPathView = (TextView) findViewById(R.id.path);
+		mPathViewHolder = findViewById(R.id.path_bar);
+		mPathView = findViewById(R.id.path);
+
+		((ImageView) findViewById(R.id.path_bar_icon)).setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN);
 
 		String startPath = getIntent().getStringExtra(START_PATH);
 		getDirectory(startPath != null ? new File(startPath) : ROOT);
 	}
 
 	private void getDirectory(File dirPath) {
-		currentPath = dirPath;
+		mCurrentPath = dirPath;
 		mFileList.clear();
 		mPaths.clear();
 
-		File[] files = currentPath.listFiles();
+		File[] files = mCurrentPath.listFiles();
 		if (files == null) {
-			currentPath = ROOT;
-			files = currentPath.listFiles();
+			mCurrentPath = ROOT;
+			files = mCurrentPath.listFiles();
 		}
 
 		if (files == null) {
@@ -104,11 +117,17 @@ public class SelectDirectoryActivity extends ListActivity {
 			}
 		});
 
-		mPathView.setText(getString(R.string.current_location, currentPath));
+		mPathView.setText(getString(R.string.current_location, stripSystemPath(mCurrentPath)));
+		mPathViewHolder.post(new Runnable() {
+			@Override
+			public void run() {
+				mPathViewHolder.fullScroll(View.FOCUS_RIGHT);
+			}
+		});
 
-		if (!currentPath.equals(ROOT)) {
+		if (!mCurrentPath.equals(ROOT)) {
 			addItem("/bi/" + getString(R.string.parent_directory));
-			mPaths.add(currentPath.getParent());
+			mPaths.add(mCurrentPath.getParent());
 		}
 
 		// list is pre-sorted
@@ -116,7 +135,7 @@ public class SelectDirectoryActivity extends ListActivity {
 			String fileName = file.getName();
 			if (!fileName.startsWith(".")) {
 				if (file.isDirectory()) {
-					addItem("/b/" + fileName + "/");
+					addItem("/b/" + fileName);
 				} else {
 					addItem("/i/" + fileName);
 				}
@@ -124,10 +143,22 @@ public class SelectDirectoryActivity extends ListActivity {
 			}
 		}
 
-		StyledSimpleAdapter fileList = new StyledSimpleAdapter(this, mFileList, R.layout.select_directory_row, new
-				String[]{ITEM_KEY}, new int[]{R.id.directory_selector_row});
+		StyledSimpleAdapter fileList = new StyledSimpleAdapter(this, mFileList, R.layout.select_directory_row, new String[]{
+				ITEM_KEY
+		}, new int[]{ R.id.directory_selector_row });
 
 		setListAdapter(fileList);
+	}
+
+	private String stripSystemPath(File currentFile) {
+		String path = currentFile.getAbsolutePath();
+		for (String systemPath : SYSTEM_PATHS) {
+			if (path.startsWith(systemPath)) {
+				String strippedPath = path.substring(systemPath.length());
+				return TextUtils.isEmpty(strippedPath) ? "/" : strippedPath; // return so we only strip once
+			}
+		}
+		return path;
 	}
 
 	private void addItem(String text) {
@@ -148,30 +179,15 @@ public class SelectDirectoryActivity extends ListActivity {
 		}
 	}
 
-	// TODO: do we really want to do "up" on back press?
-	// @Override
-	// public boolean onKeyDown(int keyCode, KeyEvent event) {
-	// if ((keyCode == KeyEvent.KEYCODE_BACK)) {
-	// if (!currentPath.equals(ROOT)) {
-	// getDirectory(currentPath.getParentFile());
-	// } else {
-	// return super.onKeyDown(keyCode, event);
-	// }
-	// return true;
-	// } else {
-	// return super.onKeyDown(keyCode, event);
-	// }
-	// }
-
 	public void handleButtonClicks(View currentButton) {
 		int buttonId = currentButton.getId();
 		if (buttonId == R.id.select_directory) {
-			if (currentPath != null) {
-				getIntent().putExtra(RESULT_PATH, currentPath.getAbsolutePath());
+			if (mCurrentPath != null) {
+				getIntent().putExtra(RESULT_PATH, mCurrentPath.getAbsolutePath());
 				setResult(RESULT_OK, getIntent());
 				finish();
 			}
-		} else if (buttonId == R.id.cancel_select) {
+		} else if (buttonId == R.id.cancel_select || buttonId == R.id.path_bar_icon) {
 			finish();
 		}
 	}
@@ -183,23 +199,24 @@ public class SelectDirectoryActivity extends ListActivity {
 
 		public View getView(int position, View convertView, ViewGroup parent) {
 			if (convertView == null) {
-				LayoutInflater layoutInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				LayoutInflater layoutInflater = LayoutInflater.from(SelectDirectoryActivity.this);
 				convertView = layoutInflater.inflate(R.layout.select_directory_row, parent, false);
 			}
 			TextView textView = ((TextView) convertView);
 			textView.setTypeface(null, Typeface.NORMAL);
 			String text = mFileList.get(position).get(ITEM_KEY);
-			if (text.startsWith("/bi/")) {
-				textView.setTypeface(null, Typeface.BOLD_ITALIC);
-				text = text.substring(4);
-			}
-			if (text.startsWith("/b/")) {
-				textView.setTypeface(null, Typeface.BOLD);
-				text = text.substring(3);
-			}
-			if (text.startsWith("/i/")) {
-				textView.setTypeface(null, Typeface.ITALIC);
-				text = text.substring(3);
+			if (!TextUtils.isEmpty(text)) {
+				if (text.startsWith("/bi/")) { // root directory
+					textView.setTypeface(null, Typeface.BOLD);
+					text = "▲   " + text.substring(4); // TODO: will this arrow symbol work on every device?
+				}
+				if (text.startsWith("/b/")) { // folders
+					text = "\uD83D\uDCC1   " + text.substring(3); // TODO: will this folder symbol work on every device?
+				}
+				if (text.startsWith("/i/")) { // files
+					textView.setTypeface(null, Typeface.ITALIC);
+					text = text.substring(3);
+				}
 			}
 			textView.setText(text);
 			return convertView;

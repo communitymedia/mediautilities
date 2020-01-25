@@ -150,8 +150,8 @@ public class CustomMediaController extends FrameLayout {
 	 * @hide This doesn't work as advertised
 	 */
 	protected View makeControllerView() {
-		LayoutInflater inflate = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		mRoot = inflate.inflate(R.layout.custom_media_controller, null);
+		LayoutInflater inflater = LayoutInflater.from(mContext);
+		mRoot = inflater.inflate(R.layout.custom_media_controller, null);
 
 		initControllerView(mRoot);
 

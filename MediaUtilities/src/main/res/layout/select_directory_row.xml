@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
 	android:id="@+id/directory_selector_row"
-	android:layout_width="match_parent"
-	android:layout_height="35dp"
 	android:gravity="center_vertical"
+	android:layout_height="0dp"
+	android:layout_width="match_parent"
 	android:maxLines="1"
-	android:textIsSelectable="false"
-	android:textSize="23sp" />
+	android:minHeight="?android:attr/listPreferredItemHeight"
+	android:paddingLeft="18dp"
+	android:paddingRight="18dp"
+	android:textAppearance="?android:attr/textAppearanceListItem"
+	android:textIsSelectable="false"/>

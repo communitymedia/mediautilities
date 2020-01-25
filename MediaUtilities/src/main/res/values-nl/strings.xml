@@ -5,7 +5,7 @@
 	<!-- directory selector -->
 	<string name="current_location">Huidig: %1$s</string>
 	<string name="select_directory">Kiezen</string>
-	<string name="parent_directory">[Bovenliggende map]</string>
+	<string name="parent_directory">Bovenliggende map</string>
 	<string name="directory_browser_error">Fout: map kan niet worden geopend – probeer het opnieuw</string>
 
 	<!-- menu item -->

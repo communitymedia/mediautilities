@@ -5,7 +5,7 @@
 	<!-- directory selector -->
 	<string name="current_location">Actual: %1$s</string>
 	<string name="select_directory">Seleccionar</string>
-	<string name="parent_directory">[Directorio raíz]</string>
+	<string name="parent_directory">Directorio raíz</string>
 	<string name="directory_browser_error">Error: no se puede abrir la carpeta - por favor, inténtelo de nuevo</string>
 
 	<!-- menu item -->

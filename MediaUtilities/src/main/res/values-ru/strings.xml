@@ -5,7 +5,7 @@
 	<!-- directory selector -->
 	<string name="current_location">Текущий: %1$s</string>
 	<string name="select_directory">Выбрать</string>
-	<string name="parent_directory">[Директория предыдущего уровня]</string>
+	<string name="parent_directory">Директория предыдущего уровня</string>
 	<string name="directory_browser_error">Ошибка: папка не открывается - повторите попытку</string>
 
 	<!-- menu item -->

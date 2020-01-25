@@ -1,56 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent">
+	android:layout_height="match_parent"
+	android:layout_width="match_parent">
 
 	<LinearLayout
 		android:id="@+id/buttons"
-		style="?android:attr/buttonBarStyle"
-		android:layout_width="match_parent"
-		android:layout_height="60dp"
+		style="?android:attr/actionBarStyle"
 		android:layout_alignParentBottom="true"
+		android:layout_height="?android:attr/actionBarSize"
+		android:layout_width="match_parent"
 		android:orientation="horizontal">
 
 		<Button
 			android:id="@+id/cancel_select"
-			style="?android:attr/buttonBarButtonStyle"
-			android:layout_width="0dp"
+			style="?android:attr/borderlessButtonStyle"
 			android:layout_height="match_parent"
 			android:layout_weight="1"
+			android:layout_width="0dp"
 			android:onClick="handleButtonClicks"
-			android:text="@string/menu_cancel" />
+			android:text="@string/menu_cancel"
+			android:textColor="@android:color/white"
+			android:visibility="gone" />
 
 		<Button
 			android:id="@+id/select_directory"
-			style="?android:attr/buttonBarButtonStyle"
-			android:layout_width="0dp"
+			style="?android:attr/borderlessButtonStyle"
 			android:layout_height="match_parent"
 			android:layout_weight="1"
+			android:layout_width="0dp"
 			android:onClick="handleButtonClicks"
-			android:text="@string/select_directory" />
+			android:text="@string/select_directory"
+			android:textColor="@android:color/white" />
 	</LinearLayout>
 
 	<LinearLayout
+		android:id="@+id/path_bar_container"
+		style="?android:attr/actionBarStyle"
+		android:layout_height="?android:attr/actionBarSize"
 		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:layout_above="@id/buttons"
-		android:orientation="vertical">
+		android:orientation="horizontal">
 
-		<TextView
-			android:id="@+id/path"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:textIsSelectable="false" />
+		<ImageButton
+			android:id="@+id/path_bar_icon"
+			android:contentDescription="@android:string/cancel"
+			android:layout_gravity="center_vertical"
+			android:layout_height="match_parent"
+			android:layout_width="wrap_content"
+			android:onClick="handleButtonClicks"
+			android:paddingLeft="16dp"
+			android:paddingRight="16dp"
+			android:src="?android:attr/homeAsUpIndicator" />
+
+		<HorizontalScrollView
+			android:id="@+id/path_bar"
+			android:layout_height="?android:attr/actionBarSize"
+			android:layout_marginEnd="0dp"
+			android:layout_marginLeft="16dp"
+			android:layout_marginRight="0dp"
+			android:layout_marginStart="16dp"
+			android:layout_width="match_parent">
+
+			<TextView
+				android:id="@+id/path"
+				android:layout_gravity="center_vertical"
+				android:layout_height="wrap_content"
+				android:layout_width="wrap_content"
+				android:maxLines="1"
+				android:paddingEnd="18dp"
+				android:paddingLeft="0dp"
+				android:paddingRight="18dp"
+				android:paddingStart="0dp"
+				android:scrollHorizontally="true"
+				android:textColor="@android:color/white"
+				android:textFontWeight="600"
+				android:textIsSelectable="false"
+				android:textSize="20sp"
+				android:textStyle="bold" />
+
+		</HorizontalScrollView>
+	</LinearLayout>
+
+	<LinearLayout
+		android:layout_above="@id/buttons"
+		android:layout_below="@id/path_bar_container"
+		android:layout_height="match_parent"
+		android:layout_width="match_parent"
+		android:orientation="vertical">
 
 		<ListView
 			android:id="@android:id/list"
+			android:layout_height="match_parent"
 			android:layout_width="match_parent"
-			android:layout_height="match_parent" />
+			android:scrollbarAlwaysDrawVerticalTrack="true" />
 
 		<TextView
 			android:id="@android:id/empty"
-			android:layout_width="match_parent"
 			android:layout_height="match_parent"
+			android:layout_width="match_parent"
 			android:text="@null" />
 	</LinearLayout>
 

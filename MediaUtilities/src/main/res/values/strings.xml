@@ -5,7 +5,7 @@
 	<!-- directory selector -->
 	<string name="current_location">Current: %1$s</string>
 	<string name="select_directory">Select</string>
-	<string name="parent_directory">[Parent directory]</string>
+	<string name="parent_directory">Parent directory</string>
 	<string name="directory_browser_error">Error: unable to open folder – please try again</string>
 
 	<string name="textview_ellipsis" translatable="false">…</string>

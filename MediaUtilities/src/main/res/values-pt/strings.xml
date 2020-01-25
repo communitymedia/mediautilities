@@ -5,7 +5,7 @@
 	<!-- directory selector -->
 	<string name="current_location">Atual: %1$s</string>
 	<string name="select_directory">Selecionar</string>
-	<string name="parent_directory">[Diretório principal]</string>
+	<string name="parent_directory">Diretório principal</string>
 	<string name="directory_browser_error">Erro: não foi possível encontrar um diretório temporário – verifique se o dispositivo ou cartão SD tem espaço livre disponível</string>
 
 	<!-- menu item -->
