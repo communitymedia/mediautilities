@@ -1,16 +1,16 @@
 /*
  *  Copyright (C) 2012 Simon Robinson
- * 
+ *
  *  This file is part of Com-Me.
- * 
- *  Com-Me is free software; you can redistribute it and/or modify it 
- *  under the terms of the GNU Lesser General Public License as 
- *  published by the Free Software Foundation; either version 3 of the 
+ *
+ *  Com-Me is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License as
+ *  published by the Free Software Foundation; either version 3 of the
  *  License, or (at your option) any later version.
  *
- *  Com-Me is distributed in the hope that it will be useful, but WITHOUT 
- *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General 
+ *  Com-Me is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General
  *  Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public
@@ -28,18 +28,6 @@ public class MediaUtilities {
 	// class options
 	public static final boolean MOV_USE_SEGMENTED_AUDIO = true;
 
-	// capabilities (detected at load time)
-	public static boolean CAN_EXPORT_AMR = false;
-
-	static {
-		try {
-			System.loadLibrary("opencore-amrnb-wrapper");
-			CAN_EXPORT_AMR = true;
-		} catch (Throwable t) {
-			CAN_EXPORT_AMR = false;
-		}
-	}
-
 	// file extensions (including dots)
 	// .sync.jpg is to counter Android's ridiculous incoming filename filtering
 	public static final String SMIL_FILE_EXTENSION = ".smil";
@@ -52,7 +40,6 @@ public class MediaUtilities {
 	public static final String[] M4A_FILE_EXTENSIONS = { "m4a", "aac" };
 	public static final String[] MP3_FILE_EXTENSIONS = { "mp3" };
 	public static final String[] WAV_FILE_EXTENSIONS = { "wav" };
-	public static final String[] AMR_FILE_EXTENSIONS = { "amr", "3gp", "3gpp" };
 	public static String[] MOV_AUDIO_FILE_EXTENSIONS;
 
 	static {
@@ -64,14 +51,6 @@ public class MediaUtilities {
 		System.arraycopy(WAV_FILE_EXTENSIONS, 0, tempExtensions,
 				M4A_FILE_EXTENSIONS.length + MP3_FILE_EXTENSIONS.length, WAV_FILE_EXTENSIONS.length);
 		MOV_AUDIO_FILE_EXTENSIONS = tempExtensions;
-		if (CAN_EXPORT_AMR) {
-			totalLength = MOV_AUDIO_FILE_EXTENSIONS.length + AMR_FILE_EXTENSIONS.length;
-			tempExtensions = new String[totalLength];
-			System.arraycopy(MOV_AUDIO_FILE_EXTENSIONS, 0, tempExtensions, 0, MOV_AUDIO_FILE_EXTENSIONS.length);
-			System.arraycopy(AMR_FILE_EXTENSIONS, 0, tempExtensions, MOV_AUDIO_FILE_EXTENSIONS.length,
-					AMR_FILE_EXTENSIONS.length);
-			MOV_AUDIO_FILE_EXTENSIONS = tempExtensions;
-		}
 	}
 
 	// message IDs (see: http://stackoverflow.com/questions/3432649/)

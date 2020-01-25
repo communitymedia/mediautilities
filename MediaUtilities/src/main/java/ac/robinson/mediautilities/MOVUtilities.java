@@ -51,7 +51,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
 
-import ac.robinson.mov.AMRtoPCMConverter;
 import ac.robinson.mov.JPEGMovWriter;
 import ac.robinson.mov.MP3toPCMConverter;
 import ac.robinson.mov.MP3toPCMConverter.MP3Configuration;
@@ -70,7 +69,7 @@ public class MOVUtilities {
 
 	private static final String LOG_TAG = "MOVUtilities";
 
-	private enum AudioType {NONE, M4A, MP3, WAV, AMR}
+	private enum AudioType {NONE, M4A, MP3, WAV}
 
 	public static ArrayList<Uri> generateNarrativeMOV(Resources res, File outputFile, ArrayList<FrameMediaContainer>
 			framesToSend, Map<Integer, Object> settings) {
@@ -306,26 +305,6 @@ public class MOVUtilities {
 							Log.d(LOG_TAG, "Error creating individual MP3 audio track - general " + "Exception");
 						}
 
-					} else if (AndroidUtilities.arrayContains(MediaUtilities.AMR_FILE_EXTENSIONS,
-							audioFileExtension)) {
-						try {
-
-							// first we need to extract PCM audio from the AMR file
-							AMRtoPCMConverter.convertFile(inputAudioFile, outputPCMStream);
-
-							// get the audio format - output is mono signed 16-bit little-endian integers, 8000Hz
-							audioFormat = new AudioFormat(8000, 16, 1, true, false);
-							Log.d(LOG_TAG, "Outputting AMR: 8000, 16, 1, signed, little endian");
-
-						} catch (IOException e) {
-							decodingError = true;
-							Log.d(LOG_TAG, "Error creating individual AMR audio track - IOException: " +
-									e.getLocalizedMessage());
-						} catch (Exception e) {
-							decodingError = true;
-							Log.d(LOG_TAG, "Error creating individual AMR audio track - general " + "Exception");
-						}
-
 					} else if (AndroidUtilities.arrayContains(MediaUtilities.WAV_FILE_EXTENSIONS,
 							audioFileExtension)) {
 						try {
@@ -397,8 +376,6 @@ public class MOVUtilities {
 					fileExtension = MediaUtilities.M4A_FILE_EXTENSIONS[0];
 				} else if (AndroidUtilities.arrayContains(MediaUtilities.MP3_FILE_EXTENSIONS, actualFileExtension)) {
 					fileExtension = MediaUtilities.MP3_FILE_EXTENSIONS[0];
-				} else if (AndroidUtilities.arrayContains(MediaUtilities.AMR_FILE_EXTENSIONS, actualFileExtension)) {
-					fileExtension = MediaUtilities.AMR_FILE_EXTENSIONS[0];
 				} else if (AndroidUtilities.arrayContains(MediaUtilities.WAV_FILE_EXTENSIONS, actualFileExtension)) {
 					fileExtension = MediaUtilities.WAV_FILE_EXTENSIONS[0];
 				} else {
@@ -486,10 +463,6 @@ public class MOVUtilities {
 							audioFileExtension) &&
 							currentTrackType.equals(MediaUtilities.MP3_FILE_EXTENSIONS[0])) {
 						currentAudioType = AudioType.MP3;
-					} else if (AndroidUtilities.arrayContains(MediaUtilities.AMR_FILE_EXTENSIONS,
-							audioFileExtension) &&
-							currentTrackType.equals(MediaUtilities.AMR_FILE_EXTENSIONS[0])) {
-						currentAudioType = AudioType.AMR;
 					} else if (AndroidUtilities.arrayContains(MediaUtilities.WAV_FILE_EXTENSIONS,
 							audioFileExtension) &&
 							currentTrackType.equals(MediaUtilities.WAV_FILE_EXTENSIONS[0])) {
@@ -593,27 +566,6 @@ public class MOVUtilities {
 						} catch (Exception e) {
 							decodingError = true;
 							Log.d(LOG_TAG, "Error creating segmented MP3 audio track - general Exception");
-						}
-
-					} else if (currentAudioType == AudioType.AMR) {
-						try {
-
-							// first we need to extract PCM audio from the AMR file
-							AMRtoPCMConverter.convertFile(inputAudioFile, outputPCMStream);
-
-							// get the audio format - output is mono signed 16-bit little-endian integers, 8000Hz
-							if (audioFormat == null) { // TODO: we assume all AMR components are the same format
-								audioFormat = new AudioFormat(8000, 16, 1, true, false);
-								Log.d(LOG_TAG, "Outputting AMR: 8000, 16, 1, signed, little endian");
-							}
-
-						} catch (IOException e) {
-							decodingError = true;
-							Log.d(LOG_TAG, "Error creating segmented AMR audio track - IOException: " +
-									e.getLocalizedMessage());
-						} catch (Exception e) {
-							decodingError = true;
-							Log.d(LOG_TAG, "Error creating segmented AMR audio track - general Exception");
 						}
 
 					} else if (currentAudioType == AudioType.WAV) {
@@ -766,15 +718,6 @@ public class MOVUtilities {
 						}
 					}
 
-				} else if (AndroidUtilities.arrayContains(MediaUtilities.AMR_FILE_EXTENSIONS, actualFileExtension)) {
-					fileExtension = MediaUtilities.AMR_FILE_EXTENSIONS[0];
-					if (automaticSampleRate) {
-						AudioFormat amrFormat = new AudioFormat(8000, 16, 1, true, false);
-						fileSampleRates.put((int) amrFormat.getSampleRate(),
-								audioDuration + fileSampleRates.get((int) amrFormat.getSampleRate(), 0));
-						Log.d(LOG_TAG, "AMR type: " + amrFormat.getSampleRate() + ", " + audioDuration);
-					}
-
 				} else if (AndroidUtilities.arrayContains(MediaUtilities.WAV_FILE_EXTENSIONS, actualFileExtension)) {
 					fileExtension = MediaUtilities.WAV_FILE_EXTENSIONS[0];
 					if (automaticSampleRate) {
@@ -890,9 +833,6 @@ public class MOVUtilities {
 					} else if (AndroidUtilities.arrayContains(MediaUtilities.MP3_FILE_EXTENSIONS,
 							audioFileExtension)) {
 						currentAudioType = AudioType.MP3;
-					} else if (AndroidUtilities.arrayContains(MediaUtilities.AMR_FILE_EXTENSIONS,
-							audioFileExtension)) {
-						currentAudioType = AudioType.AMR;
 					} else if (AndroidUtilities.arrayContains(MediaUtilities.WAV_FILE_EXTENSIONS,
 							audioFileExtension)) {
 						currentAudioType = AudioType.WAV;
@@ -1027,59 +967,6 @@ public class MOVUtilities {
 						} catch (Exception e) {
 							decodingError = true;
 							Log.d(LOG_TAG, "Error creating combined MP3 audio track: " + e.getLocalizedMessage());
-						}
-
-					} else if (currentAudioType == AudioType.AMR) {
-						try {
-							// first we need to extract PCM audio from the AMR file
-							// output from PCM converter is mono signed 16-bit little-endian integers, always 8000Hz
-							AMRtoPCMConverter.convertFile(inputAudioFile, currentPCMStream);
-							AudioFormat amrFormat = new AudioFormat(8000, 16, 1, true, false);
-
-							// if the sample rate or sample size don't match our output, use SSRC to resample the audio
-							if (amrFormat.getSampleRate() != globalAudioFormat.getSampleRate() ||
-									amrFormat.getSampleSizeInBits() != globalAudioFormat.getSampleSizeInBits()) {
-
-								Log.d(LOG_TAG, "Resampling AMR audio");
-								try {
-									temporaryPCMInputStream = new BufferedInputStream(new FileInputStream
-											(currentPCMFile));
-									temporaryPCMFile = File.createTempFile(inputAudioFile.getName(), ".temp.pcm",
-											tempDirectory);
-									temporaryPCMOutputStream = new BufferedOutputStream(new FileOutputStream
-											(temporaryPCMFile));
-
-									// use SSRC to resample PCM audio - note that two passes are required for accuracy
-									new SSRC(tempDirectory, temporaryPCMInputStream, temporaryPCMOutputStream,
-											ByteOrder.LITTLE_ENDIAN, (int) amrFormat
-											.getSampleRate(), (int) globalAudioFormat.getSampleRate(), amrFormat
-											.getSampleSizeInBits(), globalAudioFormat
-											.getSampleSizeInBits(), 1, currentPCMFile.length(), 0, 0, 0, true, false,
-											false, true);
-
-									// this is now the PCM file to use
-									if (currentPCMFile != null) {
-										currentPCMFile.delete();
-									}
-									currentPCMFile = temporaryPCMFile;
-
-								} catch (Exception e) {
-									if (temporaryPCMFile != null) {
-										temporaryPCMFile.delete();
-									}
-								} finally {
-									IOUtilities.closeStream(temporaryPCMInputStream);
-									IOUtilities.closeStream(temporaryPCMOutputStream);
-								}
-							}
-
-							Log.d(LOG_TAG, "Outputting AMR: " + globalAudioFormat.getSampleRate() + ", " +
-									globalAudioFormat.getSampleSizeInBits() + " from " + amrFormat.getSampleRate() +
-									", " + amrFormat.getSampleSizeInBits());
-
-						} catch (Exception e) {
-							decodingError = true;
-							Log.d(LOG_TAG, "Error creating combined AMR audio track: " + e.getLocalizedMessage());
 						}
 
 					} else if (currentAudioType == AudioType.WAV) {

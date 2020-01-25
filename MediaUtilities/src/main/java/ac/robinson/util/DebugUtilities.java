@@ -1,16 +1,16 @@
 /*
  *  Copyright (C) 2012 Simon Robinson
- * 
+ *
  *  This file is part of Com-Me.
- * 
- *  Com-Me is free software; you can redistribute it and/or modify it 
- *  under the terms of the GNU Lesser General Public License as 
- *  published by the Free Software Foundation; either version 3 of the 
+ *
+ *  Com-Me is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License as
+ *  published by the Free Software Foundation; either version 3 of the
  *  License, or (at your option) any later version.
  *
- *  Com-Me is distributed in the hope that it will be useful, but WITHOUT 
- *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General 
+ *  Com-Me is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General
  *  Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public
@@ -114,21 +114,8 @@ public class DebugUtilities {
 		return devices.contains(getDeviceBrandProduct());
 	}
 
-	// some devices can only record AMR audio
-	public static boolean supportsAMRAudioRecordingOnly() {
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.GINGERBREAD_MR1) {
-			return true; // no pre-v10 devices support anything other than AMR
-		}
-
-		ArrayList<String> devices = new ArrayList<String>();
-		devices.add("samsung/GT-S5830/GT-S5830"); // Samsung Galaxy Ace
-		devices.add("samsung/GT-S5830i/GT-S5830i"); // Samsung Galaxy Ace i
-		// devices.add("samsung/GT-S5360/GT-S5360"); // Samsung Galaxy Y - probable, but not certain
-
-		return devices.contains(getDeviceBrandProduct());
-	}
-
 	public static boolean supportsLandscapeCameraOnly() {
+		// TODO: should probably be deprecated as these devices don't support our minimum SDK level
 		ArrayList<String> devices = new ArrayList<String>();
 		devices.add("samsung/GT-S5830/GT-S5830"); // Samsung Galaxy Ace
 		devices.add("samsung/GT-S5830i/GT-S5830i"); // Samsung Galaxy Ace i

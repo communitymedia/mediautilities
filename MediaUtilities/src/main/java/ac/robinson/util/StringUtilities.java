@@ -32,7 +32,10 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.Normalizer;
 import java.util.Locale;
+
+import ac.robinson.mediautilities.R;
 
 public class StringUtilities {
 
@@ -109,5 +112,10 @@ public class StringUtilities {
 		} catch (UnsupportedEncodingException e) {
 		}
 		return input;
+	}
+
+	public static String normaliseToAscii(String input) {
+		String normalisedName = Normalizer.normalize(input, Normalizer.Form.NFD);
+		return normalisedName.replaceAll("[^\\p{ASCII}]", ""); // remove accents
 	}
 }
