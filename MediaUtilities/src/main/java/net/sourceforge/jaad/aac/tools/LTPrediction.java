@@ -1,16 +1,16 @@
 /*
  *  Copyright (C) 2011 in-somnia
- * 
+ *
  *  This file is part of JAAD.
- * 
- *  JAAD is free software; you can redistribute it and/or modify it 
- *  under the terms of the GNU Lesser General Public License as 
- *  published by the Free Software Foundation; either version 3 of the 
+ *
+ *  JAAD is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License as
+ *  published by the Free Software Foundation; either version 3 of the
  *  License, or (at your option) any later version.
  *
- *  JAAD is distributed in the hope that it will be useful, but WITHOUT 
- *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General 
+ *  JAAD is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General
  *  Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public
@@ -27,11 +27,14 @@ import net.sourceforge.jaad.aac.syntax.BitStream;
 import net.sourceforge.jaad.aac.syntax.Constants;
 import net.sourceforge.jaad.aac.syntax.ICSInfo;
 import net.sourceforge.jaad.aac.syntax.ICStream;
+
+import java.util.Arrays;
+
 import ac.robinson.util.AndroidUtilities;
 
 /**
  * Long-term prediction
- * 
+ *
  * @author in-somnia
  */
 public class LTPrediction implements Constants {
@@ -151,9 +154,9 @@ public class LTPrediction implements Constants {
 		lag = ltp.lag;
 		lastBand = ltp.lastBand;
 		lagUpdate = ltp.lagUpdate;
-		shortUsed = AndroidUtilities.arrayCopyOf(ltp.shortUsed, ltp.shortUsed.length);
-		shortLagPresent = AndroidUtilities.arrayCopyOf(ltp.shortLagPresent, ltp.shortLagPresent.length);
-		shortLag = AndroidUtilities.arrayCopyOf(ltp.shortLag, ltp.shortLag.length);
-		longUsed = AndroidUtilities.arrayCopyOf(ltp.longUsed, ltp.longUsed.length);
+		shortUsed = Arrays.copyOf(ltp.shortUsed, ltp.shortUsed.length);
+		shortLagPresent = Arrays.copyOf(ltp.shortLagPresent, ltp.shortLagPresent.length);
+		shortLag = Arrays.copyOf(ltp.shortLag, ltp.shortLag.length);
+		longUsed = Arrays.copyOf(ltp.longUsed, ltp.longUsed.length);
 	}
 }

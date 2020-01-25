@@ -6,14 +6,14 @@
  * Copyright (c) 2011 by Jeremy Wood.
  * All rights reserved.
  *
- * The copyright of this software is owned by Jeremy Wood. 
- * You may not use, copy or modify this software, except in  
- * accordance with the license agreement you entered into with  
+ * The copyright of this software is owned by Jeremy Wood.
+ * You may not use, copy or modify this software, except in
+ * accordance with the license agreement you entered into with
  * Jeremy Wood. For details see accompanying license terms.
- * 
+ *
  * This software is probably, but not necessarily, discussed here:
  * http://javagraphics.java.net/
- * 
+ *
  * That site should also contain the most recent official version
  * of this software.  (See the SVN repository for more details.)
  */
@@ -71,11 +71,9 @@ class AtomFactory {
 	}
 	private static String padding = "";
 
-	// @SuppressWarnings("resource") is to suppress complaint about stream closure (handled by in.close in readAll)
-	@SuppressWarnings("resource")
 	public static synchronized Atom read(Atom parent, InputStream in) throws IOException {
 		long size = Atom.read32Int(in);
-		/**
+		/*
 		 * When in debugging mode, we make a copy of the incoming array and then test the Atom.write() method later by
 		 * validating it against what we just read.
 		 */

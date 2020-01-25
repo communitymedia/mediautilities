@@ -19,7 +19,7 @@ android {
 }
 
 dependencies {
-	implementation 'com.android.support:exifinterface:28.0.0'
+	implementation 'androidx.exifinterface:exifinterface:1.1.0'
 
 	implementation 'com.google.code.findbugs:annotations:3.0.1', {
 		// Need to exclude these, or build is broken by:

@@ -60,7 +60,6 @@ public class UIUtilities {
 	 *
 	 * @param window
 	 */
-	@SuppressWarnings("deprecation")
 	public static void setPixelDithering(Window window) {
 		if (window != null && Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) { // deprecated from API 17+
 			// better gradient drawables
@@ -129,47 +128,19 @@ public class UIUtilities {
 		return ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 	}
 
-	@SuppressWarnings("deprecation")
 	public static Point getScreenSize(WindowManager windowManager) {
 		Point screenSize = new Point();
 		Display display = windowManager.getDefaultDisplay();
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-			getPointScreenSize(display, screenSize);
-		} else {
-			screenSize.set(display.getWidth(), display.getHeight());
-		}
+		display.getSize(screenSize);
 		return screenSize;
 	}
 
-	@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-	private static void getPointScreenSize(Display display, Point screenSize) {
-		display.getSize(screenSize);
-	}
-
-	/**
-	 * Set the SurfaceHolder's type to SURFACE_TYPE_PUSH_BUFFERS, but only in API < 11 (after this it is set
-	 * automatically by the system when needed)
-	 *
-	 * @param holder
-	 */
-	@SuppressWarnings("deprecation")
-	public static void setPushBuffers(SurfaceHolder holder) {
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
-			holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-		}
-	}
-
-	@TargetApi(Build.VERSION_CODES.GINGERBREAD)
 	public static void setScreenOrientationFixed(Activity activity, boolean orientationFixed) {
 		if (orientationFixed) {
 			WindowManager windowManager = activity.getWindowManager();
 			boolean naturallyPortrait = getNaturalScreenOrientation(windowManager) == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-			int reversePortrait = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-			int reverseLandscape = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
-				reversePortrait = ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
-				reverseLandscape = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
-			}
+			int reversePortrait = ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
+			int reverseLandscape = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
 			switch (windowManager.getDefaultDisplay().getRotation()) {
 				case Surface.ROTATION_0:
 					activity.setRequestedOrientation(naturallyPortrait ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
@@ -287,81 +258,24 @@ public class UIUtilities {
 	 *            the touched button; for For API 10 and below the normal platform button touch colour is used
 	 */
 	public static void setButtonColorFilters(View button, final int defaultColor, final int touchedColor) {
-
 		Drawable background = button.getBackground();
 		if (background == null) {
 			return;
 		}
 
 		final LightingColorFilter normalColour;
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
-			normalColour = new LightingColorFilter(defaultColor, Color.TRANSPARENT);
+		// use the requested colour to replace normal buttons; for white we lighten the existing colour instead
+		if (defaultColor != 0xffffffff) {
+				// float[] hsv = new float[3];
+				// Color.colorToHSV(defaultColor, hsv);
+				// hsv[1] = 0.95f; // fully saturate and slightly darken the requested colour to improve display
+				// hsv[2] *= 0.88f;
+				// normalColour = new LightingColorFilter(Color.TRANSPARENT, Color.HSVToColor(hsv));
+			normalColour = new LightingColorFilter(Color.TRANSPARENT, defaultColor );
 		} else {
-			// use the requested colour to replace normal buttons; for white we lighten the existing colour instead
-			if (defaultColor != 0xffffffff) {
-//				float[] hsv = new float[3];
-//				Color.colorToHSV(defaultColor, hsv);
-//				hsv[1] = 0.95f; // fully saturate and slightly darken the requested colour to improve display
-//				hsv[2] *= 0.88f;
-//				normalColour = new LightingColorFilter(Color.TRANSPARENT, Color.HSVToColor(hsv));
-				normalColour = new LightingColorFilter(Color.TRANSPARENT, defaultColor );
-			} else {
-				normalColour = new LightingColorFilter(0x00EAEAEA, Color.TRANSPARENT);
-			}
+			normalColour = new LightingColorFilter(0x00EAEAEA, Color.TRANSPARENT);
 		}
 
 		background.setColorFilter(normalColour);
-
-		// before Honeycomb the colour filter looks bad on a focused button, and if we use the blanking approach
-		// (above) then we lose the gradient of a button; instead we remove the colour filter entirely
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
-			button.setOnFocusChangeListener(new OnFocusChangeListener() {
-				@Override
-				public void onFocusChange(View v, boolean hasFocus) {
-					if (hasFocus) {
-						v.getBackground().clearColorFilter();
-					} else {
-						v.getBackground().setColorFilter(normalColour);
-					}
-				}
-			});
-		}
-
-		button.setOnTouchListener(new OnTouchListener() {
-			Rect viewRect;
-
-			private void setNormalColour(View v) {
-				v.getBackground().setColorFilter(normalColour);
-			}
-
-			private void setTouchedColour(View v) {
-				// before Honeycomb the colour filter looks bad on a pressed button, and if we use the blanking approach
-				// (above) then we lose the gradient of a button; instead we remove the colour filter entirely
-				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
-					v.getBackground().clearColorFilter();
-				}
-			}
-
-			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				int eventAction = event.getAction();
-				if (eventAction == MotionEvent.ACTION_DOWN) {
-					viewRect = new Rect(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
-					setTouchedColour(v);
-				} else if (eventAction == MotionEvent.ACTION_MOVE) {
-					// touch moved outside bounds
-					if (!viewRect.contains(v.getLeft() + (int) event.getX(), v.getTop() + (int) event.getY())) {
-						setNormalColour(v);
-					} else {
-						setTouchedColour(v);
-					}
-				} else if (eventAction == MotionEvent.ACTION_UP || eventAction == MotionEvent.ACTION_CANCEL) {
-					setNormalColour(v);
-				}
-
-				return false;
-			}
-
-		});
 	}
 }

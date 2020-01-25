@@ -60,21 +60,8 @@ public class StringUtilities {
 		return byteToString(data, 0, data.length, charset);
 	}
 
-	@TargetApi(Build.VERSION_CODES.GINGERBREAD)
 	public static String byteToString(byte[] data, int offset, int byteCount, Charset charset) {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
-			return new String(data, offset, byteCount, charset);
-		} else {
-			// see: http://stackoverflow.com/questions/7376724
-			CharsetDecoder decoder = charset.newDecoder();
-			CharBuffer charBuffer;
-			try {
-				charBuffer = decoder.decode(ByteBuffer.wrap(data, offset, byteCount));
-				return charBuffer.toString();
-			} catch (Exception e) {
-				return new String(data, offset, byteCount); // last-ditch effort - ignore the encoding
-			}
-		}
+		return new String(data, offset, byteCount, charset);
 	}
 
 	public static String millisecondsToTimeString(long milliseconds, boolean includeMilliseconds) {

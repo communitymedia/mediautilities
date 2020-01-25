@@ -1,16 +1,16 @@
 /*
  *  Copyright (C) 2011 in-somnia
- * 
+ *
  *  This file is part of JAAD.
- * 
- *  JAAD is free software; you can redistribute it and/or modify it 
- *  under the terms of the GNU Lesser General Public License as 
- *  published by the Free Software Foundation; either version 3 of the 
+ *
+ *  JAAD is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License as
+ *  published by the Free Software Foundation; either version 3 of the
  *  License, or (at your option) any later version.
  *
- *  JAAD is distributed in the hope that it will be useful, but WITHOUT 
- *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General 
+ *  JAAD is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General
  *  Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public
@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
 
@@ -34,7 +35,7 @@ import ac.robinson.util.StringUtilities;
 /**
  * This box contains the data for a metadata tag. It is right below an iTunes metadata box (e.g. '@nam') or a custom
  * meta tag box ('----'). A custom meta tag box also contains a 'name'-box declaring the tag's name.
- * 
+ *
  * @author in-somnia
  */
 /*
@@ -66,7 +67,7 @@ public class ITunesMetadataBox extends FullBox {
 		UPC(/*String.class*/),
 		BMP(/*byte[].class*/),
 		UNDEFINED(/*byte[].class*/);
-		
+
 		private static final DataType[] TYPES = { IMPLICIT, UTF8, UTF16, null, null, null, HTML, XML, UUID, ISRC, MI3P,
 				null, GIF, JPEG, PNG, URL, DURATION, DATETIME, GENRE, null, null, INTEGER, null, null, RIAA, UPC, null,
 				BMP };
@@ -110,16 +111,16 @@ public class ITunesMetadataBox extends FullBox {
 
 	/**
 	 * Returns an unmodifiable array with the raw content, that can be present in different formats.
-	 * 
+	 *
 	 * @return the raw metadata
 	 */
 	public byte[] getData() {
-		return AndroidUtilities.arrayCopyOf(data, data.length);
+		return Arrays.copyOf(data, data.length);
 	}
 
 	/**
 	 * Returns the content as a text string.
-	 * 
+	 *
 	 * @return the metadata as text
 	 */
 	public String getText() {
@@ -129,7 +130,7 @@ public class ITunesMetadataBox extends FullBox {
 
 	/**
 	 * Returns the content as an unsigned 8-bit integer.
-	 * 
+	 *
 	 * @return the metadata as an integer
 	 */
 	public long getNumber() {
@@ -148,7 +149,7 @@ public class ITunesMetadataBox extends FullBox {
 
 	/**
 	 * Returns the content as a boolean (flag) value.
-	 * 
+	 *
 	 * @return the metadata as a boolean
 	 */
 	public boolean getBoolean() {

@@ -1,16 +1,16 @@
 /*
  *  Copyright (C) 2012 Simon Robinson
- * 
+ *
  *  This file is part of Com-Me.
- * 
- *  Com-Me is free software; you can redistribute it and/or modify it 
- *  under the terms of the GNU Lesser General Public License as 
- *  published by the Free Software Foundation; either version 3 of the 
+ *
+ *  Com-Me is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License as
+ *  published by the Free Software Foundation; either version 3 of the
  *  License, or (at your option) any later version.
  *
- *  Com-Me is distributed in the hope that it will be useful, but WITHOUT 
- *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General 
+ *  Com-Me is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General
  *  Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public
@@ -20,6 +20,7 @@
 
 package ac.robinson.service;
 
+import android.annotation.SuppressLint;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
@@ -135,12 +136,12 @@ public class ImportingService extends Service {
 		}
 	}
 
+	@SuppressLint("MissingPermission") // not all applications that use this library need its Bluetooth functionality
 	private void updateServices() {
 		if (mBluetoothAdapter != null) {
 			IntentFilter filter = new IntentFilter("android.bluetooth.adapter.action.STATE_CHANGED");
 			registerReceiver(mBluetoothStateReceiver, filter);
 
-			//noinspection MissingPermission - not all applications that use this library need its Bluetooth functionality
 			if (!mBluetoothAdapter.isEnabled() && mRequireBluetoothEnabled) {
 				// removed - shouldn't be done without user permission - now start observer when bluetooth is enabled
 				// may need <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />

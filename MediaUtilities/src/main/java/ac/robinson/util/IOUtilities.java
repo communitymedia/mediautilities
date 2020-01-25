@@ -139,14 +139,11 @@ public class IOUtilities {
 		return false;
 	}
 
-	@TargetApi(Build.VERSION_CODES.GINGERBREAD)
 	@Deprecated
 	public static void setFullyPublic(File file) {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
-			file.setReadable(true, false);
-			file.setWritable(true, false);
-			file.setExecutable(true, false);
-		}
+		file.setReadable(true, false);
+		file.setWritable(true, false);
+		file.setExecutable(true, false);
 	}
 
 	public static boolean externalStorageIsWritable() {
@@ -252,16 +249,9 @@ public class IOUtilities {
 		return fileOrDirectory.delete();
 	}
 
-	@TargetApi(Build.VERSION_CODES.GINGERBREAD)
 	public static boolean createMediaScannerIgnoreFile(File directory) {
-		String filename;
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
-			filename = MediaStore.MEDIA_IGNORE_FILENAME;
-		} else {
-			filename = ".nomedia";
-		}
 		try {
-			new File(directory, filename).createNewFile(); // prevent media scanner
+			new File(directory, MediaStore.MEDIA_IGNORE_FILENAME).createNewFile(); // prevent media scanner
 			return true;
 		} catch (Exception e) {
 			return false;
