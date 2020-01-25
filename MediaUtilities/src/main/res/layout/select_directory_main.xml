@@ -42,6 +42,7 @@
 
 		<ImageButton
 			android:id="@+id/path_bar_icon"
+			android:background="?android:attr/actionBarItemBackground"
 			android:contentDescription="@android:string/cancel"
 			android:layout_gravity="center_vertical"
 			android:layout_height="match_parent"
@@ -49,7 +50,7 @@
 			android:onClick="handleButtonClicks"
 			android:paddingLeft="16dp"
 			android:paddingRight="16dp"
-			android:src="?android:attr/homeAsUpIndicator" />
+			android:src="?android:attr/homeAsUpIndicator" /><!-- TODO: actionBarItemBackground is close, but not tinted white -->
 
 		<HorizontalScrollView
 			android:id="@+id/path_bar"
@@ -75,7 +76,7 @@
 				android:textFontWeight="600"
 				android:textIsSelectable="false"
 				android:textSize="20sp"
-				android:textStyle="bold" />
+				android:textStyle="bold" /><!-- font weight of 600 matches platform > API 21; before that, bold is nearest -->
 
 		</HorizontalScrollView>
 	</LinearLayout>
