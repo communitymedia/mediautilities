@@ -84,7 +84,7 @@ public class MOVUtilities {
 		final boolean textBackgroundSpanWidth = (Boolean) settings.get(MediaUtilities.KEY_TEXT_BACKGROUND_SPAN_WIDTH);
 		final int textMaxFontSize = (Integer) settings.get(MediaUtilities.KEY_MAX_TEXT_FONT_SIZE);
 		final int textMaxCharsPerLine = (Integer) settings.get(MediaUtilities.KEY_MAX_TEXT_CHARACTERS_PER_LINE);
-		final int audioResourceId = (Integer) settings.get(MediaUtilities.KEY_AUDIO_RESOURCE_ID);
+		final int audioIconResourceId = (Integer) settings.get(MediaUtilities.KEY_AUDIO_RESOURCE_ID);
 		final int audioResamplingRate = (Integer) settings.get(MediaUtilities.KEY_RESAMPLE_AUDIO);
 
 		// all frames *must* be the same dimensions, so we work from a base bitmap for everything
@@ -92,7 +92,6 @@ public class MOVUtilities {
 				.inPreferredConfig);
 		Canvas baseCanvas = new Canvas(baseBitmap);
 		Paint basePaint = BitmapUtilities.getPaint(textColourNoImage, 1);
-		basePaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
 
 		int audioBitmapSize = Math.min(outputWidth, outputHeight);
 		int audioBitmapLeft = Math.round((outputWidth - audioBitmapSize) / 2f);
@@ -170,15 +169,16 @@ public class MOVUtilities {
 				}
 
 				if (!TextUtils.isEmpty(frame.mTextContent)) {
+					// TODO: we don't actually pass the value of @dimen/export_maximum_text_height_with_image
 					BitmapUtilities.drawScaledText(frame.mTextContent, baseCanvas, basePaint, (imageLoaded ?
 							textColourWithImage : textColourNoImage), (imageLoaded ? textBackgroundColour : 0),
-							textSpacing, textCornerRadius, imageLoaded, 0, textBackgroundSpanWidth, baseBitmap
-							.getHeight(), textMaxFontSize, textMaxCharsPerLine);
+							textSpacing, textCornerRadius, imageLoaded, 0, textBackgroundSpanWidth, outputHeight,
+							textMaxFontSize, textMaxCharsPerLine);
 
 				} else if (!imageLoaded) {
 					// quicker to do this than load the SVG for narratives that have no audio
 					if (audioSVG == null) {
-						audioSVG = SVGParser.getSVGFromResource(res, audioResourceId);
+						audioSVG = SVGParser.getSVGFromResource(res, audioIconResourceId);
 					}
 					if (audioSVG != null) {
 						// we can't use PNG compression reliably in the MOV file, so convert to JPEG

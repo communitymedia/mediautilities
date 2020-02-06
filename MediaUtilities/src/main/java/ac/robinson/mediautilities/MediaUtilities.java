@@ -33,6 +33,7 @@ public class MediaUtilities {
 	public static final String SMIL_FILE_EXTENSION = ".smil";
 	public static final String SYNC_FILE_EXTENSION = ".sync.jpg";
 	public static final String HTML_FILE_EXTENSION = ".html";
+	public static final String MP4_FILE_EXTENSION = ".mp4";
 	public static final String MOV_FILE_EXTENSION = ".mov";
 
 	// audio file types that are compatible with our video export (no dots)

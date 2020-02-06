@@ -31,6 +31,7 @@ import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.graphics.YuvImage;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -760,20 +761,25 @@ public class BitmapUtilities {
 		borderCanvas.drawRect(iconBorder, borderPaint);
 	}
 
-	public static Paint getPaint(int color, int strokeWidth) {
-
+	public static Paint getPaint(int colour, int strokeWidth) {
 		Paint bitmapPaint = new Paint(Paint.DEV_KERN_TEXT_FLAG);
+		return resetPaint(bitmapPaint, colour, strokeWidth);
+	}
+
+	public static Paint resetPaint(Paint bitmapPaint, int colour, int strokeWidth) {
+		bitmapPaint.reset();
 
 		bitmapPaint.setDither(true);
 		bitmapPaint.setAntiAlias(true);
 		bitmapPaint.setFilterBitmap(true);
+		bitmapPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
 		bitmapPaint.setSubpixelText(true);
 
 		bitmapPaint.setStrokeCap(Paint.Cap.ROUND);
 		bitmapPaint.setStrokeJoin(Paint.Join.ROUND);
 		bitmapPaint.setStrokeMiter(1);
 
-		bitmapPaint.setColor(color);
+		bitmapPaint.setColor(colour);
 		bitmapPaint.setStrokeWidth(strokeWidth);
 
 		return bitmapPaint;

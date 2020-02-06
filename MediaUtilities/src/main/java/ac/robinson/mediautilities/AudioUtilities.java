@@ -26,15 +26,15 @@ import ac.robinson.util.AndroidUtilities;
 import ac.robinson.util.IOUtilities;
 import vavi.sound.pcm.resampling.ssrc.SSRC;
 
-class AudioUtilities {
+public class AudioUtilities {
 
 	private static final String LOG_TAG = "AudioUtilities";
 
 	public enum AudioType {NONE, M4A, MP3, WAV}
 
-	static class CombinedAudioTrack {
-		File mCombinedPCMFile;
-		AudioFormat mCombinedPCMAudioFormat;
+	public static class CombinedAudioTrack {
+		public File mCombinedPCMFile;
+		public AudioFormat mCombinedPCMAudioFormat;
 		long mCombinedPCMDurationMs;
 		ArrayList<File> mTemporaryFilesToDelete; // must be deleted *after* we actually use the PCM file
 	}
@@ -42,7 +42,7 @@ class AudioUtilities {
 	static CombinedAudioTrack createCombinedNarrativeAudioTrack(ArrayList<FrameMediaContainer> framesToSend, int sampleRate,
 																File tempDirectory) {
 
-		Log.d(LOG_TAG, "Exporting combined MOV audio (" + sampleRate + ")");
+		Log.d(LOG_TAG, "Exporting combined audio (" + sampleRate + ")");
 		CombinedAudioTrack exportedTrack = new CombinedAudioTrack();
 
 		// the list of files to be deleted after they've been written to the movie
