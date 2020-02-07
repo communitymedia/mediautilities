@@ -546,10 +546,12 @@ public class MP4Encoder {
 
 				if (bufferInfo.size != 0) {
 					if (!trackInfo.mMuxerWrapper.mStarted) {
-						// TODO: this does still happen, albeit very rarely - why?
-						Log.e(LOG_TAG, "muxer not started; dropping " + ((encoder == mVideoEncoder) ? "video" : "audio") + " " +
+						// TODO: this does still happen, albeit very rarely, but especially on shorter narratives - why?
+						Log.e(LOG_TAG, "Muxer not started; dropping " + ((encoder == mVideoEncoder) ? "video" : "audio") + " " +
 								"frames");
-						throw new RuntimeException("Frames dropped before starting muxer");
+						// disabled for now as this happens far too often (tradeoff of slightly out of sync tracks is worth it
+						// until we can find a way to ensure all tracks are started before data is received)
+						// throw new RuntimeException("Frames dropped before starting muxer");
 					} else {
 						// adjust the ByteBuffer values to match BufferInfo
 						// (only needed before v21 - see note in MediaCodec.getOutputBuffers)

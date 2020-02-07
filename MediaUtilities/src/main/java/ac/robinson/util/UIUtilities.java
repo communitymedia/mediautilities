@@ -128,10 +128,21 @@ public class UIUtilities {
 		return ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 	}
 
+	/**
+	 * Gets the size of the device's screen. On more recent devices (API >= 17) this is the <i>real</i> size of the screen. On
+	 * earlier devices the returned value does not include non-hideable interface elements.
+	 *
+	 * @param windowManager A WindowManager instance (i.e., obtained via getWindowManager())
+	 * @return A Point where x is the screen width and y is the screen height
+	 */
 	public static Point getScreenSize(WindowManager windowManager) {
 		Point screenSize = new Point();
 		Display display = windowManager.getDefaultDisplay();
-		display.getSize(screenSize);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+			display.getRealSize(screenSize);
+		} else {
+			display.getSize(screenSize);
+		}
 		return screenSize;
 	}
 
