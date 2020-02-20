@@ -141,7 +141,7 @@ public class SoundSampleDescriptionEntry extends SampleDescriptionEntry {
 		this.bitsPerSample = bitsPerSample;
 		this.sampleRate = sampleRate;
 
-		this.version = 0; // TODO: version 1 breaks playback in VLC
+        this.version = 0; // TODO: version 1 breaks playback in VLC (see: https://github.com/mickleness/pumpernickel/issues/17)
 		this.samplesPerPacket = 1;
 		this.bytesPerPacket = 1 * bitsPerSample / 8;
 		this.bytesPerFrame = bytesPerPacket * numberOfChannels;

@@ -25,7 +25,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
@@ -62,8 +61,9 @@ public class MOVUtilities {
 
 	private static final String LOG_TAG = "MOVUtilities";
 
-	public static ArrayList<Uri> generateNarrativeMOV(Resources res, File outputFile, ArrayList<FrameMediaContainer>
-			framesToSend, Map<Integer, Object> settings) {
+	public static ArrayList<Uri> generateNarrativeMOV(Resources res, File outputFile,
+													  ArrayList<FrameMediaContainer> framesToSend,
+													  Map<Integer, Object> settings) {
 
 		ArrayList<Uri> filesToSend = new ArrayList<>();
 		if (framesToSend == null || framesToSend.size() <= 0) {
@@ -88,8 +88,8 @@ public class MOVUtilities {
 		final int audioResamplingRate = (Integer) settings.get(MediaUtilities.KEY_RESAMPLE_AUDIO);
 
 		// all frames *must* be the same dimensions, so we work from a base bitmap for everything
-		Bitmap baseBitmap = Bitmap.createBitmap(outputWidth, outputHeight, ImageCacheUtilities.mBitmapFactoryOptions
-				.inPreferredConfig);
+		Bitmap baseBitmap = Bitmap.createBitmap(outputWidth, outputHeight,
+				ImageCacheUtilities.mBitmapFactoryOptions.inPreferredConfig);
 		Canvas baseCanvas = new Canvas(baseBitmap);
 		Paint basePaint = BitmapUtilities.getPaint(textColourNoImage, 1);
 
@@ -111,8 +111,9 @@ public class MOVUtilities {
 			// individual tracks is similar in speed to segmented tracks, but typically only works with QuickTime
 			// Player (hence this is not a user editable preference)
 			if (audioResamplingRate != 0) {
-				AudioUtilities.CombinedAudioTrack resampledAudioTrack = AudioUtilities.createCombinedNarrativeAudioTrack(framesToSend,
-						audioResamplingRate, outputFile.getParentFile());
+				AudioUtilities.CombinedAudioTrack resampledAudioTrack =
+						AudioUtilities.createCombinedNarrativeAudioTrack(framesToSend, audioResamplingRate, outputFile
+						.getParentFile());
 
 				if (resampledAudioTrack.mCombinedPCMFile != null) {
 					AudioInputStream pcmAudioStream;
@@ -120,8 +121,8 @@ public class MOVUtilities {
 						// output from converters and/or SSRC is mono signed 16-bit little-endian integers
 						pcmAudioStream = new AudioInputStream(new FileInputStream(resampledAudioTrack.mCombinedPCMFile),
 								resampledAudioTrack.mCombinedPCMAudioFormat, (long) (
-								(resampledAudioTrack.mCombinedPCMAudioFormat.getSampleRate() *
-										resampledAudioTrack.mCombinedPCMDurationMs) / 1000f));
+								resampledAudioTrack.mCombinedPCMAudioFormat.getFrameRate() *
+										(resampledAudioTrack.mCombinedPCMDurationMs / 1000f)));
 
 						// new source: pumpernickel/pump-quicktime/src/main/java/com/pump/animation/quicktime/MovWriter.java
 						outputFileWriter.addAudioTrack(pcmAudioStream, 0, resampledAudioTrack.mCombinedPCMDurationMs / 1000f);
@@ -135,12 +136,12 @@ public class MOVUtilities {
 
 			} else {
 				if (MediaUtilities.MOV_USE_SEGMENTED_AUDIO) {
-					ArrayList<File> segmentFiles = addNarrativeAudioAsSegmentedTrack(framesToSend, outputFile
-							.getParentFile(), outputFileWriter);
+					ArrayList<File> segmentFiles = addNarrativeAudioAsSegmentedTrack(framesToSend, outputFile.getParentFile(),
+							outputFileWriter);
 					filesToDelete.addAll(segmentFiles);
 				} else {
-					ArrayList<File> individualFiles = addNarrativeAudioAsIndividualTracks(framesToSend, outputFile
-							.getParentFile(), outputFileWriter);
+					ArrayList<File> individualFiles = addNarrativeAudioAsIndividualTracks(framesToSend,
+							outputFile.getParentFile(), outputFileWriter);
 					filesToDelete.addAll(individualFiles);
 				}
 			}
@@ -156,8 +157,8 @@ public class MOVUtilities {
 
 				if (frame.mImagePath != null) {
 					// scale image size to make sure it is small enough to fit in the container
-					imageBitmap = BitmapUtilities.loadAndCreateScaledBitmap(frame.mImagePath, outputWidth,
-							outputHeight, BitmapUtilities.ScalingLogic.FIT, true);
+					imageBitmap = BitmapUtilities.loadAndCreateScaledBitmap(frame.mImagePath, outputWidth, outputHeight,
+							BitmapUtilities.ScalingLogic.FIT, true);
 
 					if (imageBitmap != null) {
 						imageBitmapLeft = Math.round((outputWidth - imageBitmap.getWidth()) / 2f);
@@ -171,9 +172,9 @@ public class MOVUtilities {
 				if (!TextUtils.isEmpty(frame.mTextContent)) {
 					// TODO: we don't actually pass the value of @dimen/export_maximum_text_height_with_image
 					BitmapUtilities.drawScaledText(frame.mTextContent, baseCanvas, basePaint, (imageLoaded ?
-							textColourWithImage : textColourNoImage), (imageLoaded ? textBackgroundColour : 0),
-							textSpacing, textCornerRadius, imageLoaded, 0, textBackgroundSpanWidth, outputHeight,
-							textMaxFontSize, textMaxCharsPerLine);
+							textColourWithImage : textColourNoImage), (imageLoaded ? textBackgroundColour : 0), textSpacing,
+							textCornerRadius, imageLoaded, 0, textBackgroundSpanWidth, outputHeight, textMaxFontSize,
+							textMaxCharsPerLine);
 
 				} else if (!imageLoaded) {
 					// quicker to do this than load the SVG for narratives that have no audio
@@ -219,8 +220,7 @@ public class MOVUtilities {
 	}
 
 	private static ArrayList<File> addNarrativeAudioAsIndividualTracks(ArrayList<FrameMediaContainer> framesToSend,
-																	   File tempDirectory, JPEGMovWriter
-																			   outputFileWriter) {
+																	   File tempDirectory, JPEGMovWriter outputFileWriter) {
 
 		Log.d(LOG_TAG, "Exporting individual track MOV audio");
 
@@ -275,15 +275,16 @@ public class MOVUtilities {
 							pcmConverter.convertFile(outputPCMStream);
 
 							// get the format of the audio - PCM output is mono signed little-endian integers
-							audioFormat = new AudioFormat(pcmConverter.getSampleRate(), pcmConverter.getSampleSize(),
-									1, true, false);
-							Log.d(LOG_TAG, "Outputting M4A: " + pcmConverter.getSampleRate() + ", " +
-									pcmConverter.getSampleSize() + ", 1, signed, little endian");
+							audioFormat = new AudioFormat(pcmConverter.getSampleRate(), pcmConverter.getSampleSize(), 1, true,
+									false);
+							Log.d(LOG_TAG,
+									"Outputting M4A: " + pcmConverter.getSampleRate() + ", " + pcmConverter.getSampleSize() +
+											", 1, signed, little endian");
 
 						} catch (IOException e) {
 							decodingError = true;
-							Log.d(LOG_TAG, "Error creating individual M4A audio track - IOException: " +
-									e.getLocalizedMessage());
+							Log.d(LOG_TAG,
+									"Error creating individual M4A audio track - IOException: " + e.getLocalizedMessage());
 						} catch (Exception e) {
 							decodingError = true;
 							Log.d(LOG_TAG, "Error creating individual M4A audio track - general " + "Exception");
@@ -291,8 +292,7 @@ public class MOVUtilities {
 							IOUtilities.closeStream(inputRandomAccessFile);
 						}
 
-					} else if (AndroidUtilities.arrayContains(MediaUtilities.MP3_FILE_EXTENSIONS,
-							audioFileExtension)) {
+					} else if (AndroidUtilities.arrayContains(MediaUtilities.MP3_FILE_EXTENSIONS, audioFileExtension)) {
 						try {
 
 							// first we need to extract PCM audio from the MP3 file
@@ -300,23 +300,21 @@ public class MOVUtilities {
 							MP3toPCMConverter.convertFile(inputAudioFile, outputPCMStream, mp3Config);
 
 							// get the format of the audio - PCM output is mono signed 16-bit little-endian integers
-							audioFormat = new AudioFormat(mp3Config.sampleFrequency, mp3Config.sampleSize, mp3Config
-									.numberOfChannels, true, false);
-							Log.d(LOG_TAG,
-									"Outputting MP3: " + mp3Config.sampleFrequency + ", " + mp3Config.sampleSize +
-											", " + mp3Config.numberOfChannels + ", signed, little endian");
+							audioFormat = new AudioFormat(mp3Config.sampleFrequency, mp3Config.sampleSize,
+									mp3Config.numberOfChannels, true, false);
+							Log.d(LOG_TAG, "Outputting MP3: " + mp3Config.sampleFrequency + ", " + mp3Config.sampleSize + ", " +
+									mp3Config.numberOfChannels + ", signed, little endian");
 
 						} catch (IOException e) {
 							decodingError = true;
-							Log.d(LOG_TAG, "Error creating individual MP3 audio track - IOException: " +
-									e.getLocalizedMessage());
+							Log.d(LOG_TAG,
+									"Error creating individual MP3 audio track - IOException: " + e.getLocalizedMessage());
 						} catch (Exception e) {
 							decodingError = true;
 							Log.d(LOG_TAG, "Error creating individual MP3 audio track - general " + "Exception");
 						}
 
-					} else if (AndroidUtilities.arrayContains(MediaUtilities.WAV_FILE_EXTENSIONS,
-							audioFileExtension)) {
+					} else if (AndroidUtilities.arrayContains(MediaUtilities.WAV_FILE_EXTENSIONS, audioFileExtension)) {
 						try {
 
 							// first we need to extract PCM audio from the WAV file
@@ -324,16 +322,15 @@ public class MOVUtilities {
 							WAVtoPCMConverter.convertFile(inputAudioFile, outputPCMStream, wavConfig);
 
 							// get the format of the audio - output is mono signed little-endian integers
-							audioFormat = new AudioFormat(wavConfig.sampleFrequency, wavConfig.sampleSize, wavConfig
-									.numberOfChannels, true, false);
-							Log.d(LOG_TAG,
-									"Outputting WAV: " + wavConfig.sampleFrequency + ", " + wavConfig.sampleSize +
-											", " + wavConfig.numberOfChannels + ", signed, little endian");
+							audioFormat = new AudioFormat(wavConfig.sampleFrequency, wavConfig.sampleSize,
+									wavConfig.numberOfChannels, true, false);
+							Log.d(LOG_TAG, "Outputting WAV: " + wavConfig.sampleFrequency + ", " + wavConfig.sampleSize + ", " +
+									wavConfig.numberOfChannels + ", signed, little endian");
 
 						} catch (IOException e) {
 							decodingError = true;
-							Log.d(LOG_TAG, "Error creating individual WAV audio track - IOException: " +
-									e.getLocalizedMessage());
+							Log.d(LOG_TAG,
+									"Error creating individual WAV audio track - IOException: " + e.getLocalizedMessage());
 						} catch (Exception e) {
 							decodingError = true;
 							Log.d(LOG_TAG, "Error creating individual WAV audio track - general Exception");
@@ -343,7 +340,7 @@ public class MOVUtilities {
 					// then add to the MOV output file if successful (pcmAudioStream is closed in MovWriter)
 					if (!decodingError && audioFormat != null) {
 						pcmAudioStream = new AudioInputStream(new FileInputStream(outputPCMFile), audioFormat, (long) (
-								(audioFormat.getSampleRate() * audioDuration) / 1000f));
+								audioFormat.getFrameRate() * (audioDuration / 1000f)));
 						outputFileWriter.addAudioTrack(pcmAudioStream,
 								frameStartTime / 1000f, (frameStartTime + audioDuration) / 1000f);
 					}
@@ -362,8 +359,8 @@ public class MOVUtilities {
 		return filesToDelete;
 	}
 
-	private static ArrayList<File> addNarrativeAudioAsSegmentedTrack(ArrayList<FrameMediaContainer> framesToSend, File
-			tempDirectory, JPEGMovWriter outputFileWriter) {
+	private static ArrayList<File> addNarrativeAudioAsSegmentedTrack(ArrayList<FrameMediaContainer> framesToSend,
+																	 File tempDirectory, JPEGMovWriter outputFileWriter) {
 
 		Log.d(LOG_TAG, "Exporting segmented MOV audio");
 
@@ -460,8 +457,7 @@ public class MOVUtilities {
 					}
 
 					String audioFileExtension = IOUtilities.getFileExtension(audioPath);
-					if (!AndroidUtilities.arrayContains(MediaUtilities.MOV_AUDIO_FILE_EXTENSIONS,
-							audioFileExtension)) {
+					if (!AndroidUtilities.arrayContains(MediaUtilities.MOV_AUDIO_FILE_EXTENSIONS, audioFileExtension)) {
 						continue;
 					}
 
@@ -469,12 +465,10 @@ public class MOVUtilities {
 					if (AndroidUtilities.arrayContains(MediaUtilities.M4A_FILE_EXTENSIONS, audioFileExtension) &&
 							currentTrackType.equals(MediaUtilities.M4A_FILE_EXTENSIONS[0])) {
 						currentAudioType = AudioUtilities.AudioType.M4A;
-					} else if (AndroidUtilities.arrayContains(MediaUtilities.MP3_FILE_EXTENSIONS,
-							audioFileExtension) &&
+					} else if (AndroidUtilities.arrayContains(MediaUtilities.MP3_FILE_EXTENSIONS, audioFileExtension) &&
 							currentTrackType.equals(MediaUtilities.MP3_FILE_EXTENSIONS[0])) {
 						currentAudioType = AudioUtilities.AudioType.MP3;
-					} else if (AndroidUtilities.arrayContains(MediaUtilities.WAV_FILE_EXTENSIONS,
-							audioFileExtension) &&
+					} else if (AndroidUtilities.arrayContains(MediaUtilities.WAV_FILE_EXTENSIONS, audioFileExtension) &&
 							currentTrackType.equals(MediaUtilities.WAV_FILE_EXTENSIONS[0])) {
 						currentAudioType = AudioUtilities.AudioType.WAV;
 					} else {
@@ -498,8 +492,9 @@ public class MOVUtilities {
 								outputPCMFile.delete();
 							}
 							outputPCMFile = null;
-							Log.d(LOG_TAG, "Error creating segmented MOV audio track - couldn't create base " +
-									currentTrackType + " file");
+							Log.d(LOG_TAG,
+									"Error creating segmented MOV audio track - couldn't create base " + currentTrackType +
+									" file");
 							continue;
 						}
 					}
@@ -513,8 +508,9 @@ public class MOVUtilities {
 						if (currentPCMFile != null) {
 							currentPCMFile.delete();
 						}
-						Log.d(LOG_TAG, "Error creating segmented MOV audio track - couldn't create individual " +
-								currentTrackType + " file");
+						Log.d(LOG_TAG,
+								"Error creating segmented MOV audio track - couldn't create individual " + currentTrackType +
+										" file");
 						continue;
 					}
 
@@ -535,16 +531,16 @@ public class MOVUtilities {
 							// get the format - output from PCM converter is mono signed little-endian integers
 							if (audioFormat == null) { // TODO: we assume all MP4 components are the same
 								// format
-								audioFormat = new AudioFormat(pcmConverter.getSampleRate(), pcmConverter.getSampleSize
-										(), 1, true, false);
-								Log.d(LOG_TAG, "Outputting M4A: " + pcmConverter.getSampleRate() + ", " +
-										pcmConverter.getSampleSize() + ", 1, signed, little endian");
+								audioFormat = new AudioFormat(pcmConverter.getSampleRate(), pcmConverter.getSampleSize(), 1,
+										true, false);
+								Log.d(LOG_TAG,
+										"Outputting M4A: " + pcmConverter.getSampleRate() + ", " + pcmConverter.getSampleSize() +
+												", 1, signed, little endian");
 							}
 
 						} catch (IOException e) {
 							decodingError = true;
-							Log.d(LOG_TAG, "Error creating segmented M4A audio track - IOException: " +
-									e.getLocalizedMessage());
+							Log.d(LOG_TAG, "Error creating segmented M4A audio track - IOException: " + e.getLocalizedMessage());
 						} catch (Exception e) {
 							decodingError = true;
 							Log.d(LOG_TAG, "Error creating segmented M4A audio track - general Exception");
@@ -565,14 +561,13 @@ public class MOVUtilities {
 								audioFormat = new AudioFormat(mp3Config.sampleFrequency, mp3Config.sampleSize,
 										mp3Config.numberOfChannels, true, false);
 								Log.d(LOG_TAG,
-										"Outputting MP3: " + mp3Config.sampleFrequency + ", " + mp3Config.sampleSize +
-												", " + mp3Config.numberOfChannels + ", signed, little endian");
+										"Outputting MP3: " + mp3Config.sampleFrequency + ", " + mp3Config.sampleSize + ", " +
+												mp3Config.numberOfChannels + ", signed, little endian");
 							}
 
 						} catch (IOException e) {
 							decodingError = true;
-							Log.d(LOG_TAG, "Error creating segmented MP3 audio track - IOException: " +
-									e.getLocalizedMessage());
+							Log.d(LOG_TAG, "Error creating segmented MP3 audio track - IOException: " + e.getLocalizedMessage());
 						} catch (Exception e) {
 							decodingError = true;
 							Log.d(LOG_TAG, "Error creating segmented MP3 audio track - general Exception");
@@ -591,14 +586,13 @@ public class MOVUtilities {
 								audioFormat = new AudioFormat(wavConfig.sampleFrequency, wavConfig.sampleSize,
 										wavConfig.numberOfChannels, true, false);
 								Log.d(LOG_TAG,
-										"Outputting WAV: " + wavConfig.sampleFrequency + ", " + wavConfig.sampleSize +
-												", " + wavConfig.numberOfChannels + ", signed, little endian");
+										"Outputting WAV: " + wavConfig.sampleFrequency + ", " + wavConfig.sampleSize + ", " +
+												wavConfig.numberOfChannels + ", signed, little endian");
 							}
 
 						} catch (IOException e) {
 							decodingError = true;
-							Log.d(LOG_TAG, "Error creating segmented WAV audio track - IOException: " +
-									e.getLocalizedMessage());
+							Log.d(LOG_TAG, "Error creating segmented WAV audio track - IOException: " + e.getLocalizedMessage());
 						} catch (Exception e) {
 							decodingError = true;
 							Log.d(LOG_TAG, "Error creating segmented WAV audio track - general Exception");
@@ -655,7 +649,7 @@ public class MOVUtilities {
 				AudioInputStream pcmAudioStream;
 				try {
 					pcmAudioStream = new AudioInputStream(new FileInputStream(outputPCMFile), audioFormat, (long) (
-							(audioFormat.getSampleRate() * audioTotalDuration) / 1000f));
+							audioFormat.getFrameRate() * (audioTotalDuration / 1000f)));
 
 					int arraySize = audioOffsetsList.size();
 					float[] audioOffsets = new float[arraySize];
