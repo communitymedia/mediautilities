@@ -19,18 +19,6 @@
  */
 package ac.robinson.mov;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.RandomAccessFile;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
-
-import ac.robinson.util.BitmapUtilities;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
@@ -62,28 +50,41 @@ import com.bric.qt.io.TrackHeaderAtom;
 import com.bric.qt.io.VideoMediaInformationHeaderAtom;
 import com.bric.qt.io.VideoSampleDescriptionEntry;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.RandomAccessFile;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
+
+import ac.robinson.util.BitmapUtilities;
+import ac.robinson.util.IOUtilities;
+
 /**
  * This writes a QuickTime MOV file as a series of images, and interleaves optional PCM (uncompressed) audio.
- * <P>
+ * <p>
  * This abstract class does not actually encode the image data; subclasses decide how to do this. The only two current
  * subclasses use either JPG or PNG compression. By modern standards: this results in a very poorly compressed image
  * file, but it is free of painful legal implications that come with the MPEG-4 standard. (And it is worlds easier to
  * implement.)
- * <P>
+ * <p>
  * This actually writes to a movie file in 2 passes: the first pass writes all the video and audio data to a
  * <code>FileOutputStream</code>. When <code>close()</code> is called, the movie structure is added and a
  * <code>RandomAccessFile</code> is used to correctly set the size headers.
  *
- * @name MovWriter
+ * @name JPEGMovWriter
  * @title Movies: Writing MOV Files Without QuickTime
  * @release June 2008
  * @blurb This article presents a class that can write a .mov file as a series of images and PCM audio.
- *        <p>
- *        This movie uses a combination of JPG/PNG and WAV encoding, which is very poor compression. But this format is
- *        not subject to nasty patent/royalty issues.
+ * <p>
+ * This movie uses a combination of JPG/PNG and WAV encoding, which is very poor compression. But this format is
+ * not subject to nasty patent/royalty issues.
  * @see <a href="http://javagraphics.blogspot.com/2008/06/movies-writing-mov-files-without.html">Movies: Writing MOV
- *      Files Without QuickTime</a>
- *
+ * Files Without QuickTime</a>
  */
 public abstract class MovWriter {
 
@@ -97,10 +98,12 @@ public abstract class MovWriter {
 		final long dataStart;
 
 		public VideoSample(int duration, long dataStart, long fileLength) {
-			if (duration <= 0)
+			if (duration <= 0) {
 				throw new IllegalArgumentException("duration (" + duration + ") must be greater than zero.");
-			if (fileLength <= 0)
+			}
+			if (fileLength <= 0) {
 				throw new IllegalArgumentException("file length (" + fileLength + ") must be greater than zero.");
+			}
 			this.duration = duration;
 			this.fileLength = fileLength;
 			this.dataStart = dataStart;
@@ -146,7 +149,7 @@ public abstract class MovWriter {
 			ParentAtom dinf = new ParentAtom("dinf");
 			minf.add(dinf);
 			DataReferenceAtom dref = new DataReferenceAtom();
-			dref.addEntry("alis", 0, 1, new byte[] {});
+			dref.addEntry("alis", 0, 1, new byte[]{});
 			dinf.add(dref);
 
 			ParentAtom stbl = new ParentAtom("stbl");
@@ -226,18 +229,21 @@ public abstract class MovWriter {
 		}
 
 		void validateSize(int width, int height) {
-			if (width == -1)
+			if (width == -1) {
 				throw new IllegalArgumentException("width = " + width);
-			if (height == -1)
+			}
+			if (height == -1) {
 				throw new IllegalArgumentException("height = " + height);
+			}
 
 			if (w == -1 && h == -1) {
 				w = width;
 				h = height;
 			} else {
 				if (w != width || h != height) {
-					throw new IllegalArgumentException("Each frame must have the same dimension.  This frame (" + width
-							+ "x" + height + ") is not the same dimensions as previous frames (" + w + "x" + h + ").");
+					throw new IllegalArgumentException(
+							"Each frame must have the same dimension.  This frame (" + width + "x" + height +
+									") is not the same dimensions as previous frames (" + w + "x" + h + ").");
 				}
 			}
 		}
@@ -249,17 +255,23 @@ public abstract class MovWriter {
 
 	private class AudioTrack {
 
-		/** The AudioInputStream to read data from. */
+		/**
+		 * The AudioInputStream to read data from.
+		 */
 		AudioInputStream audioIn;
 
-		/** The number of samples written. */
+		/**
+		 * The number of samples written.
+		 */
 		long totalSamples;
 
-		/** The duration, relative not to the audio's data but to the movie's time scale. */
+		/**
+		 * The duration, relative not to the audio's data but to the movie's time scale.
+		 */
 		long totalDurationInMovieTimeScale;
 
 		// we might need to convert the endian-ness
-		boolean reverseBytePairs = false;
+		boolean reverseBytePairs;
 
 		long myTimeScale;
 		TimeToSampleAtom stts = new TimeToSampleAtom();
@@ -268,7 +280,9 @@ public abstract class MovWriter {
 		ChunkOffsetAtom stco = new ChunkOffsetAtom();
 		int sampleMultiplier;
 
-		/** Whether to use an Edit List (or a silent track) to arrange the audio **/
+		/**
+		 * Whether to use an Edit List (or a silent track) to arrange the audio
+		 **/
 		boolean useEditList = false; // edit lists will be used for multi-part audio regardless of this value
 		float[] audioOffsets;
 		float[] audioStarts;
@@ -278,8 +292,7 @@ public abstract class MovWriter {
 		 * audioOffsets specifies where in the movie file each audio segment should be played; audioStarts and audioEnds
 		 * specify where in the audio file each segment is located. Each *must* be at least 1 value in length
 		 **/
-		AudioTrack(AudioInputStream audio, float[] audioOffsets, float[] audioStarts, float[] audioLengths)
-				throws IOException {
+		AudioTrack(AudioInputStream audio, float[] audioOffsets, float[] audioStarts, float[] audioLengths) throws IOException {
 			this.audioOffsets = audioOffsets;
 			this.audioStarts = audioStarts;
 			this.audioLengths = audioLengths;
@@ -287,8 +300,7 @@ public abstract class MovWriter {
 			// hmm... I'm not sure that this logic has ever been tested, but it seems appropriate:
 			AudioFormat audioFormat = audio.getFormat();
 			AudioFormat.Encoding encoding = audioFormat.getEncoding();
-			if (!(AudioFormat.Encoding.PCM_SIGNED.equals(encoding) || AudioFormat.Encoding.PCM_UNSIGNED
-					.equals(encoding))) {
+			if (!(AudioFormat.Encoding.PCM_SIGNED.equals(encoding) || AudioFormat.Encoding.PCM_UNSIGNED.equals(encoding))) {
 				if (audioFormat.getSampleSizeInBits() > 8) {
 					audioIn = AudioSystem.getAudioInputStream(AudioFormat.Encoding.PCM_SIGNED, audio);
 				} else {
@@ -311,7 +323,7 @@ public abstract class MovWriter {
 			reverseBytePairs = bitsPerSample > 8 && (!audioIn.getFormat().isBigEndian());
 
 			if (!useEditList) {
-				/**
+				/*
 				 * Previously I tried using an EditAtom to change when an audio track began playing, but that only
 				 * worked for about 1 audio track (when other audio tracks were added to the test: QT Player could play
 				 * the movie back fine but a MovieExporter would drop other tracks).
@@ -363,11 +375,11 @@ public abstract class MovWriter {
 				float previousOffset = 0;
 				for (int i = 0, n = audioOffsets.length; i < n; i++) {
 					if (audioOffsets[i] > previousOffset) {
-						editListAtom.addEditListTableEntry(
-								(int) ((audioOffsets[i] - previousOffset) * DEFAULT_TIME_SCALE), -1, 1f);
+						editListAtom.addEditListTableEntry((int) ((audioOffsets[i] - previousOffset) *
+								DEFAULT_TIME_SCALE), -1, 1f);
 					}
-					editListAtom.addEditListTableEntry((int) (audioLengths[i] * DEFAULT_TIME_SCALE),
-							(int) (audioStarts[i] * myTimeScale), 1f);
+					editListAtom.addEditListTableEntry((int) (audioLengths[i] * DEFAULT_TIME_SCALE), (int) (audioStarts[i] *
+							myTimeScale), 1f);
 					previousOffset = audioOffsets[i] + audioLengths[i];
 				}
 				editAtom.add(editListAtom);
@@ -388,7 +400,7 @@ public abstract class MovWriter {
 			ParentAtom dinf = new ParentAtom("dinf");
 			minf.add(dinf);
 			DataReferenceAtom dref = new DataReferenceAtom();
-			dref.addEntry("alis", 0, 1, new byte[] {});
+			dref.addEntry("alis", 0, 1, new byte[]{});
 			dinf.add(dref);
 
 			ParentAtom stbl = new ParentAtom("stbl");
@@ -415,9 +427,8 @@ public abstract class MovWriter {
 		 * If there is no more data to write then this method will do nothing.
 		 *
 		 * @param time the duration (relative to DEFAULT_TIME_SCALE) of audio to write. For example if this is 1200 and
-		 *            DEFAULT_TIME_SCALE is 600: then this should write 2 seconds of audio data.
+		 *             DEFAULT_TIME_SCALE is 600: then this should write 2 seconds of audio data.
 		 * @return true if data was written, false if the AudioInputStream has been depleted.
-		 * @throws IOException
 		 */
 		boolean writeAudio(long time) throws IOException {
 			long durationInMyTimeScale = (time * myTimeScale) / DEFAULT_TIME_SCALE;
@@ -443,8 +454,9 @@ public abstract class MovWriter {
 		}
 
 		private void closeChunk(long chunkSizeInBytes) {
-			if (chunkSizeInBytes <= 0)
+			if (chunkSizeInBytes <= 0) {
 				throw new IllegalArgumentException("chunkSizeInBytes = " + chunkSizeInBytes);
+			}
 
 			long dataStart = out.getBytesWritten() - chunkSizeInBytes;
 
@@ -458,30 +470,39 @@ public abstract class MovWriter {
 		}
 	}
 
-	/** The output stream we write the movie data to. */
+	/**
+	 * The output stream we write the movie data to.
+	 */
 	private MeasuredOutputStream out;
 
-	/** The file we're writing to. */
+	/**
+	 * The file we're writing to.
+	 */
 	File dest;
 
-	/** Whether close() has been called yet. */
+	/**
+	 * Whether close() has been called yet.
+	 */
 	private boolean closed = false;
 
-	/** The video track. */
+	/**
+	 * The video track.
+	 */
 	protected VideoTrack videoTrack = new VideoTrack();
 
-	/** The audio tracks to include. */
-	protected AudioTrack[] audioTracks = new AudioTrack[] {};
+	/**
+	 * The audio tracks to include.
+	 */
+	protected AudioTrack[] audioTracks = new AudioTrack[]{};
 
 	/**
 	 * Constructs a new <code>MovWriter</code>.
-	 * <P>
+	 * <p>
 	 * By constructing this object a <code>FileOutputStream</code> is opened for the destination file. It remains open
 	 * until <code>close()</code> is called or this object is finalized.
 	 *
 	 * @param file the file data is written to. It is strongly recommended that this file name end with ".mov" (or
-	 *            ".MOV"), although this is not required.
-	 * @throws IOException
+	 *             ".MOV"), although this is not required.
 	 */
 	public MovWriter(File file) throws IOException {
 		dest = file;
@@ -525,21 +546,22 @@ public abstract class MovWriter {
 	 * could be inserted at any time (before calling <code>close()</code>), but currently that functionality is not
 	 * supported.
 	 *
-	 * @param audio the audio to add to this movie, in PCM encoding.
+	 * @param audio        the audio to add to this movie, in PCM encoding.
 	 * @param audioOffsets where in the movie each segment of the audio track should be played. Values *must* increase
-	 *            throughout the array, and the array *must* be at least 1 value in length
-	 * @param audioStarts where in the audio track each segment starts
+	 *                     throughout the array, and the array *must* be at least 1 value in length
+	 * @param audioStarts  where in the audio track each segment starts
 	 * @param audioLengths the length of each segment in the audio track
-	 * @throws IOException
 	 * @throws RuntimeException if you invoke this method after calling <code>addFrame()</code> or <code>close()</code>.
 	 */
 	public synchronized void addSegmentedAudioTrack(AudioInputStream audio, float[] audioOffsets, float[] audioStarts,
-			float[] audioLengths) throws IOException {
-		if (closed)
+													float[] audioLengths) throws IOException {
+		if (closed) {
 			throw new RuntimeException("this writer has already been closed");
+		}
 
-		if (videoTrack.isEmpty() == false)
+		if (!videoTrack.isEmpty()) {
 			throw new RuntimeException("cannot add audio after video data has been started");
+		}
 		AudioTrack newTrack;
 
 		newTrack = new AudioTrack(audio, audioOffsets, audioStarts, audioLengths);
@@ -549,7 +571,7 @@ public abstract class MovWriter {
 		newTracks[newTracks.length - 1] = newTrack;
 		audioTracks = newTracks;
 
-		/**
+		/*
 		 * The QT File Format says: In order to overcome any latencies in sound playback, at least one second of sound
 		 * data is placed at the beginning of the interleaved data. This means that the sound and video data are offset
 		 * from each other in the file by one second.
@@ -565,10 +587,9 @@ public abstract class MovWriter {
 	 * could be inserted at any time (before calling <code>close()</code>), but currently that functionality is not
 	 * supported.
 	 *
-	 * @param audio the audio to add to this movie, in PCM encoding.
+	 * @param audio     the audio to add to this movie, in PCM encoding.
 	 * @param startTime the start time (in seconds) of this audio in the movie. For example: if this is 5, then this
-	 *            audio will begin 5 seconds into the movie.
-	 * @throws IOException
+	 *                  audio will begin 5 seconds into the movie.
 	 * @throws RuntimeException if you invoke this method after calling <code>addFrame()</code> or <code>close()</code>.
 	 */
 	public synchronized void addAudioTrack(AudioInputStream audio, float startTime) throws IOException {
@@ -583,35 +604,37 @@ public abstract class MovWriter {
 	 * could be inserted at any time (before calling <code>close()</code>), but currently that functionality is not
 	 * supported.
 	 *
-	 * @param audio the audio to add to this movie, in PCM encoding.
+	 * @param audio     the audio to add to this movie, in PCM encoding.
 	 * @param startTime the start time (in seconds) of this audio in the movie. For example: if this is 5, then this
-	 *            audio will begin 5 seconds into the movie.
-	 * @param endTime the end time (in seconds) of this audio in the movie. If the audio would normally last past this
-	 *            time: then it is cut off. (If the audio runs out before this time: then this argument has no effect.)
-	 * @throws IOException
+	 *                  audio will begin 5 seconds into the movie.
+	 * @param endTime   the end time (in seconds) of this audio in the movie. If the audio would normally last past this
+	 *                  time: then it is cut off. (If the audio runs out before this time: then this argument has no effect.)
 	 * @throws RuntimeException if you invoke this method after calling <code>addFrame()</code> or <code>close()</code>.
 	 */
 	public synchronized void addAudioTrack(AudioInputStream audio, float startTime, float endTime) throws IOException {
-		if (closed)
+		if (closed) {
 			throw new RuntimeException("this writer has already been closed");
+		}
 
-		if (videoTrack.isEmpty() == false)
+		if (!videoTrack.isEmpty()) {
 			throw new RuntimeException("cannot add audio after video data has been started");
+		}
 		AudioTrack newTrack;
 
 		long sampleMin = (long) ((endTime - startTime) * audio.getFormat().getFrameRate());
 		if (sampleMin < audio.getFrameLength()) {
 			audio = new AudioInputStream(audio, audio.getFormat(), sampleMin);
 		}
-		newTrack = new AudioTrack(audio, new float[] { startTime }, new float[] { 0 }, new float[] { endTime
-				- startTime });
+		newTrack = new AudioTrack(audio, new float[]{ startTime }, new float[]{ 0 }, new float[]{
+				endTime - startTime
+		});
 
 		AudioTrack[] newTracks = new AudioTrack[audioTracks.length + 1];
 		System.arraycopy(audioTracks, 0, newTracks, 0, audioTracks.length);
 		newTracks[newTracks.length - 1] = newTrack;
 		audioTracks = newTracks;
 
-		/**
+		/*
 		 * The QT File Format says: In order to overcome any latencies in sound playback, at least one second of sound
 		 * data is placed at the beginning of the interleaved data. This means that the sound and video data are offset
 		 * from each other in the file by one second.
@@ -626,20 +649,20 @@ public abstract class MovWriter {
 
 	/**
 	 * Adds an image to this animation.
-	 * <P>
+	 * <p>
 	 * All images must be the same dimensions; if this image is a different size from previously added images an
 	 * exception is thrown.
 	 *
 	 * @param duration the duration (in seconds) this frame should show. (This value is converted to a timescale of
-	 *            DEFAULT_TIME_SCALE.)
-	 * @param bi the image to add as a frame.
+	 *                 DEFAULT_TIME_SCALE.)
+	 * @param bi       the image to add as a frame.
 	 * @param settings an optional map of settings subclasses may use to encode this data. For example, the
-	 *            JPEGMovWriter may consult this map to determine the image quality of the JPEG it writes.
-	 * @throws IOException
+	 *                 JPEGMovWriter may consult this map to determine the image quality of the JPEG it writes.
 	 */
 	public synchronized void addFrame(float duration, Bitmap bi, Map<String, Object> settings) throws IOException {
-		if (closed)
+		if (closed) {
 			throw new IllegalArgumentException("this writer has already been closed");
+		}
 		int relativeDuration = (int) (duration * DEFAULT_TIME_SCALE + .5);
 
 		videoTrack.validateSize(bi.getWidth(), bi.getHeight());
@@ -654,23 +677,23 @@ public abstract class MovWriter {
 
 	/**
 	 * Adds an image to this animation.
-	 * <P>
+	 * <p>
 	 * All images must be the same dimensions; if this image is a different size from previously added images an
 	 * exception is thrown.
-	 * <P>
+	 * <p>
 	 * This method is provided as a convenient way to quickly merge frames into a movie. It does not, however, type
 	 * check the images, or convert images that are not of the correct file type. (For example: if you add TIFF image
 	 * files to a MovWriter that expects JPG image files, then no exception will be thrown. But the new mov file will be
 	 * unreadable.)
 	 *
 	 * @param duration the duration (in seconds) this frame should show. (This value is converted to a timescale of
-	 *            DEFAULT_TIME_SCALE.)
-	 * @param image the image to add.
-	 * @throws IOException
+	 *                 DEFAULT_TIME_SCALE.)
+	 * @param image    the image to add.
 	 */
 	public synchronized void addFrame(float duration, File image) throws IOException {
-		if (closed)
+		if (closed) {
 			throw new IllegalArgumentException("this writer has already been closed");
+		}
 
 		int relativeTime = (int) (duration * DEFAULT_TIME_SCALE + .5);
 		videoTrack.addFrame(relativeTime, image);
@@ -685,15 +708,15 @@ public abstract class MovWriter {
 	 * This finishes writing the movie file.
 	 *
 	 * @param writeRemainingAudio if true then unfinished AudioInputStreams continue to write to the movie file. If
-	 *            false then the movie ends immediately. If an operation is cancelled you should pass false here to
-	 *            speed up the time it takes to close everything out.
-	 *
-	 * @throws IOException
+	 *                            false then the movie ends immediately. If an operation is cancelled you should pass false
+	 *                            here to
+	 *                            speed up the time it takes to close everything out.
 	 */
 	public void close(boolean writeRemainingAudio) throws IOException {
 		synchronized (this) {
-			if (closed)
+			if (closed) {
 				return;
+			}
 			closed = true;
 		}
 
@@ -701,14 +724,16 @@ public abstract class MovWriter {
 		try {
 			videoTrack.close();
 			if (writeRemainingAudio) {
-				writeAudioLoop: while (true) {
+				while (true) {
 					boolean audioRemaining = false;
 					for (AudioTrack audio : audioTracks) {
-						if (audio.writeAudio(DEFAULT_TIME_SCALE))
+						if (audio.writeAudio(DEFAULT_TIME_SCALE)) {
 							audioRemaining = true;
+						}
 					}
-					if (!audioRemaining)
-						break writeAudioLoop;
+					if (!audioRemaining) {
+						break;
+					}
 				}
 			}
 
@@ -756,17 +781,16 @@ public abstract class MovWriter {
 			array[7] = (byte) (mdatSize & 0xff);
 			raf.write(array);
 		} finally {
-			raf.close();
+			IOUtilities.closeStream(raf);
 		}
 	}
 
 	/**
 	 * Write a file to an OutputStream.
 	 *
-	 * @param out the stream to write to.
+	 * @param out  the stream to write to.
 	 * @param file the file to write
 	 * @return the number of bytes written.
-	 * @throws IOException
 	 */
 	protected static synchronized long write(OutputStream out, File file) throws IOException {
 		FileInputStream in = null;
@@ -774,36 +798,33 @@ public abstract class MovWriter {
 			in = new FileInputStream(file);
 			return write(out, in, false);
 		} finally {
-			try {
-				in.close();
-			} catch (IOException e) {
-			}
+			IOUtilities.closeStream(in);
 		}
 	}
 
 	/**
 	 * Write the remainder of an InputStream to an OutputStream.
 	 *
-	 * @param out the stream to write to.
-	 * @param in the data to write
-	 * @param whether every two bytes should be switched (to convert from one endian to another)
+	 * @param out              the stream to write to.
+	 * @param in               the data to write
+	 * @param reverseBytePairs whether every two bytes should be switched (to convert from one endian to another)
 	 * @return the number of bytes written.
-	 * @throws IOException
 	 */
-	protected static synchronized long write(OutputStream out, InputStream in, boolean reverseBytePairs)
-			throws IOException {
+	protected static synchronized long write(OutputStream out, InputStream in, boolean reverseBytePairs) throws IOException {
 		byte[] block = new byte[4096];
 
 		long written = 0;
 		int k = read(in, block, block.length);
-		if (reverseBytePairs)
+		if (reverseBytePairs) {
 			reverseBytePairs(block, k);
+		}
 		while (k != -1) {
 			written += k;
 			out.write(block, 0, k);
 			k = read(in, block, block.length);
-			if (reverseBytePairs)
+			if (reverseBytePairs) {
 				reverseBytePairs(block, k);
+			}
 		}
 		return written;
 	}
@@ -811,62 +832,65 @@ public abstract class MovWriter {
 	/**
 	 * Write up to a certain number of bytes from an InputStream to an OutputStream.
 	 *
-	 * @param out the stream to write to.
-	 * @param in the data to write
-	 * @param maxBytes the maximum number of bytes to write
-	 * @param whether every two bytes should be switched (to convert from one endian to another)
+	 * @param out              the stream to write to.
+	 * @param in               the data to write
+	 * @param maxBytes         the maximum number of bytes to write
+	 * @param reverseBytePairs whether every two bytes should be switched (to convert from one endian to another)
 	 * @return the number of bytes written.
-	 * @throws IOException
 	 */
-	protected static synchronized long write(OutputStream out, InputStream in, long maxBytes, boolean reverseBytePairs)
-			throws IOException {
+	protected static synchronized long write(OutputStream out, InputStream in, long maxBytes, boolean reverseBytePairs) throws IOException {
 		byte[] block = new byte[4096];
 
 		long written = 0;
 
-		if (maxBytes % 2 == 1)
+		if (maxBytes % 2 == 1) {
 			maxBytes--;
+		}
 
 		int k = read(in, block, Math.min(block.length, (int) maxBytes));
-		if (reverseBytePairs)
+		if (reverseBytePairs) {
 			reverseBytePairs(block, k);
-		loop: while (k != -1) {
+		}
+		while (k != -1) {
 			written += k;
 			out.write(block, 0, k);
 			k = read(in, block, Math.min(block.length, (int) (maxBytes - written)));
-			if (reverseBytePairs)
+			if (reverseBytePairs) {
 				reverseBytePairs(block, k);
-			if (written == maxBytes)
-				break loop;
+			}
+			if (written == maxBytes) {
+				break;
+			}
 		}
 		return written;
 	}
 
 	/**
 	 * Reads bytes from an InputStream. This will always return an even number of bytes.
-	 *
-	 * @param bytesToRead
-	 * @return
 	 */
 	private static int read(InputStream in, byte[] dest, int bytesToRead) throws IOException {
 		int read = 0;
-		if (bytesToRead % 2 == 1)
+		if (bytesToRead % 2 == 1) {
 			bytesToRead--;
+		}
 		read = in.read(dest, 0, bytesToRead);
-		if (read == -1)
+		if (read == -1) {
 			return read;
+		}
 		while ((read % 2) == 1) {
 			int k = in.read(dest, read, bytesToRead - read);
-			if (k == -1)
+			if (k == -1) {
 				return read;
+			}
 			read += k;
 		}
 		return read;
 	}
 
 	private static void reverseBytePairs(byte[] data, int length) {
-		if (length == -1)
+		if (length == -1) {
 			return;
+		}
 		// it is safe to assume length is divisible by 2
 		for (int a = 0; a < length - 1; a += 2) {
 			byte t = data[a];

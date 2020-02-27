@@ -97,7 +97,7 @@ public class MOVUtilities {
 		int audioBitmapLeft = Math.round((outputWidth - audioBitmapSize) / 2f);
 		int audioBitmapTop = Math.round((outputHeight - audioBitmapSize) / 2f);
 
-		Bitmap imageBitmap = null;
+		Bitmap imageBitmap;
 		SVG audioSVG = null;
 		JPEGMovWriter outputFileWriter = null;
 		ArrayList<File> filesToDelete = new ArrayList<>();
@@ -153,7 +153,7 @@ public class MOVUtilities {
 			for (FrameMediaContainer frame : framesToSend) {
 
 				imageLoaded = false;
-				baseCanvas.drawColor(backgroundColour);
+				baseCanvas.drawColor(frame.mBackgroundColour < 0 ? frame.mBackgroundColour : backgroundColour);
 
 				if (frame.mImagePath != null) {
 					// scale image size to make sure it is small enough to fit in the container
@@ -171,14 +171,14 @@ public class MOVUtilities {
 
 				if (!TextUtils.isEmpty(frame.mTextContent)) {
 					// TODO: we don't actually pass the value of @dimen/export_maximum_text_height_with_image
-					BitmapUtilities.drawScaledText(frame.mTextContent, baseCanvas, basePaint, (imageLoaded ?
-							textColourWithImage : textColourNoImage), (imageLoaded ? textBackgroundColour : 0), textSpacing,
-							textCornerRadius, imageLoaded, 0, textBackgroundSpanWidth, outputHeight, textMaxFontSize,
-							textMaxCharsPerLine);
+					BitmapUtilities.drawScaledText(frame.mTextContent, baseCanvas, basePaint, frame.mForegroundColour <
+							0 ? frame.mForegroundColour : (imageLoaded ? textColourWithImage : textColourNoImage), (imageLoaded
+							? textBackgroundColour : 0), textSpacing, textCornerRadius, imageLoaded, 0, textBackgroundSpanWidth,
+							outputHeight, textMaxFontSize, textMaxCharsPerLine);
 
 				} else if (!imageLoaded) {
 					// quicker to do this than load the SVG for narratives that have no audio
-					if (audioSVG == null) {
+					if (audioIconResourceId < 0 && audioSVG == null) {  // only load the icon if one is specified
 						audioSVG = SVGParser.getSVGFromResource(res, audioIconResourceId);
 					}
 					if (audioSVG != null) {
@@ -197,9 +197,11 @@ public class MOVUtilities {
 			fileError = true; // these are the only places where errors really matter
 			Log.d(LOG_TAG, "Error creating MOV file - Throwable: " + t.getLocalizedMessage());
 		} finally {
-			try {
-				outputFileWriter.close(!fileError);
-			} catch (Exception ignored) {
+			if (outputFileWriter != null) {
+				try {
+					outputFileWriter.close(!fileError);
+				} catch (Exception ignored) {
+				}
 			}
 		}
 
@@ -252,9 +254,9 @@ public class MOVUtilities {
 				audioDuration = frame.mAudioDurations.get(audioId);
 
 				File inputAudioFile = new File(audioPath);
-				File outputPCMFile = null;
+				File outputPCMFile;
 				BufferedOutputStream outputPCMStream = null;
-				AudioInputStream pcmAudioStream = null;
+				AudioInputStream pcmAudioStream;
 				AudioFormat audioFormat = null;
 				boolean decodingError;
 
@@ -424,7 +426,7 @@ public class MOVUtilities {
 
 		// add the separate track types
 		for (String currentTrackType : fileTracks) {
-			File inputAudioFile = null;
+			File inputAudioFile;
 			File outputPCMFile = null;
 			BufferedOutputStream outputPCMStream = null;
 			boolean audioWritten = false;

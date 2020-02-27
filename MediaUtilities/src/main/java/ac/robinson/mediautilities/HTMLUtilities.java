@@ -1,16 +1,16 @@
 /*
  *  Copyright (C) 2012 Simon Robinson
- * 
+ *
  *  This file is part of Com-Me.
- * 
- *  Com-Me is free software; you can redistribute it and/or modify it 
- *  under the terms of the GNU Lesser General Public License as 
- *  published by the Free Software Foundation; either version 3 of the 
+ *
+ *  Com-Me is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License as
+ *  published by the Free Software Foundation; either version 3 of the
  *  License, or (at your option) any later version.
  *
- *  Com-Me is distributed in the hope that it will be useful, but WITHOUT 
- *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General 
+ *  Com-Me is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General
  *  Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public
@@ -19,6 +19,12 @@
  */
 
 package ac.robinson.mediautilities;
+
+import android.content.res.Resources;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.text.TextUtils;
+import android.util.Base64;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -32,11 +38,6 @@ import java.util.Map;
 
 import ac.robinson.util.BitmapUtilities;
 import ac.robinson.util.IOUtilities;
-import android.content.res.Resources;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.text.TextUtils;
-import android.util.Base64;
 
 public class HTMLUtilities {
 
@@ -46,7 +47,8 @@ public class HTMLUtilities {
 	}
 
 	public static ArrayList<Uri> generateNarrativeHTML(Resources res, File outputFile,
-			ArrayList<FrameMediaContainer> framesToSend, Map<Integer, Object> settings) {
+													   ArrayList<FrameMediaContainer> framesToSend,
+													   Map<Integer, Object> settings) {
 
 		ArrayList<Uri> filesToSend = new ArrayList<Uri>();
 		if (framesToSend == null || framesToSend.size() <= 0) {
@@ -80,7 +82,7 @@ public class HTMLUtilities {
 				if (readLine.contains(playerBarHeightIdentifier) && playerBarAdjustment == 0) {
 					try {
 						playerBarAdjustment = Integer.parseInt(readLine.replace(playerBarHeightIdentifier, ""));
-					} catch (Throwable t) {
+					} catch (Throwable ignored) {
 					}
 				} else if (readLine.contains(playButtonIconIdentifier) && "".equals(playButtonIcon)) {
 					playButtonIcon = readLine.replace(playButtonIconIdentifier, "");
@@ -108,8 +110,7 @@ public class HTMLUtilities {
 							// TODO: remove region stuff and just fit images properly in the html using percentages
 							String displayMediaRegion = "portrait";
 							int orientation = BitmapUtilities.getImageRotationDegrees(frame.mImagePath);
-							BitmapFactory.Options imageDimensions = BitmapUtilities
-									.getImageDimensions(frame.mImagePath);
+							BitmapFactory.Options imageDimensions = BitmapUtilities.getImageDimensions(frame.mImagePath);
 							if (orientation == 0) {
 								if (imageDimensions.outWidth > imageDimensions.outHeight) {
 									displayMediaRegion = "landscape";
@@ -123,8 +124,8 @@ public class HTMLUtilities {
 							// playerOutputFileWriter.write(" width=\"" + imageDimensions.outWidth + "\" height=\""
 							// + imageDimensions.outHeight + "\"");
 							playerOutputFileWriter.write(" src=\"data:image/jpeg;base64,");
-							playerOutputFileWriter.write(Base64.encodeToString(
-									IOUtilities.readFileToByteArray(frame.mImagePath), 0));
+							playerOutputFileWriter.write(Base64.encodeToString(IOUtilities.readFileToByteArray(frame.mImagePath)
+									, 0));
 							playerOutputFileWriter.write("\" alt=\"" + frame.mFrameId + "\">\n");
 							imageLoaded = true;
 						}
@@ -150,8 +151,7 @@ public class HTMLUtilities {
 
 							// TODO: use the correct type for other files (e.g. mp3)
 							playerOutputFileWriter.write("<audio src=\"data:audio/mpeg;base64,");
-							playerOutputFileWriter.write(Base64.encodeToString(
-									IOUtilities.readFileToByteArray(audioPath), 0));
+							playerOutputFileWriter.write(Base64.encodeToString(IOUtilities.readFileToByteArray(audioPath), 0));
 							playerOutputFileWriter.write("\"></audio>\n");
 							audioLoaded = true;
 						}

@@ -25,6 +25,8 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.SystemClock;
 
+import androidx.annotation.NonNull;
+
 public class CrossFadeDrawable extends Drawable {
 	private static final int TRANSITION_STARTING = 0;
 	private static final int TRANSITION_RUNNING = 1;
@@ -68,7 +70,7 @@ public class CrossFadeDrawable extends Drawable {
 
 	/**
 	 * Begin the second layer on top of the first layer.
-	 * 
+	 *
 	 * @param durationMillis The length of the transition in milliseconds
 	 */
 	public void startTransition(int durationMillis) {
@@ -94,7 +96,7 @@ public class CrossFadeDrawable extends Drawable {
 	 * Reverses the transition, picking up where the transition currently is. If the transition is not currently
 	 * running, this will start the transition with the specified duration. If the transition is already running, the
 	 * last known duration will be used.
-	 * 
+	 *
 	 * @param duration The duration to use if no transition is running.
 	 */
 	public void reverseTransition(int duration) {
@@ -126,7 +128,7 @@ public class CrossFadeDrawable extends Drawable {
 	}
 
 	@Override
-	public void draw(Canvas canvas) {
+	public void draw(@NonNull Canvas canvas) {
 		boolean done = true;
 
 		switch (mTransitionState) {
@@ -264,7 +266,7 @@ public class CrossFadeDrawable extends Drawable {
 	 * Enables or disables the cross fade of the drawables. When cross fade is disabled, the first drawable is always
 	 * drawn opaque. With cross fade enabled, the first drawable is drawn with the opposite alpha of the second
 	 * drawable.
-	 * 
+	 *
 	 * @param enabled True to enable cross fading, false otherwise.
 	 */
 	public void setCrossFadeEnabled(boolean enabled) {
@@ -273,7 +275,7 @@ public class CrossFadeDrawable extends Drawable {
 
 	/**
 	 * Indicates whether the cross fade is enabled for this transition.
-	 * 
+	 *
 	 * @return True if cross fading is enabled, false otherwise.
 	 */
 	boolean isCrossFadeEnabled() {

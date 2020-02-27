@@ -20,7 +20,6 @@
 
 package ac.robinson.util;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -29,7 +28,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
-import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 
@@ -133,7 +131,7 @@ public class IOUtilities {
 			try {
 				stream.close();
 				return true;
-			} catch (Throwable t) {
+			} catch (Throwable ignored) {
 			}
 		}
 		return false;
@@ -275,7 +273,9 @@ public class IOUtilities {
 
 		// Remove the extension.
 		int extensionIndex = filename.lastIndexOf('.');
-		if (extensionIndex == -1) return filename;
+		if (extensionIndex == -1) {
+			return filename;
+		}
 
 		return filename.substring(0, extensionIndex);
 	}
@@ -298,7 +298,7 @@ public class IOUtilities {
 					fileString.append(spaceString);
 				}
 			}
-		} catch (Exception e) {
+		} catch (Exception ignored) {
 		} finally {
 			IOUtilities.closeStream(bufferedReader);
 			IOUtilities.closeStream(fileStream);
@@ -314,24 +314,30 @@ public class IOUtilities {
 	}
 
 	public static String getFileContents(String filePath) {
-		StringBuilder fileString = new StringBuilder();
 		if (new File(filePath).exists()) {
-			FileInputStream fileStream = null;
-			BufferedReader bufferedReader = null;
-			String currentLine;
 			try {
-				fileStream = new FileInputStream(filePath);
-				bufferedReader = new BufferedReader(new InputStreamReader(fileStream));
-				while ((currentLine = bufferedReader.readLine()) != null) {
-					fileString.append(currentLine);
-					fileString.append("\n");
-				}
-			} catch (FileNotFoundException e) {
-			} catch (IOException e) {
-			} finally {
-				IOUtilities.closeStream(bufferedReader);
-				IOUtilities.closeStream(fileStream);
+				return getFileContents(new FileInputStream(filePath));
+			} catch (FileNotFoundException ignored) {
 			}
+		}
+		return "";
+	}
+
+	public static String getFileContents(InputStream stream) {
+		StringBuilder fileString = new StringBuilder();
+		BufferedReader bufferedReader = null;
+		String currentLine;
+		try {
+			bufferedReader = new BufferedReader(new InputStreamReader(stream));
+			while ((currentLine = bufferedReader.readLine()) != null) {
+				fileString.append(currentLine);
+				fileString.append("\n");
+			}
+		} catch (FileNotFoundException ignored) {
+		} catch (IOException ignored) {
+		} finally {
+			IOUtilities.closeStream(bufferedReader);
+			IOUtilities.closeStream(stream);
 		}
 		if (fileString.length() > 0) {
 			fileString.deleteCharAt(fileString.length() - 1);
@@ -382,7 +388,6 @@ public class IOUtilities {
 	/**
 	 * Get the duration of an audio file using MediaPlayer
 	 *
-	 * @param audioFile
 	 * @return the file's duration, or -1 on error
 	 */
 	public static int getAudioFileLength(File audioFile) {
@@ -397,7 +402,7 @@ public class IOUtilities {
 			mediaPlayer.setDataSource(playerInputStream.getFD());
 			mediaPlayer.prepare();
 			audioDuration = mediaPlayer.getDuration();
-		} catch (Throwable t) {
+		} catch (Throwable ignored) {
 		} finally {
 			IOUtilities.closeStream(playerInputStream);
 			if (mediaPlayer != null) {

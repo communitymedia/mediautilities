@@ -1,16 +1,16 @@
 /*
  *  Copyright (C) 2012 Simon Robinson
- * 
+ *
  *  This file is part of Com-Me.
- * 
- *  Com-Me is free software; you can redistribute it and/or modify it 
- *  under the terms of the GNU Lesser General Public License as 
- *  published by the Free Software Foundation; either version 3 of the 
+ *
+ *  Com-Me is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License as
+ *  published by the Free Software Foundation; either version 3 of the
  *  License, or (at your option) any later version.
  *
- *  Com-Me is distributed in the hope that it will be useful, but WITHOUT 
- *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General 
+ *  Com-Me is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General
  *  Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public
@@ -74,15 +74,15 @@ public class SMILUtilities {
 
 	/**
 	 * Get a list of the additional files that are part of a SMIL narrative file
-	 * 
-	 * @param smilFile The SMIL file to parse
+	 *
+	 * @param smilFile                The SMIL file to parse
 	 * @param includeNonMediaElements Whether to include those files that are not actual content (i.e. background
-	 *            images, etc.)
+	 *                                images, etc.)
 	 * @return The files used in the SMIL narrative
 	 */
 	public static ArrayList<String> getSimpleSMILFileList(File smilFile, boolean includeNonMediaElements) {
 
-		ArrayList<String> smilContents = new ArrayList<String>();
+		ArrayList<String> smilContents = new ArrayList<>();
 
 		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
 		try {
@@ -105,8 +105,8 @@ public class SMILUtilities {
 						String sourceFile = mediaElement.getAttribute("src");
 
 						// some items are just meta data and should be ignored
-						if ("false".equals(mediaElement.getAttribute("is-media"))
-								|| "blank".equals(parElement.getAttribute("id"))) {
+						if ("false".equals(mediaElement.getAttribute("is-media")) ||
+								"blank".equals(parElement.getAttribute("id"))) {
 							if (includeNonMediaElements) {
 								if (!smilContents.contains(sourceFile)) {
 									smilContents.add(sourceFile);
@@ -137,22 +137,23 @@ public class SMILUtilities {
 	}
 
 	public static ArrayList<FrameMediaContainer> getSMILFrameList(File smilFile, int sequenceIncrement,
-			boolean deleteNonMediaElements) {
+																  boolean deleteNonMediaElements) {
 		return getSMILFrameList(smilFile, sequenceIncrement, deleteNonMediaElements, 0, true);
 	}
 
 	/**
 	 * Get a list of the frames in a SMIL narrative file. Each frame is returned in a FrameMediaContainer, and non-media
 	 * element files are deleted from the file system
-	 * 
+	 *
 	 * @param smilFile The SMIL file to parse
 	 * @return The frames of the SMIL narrative
 	 */
 	public static ArrayList<FrameMediaContainer> getSMILFrameList(File smilFile, int sequenceIncrement,
-			boolean deleteNonMediaElements, int frameLimit, boolean validateAudioLengths) {
+																  boolean deleteNonMediaElements, int frameLimit,
+																  boolean validateAudioLengths) {
 
-		ArrayList<FrameMediaContainer> smilContents = new ArrayList<FrameMediaContainer>();
-		ArrayList<File> ignoredFiles = new ArrayList<File>();
+		ArrayList<FrameMediaContainer> smilContents = new ArrayList<>();
+		ArrayList<File> ignoredFiles = new ArrayList<>();
 
 		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
 		try {
@@ -170,8 +171,7 @@ public class SMILUtilities {
 			for (int i = 0; i < n && i < frameLimit; i++) {
 
 				Element parElement = (Element) nodeList.item(i);
-				FrameMediaContainer currentFrame = new FrameMediaContainer(parElement.getAttribute("id"),
-						frameSequenceId);
+				FrameMediaContainer currentFrame = new FrameMediaContainer(parElement.getAttribute("id"), frameSequenceId);
 
 				NodeList mediaElements = parElement.getChildNodes();
 				for (int j = 0, o = mediaElements.getLength(); j < o; j++) {
@@ -191,16 +191,17 @@ public class SMILUtilities {
 
 							// some items are just meta data and should be ignored
 							// "blank" is a blank frame at the end of the narrative
-							if ("false".equals(mediaElement.getAttribute("is-media"))
-									|| "blank".equals(parElement.getAttribute("id"))) {
-								if (!smilContents.contains(sourceFile)) {
+							if ("false".equals(mediaElement.getAttribute("is-media")) ||
+									"blank".equals(parElement.getAttribute("id"))) {
+								if (!ignoredFiles.contains(sourceFile)) {
 									ignoredFiles.add(sourceFile);
 								}
 								currentFrame.updateFrameMaxDuration(elementDuration);
 
 							} else {
-								currentFrame.addMediaFromSMIL(mediaElements.item(j).getNodeName(), sourceFile,
-										elementId, elementDuration, elementRegion, validateAudioLengths);
+								currentFrame.addMediaFromSMIL(mediaElements.item(j)
+										.getNodeName(), sourceFile, elementId, elementDuration, elementRegion,
+										validateAudioLengths);
 							}
 						}
 					}
@@ -233,8 +234,8 @@ public class SMILUtilities {
 	public static int getDurationFromString(String mediaDuration) {
 		if (!TextUtils.isEmpty(mediaDuration)) {
 			if (mediaDuration.endsWith(SMILUtilities.SMIL_MILLISECOND_STRING)) {
-				mediaDuration = mediaDuration.substring(0, mediaDuration.length()
-						- SMILUtilities.SMIL_MILLISECOND_STRING.length());
+				mediaDuration = mediaDuration.substring(0,
+						mediaDuration.length() - SMILUtilities.SMIL_MILLISECOND_STRING.length());
 				return StringUtilities.safeStringToInteger(mediaDuration);
 			}
 		}
@@ -243,16 +244,13 @@ public class SMILUtilities {
 
 	/**
 	 * Output files are put in the same directory as outputFile
-	 * 
-	 * @param res
-	 * @param outputFile
-	 * @param framesToSend
-	 * @return
 	 */
+	@SuppressWarnings("ConstantConditions")
 	public static ArrayList<Uri> generateNarrativeSMIL(Resources res, File outputFile,
-			ArrayList<FrameMediaContainer> framesToSend, Map<Integer, Object> settings) {
+													   ArrayList<FrameMediaContainer> framesToSend,
+													   Map<Integer, Object> settings) {
 
-		ArrayList<Uri> filesToSend = new ArrayList<Uri>();
+		ArrayList<Uri> filesToSend = new ArrayList<>();
 		if (framesToSend == null || framesToSend.size() <= 0) {
 			return filesToSend;
 		}
@@ -288,12 +286,10 @@ public class SMILUtilities {
 		File outputDirectory = outputFile.getParentFile();
 
 		String narrativeName = outputFile.getName();
-		narrativeName = narrativeName
-				.substring(0, narrativeName.length() - MediaUtilities.SMIL_FILE_EXTENSION.length());
+		narrativeName = narrativeName.substring(0, narrativeName.length() - MediaUtilities.SMIL_FILE_EXTENSION.length());
 
 		// add a duplicate of the player because some devices have a pointless whitelist of incoming file extensions (!)
-		File syncFile = new File(outputDirectory, String.format("%s%s", narrativeName,
-				MediaUtilities.SYNC_FILE_EXTENSION));
+		File syncFile = new File(outputDirectory, String.format("%s%s", narrativeName, MediaUtilities.SYNC_FILE_EXTENSION));
 		filesToSend.add(Uri.fromFile(syncFile));
 
 		final File storyPlayerFile = new File(outputDirectory, String.format("play-%s.html", narrativeName));
@@ -308,8 +304,7 @@ public class SMILUtilities {
 
 		// would be better to use data:image/png URI, but this breaks Quicktime playback
 		File tempBackgroundFile = new File(outputDirectory, String.format("%s-background.png", narrativeName));
-		Bitmap backgroundBitmap = Bitmap
-				.createBitmap(2, 2, ImageCacheUtilities.mBitmapFactoryOptions.inPreferredConfig);
+		Bitmap backgroundBitmap = Bitmap.createBitmap(2, 2, ImageCacheUtilities.mBitmapFactoryOptions.inPreferredConfig);
 		backgroundBitmap.eraseColor(backgroundColour);
 		if (BitmapUtilities.saveBitmap(backgroundBitmap, Bitmap.CompressFormat.PNG, 100, tempBackgroundFile)) {
 			filesToSend.add(Uri.fromFile(tempBackgroundFile));
@@ -320,7 +315,7 @@ public class SMILUtilities {
 			// see: http://service.real.com/help/library/guides/production/htmfiles/smil.htm
 			XmlSerializer smilSerializer = Xml.newSerializer();
 			String rootNamespace = "http://www.w3.org/2001/SMIL20/Language";
-			String tagNamespace = null;
+			final String tagNamespace = null;
 			smilSerializer.setOutput(smilFileWriter);
 			smilSerializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
 			// these don't work (Java bug)
@@ -330,8 +325,7 @@ public class SMILUtilities {
 			smilSerializer.startDocument("utf-8", null);
 			smilSerializer.setPrefix("", rootNamespace);
 			smilSerializer.startTag(rootNamespace, "smil");
-			smilSerializer.attribute(tagNamespace, "xmlns:qt",
-					"http://www.apple.com/quicktime/resources/smilextensions");
+			smilSerializer.attribute(tagNamespace, "xmlns:qt", "http://www.apple.com/quicktime/resources/smilextensions");
 			smilSerializer.attribute(tagNamespace, "qt:autoplay", "true");
 			smilSerializer.attribute(tagNamespace, "qt:time-slider", "true");
 
@@ -353,21 +347,22 @@ public class SMILUtilities {
 					// scale the image dimensions for coping with smil "meet" scaling
 					BitmapFactory.Options imageDimensions = BitmapUtilities.getImageDimensions(frame.mImagePath);
 					int maxDimension = Math.max(imageDimensions.outWidth, imageDimensions.outHeight);
-					Point imageSize = new Point(Math.round((outputWidth / (float) maxDimension)
-							* imageDimensions.outWidth), Math.round((outputHeight / (float) maxDimension)
-							* imageDimensions.outHeight));
+					Point imageSize = new Point(Math.round(
+							(outputWidth / (float) maxDimension) * imageDimensions.outWidth), Math.round(
+							(outputHeight / (float) maxDimension) * imageDimensions.outHeight));
 
-					addRegion(smilSerializer, tagNamespace, getImageRegion(frame),
-							Integer.toString(Math.round((outputWidth - imageSize.x) / 2f)),
-							Integer.toString(Math.round((outputHeight - imageSize.y) / 2f)), "100%", "100%", "meet");
+					addRegion(smilSerializer, tagNamespace, getImageRegion(frame), Integer.toString(Math.round(
+							(outputWidth - imageSize.x) / 2f)), Integer.toString(Math.round(
+							(outputHeight - imageSize.y) / 2f)), "100%", "100%", "meet");
 				}
 			}
 
 			addRegion(smilSerializer, tagNamespace, "fill-area", "0", "0", "100%", "100%", "fill");
-			addRegion(smilSerializer, tagNamespace, "audio-icon",
-					Integer.toString((outputWidth - audioIconBitmap.getWidth()) / 2),
-					Integer.toString((outputHeight - audioIconBitmap.getHeight()) / 2),
-					Integer.toString(audioIconBitmap.getWidth()), Integer.toString(audioIconBitmap.getHeight()), "fill");
+			addRegion(smilSerializer, tagNamespace, "audio-icon", Integer.toString(
+					(outputWidth - audioIconBitmap.getWidth()) / 2), Integer.toString(
+					(outputHeight - audioIconBitmap.getHeight()) /
+							2), Integer.toString(audioIconBitmap.getWidth()), Integer.toString(audioIconBitmap.getHeight()),
+					"fill");
 			// TODO: top of 540 into attrs
 			addRegion(smilSerializer, tagNamespace, "text-subtitles", "0", "540", "100%", "100%", "meet");
 
@@ -376,8 +371,8 @@ public class SMILUtilities {
 
 			smilSerializer.startTag(tagNamespace, "body");
 			smilSerializer.startTag(tagNamespace, "seq");
-			smilSerializer.attribute(tagNamespace, "id", framesToSend.get(0).mParentId == null ? UUID.randomUUID()
-					.toString() : framesToSend.get(0).mParentId);
+			smilSerializer.attribute(tagNamespace, "id",
+					framesToSend.get(0).mParentId == null ? UUID.randomUUID().toString() : framesToSend.get(0).mParentId);
 
 			// find all the story components
 			boolean imageLoaded;
@@ -402,7 +397,8 @@ public class SMILUtilities {
 					// output files must be in a public directory for sending (/data/ directory will *not* work)
 					if (IOUtilities.isInternalPath(frame.mImagePath)) { // so we can send private files
 						savedFile = copySmilFileToOutput(frame.mImagePath, outputDirectory, narrativeName,
-								frame.mFrameSequenceId, 0, IOUtilities.getFileExtension(frame.mImagePath));
+								frame.mFrameSequenceId, 0, IOUtilities
+								.getFileExtension(frame.mImagePath));
 					} else {
 						savedFile = new File(frame.mImagePath);
 					}
@@ -419,8 +415,8 @@ public class SMILUtilities {
 					if (audioPath != null && new File(audioPath).exists()) {
 						// output files must be in a public directory for sending (/data/ directory will *not* work)
 						if (IOUtilities.isInternalPath(audioPath)) { // so we can send private files
-							savedFile = copySmilFileToOutput(audioPath, outputDirectory, narrativeName,
-									frame.mFrameSequenceId, audioId + 1, IOUtilities.getFileExtension(audioPath));
+							savedFile = copySmilFileToOutput(audioPath, outputDirectory, narrativeName, frame.mFrameSequenceId,
+									audioId + 1, IOUtilities.getFileExtension(audioPath));
 						} else {
 							savedFile = new File(audioPath);
 						}
@@ -444,25 +440,24 @@ public class SMILUtilities {
 					// TODO: the text background isn't really necessary here, as transparency breaks SMIL so all text
 					// background is black by default... remove? (but bear in mind height is only calculated properly
 					// when there's a background to draw)
-					int textHeight = BitmapUtilities.drawScaledText(frame.mTextContent, textBitmapCanvas,
-							textBitmapPaint, (imageLoaded ? textColourWithImage : textColourNoImage),
-							(imageLoaded ? textBackgroundColour : 0), textSpacing, textCornerRadius, imageLoaded, 0,
-							textBackgroundSpanWidth, textMaxHeightWithImage, textMaxFontSize, textMaxCharsPerLine);
+					int textHeight = BitmapUtilities.drawScaledText(frame.mTextContent, textBitmapCanvas, textBitmapPaint,
+							(imageLoaded ? textColourWithImage : textColourNoImage), (imageLoaded ? textBackgroundColour : 0),
+							textSpacing, textCornerRadius, imageLoaded, 0, textBackgroundSpanWidth, textMaxHeightWithImage,
+							textMaxFontSize, textMaxCharsPerLine);
 
 					// crop to the actual size of the text to show as much as possible of the image
 					Bitmap textBitmapCropped;
 					if (imageLoaded) {
-						textBitmapCropped = Bitmap.createBitmap(textBitmap, 0, outputHeight - textHeight - 1,
-								outputWidth, textHeight, null, false);
+						textBitmapCropped = Bitmap.createBitmap(textBitmap, 0,
+								outputHeight - textHeight - 1, outputWidth, textHeight, null, false);
 					} else {
 						textBitmapCropped = textBitmap;
 					}
 
-					// savedFile = new File(outputDirectory, getFormattedFileName(narrativeName, frame.mFrameSequenceId,
-					// 0, "png"));
+					// savedFile = new File(outputDirectory, getFormattedFileName(narrativeName, frame.mFrameSequenceId, 0,
+					// "png"));
 					savedFile = new File(outputDirectory, frame.mFrameId + ".png");
 					BitmapUtilities.saveBitmap(textBitmapCropped, Bitmap.CompressFormat.PNG, 100, savedFile);
-					textBitmapCanvas = null;
 
 					filesToSend.add(Uri.fromFile(savedFile));
 					textLoaded = true;
@@ -470,20 +465,20 @@ public class SMILUtilities {
 
 				// clear the background - could use a SMIL brush, but the Quicktime plugin doesn't recognise these
 				addSmilTag(smilSerializer, tagNamespace, "img", tempBackgroundFile.getName(), frame.mFrameMaxDuration,
-						"fill-area", false);
+						"fill" + "-area", false);
 
 				if (imageLoaded) {
-					addSmilTag(smilSerializer, tagNamespace, "img", displayMedia, frame.mFrameMaxDuration,
-							displayMediaRegion, true);
+					addSmilTag(smilSerializer, tagNamespace, "img", displayMedia, frame.mFrameMaxDuration, displayMediaRegion,
+							true);
 					if (textLoaded) {
 						addSmilTag(smilSerializer, tagNamespace, "img", savedFile.getName(), frame.mFrameMaxDuration,
-								"text-subtitles", false);
+								"text" + "-subtitles", false);
 						addTextTag(smilSerializer, tagNamespace, frame.mTextContent);
 					}
 				} else {
 					if (textLoaded) {
-						addSmilTag(smilSerializer, tagNamespace, "img", savedFile.getName(), frame.mFrameMaxDuration,
-								"fill-area", false);
+						addSmilTag(smilSerializer, tagNamespace, "img", savedFile.getName(), frame.mFrameMaxDuration, "fill-area"
+								, false);
 						addTextTag(smilSerializer, tagNamespace, frame.mTextContent);
 					} else {
 						addSmilTag(smilSerializer, tagNamespace, "img", displayMedia, frame.mFrameMaxDuration,
@@ -497,17 +492,15 @@ public class SMILUtilities {
 			// blank frame to clear the screen, and also useful for syncing, so we always know all sent files
 			smilSerializer.startTag(tagNamespace, "par");
 			smilSerializer.attribute(tagNamespace, "id", "blank");
-			if (narrativeHasAudio) {
+			if (narrativeHasAudio && audioResourceId < 0) { // only load the icon if one is specified
 				SVG audioSVG = SVGParser.getSVGFromResource(res, audioResourceId);
 				Canvas audioIconCanvas = new Canvas(audioIconBitmap);
 				audioIconCanvas.drawPicture(audioSVG.getPicture(), new RectF(audioBitmapLeft, audioBitmapTop,
 						audioBitmapLeft + audioBitmapSize, audioBitmapTop + audioBitmapSize));
 				if (BitmapUtilities.saveBitmap(audioIconBitmap, Bitmap.CompressFormat.PNG, 100, tempAudioIconFile)) {
-					addSmilTag(smilSerializer, tagNamespace, "meta-data", tempAudioIconFile.getName(), 2, "fill-area",
-							false);
+					addSmilTag(smilSerializer, tagNamespace, "meta-data", tempAudioIconFile.getName(), 2, "fill-area", false);
 					filesToSend.add(Uri.fromFile(tempAudioIconFile));
 				} // if this fails, audio playback won't have an icon
-				audioIconCanvas = null;
 			}
 			addSmilTag(smilSerializer, tagNamespace, "meta-data", storyPlayerFile.getName(), 2, "fill-area", false);
 			addSmilTag(smilSerializer, tagNamespace, "meta-data", syncFile.getName(), 2, "fill-area", false);
@@ -538,7 +531,7 @@ public class SMILUtilities {
 		InputStream playerFileStream = res.openRawResource(R.raw.smil_player);
 		BufferedReader playerFileReader = new BufferedReader(new InputStreamReader(playerFileStream));
 		BufferedWriter playerFileWriter = null;
-		String readLine = null;
+		String readLine;
 		try {
 			playerFileWriter = new BufferedWriter(new FileWriter(storyPlayerFile));
 			while ((readLine = playerFileReader.readLine()) != null) {
@@ -546,12 +539,11 @@ public class SMILUtilities {
 				readLine = readLine.replace("[WIDTH]", Integer.toString(outputWidth));
 				readLine = readLine.replace("[HEIGHT]", Integer.toString(outputHeight + playerBarAdjustment));
 				readLine = readLine.replace("[HALF-WIDTH]", Integer.toString(outputWidth / 2));
-				readLine = readLine
-						.replace("[HALF-HEIGHT]", Integer.toString((outputHeight + playerBarAdjustment) / 2));
+				readLine = readLine.replace("[HALF-HEIGHT]", Integer.toString((outputHeight + playerBarAdjustment) / 2));
 				playerFileWriter.write(readLine + '\n');
 			}
 			filesToSend.add(Uri.fromFile(storyPlayerFile));
-		} catch (Throwable t) {
+		} catch (Throwable ignored) {
 		} finally {
 			// can still export the smil, even if the player fails
 			IOUtilities.closeStream(playerFileWriter);
@@ -578,15 +570,14 @@ public class SMILUtilities {
 	}
 
 	// only used for when we're installed internally TODO: detect automatically?
-	private static File copySmilFileToOutput(String sourceFilePath, File outputDirectory, String narrativeName,
-			int frameId, int mediaId, String fileExtension) {
+	private static File copySmilFileToOutput(String sourceFilePath, File outputDirectory, String narrativeName, int frameId,
+											 int mediaId, String fileExtension) {
 
-		File outputFile = new File(outputDirectory,
-				getFormattedFileName(narrativeName, frameId, mediaId, fileExtension));
+		File outputFile = new File(outputDirectory, getFormattedFileName(narrativeName, frameId, mediaId, fileExtension));
 		try {
 			IOUtilities.copyFile(new File(sourceFilePath), outputFile);
 			return outputFile;
-		} catch (Throwable t) {
+		} catch (Throwable ignored) {
 		}
 		return null;
 	}
@@ -599,9 +590,8 @@ public class SMILUtilities {
 		return imageRegion + "image-" + frame.mFrameSequenceId;
 	}
 
-	private static void addRegion(XmlSerializer smilSerializer, String tagNamespace, String regionId,
-			String regionLeft, String regionTop, String regionWidth, String regionHeight, String regionFit)
-			throws IOException {
+	private static void addRegion(XmlSerializer smilSerializer, String tagNamespace, String regionId, String regionLeft,
+								  String regionTop, String regionWidth, String regionHeight, String regionFit) throws IOException {
 		smilSerializer.startTag(tagNamespace, "region");
 		smilSerializer.attribute(tagNamespace, "id", regionId);
 		smilSerializer.attribute(tagNamespace, "top", regionTop);
@@ -612,15 +602,14 @@ public class SMILUtilities {
 		smilSerializer.endTag(tagNamespace, "region");
 	}
 
-	private static void addTextTag(XmlSerializer smilSerializer, String tagNamespace, String textString)
-			throws IOException {
+	private static void addTextTag(XmlSerializer smilSerializer, String tagNamespace, String textString) throws IOException {
 		smilSerializer.startTag(tagNamespace, "text-media");
 		smilSerializer.text(textString);
 		smilSerializer.endTag(tagNamespace, "text-media");
 	}
 
 	private static void addSmilTag(XmlSerializer smilSerializer, String tagNamespace, String tagName, String fileName,
-			int duration, String region, boolean isMedia) throws IOException {
+								   int duration, String region, boolean isMedia) throws IOException {
 		smilSerializer.startTag(tagNamespace, tagName);
 		smilSerializer.attribute(tagNamespace, "src", fileName);
 		smilSerializer.attribute(tagNamespace, "dur", duration + SMIL_MILLISECOND_STRING);

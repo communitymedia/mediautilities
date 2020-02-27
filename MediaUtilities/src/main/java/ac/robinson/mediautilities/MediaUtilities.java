@@ -47,8 +47,7 @@ public class MediaUtilities {
 		int totalLength = M4A_FILE_EXTENSIONS.length + MP3_FILE_EXTENSIONS.length + WAV_FILE_EXTENSIONS.length;
 		String[] tempExtensions = new String[totalLength];
 		System.arraycopy(M4A_FILE_EXTENSIONS, 0, tempExtensions, 0, M4A_FILE_EXTENSIONS.length);
-		System.arraycopy(MP3_FILE_EXTENSIONS, 0, tempExtensions, M4A_FILE_EXTENSIONS.length, MP3_FILE_EXTENSIONS
-				.length);
+		System.arraycopy(MP3_FILE_EXTENSIONS, 0, tempExtensions, M4A_FILE_EXTENSIONS.length, MP3_FILE_EXTENSIONS.length);
 		System.arraycopy(WAV_FILE_EXTENSIONS, 0, tempExtensions,
 				M4A_FILE_EXTENSIONS.length + MP3_FILE_EXTENSIONS.length, WAV_FILE_EXTENSIONS.length);
 		MOV_AUDIO_FILE_EXTENSIONS = tempExtensions;

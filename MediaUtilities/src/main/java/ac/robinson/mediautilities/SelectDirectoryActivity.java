@@ -162,7 +162,7 @@ public class SelectDirectoryActivity extends ListActivity {
 	}
 
 	private void addItem(String text) {
-		HashMap<String, String> item = new HashMap<String, String>();
+		HashMap<String, String> item = new HashMap<>();
 		item.put(ITEM_KEY, text);
 		mFileList.add(item);
 	}

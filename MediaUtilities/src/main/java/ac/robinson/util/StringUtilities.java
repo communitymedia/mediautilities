@@ -20,22 +20,15 @@
 
 package ac.robinson.util;
 
-import android.annotation.TargetApi;
-import android.os.Build;
 import android.text.TextUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.Normalizer;
 import java.util.Locale;
-
-import ac.robinson.mediautilities.R;
 
 public class StringUtilities {
 
@@ -80,11 +73,10 @@ public class StringUtilities {
 		int seconds = remainder % 60;
 
 		// TODO: use StringBuilder for efficiency?
-		return (hours > 0 ? hours + ":" : "")
-				+ (hours > 0 ? String.format(Locale.US, int2sd, minutes) : minutes) + ":"
-				+ String.format(Locale.US, int2sd, seconds)
-				+ (includeMilliseconds ? "."
-				+ (highPrecision ? String.format(Locale.US, int3sd, millisecondsIn) : String.format(Locale.US, int1sd, millisecondsIn / 100)) : "");
+		return (hours > 0 ? hours + ":" : "") + (hours > 0 ? String.format(Locale.US, int2sd, minutes) : minutes) + ":" +
+				String.format(Locale.US, int2sd, seconds) + (includeMilliseconds ? "." +
+				(highPrecision ? String.format(Locale.US, int3sd, millisecondsIn) : String.format(Locale.US, int1sd,
+						millisecondsIn / 100)) : "");
 	}
 
 	public static String sha1Hash(String input) {
@@ -94,9 +86,9 @@ public class StringUtilities {
 
 			byte[] digest = md.digest();
 			BigInteger bi = new BigInteger(1, digest);
-			return String.format((Locale) null, "%0" + (digest.length * 2) + "x", bi).toLowerCase(Locale.ENGLISH);
-		} catch (NoSuchAlgorithmException e) {
-		} catch (UnsupportedEncodingException e) {
+			return String.format(Locale.US, "%0" + (digest.length * 2) + "x", bi).toLowerCase(Locale.ENGLISH);
+		} catch (NoSuchAlgorithmException ignored) {
+		} catch (UnsupportedEncodingException ignored) {
 		}
 		return input;
 	}

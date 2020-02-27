@@ -59,7 +59,6 @@ public class MP3toPCMConverter {
 	 * @param input  the input MP3 file
 	 * @param output a stream to write the PCM to
 	 * @param config an MP3Configuration instance that will be configured with the stream's properties
-	 * @throws IOException
 	 */
 	public static void convertFile(File input, OutputStream output, MP3Configuration config) throws IOException {
 		convertFile(input, output, config, FILE_START, FILE_END);
@@ -75,10 +74,8 @@ public class MP3toPCMConverter {
 	 * @param config  an MP3Configuration instance that will be configured with the stream's properties
 	 * @param startMs time to start reading the MP3 from, 0 for the start
 	 * @param endMs   time to stop reading the MP3 from, or -1 for the end
-	 * @throws IOException
 	 */
-	public static void convertFile(File input, OutputStream output, MP3Configuration config, int startMs, int endMs)
-			throws IOException {
+	public static void convertFile(File input, OutputStream output, MP3Configuration config, int startMs, int endMs) throws IOException {
 		float totalMs = 0;
 		boolean seeking = true;
 
@@ -125,8 +122,7 @@ public class MP3toPCMConverter {
 								// output.write(pcm[i] & 0xff); // big-endian
 							} else {
 								// see: https://stackoverflow.com/questions/3816446/
-								short average = (short) ((pcm[i] >> 1) + (pcm[i + 1] >> 1) +
-										(pcm[i] & pcm[i + 1] & 0x1));
+								short average = (short) ((pcm[i] >> 1) + (pcm[i + 1] >> 1) + (pcm[i] & pcm[i + 1] & 0x1));
 								output.write(average & 0xff);
 								output.write((average >> 8) & 0xff);
 								i += 1;

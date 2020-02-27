@@ -20,15 +20,12 @@
 
 package ac.robinson.util;
 
-import android.annotation.TargetApi;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.os.Build;
 import android.util.Log;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import androidx.annotation.NonNull;
 
 public class CameraUtilities {
 
@@ -44,23 +41,21 @@ public class CameraUtilities {
 		// post-v9 orientation value; Integer rather than int so we can return null if not known
 		public Integer cameraOrientationDegrees = null;
 
+		@NonNull
 		@Override
 		public String toString() {
-			return this.getClass().getName() + "[" + hasFrontCamera + "," + numberOfCameras + "," + usingFrontCamera
-					+ "," + cameraOrientationDegrees + "]";
+			return this.getClass().getName() + "[" + hasFrontCamera + "," + numberOfCameras + "," + usingFrontCamera + "," +
+					cameraOrientationDegrees + "]";
 		}
 	}
 
 	/**
 	 * Check whether the device has a camera - <b>defaults to true</b> on SDK versions < 7
-	 *
-	 * @param packageManager
-	 * @return
 	 */
 	public static boolean deviceHasCamera(PackageManager packageManager) {
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-			return packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA)
-					|| packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT);
+			return packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA) ||
+					packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT);
 		} else {
 			return packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY);
 		}
@@ -110,7 +105,7 @@ public class CameraUtilities {
 
 	// see: http://developer.android.com/reference/android/hardware/Camera.Parameters.html#setRotation(int)
 	public static int getPreviewOrientationDegrees(int screenOrientationDegrees, Integer cameraOrientationDegrees,
-			boolean usingFrontCamera) {
+												   boolean usingFrontCamera) {
 
 		int previewOrientationDegrees = 0;
 

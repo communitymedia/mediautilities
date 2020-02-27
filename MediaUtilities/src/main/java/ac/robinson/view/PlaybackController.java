@@ -20,11 +20,6 @@
 
 package ac.robinson.view;
 
-import java.util.Formatter;
-import java.util.Locale;
-
-import ac.robinson.mediautilities.R;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
@@ -39,6 +34,11 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
+
+import java.util.Formatter;
+import java.util.Locale;
+
+import ac.robinson.mediautilities.R;
 
 // TODO: this class and CustomMediaController should be combined (lots of duplicate code)
 public class PlaybackController extends FrameLayout {
@@ -89,35 +89,35 @@ public class PlaybackController extends FrameLayout {
 	public void onFinishInflate() {
 		super.onFinishInflate();
 
-		mPauseButton = (ImageButton) findViewById(R.id.pause);
+		mPauseButton = findViewById(R.id.pause);
 		if (mPauseButton != null) {
 			mPauseButton.requestFocus();
 			mPauseButton.setOnClickListener(mPauseListener);
 		}
 
-		mFfwdButton = (ImageButton) findViewById(R.id.ffwd);
+		mFfwdButton = findViewById(R.id.ffwd);
 		if (mFfwdButton != null) {
 			mFfwdButton.setOnClickListener(mFfwdListener);
 		}
 
-		mRewButton = (ImageButton) findViewById(R.id.rew);
+		mRewButton = findViewById(R.id.rew);
 		if (mRewButton != null) {
 			mRewButton.setOnClickListener(mRewListener);
 		}
 
 		// by default these are hidden - they will be enabled when setButtonListeners() is called
-		mBackButton = (ImageButton) findViewById(R.id.back);
-		mShareButton = (ImageButton) findViewById(R.id.share);
+		mBackButton = findViewById(R.id.back);
+		mShareButton = findViewById(R.id.share);
 		installButtonListeners();
 
-		mProgress = (SeekBar) findViewById(R.id.mediacontroller_progress);
+		mProgress = findViewById(R.id.mediacontroller_progress);
 		if (mProgress != null) {
 			mProgress.setOnSeekBarChangeListener(mSeekListener);
 			mProgress.setMax(PROGRESS_BAR_STEPS);
 		}
 
-		mEndTime = (TextView) findViewById(R.id.time);
-		mCurrentTime = (TextView) findViewById(R.id.time_current);
+		mEndTime = findViewById(R.id.time);
+		mCurrentTime = findViewById(R.id.time_current);
 		mFormatBuilder = new StringBuilder();
 		mFormatter = new Formatter(mFormatBuilder, Locale.getDefault());
 	}
@@ -235,9 +235,9 @@ public class PlaybackController extends FrameLayout {
 	@Override
 	public boolean dispatchKeyEvent(KeyEvent event) {
 		int keyCode = event.getKeyCode();
-		if (event.getRepeatCount() == 0
-				&& event.getAction() == KeyEvent.ACTION_DOWN
-				&& (keyCode == KeyEvent.KEYCODE_HEADSETHOOK || keyCode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE || keyCode == KeyEvent.KEYCODE_SPACE)) {
+		if (event.getRepeatCount() == 0 && event.getAction() == KeyEvent.ACTION_DOWN &&
+				(keyCode == KeyEvent.KEYCODE_HEADSETHOOK || keyCode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE ||
+						keyCode == KeyEvent.KEYCODE_SPACE)) {
 			doPauseResume();
 			refreshController();
 			if (mPauseButton != null) {
@@ -372,7 +372,7 @@ public class PlaybackController extends FrameLayout {
 	private void installButtonListeners() {
 		if (mShareButton != null) {
 			mShareButton.setOnClickListener(mShareListener);
-			mShareButton.setEnabled(mShareButton != null);
+			mShareButton.setEnabled(mShareListener != null);
 			((LinearLayout) mShareButton.getParent()).setVisibility(mShareListener != null ? View.VISIBLE : View.GONE);
 		}
 
@@ -410,8 +410,6 @@ public class PlaybackController extends FrameLayout {
 
 		/**
 		 * Note: seekTo will always be called instead of this unless you do setUseCustomSeekButtons(true)
-		 *
-		 * @param direction
 		 */
 		void seekButton(int direction);
 

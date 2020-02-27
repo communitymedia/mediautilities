@@ -20,14 +20,13 @@
 
 package ac.robinson.mov;
 
-import android.util.Log;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
 import ac.robinson.util.IOUtilities;
+import androidx.annotation.NonNull;
 
 public final class WAVtoPCMConverter {
 
@@ -36,6 +35,7 @@ public final class WAVtoPCMConverter {
 		public int sampleSize = 0;
 		public int numberOfChannels = 0;
 
+		@NonNull
 		@Override
 		public String toString() {
 			return this.getClass().getName() + "[" + sampleFrequency + "," + sampleSize + "," + numberOfChannels + "]";
@@ -47,7 +47,6 @@ public final class WAVtoPCMConverter {
 	 *
 	 * @param input  the input file to convert
 	 * @param output the output stream to write to
-	 * @throws IOException
 	 */
 	// @SuppressWarnings("resource") is to suppress complaint about stream closure (handled by closeStream in finally)
 	@SuppressWarnings("resource")
@@ -75,8 +74,9 @@ public final class WAVtoPCMConverter {
 				inputWAVStream.read(chunkHeader, 0, 8);
 				offset += 8;
 
-				int chunkLen = ((0xff & chunkHeader[7]) << 24) | ((0xff & chunkHeader[6]) << 16) |
-						((0xff & chunkHeader[5]) << 8) | ((0xff & chunkHeader[4]));
+				int chunkLen =
+						((0xff & chunkHeader[7]) << 24) | ((0xff & chunkHeader[6]) << 16) | ((0xff & chunkHeader[5]) << 8) |
+								((0xff & chunkHeader[4]));
 
 				if (chunkHeader[0] == 'f' && chunkHeader[1] == 'm' && chunkHeader[2] == 't' && chunkHeader[3] == ' ') {
 					if (chunkLen < 16 || chunkLen > 1024) {
@@ -95,11 +95,9 @@ public final class WAVtoPCMConverter {
 					config.numberOfChannels = ((0xff & fmt[3]) << 8) | ((0xff & fmt[2]));
 					config.sampleSize = ((0xff & fmt[15]) << 8) | ((0xff & fmt[14]));
 					config.sampleFrequency =
-							((0xff & fmt[7]) << 24) | ((0xff & fmt[6]) << 16) | ((0xff & fmt[5]) << 8) |
-									((0xff & fmt[4]));
+							((0xff & fmt[7]) << 24) | ((0xff & fmt[6]) << 16) | ((0xff & fmt[5]) << 8) | ((0xff & fmt[4]));
 
-				} else if (chunkHeader[0] == 'd' && chunkHeader[1] == 'a' && chunkHeader[2] == 't' &&
-						chunkHeader[3] == 'a') {
+				} else if (chunkHeader[0] == 'd' && chunkHeader[1] == 'a' && chunkHeader[2] == 't' && chunkHeader[3] == 'a') {
 					if (config.numberOfChannels == 0 || config.sampleFrequency == 0) {
 						throw new IOException("Bad WAV file: data chunk before fmt chunk");
 					}
@@ -167,8 +165,9 @@ public final class WAVtoPCMConverter {
 				inputWAVStream.read(chunkHeader, 0, 8);
 				offset += 8;
 
-				int chunkLen = ((0xff & chunkHeader[7]) << 24) | ((0xff & chunkHeader[6]) << 16) |
-						((0xff & chunkHeader[5]) << 8) | ((0xff & chunkHeader[4]));
+				int chunkLen =
+						((0xff & chunkHeader[7]) << 24) | ((0xff & chunkHeader[6]) << 16) | ((0xff & chunkHeader[5]) << 8) |
+								((0xff & chunkHeader[4]));
 
 				if (chunkHeader[0] == 'f' && chunkHeader[1] == 'm' && chunkHeader[2] == 't' && chunkHeader[3] == ' ') {
 					if (chunkLen < 16 || chunkLen > 1024) {
@@ -187,12 +186,10 @@ public final class WAVtoPCMConverter {
 					config.numberOfChannels = ((0xff & fmt[3]) << 8) | ((0xff & fmt[2]));
 					config.sampleSize = ((0xff & fmt[15]) << 8) | ((0xff & fmt[14]));
 					config.sampleFrequency =
-							((0xff & fmt[7]) << 24) | ((0xff & fmt[6]) << 16) | ((0xff & fmt[5]) << 8) |
-									((0xff & fmt[4]));
+							((0xff & fmt[7]) << 24) | ((0xff & fmt[6]) << 16) | ((0xff & fmt[5]) << 8) | ((0xff & fmt[4]));
 					break;
 
-				} else if (chunkHeader[0] == 'd' && chunkHeader[1] == 'a' && chunkHeader[2] == 't' &&
-						chunkHeader[3] == 'a') {
+				} else if (chunkHeader[0] == 'd' && chunkHeader[1] == 'a' && chunkHeader[2] == 't' && chunkHeader[3] == 'a') {
 					if (config.numberOfChannels == 0 || config.sampleFrequency == 0) {
 						throw new IOException("Bad WAV file: data chunk before fmt chunk");
 					}

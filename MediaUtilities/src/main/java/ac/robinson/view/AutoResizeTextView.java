@@ -1,16 +1,16 @@
 /*
  *  Copyright (C) 2012 Simon Robinson
- * 
+ *
  *  This file is part of Com-Me.
- * 
- *  Com-Me is free software; you can redistribute it and/or modify it 
- *  under the terms of the GNU Lesser General Public License as 
- *  published by the Free Software Foundation; either version 3 of the 
+ *
+ *  Com-Me is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License as
+ *  published by the Free Software Foundation; either version 3 of the
  *  License, or (at your option) any later version.
  *
- *  Com-Me is distributed in the hope that it will be useful, but WITHOUT 
- *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General 
+ *  Com-Me is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General
  *  Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public
@@ -62,12 +62,9 @@ public class AutoResizeTextView extends TextView {
 		mEllipsis = context.getString(R.string.textview_ellipsis);
 		if (attrs != null) {
 			TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.AutoResizeTextView);
-			mMinTextSize = attributes.getDimensionPixelSize(R.styleable.AutoResizeTextView_minTextSize,
-					(int) mMinTextSize);
-			mMaxTextSize = attributes.getDimensionPixelSize(R.styleable.AutoResizeTextView_maxTextSize,
-					(int) mMaxTextSize);
-			mMaxTextHeight = attributes.getDimensionPixelSize(R.styleable.AutoResizeTextView_maxTextHeight,
-					mMaxTextHeight);
+			mMinTextSize = attributes.getDimensionPixelSize(R.styleable.AutoResizeTextView_minTextSize, (int) mMinTextSize);
+			mMaxTextSize = attributes.getDimensionPixelSize(R.styleable.AutoResizeTextView_maxTextSize, (int) mMaxTextSize);
+			mMaxTextHeight = attributes.getDimensionPixelSize(R.styleable.AutoResizeTextView_maxTextHeight, mMaxTextHeight);
 			mEllipsize = attributes.getBoolean(R.styleable.AutoResizeTextView_ellipsize, mEllipsize);
 			attributes.recycle();
 		}
@@ -119,17 +116,16 @@ public class AutoResizeTextView extends TextView {
 		int horizontalPadding = getCompoundPaddingLeft() + getCompoundPaddingRight();
 		int verticalPadding = getCompoundPaddingTop() + getCompoundPaddingBottom();
 		boolean useResizedDimensions = mMaxTextHeight > 0;
-		Point fittedTextSize = resizeTextToFit(requestedWidth - horizontalPadding,
-				useResizedDimensions ? Math.min(requestedHeight - verticalPadding, mMaxTextHeight - verticalPadding)
-						: requestedHeight - verticalPadding);
-		setMeasuredDimension(useResizedDimensions ? fittedTextSize.x + horizontalPadding : requestedWidth,
-				useResizedDimensions ? fittedTextSize.y + verticalPadding : requestedHeight);
+		Point fittedTextSize = resizeTextToFit(requestedWidth - horizontalPadding, useResizedDimensions ? Math.min(
+				requestedHeight - verticalPadding, mMaxTextHeight - verticalPadding) : requestedHeight - verticalPadding);
+		setMeasuredDimension(useResizedDimensions ? fittedTextSize.x + horizontalPadding : requestedWidth, useResizedDimensions ?
+				fittedTextSize.y + verticalPadding : requestedHeight);
 	}
 
 	/**
 	 * Resize this view's text to be no larger than the specified width and height
-	 * 
-	 * @param width the maximum allowed width
+	 *
+	 * @param width  the maximum allowed width
 	 * @param height the maximum allowed height
 	 * @return a Point containing the new minimum width (x) and height (y) of the text view
 	 */
@@ -153,8 +149,8 @@ public class AutoResizeTextView extends TextView {
 
 		// if we've reached our minimum text size and the text still doesn't fit, append an ellipsis
 		if (mEllipsize && newTextSize <= mMinTextSize && fittedTextSize.y > height) {
-			StaticLayout layout = new StaticLayout(text, textPaint, width, Alignment.ALIGN_NORMAL, mSpacingMult,
-					mSpacingAdd, false);
+			StaticLayout layout = new StaticLayout(text, textPaint, width, Alignment.ALIGN_NORMAL, mSpacingMult, mSpacingAdd,
+					false);
 			if (layout.getLineCount() > 0) {
 				// the line at the vertical position nearest to height would overflow, so trim up to the previous line
 				int lastLine = layout.getLineForVertical(height) - 1;
@@ -192,8 +188,7 @@ public class AutoResizeTextView extends TextView {
 
 	// use a static layout to render text off screen before measuring its width and height
 	private void getFittedTextSize(CharSequence source, TextPaint paint, int maxWidth, Point fittedTextSize) {
-		StaticLayout layout = new StaticLayout(source, paint, maxWidth, Alignment.ALIGN_NORMAL, mSpacingMult,
-				mSpacingAdd, true);
+		StaticLayout layout = new StaticLayout(source, paint, maxWidth, Alignment.ALIGN_NORMAL, mSpacingMult, mSpacingAdd, true);
 		float layoutWidth = layout.getWidth();
 		int layoutLines = layout.getLineCount();
 		if (layoutLines > 0) {

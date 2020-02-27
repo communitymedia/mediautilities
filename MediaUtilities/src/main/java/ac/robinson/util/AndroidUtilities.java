@@ -24,10 +24,6 @@ public class AndroidUtilities {
 
 	/**
 	 * Check if an array contains the item given - could use Arrays.binarySearch, but that requires a sorted array
-	 *
-	 * @param array
-	 * @param item
-	 * @return
 	 */
 	public static <T> boolean arrayContains(T[] array, T item) {
 		if (item == null) {

@@ -134,8 +134,8 @@ public class CustomMediaController extends FrameLayout {
 	public void setAnchorView(View view) {
 		mAnchor = view;
 
-		FrameLayout.LayoutParams frameParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup
-				.LayoutParams.MATCH_PARENT);
+		FrameLayout.LayoutParams frameParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+				ViewGroup.LayoutParams.MATCH_PARENT);
 
 		removeAllViews();
 		View v = makeControllerView();
@@ -159,13 +159,13 @@ public class CustomMediaController extends FrameLayout {
 	}
 
 	private void initControllerView(View v) {
-		mPauseButton = (ImageButton) v.findViewById(R.id.pause);
+		mPauseButton = v.findViewById(R.id.pause);
 		if (mPauseButton != null) {
 			mPauseButton.requestFocus();
 			mPauseButton.setOnClickListener(mPauseListener);
 		}
 
-		mFfwdButton = (ImageButton) v.findViewById(R.id.ffwd);
+		mFfwdButton = v.findViewById(R.id.ffwd);
 		if (mFfwdButton != null) {
 			mFfwdButton.setOnClickListener(mFfwdListener);
 			if (!mFromXml) {
@@ -173,7 +173,7 @@ public class CustomMediaController extends FrameLayout {
 			}
 		}
 
-		mRewButton = (ImageButton) v.findViewById(R.id.rew);
+		mRewButton = v.findViewById(R.id.rew);
 		if (mRewButton != null) {
 			mRewButton.setOnClickListener(mRewListener);
 			if (!mFromXml) {
@@ -182,26 +182,26 @@ public class CustomMediaController extends FrameLayout {
 		}
 
 		// by default these are hidden - they will be enabled when setPrevNextListeners() is called
-		mNextButton = (ImageButton) v.findViewById(R.id.next);
+		mNextButton = v.findViewById(R.id.next);
 		if (mNextButton != null && !mFromXml && !mListenersSet) {
 			mNextButton.setVisibility(View.GONE);
 		}
-		mPrevButton = (ImageButton) v.findViewById(R.id.prev);
+		mPrevButton = v.findViewById(R.id.prev);
 		if (mPrevButton != null && !mFromXml && !mListenersSet) {
 			mPrevButton.setVisibility(View.GONE);
 		}
 
-		mProgress = (SeekBar) v.findViewById(R.id.mediacontroller_progress);
+		mProgress = v.findViewById(R.id.mediacontroller_progress);
 		if (mProgress != null) {
 			if (mProgress instanceof SeekBar) {
-				SeekBar seeker = (SeekBar) mProgress;
+				SeekBar seeker = mProgress;
 				seeker.setOnSeekBarChangeListener(mSeekListener);
 			}
 			mProgress.setMax(1000);
 		}
 
-		mEndTime = (TextView) v.findViewById(R.id.time);
-		mCurrentTime = (TextView) v.findViewById(R.id.time_current);
+		mEndTime = v.findViewById(R.id.time);
+		mCurrentTime = v.findViewById(R.id.time_current);
 		mFormatBuilder = new StringBuilder();
 		mFormatter = new Formatter(mFormatBuilder, Locale.getDefault());
 
@@ -299,7 +299,9 @@ public class CustomMediaController extends FrameLayout {
 	 * Remove the controller from the screen.
 	 */
 	public void hide() {
-		if (mAnchor == null) return;
+		if (mAnchor == null) {
+			return;
+		}
 
 		if (mShowing) {
 			if (mRoot != null) {
@@ -372,8 +374,12 @@ public class CustomMediaController extends FrameLayout {
 			mProgress.setSecondaryProgress(percent * 10);
 		}
 
-		if (mEndTime != null) mEndTime.setText(stringForTime(duration));
-		if (mCurrentTime != null) mCurrentTime.setText(stringForTime(position));
+		if (mEndTime != null) {
+			mEndTime.setText(stringForTime(duration));
+		}
+		if (mCurrentTime != null) {
+			mCurrentTime.setText(stringForTime(position));
+		}
 
 		return position;
 	}
@@ -394,8 +400,9 @@ public class CustomMediaController extends FrameLayout {
 	@Override
 	public boolean dispatchKeyEvent(KeyEvent event) {
 		int keyCode = event.getKeyCode();
-		if (event.getRepeatCount() == 0 && event.getAction() == KeyEvent.ACTION_DOWN && (keyCode == KeyEvent.KEYCODE_HEADSETHOOK
-				|| keyCode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE || keyCode == KeyEvent.KEYCODE_SPACE)) {
+		if (event.getRepeatCount() == 0 && event.getAction() == KeyEvent.ACTION_DOWN &&
+				(keyCode == KeyEvent.KEYCODE_HEADSETHOOK || keyCode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE ||
+						keyCode == KeyEvent.KEYCODE_SPACE)) {
 			show();
 			doPauseResume();
 			if (mPauseButton != null) {
@@ -425,7 +432,9 @@ public class CustomMediaController extends FrameLayout {
 	};
 
 	private void updatePausePlay() {
-		if (mRoot == null || mPauseButton == null) return;
+		if (mRoot == null || mPauseButton == null) {
+			return;
+		}
 
 		if (mPlayer == null || mPlayer.isPlaying() || mPlayer.isLoading()) {
 			mPauseButton.setImageResource(R.drawable.ic_menu_pause);
@@ -476,7 +485,9 @@ public class CustomMediaController extends FrameLayout {
 			long duration = mPlayer.getDuration();
 			long newPosition = (duration * progress) / 1000L;
 			mPlayer.seekTo((int) newPosition);
-			if (mCurrentTime != null) mCurrentTime.setText(stringForTime((int) newPosition));
+			if (mCurrentTime != null) {
+				mCurrentTime.setText(stringForTime((int) newPosition));
+			}
 		}
 
 		public void onStopTrackingTouch(SeekBar bar) {

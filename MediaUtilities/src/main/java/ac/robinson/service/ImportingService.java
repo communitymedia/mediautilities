@@ -114,13 +114,12 @@ public class ImportingService extends Service {
 		if (mBluetoothObserver == null) {
 			try {
 				Class<?> activityClass = Class.forName(mBluetoothObserverClassName);
-				Constructor<?> constructor = activityClass.getConstructor(new Class[] { String.class, Handler.class });
-				mBluetoothObserver = (FileObserver) constructor.newInstance(mBluetoothDirectoryPath,
-						mBluetoothFileHandler);
+				Constructor<?> constructor = activityClass.getConstructor(new Class[]{ String.class, Handler.class });
+				mBluetoothObserver = (FileObserver) constructor.newInstance(mBluetoothDirectoryPath, mBluetoothFileHandler);
 				forwardMessage(MediaUtilities.MSG_IMPORT_SERVICE_REGISTERED, null);
 			} catch (Exception e) {
-				Log.d(DebugUtilities.getLogTag(this), "Unable to instantiate BluetoothObserver ("
-						+ mBluetoothObserverClassName + ")");
+				Log.d(DebugUtilities.getLogTag(this),
+						"Unable to instantiate BluetoothObserver (" + mBluetoothObserverClassName + ")");
 			}
 		} else {
 			mBluetoothObserver.startWatching();
@@ -239,8 +238,7 @@ public class ImportingService extends Service {
 					if (messageBundle != null) {
 						ImportingService hintService = mService.get();
 						if (hintService != null) {
-							hintService.sendBluetoothObserverFileHint(messageBundle
-									.getString(MediaUtilities.KEY_FILE_NAME));
+							hintService.sendBluetoothObserverFileHint(messageBundle.getString(MediaUtilities.KEY_FILE_NAME));
 						}
 					}
 					break;

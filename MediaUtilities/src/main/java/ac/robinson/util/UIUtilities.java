@@ -20,7 +20,6 @@
 
 package ac.robinson.util;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -32,19 +31,13 @@ import android.graphics.Color;
 import android.graphics.LightingColorFilter;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
-import android.os.PowerManager;
 import android.util.TypedValue;
 import android.view.Display;
-import android.view.MotionEvent;
 import android.view.Surface;
-import android.view.SurfaceHolder;
 import android.view.View;
-import android.view.View.OnFocusChangeListener;
-import android.view.View.OnTouchListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
@@ -57,8 +50,6 @@ public class UIUtilities {
 
 	/**
 	 * Enable pixel dithering for this window (but only in API < 17)
-	 *
-	 * @param window
 	 */
 	public static void setPixelDithering(Window window) {
 		if (window != null && Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) { // deprecated from API 17+
@@ -70,9 +61,6 @@ public class UIUtilities {
 
 	/**
 	 * Get the current rotation of the screen, either 0, 90, 180 or 270 degrees
-	 *
-	 * @param windowManager
-	 * @return
 	 */
 	public static int getScreenRotationDegrees(WindowManager windowManager) {
 		int degrees = 0;
@@ -99,7 +87,6 @@ public class UIUtilities {
 	 * Get the "natural" screen orientation - i.e. the orientation in which this device is designed to be used most
 	 * often.
 	 *
-	 * @param windowManager
 	 * @return either ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE or ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 	 */
 	public static int getNaturalScreenOrientation(WindowManager windowManager) {
@@ -115,7 +102,9 @@ public class UIUtilities {
 				break;
 			case Surface.ROTATION_90:
 			case Surface.ROTATION_270:
+				//noinspection SuspiciousNameCombination
 				width = screenSize.y;
+				//noinspection SuspiciousNameCombination
 				height = screenSize.x;
 				break;
 			default:
@@ -154,19 +143,19 @@ public class UIUtilities {
 			int reverseLandscape = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
 			switch (windowManager.getDefaultDisplay().getRotation()) {
 				case Surface.ROTATION_0:
-					activity.setRequestedOrientation(naturallyPortrait ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-							: ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+					activity.setRequestedOrientation(naturallyPortrait ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT :
+							ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 					break;
 				case Surface.ROTATION_90:
-					activity.setRequestedOrientation(naturallyPortrait ? ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-							: reversePortrait);
+					activity.setRequestedOrientation(naturallyPortrait ? ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE :
+							reversePortrait);
 					break;
 				case Surface.ROTATION_180:
 					activity.setRequestedOrientation(naturallyPortrait ? reversePortrait : reverseLandscape);
 					break;
 				case Surface.ROTATION_270:
-					activity.setRequestedOrientation(naturallyPortrait ? reverseLandscape
-							: ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+					activity.setRequestedOrientation(naturallyPortrait ? reverseLandscape :
+							ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 					break;
 				default:
 					break;
@@ -177,7 +166,8 @@ public class UIUtilities {
 	}
 
 	public static void setFullScreen(final Window window) {
-		if ((window.getAttributes().flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) != WindowManager.LayoutParams.FLAG_FULLSCREEN) {
+		if ((window.getAttributes().flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) !=
+				WindowManager.LayoutParams.FLAG_FULLSCREEN) {
 			Handler handler = new Handler();
 			handler.post(new Runnable() {
 				@Override
@@ -186,7 +176,7 @@ public class UIUtilities {
 						WindowManager.LayoutParams attrs = window.getAttributes();
 						attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
 						window.setAttributes(attrs);
-					} catch (Throwable t) {
+					} catch (Throwable ignored) {
 					}
 				}
 			});
@@ -194,7 +184,8 @@ public class UIUtilities {
 	}
 
 	public static void setNonFullScreen(final Window window) {
-		if ((window.getAttributes().flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) == WindowManager.LayoutParams.FLAG_FULLSCREEN) {
+		if ((window.getAttributes().flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) ==
+				WindowManager.LayoutParams.FLAG_FULLSCREEN) {
 			Handler handler = new Handler();
 			handler.post(new Runnable() {
 				@Override
@@ -203,7 +194,7 @@ public class UIUtilities {
 						WindowManager.LayoutParams attrs = window.getAttributes();
 						attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
 						window.setAttributes(attrs);
-					} catch (Throwable t) {
+					} catch (Throwable ignored) {
 					}
 				}
 			});
@@ -256,17 +247,16 @@ public class UIUtilities {
 	 */
 	@Deprecated
 	public static int dipToPx(Resources resources, int dip) {
-		return Math
-				.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 170 - 8, resources.getDisplayMetrics()));
+		return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 170 - 8, resources.getDisplayMetrics()));
 	}
 
 	/**
 	 * Set colour filters for a button so that the standard resources can be used in different colours
 	 *
-	 * @param button The button to set colour filters for
+	 * @param button       The button to set colour filters for
 	 * @param defaultColor The normal (untouched) colour for the button
 	 * @param touchedColor The touch colour - currently ignored. For API 11 and above the coloured filter is applied to
-	 *            the touched button; for For API 10 and below the normal platform button touch colour is used
+	 *                     the touched button; for For API 10 and below the normal platform button touch colour is used
 	 */
 	public static void setButtonColorFilters(View button, final int defaultColor, final int touchedColor) {
 		Drawable background = button.getBackground();
@@ -277,12 +267,12 @@ public class UIUtilities {
 		final LightingColorFilter normalColour;
 		// use the requested colour to replace normal buttons; for white we lighten the existing colour instead
 		if (defaultColor != 0xffffffff) {
-				// float[] hsv = new float[3];
-				// Color.colorToHSV(defaultColor, hsv);
-				// hsv[1] = 0.95f; // fully saturate and slightly darken the requested colour to improve display
-				// hsv[2] *= 0.88f;
-				// normalColour = new LightingColorFilter(Color.TRANSPARENT, Color.HSVToColor(hsv));
-			normalColour = new LightingColorFilter(Color.TRANSPARENT, defaultColor );
+			// float[] hsv = new float[3];
+			// Color.colorToHSV(defaultColor, hsv);
+			// hsv[1] = 0.95f; // fully saturate and slightly darken the requested colour to improve display
+			// hsv[2] *= 0.88f;
+			// normalColour = new LightingColorFilter(Color.TRANSPARENT, Color.HSVToColor(hsv));
+			normalColour = new LightingColorFilter(Color.TRANSPARENT, defaultColor);
 		} else {
 			normalColour = new LightingColorFilter(0x00EAEAEA, Color.TRANSPARENT);
 		}

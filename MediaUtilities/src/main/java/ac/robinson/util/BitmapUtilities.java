@@ -35,7 +35,6 @@ import android.graphics.Typeface;
 import android.graphics.YuvImage;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import androidx.exifinterface.media.ExifInterface;
 import android.text.TextUtils;
 
 import java.io.BufferedOutputStream;
@@ -45,6 +44,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+
+import androidx.exifinterface.media.ExifInterface;
 
 /**
  * Class containing static utility methods for bitmap decoding and scaling
@@ -69,8 +70,8 @@ public class BitmapUtilities {
 
 	// get screen size by: Display display = ((WindowManager)getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
 	// if using an ImageView etc, remember that the size is zero initially before inflation
-	public static Bitmap loadAndCreateScaledBitmap(String imagePath, int dstWidth, int dstHeight,
-			ScalingLogic scalingLogic, boolean rotateImage) {
+	public static Bitmap loadAndCreateScaledBitmap(String imagePath, int dstWidth, int dstHeight, ScalingLogic scalingLogic,
+												   boolean rotateImage) {
 
 		Matrix imageMatrix = null;
 		if (rotateImage) {
@@ -86,14 +87,13 @@ public class BitmapUtilities {
 	}
 
 	public static Bitmap loadAndCreateScaledResource(Resources res, int resId, int dstWidth, int dstHeight,
-			ScalingLogic scalingLogic) {
+													 ScalingLogic scalingLogic) {
 
 		Bitmap unscaledBitmap = decodeResource(res, resId, dstWidth, dstHeight, scalingLogic);
 		return createScaledBitmap(unscaledBitmap, dstWidth, dstHeight, scalingLogic, new Matrix());
 	}
 
-	public static Bitmap loadAndCreateScaledStream(String streamPath, int dstWidth, int dstHeight,
-			ScalingLogic scalingLogic) {
+	public static Bitmap loadAndCreateScaledStream(String streamPath, int dstWidth, int dstHeight, ScalingLogic scalingLogic) {
 
 		Bitmap unscaledBitmap = decodeStream(streamPath, dstWidth, dstHeight, scalingLogic);
 		return createScaledBitmap(unscaledBitmap, dstWidth, dstHeight, scalingLogic, new Matrix());
@@ -134,26 +134,23 @@ public class BitmapUtilities {
 		if (imagePath.endsWith(".jpg") || imagePath.endsWith(".jpeg")) {
 			try {
 				ExifInterface exif = new ExifInterface(imagePath);
-				int exifRotation = exif
-						.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+				int exifRotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
 				int newRotation = ExifInterface.ORIENTATION_UNDEFINED;
 				switch (exifRotation) {
 					case ExifInterface.ORIENTATION_UNDEFINED: // usually means that the current rotation is normal
 					case ExifInterface.ORIENTATION_NORMAL:
-						newRotation = (antiClockwise ? ExifInterface.ORIENTATION_ROTATE_270
-								: ExifInterface.ORIENTATION_ROTATE_90);
+						newRotation = (antiClockwise ? ExifInterface.ORIENTATION_ROTATE_270 :
+								ExifInterface.ORIENTATION_ROTATE_90);
 						break;
 					case ExifInterface.ORIENTATION_ROTATE_90:
-						newRotation = (antiClockwise ? ExifInterface.ORIENTATION_NORMAL
-								: ExifInterface.ORIENTATION_ROTATE_180);
+						newRotation = (antiClockwise ? ExifInterface.ORIENTATION_NORMAL : ExifInterface.ORIENTATION_ROTATE_180);
 						break;
 					case ExifInterface.ORIENTATION_ROTATE_180:
-						newRotation = (antiClockwise ? ExifInterface.ORIENTATION_ROTATE_90
-								: ExifInterface.ORIENTATION_ROTATE_270);
+						newRotation = (antiClockwise ? ExifInterface.ORIENTATION_ROTATE_90 :
+								ExifInterface.ORIENTATION_ROTATE_270);
 						break;
 					case ExifInterface.ORIENTATION_ROTATE_270:
-						newRotation = (antiClockwise ? ExifInterface.ORIENTATION_ROTATE_180
-								: ExifInterface.ORIENTATION_NORMAL);
+						newRotation = (antiClockwise ? ExifInterface.ORIENTATION_ROTATE_180 : ExifInterface.ORIENTATION_NORMAL);
 						break;
 					default:
 						break;
@@ -181,7 +178,7 @@ public class BitmapUtilities {
 					rotatedImage.recycle();
 					return success;
 				}
-			} catch (Throwable t) {
+			} catch (Throwable ignored) {
 			}
 			return false;
 		}
@@ -205,23 +202,23 @@ public class BitmapUtilities {
 	 * Utility function for decoding an image resource. The decoded bitmap will be optimized for further scaling to the
 	 * requested destination dimensions and scaling logic.
 	 *
-	 * @param res The resources object containing the image data
-	 * @param resId The resource id of the image data
-	 * @param dstWidth Width of destination area
-	 * @param dstHeight Height of destination area
+	 * @param res          The resources object containing the image data
+	 * @param resId        The resource id of the image data
+	 * @param dstWidth     Width of destination area
+	 * @param dstHeight    Height of destination area
 	 * @param scalingLogic Logic to use to avoid image stretching
 	 * @return Decoded bitmap
 	 */
 	public static Bitmap decodeResource(Resources res, int resId, int dstWidth, int dstHeight, ScalingLogic scalingLogic) {
-		if (dstWidth <= 0 || dstHeight <= 0)
+		if (dstWidth <= 0 || dstHeight <= 0) {
 			return null;
+		}
 		Options options = new Options();
 		options.inJustDecodeBounds = true;
 		BitmapFactory.decodeResource(res, resId, options);
 		options.inJustDecodeBounds = false;
 		// options.inPurgeable = true; // ignored for resources: http://stackoverflow.com/a/7068403
-		options.inSampleSize = calculateSampleSize(options.outWidth, options.outHeight, dstWidth, dstHeight,
-				scalingLogic);
+		options.inSampleSize = calculateSampleSize(options.outWidth, options.outHeight, dstWidth, dstHeight, scalingLogic);
 		return BitmapFactory.decodeResource(res, resId, options);
 	}
 
@@ -229,23 +226,23 @@ public class BitmapUtilities {
 	 * Utility function for decoding an image file. The decoded bitmap will be optimized for further scaling to the
 	 * requested destination dimensions and scaling logic.
 	 *
-	 * @param imagePath the file path of the image
-	 * @param dstWidth Width of destination area
-	 * @param dstHeight Height of destination area
+	 * @param imagePath    the file path of the image
+	 * @param dstWidth     Width of destination area
+	 * @param dstHeight    Height of destination area
 	 * @param scalingLogic Logic to use to avoid image stretching
 	 * @return Decoded bitmap
 	 */
 	public static Bitmap decodeFile(String imagePath, int dstWidth, int dstHeight, ScalingLogic scalingLogic) {
-		if (dstWidth <= 0 || dstHeight <= 0)
+		if (dstWidth <= 0 || dstHeight <= 0) {
 			return null;
+		}
 		Options options = new Options();
 		options.inJustDecodeBounds = true;
 		BitmapFactory.decodeFile(imagePath, options);
 		options.inJustDecodeBounds = false;
 		options.inPurgeable = true; // TODO: is this appropriate for image cache? is it actually used at all?
 		options.inInputShareable = true; // as above
-		options.inSampleSize = calculateSampleSize(options.outWidth, options.outHeight, dstWidth, dstHeight,
-				scalingLogic);
+		options.inSampleSize = calculateSampleSize(options.outWidth, options.outHeight, dstWidth, dstHeight, scalingLogic);
 		return BitmapFactory.decodeFile(imagePath, options);
 	}
 
@@ -253,24 +250,24 @@ public class BitmapUtilities {
 	 * Utility function for decoding an image stream. The decoded bitmap will be optimized for further scaling to the
 	 * requested destination dimensions and scaling logic.
 	 *
-	 * @param streamPath The path of the image stream to decode
-	 * @param dstWidth Width of destination area
-	 * @param dstHeight Height of destination area
+	 * @param streamPath   The path of the image stream to decode
+	 * @param dstWidth     Width of destination area
+	 * @param dstHeight    Height of destination area
 	 * @param scalingLogic Logic to use to avoid image stretching
 	 * @return Decoded bitmap, or null on error
 	 */
 	public static Bitmap decodeStream(String streamPath, int dstWidth, int dstHeight, ScalingLogic scalingLogic) {
 		try {
-			if (dstWidth <= 0 || dstHeight <= 0)
+			if (dstWidth <= 0 || dstHeight <= 0) {
 				return null;
+			}
 			Options options = new Options();
 			options.inJustDecodeBounds = true;
 			BitmapFactory.decodeStream(new FileInputStream(streamPath), null, options);
 			options.inJustDecodeBounds = false;
 			options.inPurgeable = true; // TODO: is this appropriate for image cache? is it actually used at all?
 			options.inInputShareable = true; // as above
-			options.inSampleSize = calculateSampleSize(options.outWidth, options.outHeight, dstWidth, dstHeight,
-					scalingLogic);
+			options.inSampleSize = calculateSampleSize(options.outWidth, options.outHeight, dstWidth, dstHeight, scalingLogic);
 			return BitmapFactory.decodeStream(new FileInputStream(streamPath), null, options);
 		} catch (FileNotFoundException e) {
 			return null;
@@ -281,22 +278,21 @@ public class BitmapUtilities {
 	 * Utility function for creating a scaled version of an existing bitmap
 	 *
 	 * @param unscaledBitmap Bitmap to scale
-	 * @param dstWidth Wanted width of destination bitmap
-	 * @param dstHeight Wanted height of destination bitmap
-	 * @param scalingLogic Logic to use to avoid image stretching
+	 * @param dstWidth       Wanted width of destination bitmap
+	 * @param dstHeight      Wanted height of destination bitmap
+	 * @param scalingLogic   Logic to use to avoid image stretching
 	 * @return New scaled bitmap object
 	 */
-	public static Bitmap createScaledBitmap(Bitmap unscaledBitmap, int dstWidth, int dstHeight,
-			ScalingLogic scalingLogic, Matrix imageMatrix) {
+	public static Bitmap createScaledBitmap(Bitmap unscaledBitmap, int dstWidth, int dstHeight, ScalingLogic scalingLogic,
+											Matrix imageMatrix) {
 		if (unscaledBitmap == null) {
 			return null;
 		}
 		if (imageMatrix == null) {
-			unscaledBitmap = Bitmap.createBitmap(unscaledBitmap, 0, 0, unscaledBitmap.getWidth(),
-					unscaledBitmap.getHeight());
+			unscaledBitmap = Bitmap.createBitmap(unscaledBitmap, 0, 0, unscaledBitmap.getWidth(), unscaledBitmap.getHeight());
 		} else {
-			unscaledBitmap = Bitmap.createBitmap(unscaledBitmap, 0, 0, unscaledBitmap.getWidth(),
-					unscaledBitmap.getHeight(), imageMatrix, true);
+			unscaledBitmap = Bitmap.createBitmap(unscaledBitmap, 0, 0, unscaledBitmap.getWidth(), unscaledBitmap.getHeight(),
+					imageMatrix, true);
 		}
 		Rect srcRect = calculateSrcRect(unscaledBitmap.getWidth(), unscaledBitmap.getHeight(), dstWidth, dstHeight,
 				scalingLogic);
@@ -312,13 +308,13 @@ public class BitmapUtilities {
 	/**
 	 * ScalingLogic defines how scaling should be carried out if source and destination image has different aspect
 	 * ratio.
-	 *
+	 * <p>
 	 * CROP: Scales the image the minimum amount while making sure that at least one of the two dimensions fit inside
 	 * the requested destination area. Parts of the source image will be cropped to realize this.
-	 *
+	 * <p>
 	 * FIT: Scales the image the minimum amount while making sure both dimensions fit inside the requested destination
 	 * area. The resulting destination dimensions might be adjusted to a smaller size than requested.
-	 *
+	 * <p>
 	 * DOWNSCALE: Like FIT, but will downscale the image by multiplying its normal sample rate by DOWNSCALE_RATIO.
 	 */
 	public static enum ScalingLogic {
@@ -329,15 +325,14 @@ public class BitmapUtilities {
 	 * Calculate optimal down-sampling factor given the dimensions of a source image, the dimensions of a destination
 	 * area and a scaling logic.
 	 *
-	 * @param srcWidth Width of source image
-	 * @param srcHeight Height of source image
-	 * @param dstWidth Width of destination area
-	 * @param dstHeight Height of destination area
+	 * @param srcWidth     Width of source image
+	 * @param srcHeight    Height of source image
+	 * @param dstWidth     Width of destination area
+	 * @param dstHeight    Height of destination area
 	 * @param scalingLogic Logic to use to avoid image stretching
 	 * @return Optimal down scaling sample size for decoding
 	 */
-	private static int calculateSampleSize(int srcWidth, int srcHeight, int dstWidth, int dstHeight,
-			ScalingLogic scalingLogic) {
+	private static int calculateSampleSize(int srcWidth, int srcHeight, int dstWidth, int dstHeight, ScalingLogic scalingLogic) {
 		final float srcAspect = (float) srcWidth / (float) srcHeight;
 		if (scalingLogic == ScalingLogic.FIT) {
 			final float dstAspect = (float) dstWidth / (float) dstHeight;
@@ -366,15 +361,14 @@ public class BitmapUtilities {
 	/**
 	 * Calculates source rectangle for scaling bitmap
 	 *
-	 * @param srcWidth Width of source image
-	 * @param srcHeight Height of source image
-	 * @param dstWidth Width of destination area
-	 * @param dstHeight Height of destination area
+	 * @param srcWidth     Width of source image
+	 * @param srcHeight    Height of source image
+	 * @param dstWidth     Width of destination area
+	 * @param dstHeight    Height of destination area
 	 * @param scalingLogic Logic to use to avoid image stretching
 	 * @return Optimal source rectangle
 	 */
-	private static Rect calculateSrcRect(int srcWidth, int srcHeight, int dstWidth, int dstHeight,
-			ScalingLogic scalingLogic) {
+	private static Rect calculateSrcRect(int srcWidth, int srcHeight, int dstWidth, int dstHeight, ScalingLogic scalingLogic) {
 		if (scalingLogic == ScalingLogic.CROP) {
 			final float srcAspect = (float) srcWidth / (float) srcHeight;
 			final float dstAspect = (float) dstWidth / (float) dstHeight;
@@ -396,15 +390,14 @@ public class BitmapUtilities {
 	/**
 	 * Calculates destination rectangle for scaling bitmap
 	 *
-	 * @param srcWidth Width of source image
-	 * @param srcHeight Height of source image
-	 * @param dstWidth Width of destination area
-	 * @param dstHeight Height of destination area
+	 * @param srcWidth     Width of source image
+	 * @param srcHeight    Height of source image
+	 * @param dstWidth     Width of destination area
+	 * @param dstHeight    Height of destination area
 	 * @param scalingLogic Logic to use to avoid image stretching
 	 * @return Optimal destination rectangle
 	 */
-	private static Rect calculateDstRect(int srcWidth, int srcHeight, int dstWidth, int dstHeight,
-			ScalingLogic scalingLogic) {
+	private static Rect calculateDstRect(int srcWidth, int srcHeight, int dstWidth, int dstHeight, ScalingLogic scalingLogic) {
 		if (scalingLogic == ScalingLogic.FIT || scalingLogic == ScalingLogic.DOWNSCALE) {
 			final float srcAspect = (float) srcWidth / (float) srcHeight;
 			final float dstAspect = (float) dstWidth / (float) dstHeight;
@@ -453,8 +446,8 @@ public class BitmapUtilities {
 					if (newImage != null) {
 						Matrix flipMatrix = new Matrix();
 						flipMatrix.postScale(-1.0f, 1.0f);
-						newImage = Bitmap.createBitmap(newImage, 0, 0, newImage.getWidth(), newImage.getHeight(),
-								flipMatrix, true);
+						newImage = Bitmap.createBitmap(newImage, 0, 0, newImage.getWidth(), newImage.getHeight(), flipMatrix,
+								true);
 						byteOutputStream = new BufferedOutputStream(fileOutputStream);
 						newImage.compress(CompressFormat.JPEG, quality, byteOutputStream);
 						byteOutputStream.flush();
@@ -463,7 +456,7 @@ public class BitmapUtilities {
 					} else {
 						return false;
 					}
-				} catch (OutOfMemoryError e) {
+				} catch (OutOfMemoryError ignored) {
 				} // probably doesn't actually catch...
 			}
 			if (!flipHorizontally || !imageSaved) {
@@ -483,7 +476,7 @@ public class BitmapUtilities {
 	 * Save YUV image data (NV21 or YUV420sp) as JPEG to a FileOutputStream.
 	 */
 	public static boolean saveYUYToJPEG(byte[] imageData, File saveTo, int format, int quality, int width, int height,
-			int rotation, boolean flipHorizontally) {
+										int rotation, boolean flipHorizontally) {
 		YuvImage yuvImg = null;
 		try {
 			yuvImg = new YuvImage(imageData, format, width, height, null);
@@ -501,8 +494,7 @@ public class BitmapUtilities {
 					// imageMatrix.postScale(-1.0f, 1.0f);
 				}
 
-				yuvBitmap = Bitmap.createBitmap(yuvBitmap, 0, 0, yuvBitmap.getWidth(), yuvBitmap.getHeight(),
-						imageMatrix, true);
+				yuvBitmap = Bitmap.createBitmap(yuvBitmap, 0, 0, yuvBitmap.getWidth(), yuvBitmap.getHeight(), imageMatrix, true);
 				BitmapUtilities.saveBitmap(yuvBitmap, Bitmap.CompressFormat.JPEG, quality, saveTo);
 				return true;
 			}
@@ -592,24 +584,11 @@ public class BitmapUtilities {
 	/**
 	 * Note: the paint's textSize and alignment will be changed...
 	 *
-	 * @param textString
-	 * @param textCanvas
-	 * @param textPaint
-	 * @param textColour
-	 * @param backgroundColour
-	 * @param backgroundPadding
-	 * @param backgroundRadius
-	 * @param alignBottom
-	 * @param leftOffset
-	 * @param backgroundSpanWidth
-	 * @param maxHeight
-	 * @param maxTextSize
-	 * @param maxCharactersPerLine
 	 * @return The height of the drawn text, including padding
 	 */
-	public static int drawScaledText(String textString, Canvas textCanvas, Paint textPaint, int textColour,
-			int backgroundColour, int backgroundPadding, int backgroundRadius, boolean alignBottom, float leftOffset,
-			boolean backgroundSpanWidth, float maxHeight, int maxTextSize, int maxCharactersPerLine) {
+	public static int drawScaledText(String textString, Canvas textCanvas, Paint textPaint, int textColour, int backgroundColour
+			, int backgroundPadding, int backgroundRadius, boolean alignBottom, float leftOffset, boolean backgroundSpanWidth,
+									 float maxHeight, int maxTextSize, int maxCharactersPerLine) {
 
 		if (TextUtils.isEmpty(textString) || "".equals(textString.trim())) {
 			return 0;
@@ -672,10 +651,10 @@ public class BitmapUtilities {
 		float drawingX = 0;
 		float drawingY;
 		if (alignBottom) {
-			drawingY = textCanvas.getHeight() - getActualDescentSize(textsToDraw[textsToDraw.length - 1], textPaint)
-					- backgroundPadding;
+			drawingY = textCanvas.getHeight() - getActualDescentSize(textsToDraw[textsToDraw.length - 1], textPaint) -
+					backgroundPadding;
 		} else {
-			drawingY = ((textCanvas.getHeight() + (lineHeight * (textsToDraw.length - 1))) / 2) + textPaint.descent();
+			drawingY = ((textCanvas.getHeight() + (lineHeight * (textsToDraw.length - 1))) / 2f) + textPaint.descent();
 		}
 		float initialX = (maxWidth / 2) + leftOffset;
 		float initialY = drawingY;
@@ -686,8 +665,8 @@ public class BitmapUtilities {
 			String firstText = textsToDraw[0].trim();
 			Rect textBounds = new Rect();
 			textPaint.getTextBounds(firstText, 0, firstText.length(), textBounds);
-			float boxTop = drawingY - (lineHeight * (textsToDraw.length - 1)) - textBounds.height()
-					+ getActualDescentSize(firstText, textPaint) - backgroundPadding;
+			float boxTop = drawingY - (lineHeight * (textsToDraw.length - 1)) - textBounds.height() +
+					getActualDescentSize(firstText, textPaint) - backgroundPadding;
 			float boxLeft = backgroundSpanWidth ? 0 : initialX;
 			float boxRight = backgroundSpanWidth ? textCanvas.getWidth() : initialX;
 			int totalPadding = 2 * backgroundPadding;
@@ -728,8 +707,8 @@ public class BitmapUtilities {
 		return (textHeightNormal < descentBounds.height()) ? 0 : textPaint.descent();
 	}
 
-	public static Paint adjustTextSize(Paint paint, int maxCharactersPerLine, int numLines, float maxWidth,
-			float maxHeight, int maxTextSize) {
+	public static Paint adjustTextSize(Paint paint, int maxCharactersPerLine, int numLines, float maxWidth, float maxHeight,
+									   int maxTextSize) {
 
 		// make sure text is small enough for its width (most common scenario)
 		String exampleText = "WMÑ1by}.acI"; // for measuring width - hacky!
@@ -756,8 +735,8 @@ public class BitmapUtilities {
 		borderPaint.setStyle(Paint.Style.STROKE);
 		borderPaint.setStrokeWidth(borderWidth);
 		borderWidth /= 2;
-		Rect iconBorder = new Rect(borderWidth, borderWidth, borderCanvas.getWidth() - borderWidth,
-				borderCanvas.getWidth() - borderWidth);
+		@SuppressWarnings("SuspiciousNameCombination") Rect iconBorder = new Rect(borderWidth, borderWidth,
+				borderCanvas.getWidth() - borderWidth, borderCanvas.getWidth() - borderWidth);
 		borderCanvas.drawRect(iconBorder, borderPaint);
 	}
 

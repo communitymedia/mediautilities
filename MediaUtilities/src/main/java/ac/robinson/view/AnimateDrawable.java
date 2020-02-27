@@ -24,6 +24,8 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Transformation;
 
+import androidx.annotation.NonNull;
+
 public class AnimateDrawable extends Drawable {
 
 	private Drawable mDrawable;
@@ -58,7 +60,7 @@ public class AnimateDrawable extends Drawable {
 	}
 
 	@Override
-	public void draw(Canvas canvas) {
+	public void draw(@NonNull Canvas canvas) {
 		if (mDrawable != null) {
 			int sc = canvas.save();
 			Animation anim = mAnimation;
@@ -117,6 +119,7 @@ public class AnimateDrawable extends Drawable {
 		}
 	}
 
+	@NonNull
 	@Override
 	public Drawable mutate() {
 		if (mDrawable != null && !mMutated && super.mutate() == this) {

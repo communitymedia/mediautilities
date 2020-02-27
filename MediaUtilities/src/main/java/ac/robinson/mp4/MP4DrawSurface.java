@@ -276,7 +276,7 @@ class MP4DrawSurface {
 			// reset after previous frame / texture
 			boolean imageLoaded = false;
 			BitmapUtilities.resetPaint(mCurrentFramePaint, Color.WHITE, 1);
-			mCurrentFrameBitmap.eraseColor(mBackgroundColour);
+			mCurrentFrameBitmap.eraseColor(nextFrame.mBackgroundColour < 0 ? nextFrame.mBackgroundColour : mBackgroundColour);
 
 			if (nextFrame.mImagePath != null) {
 				// scale image size to make sure it is small enough to fit in the container
@@ -294,16 +294,17 @@ class MP4DrawSurface {
 
 			// TODO: we don't actually pass the value of @dimen/export_maximum_text_height_with_image
 			if (!TextUtils.isEmpty(nextFrame.mTextContent)) {
-				BitmapUtilities.drawScaledText(nextFrame.mTextContent, mCurrentFrameCanvas, mCurrentFramePaint, (imageLoaded ?
-						mTextColourWithImage : mTextColourNoImage), (imageLoaded ? mTextBackgroundColour : 0), mTextSpacing,
-						mTextCornerRadius, imageLoaded, 0, mTextBackgroundSpanWidth, mCanvasHeight, mTextMaxFontSize,
-						mTextMaxCharsPerLine);
+				BitmapUtilities.drawScaledText(nextFrame.mTextContent, mCurrentFrameCanvas, mCurrentFramePaint,
+						nextFrame.mForegroundColour <
+								0 ? nextFrame.mForegroundColour : (imageLoaded ? mTextColourWithImage : mTextColourNoImage),
+						(imageLoaded ? mTextBackgroundColour : 0), mTextSpacing, mTextCornerRadius, imageLoaded, 0,
+						mTextBackgroundSpanWidth, mCanvasHeight, mTextMaxFontSize, mTextMaxCharsPerLine);
 
 			} else if (!imageLoaded) {
 				// quicker to do this than load the SVG for narratives that have no audio
 				// TODO: this is the only reason we need the Resources object - should we just preload and pass this object?
 				// TODO: use SVG.getBitmap()?
-				if (mAudioSVG == null) {
+				if (mAudioIconResourceId < 0 && mAudioSVG == null) { // only load the icon if one is specified
 					mAudioSVG = SVGParser.getSVGFromResource(mResources, mAudioIconResourceId);
 				}
 				if (mAudioSVG != null) {

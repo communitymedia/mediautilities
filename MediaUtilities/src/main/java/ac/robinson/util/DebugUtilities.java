@@ -50,7 +50,7 @@ public class DebugUtilities {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yy HH:mm", Locale.ENGLISH);
 			dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 			return dateFormat.format(new java.util.Date(zipEntry.getTime()));
-		} catch (Exception e) {
+		} catch (Exception ignored) {
 		}
 		return "unknown";
 	}
@@ -85,25 +85,13 @@ public class DebugUtilities {
 
 	public static String getDeviceDebugSummary(WindowManager windowManager, Resources resources) {
 		Point screenSize = UIUtilities.getScreenSize(windowManager);
-		return Build.MODEL + ", " + getDeviceBrandProduct() + ", v" + Build.VERSION.SDK_INT + " ("
-				+ Build.VERSION.RELEASE + "), " + screenSize.x + "x" + screenSize.y + "-"
-				+ getScreenDensityString(resources).replace("dpi", "") + "-"
-				+ getScreenSizeString(resources).substring(0, 1);
+		return Build.MODEL + ", " + getDeviceBrandProduct() + ", v" + Build.VERSION.SDK_INT + " (" + Build.VERSION.RELEASE +
+				"), " + screenSize.x + "x" + screenSize.y + "-" + getScreenDensityString(resources).replace("dpi", "") + "-" +
+				getScreenSizeString(resources).substring(0, 1);
 	}
 
 	public static String getDeviceBrandProduct() {
 		return Build.BRAND + "/" + Build.PRODUCT + "/" + Build.DEVICE;
-	}
-
-	// some devices cannot use SoundPool and MediaPlayer simultaneously due to a bug
-	// - currently just Galaxy Tab 10.1 with original SDK version
-	public static boolean hasSoundPoolBug() {
-		ArrayList<String> devices = new ArrayList<>();
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-			devices.add("samsung/GT-P7510/GT-P7510"); // Samsung Galaxy Tab 10.1
-		}
-
-		return devices.contains(getDeviceBrandProduct());
 	}
 
 	// some devices have a bug where the internal storage folder requires storage permission to be granted
