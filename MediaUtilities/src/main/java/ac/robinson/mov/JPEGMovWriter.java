@@ -74,7 +74,7 @@ public class JPEGMovWriter extends MovWriter {
 	 */
 	@SuppressLint("UseValueOf")
 	public synchronized void addFrame(float duration, Bitmap bi, float jpegQuality) throws IOException {
-		Map<String, Object> settings = new Hashtable<String, Object>(1);
+		Map<String, Object> settings = new Hashtable<>(1);
 		settings.put(PROPERTY_QUALITY, new Float(jpegQuality));
 		super.addFrame(duration, bi, settings);
 	}

@@ -37,7 +37,7 @@ public class OrientationManager {
 	private static boolean mIsListening = false;
 
 	private enum Side {
-		TOP, BOTTOM, LEFT, RIGHT;
+		TOP, BOTTOM, LEFT, RIGHT
 	}
 
 	public static boolean isListening() {
@@ -125,7 +125,7 @@ public class OrientationManager {
 	};
 
 	public interface OrientationListener {
-		public void onOrientationChanged(int newOrientationDegrees);
+		void onOrientationChanged(int newOrientationDegrees);
 	}
 
 	public static int getDisplayRotationDegrees(int displayRotation) {

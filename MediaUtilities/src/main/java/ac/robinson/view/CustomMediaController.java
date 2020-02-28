@@ -149,6 +149,7 @@ public class CustomMediaController extends FrameLayout {
 	 * @return The controller view.
 	 * @hide This doesn't work as advertised
 	 */
+	@SuppressLint("InflateParams")
 	protected View makeControllerView() {
 		LayoutInflater inflater = LayoutInflater.from(mContext);
 		mRoot = inflater.inflate(R.layout.custom_media_controller, null);
@@ -327,6 +328,7 @@ public class CustomMediaController extends FrameLayout {
 		}
 	}
 
+	@SuppressLint("HandlerLeak") // it *is* static...
 	private static Handler mHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
@@ -532,7 +534,7 @@ public class CustomMediaController extends FrameLayout {
 			}
 			int pos = mPlayer.getCurrentPosition();
 			pos -= 5000; // milliseconds
-			mPlayer.seekTo(pos < 0 ? 0 : pos);
+			mPlayer.seekTo(Math.max(pos, 0));
 			setProgress();
 
 			show();

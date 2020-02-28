@@ -179,7 +179,7 @@ public class ImportingService extends Service {
 		private final WeakReference<ImportingService> mService;
 
 		public BluetoothFileHandler(ImportingService service) {
-			mService = new WeakReference<ImportingService>(service);
+			mService = new WeakReference<>(service);
 		}
 
 		@Override
@@ -217,7 +217,7 @@ public class ImportingService extends Service {
 		private final WeakReference<ImportingService> mService;
 
 		public ClientMessageHandler(ImportingService service) {
-			mService = new WeakReference<ImportingService>(service);
+			mService = new WeakReference<>(service);
 		}
 
 		@Override

@@ -36,6 +36,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import ac.robinson.util.IOUtilities;
+import androidx.annotation.NonNull;
 
 public class MP3toPCMConverter {
 
@@ -47,6 +48,7 @@ public class MP3toPCMConverter {
 		public int sampleSize = 0;
 		public int numberOfChannels = 0;
 
+		@NonNull
 		@Override
 		public String toString() {
 			return this.getClass().getName() + "[" + sampleFrequency + "," + sampleSize + "," + numberOfChannels + "]";

@@ -104,7 +104,7 @@ public class DebugUtilities {
 
 	public static boolean supportsLandscapeCameraOnly() {
 		// TODO: should probably be deprecated as these devices don't support our minimum SDK level
-		ArrayList<String> devices = new ArrayList<String>();
+		ArrayList<String> devices = new ArrayList<>();
 		devices.add("samsung/GT-S5830/GT-S5830"); // Samsung Galaxy Ace
 		devices.add("samsung/GT-S5830i/GT-S5830i"); // Samsung Galaxy Ace i
 		// devices.add("samsung/GT-S5360/GT-S5360"); // Samsung Galaxy Y - probable, but not certain

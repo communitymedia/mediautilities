@@ -313,7 +313,7 @@ public class BitmapUtilities {
 	 * <p>
 	 * DOWNSCALE: Like FIT, but will downscale the image by multiplying its normal sample rate by DOWNSCALE_RATIO.
 	 */
-	public static enum ScalingLogic {
+	public enum ScalingLogic {
 		CROP, FIT, DOWNSCALE
 	}
 
@@ -375,7 +375,7 @@ public class BitmapUtilities {
 				return new Rect(srcRectLeft, 0, srcRectLeft + srcRectWidth, srcHeight);
 			} else {
 				final int srcRectHeight = (int) (srcWidth / dstAspect);
-				final int scrRectTop = (int) (srcHeight - srcRectHeight) / 2;
+				final int scrRectTop = (srcHeight - srcRectHeight) / 2;
 				return new Rect(0, scrRectTop, srcWidth, scrRectTop + srcRectHeight);
 			}
 		} else {
@@ -416,7 +416,6 @@ public class BitmapUtilities {
 				ImageCacheUtilities.mBitmapFactoryOptions.inPreferredConfig);
 		Canvas canvas = new Canvas(newBitmap);
 		canvas.drawBitmap(bitmap, 0, 0, null);
-		canvas = null;
 		return newBitmap;
 	}
 
@@ -426,12 +425,11 @@ public class BitmapUtilities {
 		Canvas canvas = new Canvas(rotated);
 		canvas.rotate(orientationDegrees, xPosition, yPosition);
 		canvas.drawBitmap(bitmap, 0, 0, null);
-		canvas = null;
 		return rotated;
 	}
 
 	public static boolean saveByteImage(byte[] imageData, File saveTo, int quality, boolean flipHorizontally) {
-		FileOutputStream fileOutputStream = null;
+		FileOutputStream fileOutputStream;
 		BufferedOutputStream byteOutputStream = null;
 		try {
 			fileOutputStream = new FileOutputStream(saveTo);
@@ -473,7 +471,7 @@ public class BitmapUtilities {
 	 */
 	public static boolean saveYUYToJPEG(byte[] imageData, File saveTo, int format, int quality, int width, int height,
 										int rotation, boolean flipHorizontally) {
-		YuvImage yuvImg = null;
+		YuvImage yuvImg;
 		try {
 			yuvImg = new YuvImage(imageData, format, width, height, null);
 
@@ -541,7 +539,7 @@ public class BitmapUtilities {
 	}
 
 	public static boolean saveBitmap(Bitmap bitmap, CompressFormat format, int quality, File saveTo) {
-		FileOutputStream fileOutputStream = null;
+		FileOutputStream fileOutputStream;
 		BufferedOutputStream bufferedOutputStream = null;
 		try {
 			fileOutputStream = new FileOutputStream(saveTo);
@@ -644,7 +642,7 @@ public class BitmapUtilities {
 
 		// set up location for drawing
 		int lineHeight = (int) Math.ceil(Math.abs(textPaint.ascent()) + textPaint.descent());
-		float drawingX = 0;
+		float drawingX;
 		float drawingY;
 		if (alignBottom) {
 			drawingY = textCanvas.getHeight() - getActualDescentSize(textsToDraw[textsToDraw.length - 1], textPaint) -
@@ -654,7 +652,7 @@ public class BitmapUtilities {
 		}
 		float initialX = (maxWidth / 2) + leftOffset;
 		float initialY = drawingY;
-		float finalHeight = 0;
+		float finalHeight;
 
 		// draw the background box
 		if (backgroundColour != 0) {
@@ -691,7 +689,7 @@ public class BitmapUtilities {
 			drawingY -= lineHeight;
 		}
 
-		return (int) Math.round(finalHeight);
+		return Math.round(finalHeight);
 	}
 
 	public static float getActualDescentSize(String text, Paint textPaint) {

@@ -106,7 +106,7 @@ public class CameraUtilities {
 	public static int getPreviewOrientationDegrees(int screenOrientationDegrees, Integer cameraOrientationDegrees,
 												   boolean usingFrontCamera) {
 
-		int previewOrientationDegrees = 0;
+		int previewOrientationDegrees;
 
 		if (cameraOrientationDegrees != null) {
 			if (usingFrontCamera) { // compensate for the mirror of the front camera

@@ -111,7 +111,7 @@ public abstract class MovWriter {
 	}
 
 	class VideoTrack {
-		List<VideoSample> samples = new Vector<VideoSample>();
+		List<VideoSample> samples = new Vector<>();
 		protected int w = -1, h = -1;
 		long totalDuration;
 		TimeToSampleAtom stts = new TimeToSampleAtom();
@@ -576,7 +576,7 @@ public abstract class MovWriter {
 		 * data is placed at the beginning of the interleaved data. This means that the sound and video data are offset
 		 * from each other in the file by one second.
 		 */
-		newTrack.writeAudio(DEFAULT_TIME_SCALE * 1);
+		newTrack.writeAudio(DEFAULT_TIME_SCALE);
 	}
 
 	/**
@@ -639,7 +639,7 @@ public abstract class MovWriter {
 		 * data is placed at the beginning of the interleaved data. This means that the sound and video data are offset
 		 * from each other in the file by one second.
 		 */
-		newTrack.writeAudio(DEFAULT_TIME_SCALE * 1);
+		newTrack.writeAudio(DEFAULT_TIME_SCALE);
 	}
 
 	@Override
@@ -869,11 +869,10 @@ public abstract class MovWriter {
 	 * Reads bytes from an InputStream. This will always return an even number of bytes.
 	 */
 	private static int read(InputStream in, byte[] dest, int bytesToRead) throws IOException {
-		int read = 0;
 		if (bytesToRead % 2 == 1) {
 			bytesToRead--;
 		}
-		read = in.read(dest, 0, bytesToRead);
+		int read = in.read(dest, 0, bytesToRead);
 		if (read == -1) {
 			return read;
 		}

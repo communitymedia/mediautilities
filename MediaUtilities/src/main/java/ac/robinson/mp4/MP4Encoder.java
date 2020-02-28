@@ -283,12 +283,12 @@ public class MP4Encoder {
 		}
 	}
 
-	private class TrackInfo {
+	private static class TrackInfo {
 		private int mIndex = 0;
 		private MediaMuxerWrapper mMuxerWrapper;
 	}
 
-	private class MediaMuxerWrapper {
+	private static class MediaMuxerWrapper {
 		private final int TOTAL_NUM_TRACKS;
 		private MediaMuxer mMuxer;
 		private boolean mStarted = false;

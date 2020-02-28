@@ -43,14 +43,14 @@ public class HTMLUtilities {
 
 	public static ArrayList<FrameMediaContainer> getHTMLFrameList(File htmlFile, int sequenceIncrement) {
 		// TODO: this
-		return new ArrayList<FrameMediaContainer>();
+		return new ArrayList<>();
 	}
 
 	public static ArrayList<Uri> generateNarrativeHTML(Resources res, File outputFile,
 													   ArrayList<FrameMediaContainer> framesToSend,
 													   Map<Integer, Object> settings) {
 
-		ArrayList<Uri> filesToSend = new ArrayList<Uri>();
+		ArrayList<Uri> filesToSend = new ArrayList<>();
 		if (framesToSend == null || framesToSend.size() <= 0) {
 			return filesToSend;
 		}
@@ -75,7 +75,7 @@ public class HTMLUtilities {
 		InputStream playerFileTemplateStream = res.openRawResource(R.raw.html_player);
 		BufferedReader playerFileTemplateReader = new BufferedReader(new InputStreamReader(playerFileTemplateStream));
 		BufferedWriter playerOutputFileWriter = null;
-		String readLine = null;
+		String readLine;
 		try {
 			playerOutputFileWriter = new BufferedWriter(new FileWriter(outputFile));
 			while ((readLine = playerFileTemplateReader.readLine()) != null) {

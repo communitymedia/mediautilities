@@ -35,8 +35,7 @@ public class ImageCacheUtilities {
 	public static final FastBitmapDrawable LOADING_DRAWABLE = new FastBitmapDrawable(null);
 
 	// TODO: Use a concurrent HashMap to support multiple threads
-	private static final HashMap<String, SoftReference<FastBitmapDrawable>> sArtCache = new HashMap<String,
-			SoftReference<FastBitmapDrawable>>();
+	private static final HashMap<String, SoftReference<FastBitmapDrawable>> sArtCache = new HashMap<>();
 
 	// TODO: use these for most/all bitmap operations
 	public static final BitmapFactory.Options mBitmapFactoryOptions;
@@ -90,7 +89,7 @@ public class ImageCacheUtilities {
 
 	public static void setLoadingIcon(String id) {
 		sArtCache.remove(id);
-		sArtCache.put(id, new SoftReference<FastBitmapDrawable>(LOADING_DRAWABLE));
+		sArtCache.put(id, new SoftReference<>(LOADING_DRAWABLE));
 	}
 
 	/**
@@ -118,7 +117,7 @@ public class ImageCacheUtilities {
 				drawable = NULL_DRAWABLE;
 			}
 
-			sArtCache.put(id, new SoftReference<FastBitmapDrawable>(drawable));
+			sArtCache.put(id, new SoftReference<>(drawable));
 		}
 
 		return drawable == NULL_DRAWABLE ? defaultIcon : drawable;

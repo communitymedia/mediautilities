@@ -30,6 +30,8 @@ import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.text.TextUtils;
+import android.webkit.MimeTypeMap;
 
 import java.io.BufferedReader;
 import java.io.Closeable;
@@ -256,28 +258,18 @@ public class IOUtilities {
 		}
 	}
 
-	// TODO: move to StringUtilities
-	// see: http://stackoverflow.com/questions/941272/
 	public static String removeExtension(String s) {
+		String name = new File(s).getName();
+		String extension = MimeTypeMap.getFileExtensionFromUrl(s);
+		if (!TextUtils.isEmpty(extension)) {
+			int extensionIndex = name.lastIndexOf(extension);
+			if (extensionIndex > 0) {
+				extensionIndex -= 1; // the dot character
+			}
+			return name.substring(0, extensionIndex);
 
-		String separator = System.getProperty("file.separator");
-		String filename;
-
-		// Remove the path upto the filename.
-		int lastSeparatorIndex = s.lastIndexOf(separator);
-		if (lastSeparatorIndex == -1) {
-			filename = s;
-		} else {
-			filename = s.substring(lastSeparatorIndex + 1);
 		}
-
-		// Remove the extension.
-		int extensionIndex = filename.lastIndexOf('.');
-		if (extensionIndex == -1) {
-			return filename;
-		}
-
-		return filename.substring(0, extensionIndex);
+		return name;
 	}
 
 	// pass -1 to read the entire file
@@ -356,7 +348,7 @@ public class IOUtilities {
 	public static File newDatedFileName(File baseDirectory, String fileExtension) {
 		Calendar fileDate;
 		StringBuilder newFileName = new StringBuilder();
-		File newFile = null;
+		File newFile;
 		boolean fileExists = false;
 		do {
 			fileDate = Calendar.getInstance();
@@ -407,7 +399,6 @@ public class IOUtilities {
 			IOUtilities.closeStream(playerInputStream);
 			if (mediaPlayer != null) {
 				mediaPlayer.release();
-				mediaPlayer = null;
 			}
 		}
 		return audioDuration;

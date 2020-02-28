@@ -43,7 +43,7 @@ public class AutoResizeTextView extends TextView {
 	private float mMaxTextSize = 48; // upper bound for the text size used (i.e. font size)
 
 	private boolean mEllipsize = true; // whether to use ellipsizing
-	private String mEllipsis = "…"; // the ellipsis string to add (loaded from R.string.textview_ellipsis on create)
+	private String mEllipsis; // the ellipsis string to add (loaded from R.string.textview_ellipsis on create)
 
 	// these values are cached to deal with devices applying their own line spacing (which would break our auto-sizing)
 	private float mSpacingMult = 1f; // the line spacing multiplier

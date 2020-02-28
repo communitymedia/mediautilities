@@ -336,7 +336,7 @@ public class PlaybackController extends FrameLayout {
 				mPlayerControl.seekButton(-1);
 			} else {
 				int pos = mPlayerControl.getCurrentPosition() - SEEK_BACKWARD_MILLIS;
-				mPlayerControl.seekTo(pos < 0 ? 0 : pos);
+				mPlayerControl.seekTo(Math.max(pos, 0));
 			}
 			setProgress();
 
