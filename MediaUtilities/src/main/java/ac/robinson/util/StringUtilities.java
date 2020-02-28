@@ -64,7 +64,7 @@ public class StringUtilities {
 
 	public static String millisecondsToTimeString(long milliseconds, boolean includeMilliseconds, boolean highPrecision) {
 		// overestimating is better than just rounding
-		int secondsIn = (int) Math.ceil(milliseconds / 1000);
+		@SuppressWarnings("IntegerDivisionInFloatingPointContext") int secondsIn = (int) Math.ceil(milliseconds / 1000);
 		int millisecondsIn = ((int) milliseconds - (secondsIn * 1000));
 
 		int hours = secondsIn / 3600;

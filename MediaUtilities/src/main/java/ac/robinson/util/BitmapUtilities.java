@@ -240,8 +240,6 @@ public class BitmapUtilities {
 		options.inJustDecodeBounds = true;
 		BitmapFactory.decodeFile(imagePath, options);
 		options.inJustDecodeBounds = false;
-		options.inPurgeable = true; // TODO: is this appropriate for image cache? is it actually used at all?
-		options.inInputShareable = true; // as above
 		options.inSampleSize = calculateSampleSize(options.outWidth, options.outHeight, dstWidth, dstHeight, scalingLogic);
 		return BitmapFactory.decodeFile(imagePath, options);
 	}
@@ -265,8 +263,6 @@ public class BitmapUtilities {
 			options.inJustDecodeBounds = true;
 			BitmapFactory.decodeStream(new FileInputStream(streamPath), null, options);
 			options.inJustDecodeBounds = false;
-			options.inPurgeable = true; // TODO: is this appropriate for image cache? is it actually used at all?
-			options.inInputShareable = true; // as above
 			options.inSampleSize = calculateSampleSize(options.outWidth, options.outHeight, dstWidth, dstHeight, scalingLogic);
 			return BitmapFactory.decodeStream(new FileInputStream(streamPath), null, options);
 		} catch (FileNotFoundException e) {

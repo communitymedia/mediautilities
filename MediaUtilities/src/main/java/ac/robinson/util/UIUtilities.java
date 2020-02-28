@@ -46,8 +46,6 @@ import java.util.List;
 
 public class UIUtilities {
 
-	private static final String LOG_TAG = "UIUtilities";
-
 	/**
 	 * Enable pixel dithering for this window (but only in API < 17)
 	 */

@@ -54,8 +54,8 @@ public class CameraUtilities {
 	 */
 	public static boolean deviceHasCamera(PackageManager packageManager) {
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-			return packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA) ||
-					packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT);
+			//noinspection deprecation
+			return (Camera.getNumberOfCameras() > 0); // FEATURE_CAMERA_ANY didn't exist until API v17
 		} else {
 			return packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY);
 		}
@@ -77,24 +77,23 @@ public class CameraUtilities {
 			final Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
 			Camera.getCameraInfo(camIdx, cameraInfo);
 
-			if (cameraInfo != null) {
-				if (cameraInfo.facing == CUSTOM_CAMERA_FRONT) {
-					cameraConfiguration.hasFrontCamera = true;
-				}
-				// allow non-preferred camera (some devices (e.g. Nexus 7) only have front camera)
-				if (cameraInfo.facing == preferredFacing || camIdx == cameraCount - 1) {
-					if (camera == null) { // so that we continue and detect a front camera even if we aren't using it
-						try {
-							camera = Camera.open(camIdx);
-							if (cameraInfo.facing == CUSTOM_CAMERA_FRONT) {
-								cameraConfiguration.usingFrontCamera = true;
-							}
-							cameraConfiguration.numberOfCameras = cameraCount;
-							// Integer so that we can compare to null when checking orientation
-							cameraConfiguration.cameraOrientationDegrees = Integer.valueOf(cameraInfo.orientation);
-						} catch (RuntimeException e) {
-							Log.e(LOG_TAG, "Camera failed to open: " + e.getLocalizedMessage());
+			if (cameraInfo.facing == CUSTOM_CAMERA_FRONT) {
+				cameraConfiguration.hasFrontCamera = true;
+			}
+
+			// allow non-preferred camera (some devices (e.g. Nexus 7) only have front camera)
+			if (cameraInfo.facing == preferredFacing || camIdx == cameraCount - 1) {
+				if (camera == null) { // so that we continue and detect a front camera even if we aren't using it
+					try {
+						camera = Camera.open(camIdx);
+						if (cameraInfo.facing == CUSTOM_CAMERA_FRONT) {
+							cameraConfiguration.usingFrontCamera = true;
 						}
+						cameraConfiguration.numberOfCameras = cameraCount;
+						// Integer so that we can compare to null when checking orientation
+						cameraConfiguration.cameraOrientationDegrees = Integer.valueOf(cameraInfo.orientation);
+					} catch (RuntimeException e) {
+						Log.e(LOG_TAG, "Camera failed to open: " + e.getLocalizedMessage());
 					}
 				}
 			}
