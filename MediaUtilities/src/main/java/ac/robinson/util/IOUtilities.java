@@ -92,6 +92,21 @@ public class IOUtilities {
 		out.close();
 	}
 
+	public static boolean moveFile(File sourceLocation, File targetLocation) {
+		// need to try both methods of moving the file as some devices (e.g., Acer Chromebook 14) fail
+		// on renameTo even though both files are on the same storage media
+		if (sourceLocation.renameTo(targetLocation)) {
+			return true;
+		}
+		try {
+			IOUtilities.copyFile(sourceLocation, targetLocation);
+			sourceLocation.delete();
+			return true;
+		} catch (IOException ignored) {
+		}
+		return false;
+	}
+
 	public static boolean copyResource(Resources resources, int resourceID, File targetLocation) {
 		Bitmap resourceImage = BitmapFactory.decodeResource(resources, resourceID);
 		if (resourceImage != null) {
