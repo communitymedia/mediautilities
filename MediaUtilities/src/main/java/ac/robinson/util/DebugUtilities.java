@@ -63,6 +63,11 @@ public class DebugUtilities {
 				return "hdpi";
 			case DisplayMetrics.DENSITY_XHIGH:
 				return "xhdpi";
+			case DisplayMetrics.DENSITY_XXHIGH:
+				return "x2hdpi";
+			case DisplayMetrics.DENSITY_XXXHIGH:
+				return "x3hdpi";
+			case DisplayMetrics.DENSITY_MEDIUM:
 			default: // medium is the default
 				return "mdpi";
 		}
@@ -86,8 +91,8 @@ public class DebugUtilities {
 	public static String getDeviceDebugSummary(WindowManager windowManager, Resources resources) {
 		Point screenSize = UIUtilities.getScreenSize(windowManager);
 		return Build.MODEL + ", " + getDeviceBrandProduct() + ", v" + Build.VERSION.SDK_INT + " (" + Build.VERSION.RELEASE +
-				"), " + screenSize.x + "x" + screenSize.y + "-" + getScreenDensityString(resources).replace("dpi", "") + "-" +
-				getScreenSizeString(resources).substring(0, 1);
+				"), " + Build.CPU_ABI + ", " + screenSize.x + "x" + screenSize.y + "-" +
+				getScreenDensityString(resources).replace("dpi", "") + "-" + getScreenSizeString(resources).substring(0, 1);
 	}
 
 	public static String getDeviceBrandProduct() {
@@ -104,6 +109,7 @@ public class DebugUtilities {
 
 	public static boolean supportsLandscapeCameraOnly() {
 		// TODO: should probably be deprecated as these devices don't support our minimum SDK level
+		// TODO: kept for now as there may be other devices in future that have this limitation
 		ArrayList<String> devices = new ArrayList<>();
 		devices.add("samsung/GT-S5830/GT-S5830"); // Samsung Galaxy Ace
 		devices.add("samsung/GT-S5830i/GT-S5830i"); // Samsung Galaxy Ace i
