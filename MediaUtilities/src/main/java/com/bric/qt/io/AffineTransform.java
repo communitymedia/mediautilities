@@ -25,7 +25,7 @@
 
 package com.bric.qt.io;
 
-import android.graphics.drawable.shapes.Shape;
+import androidx.annotation.NonNull;
 
 /**
  * The <code>AffineTransform</code> class represents a 2D affine transform that performs a linear mapping from 2D
@@ -36,7 +36,7 @@ import android.graphics.drawable.shapes.Shape;
  * ]. This matrix transforms source coordinates {@code (x,y)} into destination coordinates {@code (x',y')} by
  * considering them to be a column vector and multiplying the coordinate vector by the matrix according to the following
  * process:
- * 
+ *
  * <pre>
  *      [ x']   [  m00  m01  m02  ] [ x ]   [ m00x + m01y + m02 ]
  *      [ y'] = [  m10  m11  m12  ] [ y ] = [ m10x + m11y + m12 ]
@@ -79,7 +79,7 @@ import android.graphics.drawable.shapes.Shape;
  * as a quadrant rotation if either <code>Math.sin(<em>theta</em>)</code> or <code>Math.cos(<em>theta</em>)</code>
  * returns exactly 1.0 or -1.0. As a rule of thumb, this property holds true for a range of approximately 0.0000000211
  * radians (or 0.00000121 degrees) around small multiples of <code>Math.PI/2.0</code>.
- * 
+ *
  * @author Jim Graham
  * @since 1.2
  */
@@ -96,7 +96,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * is one in which the output coordinates are always the same as the input coordinates. If this transform is
 	 * anything other than the identity transform, the type will either be the constant GENERAL_TRANSFORM or a
 	 * combination of the appropriate flag bits for the various coordinate conversions that this transform performs.
-	 * 
+	 *
 	 * @see #TYPE_TRANSLATION
 	 * @see #TYPE_UNIFORM_SCALE
 	 * @see #TYPE_GENERAL_SCALE
@@ -113,7 +113,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * This flag bit indicates that the transform defined by this object performs a translation in addition to the
 	 * conversions indicated by other flag bits. A translation moves the coordinates by a constant amount in x and y
 	 * without changing the length or angle of vectors.
-	 * 
+	 *
 	 * @see #TYPE_IDENTITY
 	 * @see #TYPE_UNIFORM_SCALE
 	 * @see #TYPE_GENERAL_SCALE
@@ -131,7 +131,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * conversions indicated by other flag bits. A uniform scale multiplies the length of vectors by the same amount in
 	 * both the x and y directions without changing the angle between vectors. This flag bit is mutually exclusive with
 	 * the TYPE_GENERAL_SCALE flag.
-	 * 
+	 *
 	 * @see #TYPE_IDENTITY
 	 * @see #TYPE_TRANSLATION
 	 * @see #TYPE_GENERAL_SCALE
@@ -149,7 +149,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * conversions indicated by other flag bits. A general scale multiplies the length of vectors by different amounts
 	 * in the x and y directions without changing the angle between perpendicular vectors. This flag bit is mutually
 	 * exclusive with the TYPE_UNIFORM_SCALE flag.
-	 * 
+	 *
 	 * @see #TYPE_IDENTITY
 	 * @see #TYPE_TRANSLATION
 	 * @see #TYPE_UNIFORM_SCALE
@@ -164,7 +164,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 
 	/**
 	 * This constant is a bit mask for any of the scale flag bits.
-	 * 
+	 *
 	 * @see #TYPE_UNIFORM_SCALE
 	 * @see #TYPE_GENERAL_SCALE
 	 * @since 1.2
@@ -180,7 +180,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * rotates clockwise to overlay the positive Y axis similar to the direction that the fingers on your left hand
 	 * curl. There is no mathematical way to determine the angle of the original flipping or mirroring transformation
 	 * since all angles of flip are identical given an appropriate adjusting rotation.
-	 * 
+	 *
 	 * @see #TYPE_IDENTITY
 	 * @see #TYPE_TRANSLATION
 	 * @see #TYPE_UNIFORM_SCALE
@@ -202,7 +202,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * of 90 degrees in addition to the conversions indicated by other flag bits. A rotation changes the angles of
 	 * vectors by the same amount regardless of the original direction of the vector and without changing the length of
 	 * the vector. This flag bit is mutually exclusive with the TYPE_GENERAL_ROTATION flag.
-	 * 
+	 *
 	 * @see #TYPE_IDENTITY
 	 * @see #TYPE_TRANSLATION
 	 * @see #TYPE_UNIFORM_SCALE
@@ -220,7 +220,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * addition to the conversions indicated by other flag bits. A rotation changes the angles of vectors by the same
 	 * amount regardless of the original direction of the vector and without changing the length of the vector. This
 	 * flag bit is mutually exclusive with the TYPE_QUADRANT_ROTATION flag.
-	 * 
+	 *
 	 * @see #TYPE_IDENTITY
 	 * @see #TYPE_TRANSLATION
 	 * @see #TYPE_UNIFORM_SCALE
@@ -235,7 +235,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 
 	/**
 	 * This constant is a bit mask for any of the rotation flag bits.
-	 * 
+	 *
 	 * @see #TYPE_QUADRANT_ROTATION
 	 * @see #TYPE_GENERAL_ROTATION
 	 * @since 1.2
@@ -247,7 +247,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * coordinates. If this transform can be classified by any of the above constants, the type will either be the
 	 * constant TYPE_IDENTITY or a combination of the appropriate flag bits for the various coordinate conversions that
 	 * this transform performs.
-	 * 
+	 *
 	 * @see #TYPE_IDENTITY
 	 * @see #TYPE_TRANSLATION
 	 * @see #TYPE_UNIFORM_SCALE
@@ -264,7 +264,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * This constant is used for the internal state variable to indicate that no calculations need to be performed and
 	 * that the source coordinates only need to be copied to their destinations to complete the transformation equation
 	 * of this transform.
-	 * 
+	 *
 	 * @see #APPLY_TRANSLATE
 	 * @see #APPLY_SCALE
 	 * @see #APPLY_SHEAR
@@ -275,7 +275,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	/**
 	 * This constant is used for the internal state variable to indicate that the translation components of the matrix
 	 * (m02 and m12) need to be added to complete the transformation equation of this transform.
-	 * 
+	 *
 	 * @see #APPLY_IDENTITY
 	 * @see #APPLY_SCALE
 	 * @see #APPLY_SHEAR
@@ -290,7 +290,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * set then it indicates that the scaling components are not both 1.0. If neither the APPLY_SHEAR nor the
 	 * APPLY_SCALE bits are set then the scaling components are both 1.0, which means that the x and y components
 	 * contribute to the transformed coordinate, but they are not multiplied by any scaling factor.
-	 * 
+	 *
 	 * @see #APPLY_IDENTITY
 	 * @see #APPLY_TRANSLATE
 	 * @see #APPLY_SHEAR
@@ -302,7 +302,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * This constant is used for the internal state variable to indicate that the shearing components of the matrix (m01
 	 * and m10) need to be factored in to complete the transformation equation of this transform. The presence of this
 	 * bit in the state variable changes the interpretation of the APPLY_SCALE bit as indicated in its documentation.
-	 * 
+	 *
 	 * @see #APPLY_IDENTITY
 	 * @see #APPLY_TRANSLATE
 	 * @see #APPLY_SCALE
@@ -325,49 +325,49 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 
 	/**
 	 * The X coordinate scaling element of the 3x3 affine transformation matrix.
-	 * 
+	 *
 	 * @serial
 	 */
 	double m00;
 
 	/**
 	 * The Y coordinate shearing element of the 3x3 affine transformation matrix.
-	 * 
+	 *
 	 * @serial
 	 */
 	double m10;
 
 	/**
 	 * The X coordinate shearing element of the 3x3 affine transformation matrix.
-	 * 
+	 *
 	 * @serial
 	 */
 	double m01;
 
 	/**
 	 * The Y coordinate scaling element of the 3x3 affine transformation matrix.
-	 * 
+	 *
 	 * @serial
 	 */
 	double m11;
 
 	/**
 	 * The X coordinate of the translation element of the 3x3 affine transformation matrix.
-	 * 
+	 *
 	 * @serial
 	 */
 	double m02;
 
 	/**
 	 * The Y coordinate of the translation element of the 3x3 affine transformation matrix.
-	 * 
+	 *
 	 * @serial
 	 */
 	double m12;
 
 	/**
 	 * This field keeps track of which components of the matrix need to be applied when performing a transformation.
-	 * 
+	 *
 	 * @see #APPLY_IDENTITY
 	 * @see #APPLY_TRANSLATE
 	 * @see #APPLY_SCALE
@@ -377,7 +377,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 
 	/**
 	 * This field caches the current transformation type of the matrix.
-	 * 
+	 *
 	 * @see #TYPE_IDENTITY
 	 * @see #TYPE_TRANSLATION
 	 * @see #TYPE_UNIFORM_SCALE
@@ -404,7 +404,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 
 	/**
 	 * Constructs a new <code>AffineTransform</code> representing the Identity transformation.
-	 * 
+	 *
 	 * @since 1.2
 	 */
 	public AffineTransform() {
@@ -417,7 +417,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	/**
 	 * Constructs a new <code>AffineTransform</code> that is a copy of the specified <code>AffineTransform</code>
 	 * object.
-	 * 
+	 *
 	 * @param Tx
 	 *            the <code>AffineTransform</code> object to copy
 	 * @since 1.2
@@ -436,7 +436,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	/**
 	 * Constructs a new <code>AffineTransform</code> from 6 floating point values representing the 6 specifiable entries
 	 * of the 3x3 transformation matrix.
-	 * 
+	 *
 	 * @param m00
 	 *            the X coordinate scaling element of the 3x3 matrix
 	 * @param m10
@@ -465,7 +465,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * Constructs a new <code>AffineTransform</code> from an array of floating point values representing either the 4
 	 * non-translation enries or the 6 specifiable entries of the 3x3 transformation matrix. The values are retrieved
 	 * from the array as {&nbsp;m00&nbsp;m10&nbsp;m01&nbsp;m11&nbsp;[m02&nbsp;m12]}.
-	 * 
+	 *
 	 * @param flatmatrix
 	 *            the float array containing the values to be set in the new <code>AffineTransform</code> object. The
 	 *            length of the array is assumed to be at least 4. If the length of the array is less than 6, only the
@@ -487,7 +487,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	/**
 	 * Constructs a new <code>AffineTransform</code> from 6 double precision values representing the 6 specifiable
 	 * entries of the 3x3 transformation matrix.
-	 * 
+	 *
 	 * @param m00
 	 *            the X coordinate scaling element of the 3x3 matrix
 	 * @param m10
@@ -516,7 +516,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * Constructs a new <code>AffineTransform</code> from an array of double precision values representing either the 4
 	 * non-translation entries or the 6 specifiable entries of the 3x3 transformation matrix. The values are retrieved
 	 * from the array as {&nbsp;m00&nbsp;m10&nbsp;m01&nbsp;m11&nbsp;[m02&nbsp;m12]}.
-	 * 
+	 *
 	 * @param flatmatrix
 	 *            the double array containing the values to be set in the new <code>AffineTransform</code> object. The
 	 *            length of the array is assumed to be at least 4. If the length of the array is less than 6, only the
@@ -537,13 +537,13 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 
 	/**
 	 * Returns a transform representing a translation transformation. The matrix representing the returned transform is:
-	 * 
+	 *
 	 * <pre>
 	 *          [   1    0    tx  ]
 	 *          [   0    1    ty  ]
 	 *          [   0    0    1   ]
 	 * </pre>
-	 * 
+	 *
 	 * @param tx
 	 *            the distance by which coordinates are translated in the X axis direction
 	 * @param ty
@@ -560,16 +560,16 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 
 	/**
 	 * Returns a transform representing a rotation transformation. The matrix representing the returned transform is:
-	 * 
+	 *
 	 * <pre>
 	 *          [   cos(theta)    -sin(theta)    0   ]
 	 *          [   sin(theta)     cos(theta)    0   ]
 	 *          [       0              0         1   ]
 	 * </pre>
-	 * 
+	 *
 	 * Rotating by a positive angle theta rotates points on the positive X axis toward the positive Y axis. Note also
 	 * the discussion of <a href="#quadrantapproximation">Handling 90-Degree Rotations</a> above.
-	 * 
+	 *
 	 * @param theta
 	 *            the angle of rotation measured in radians
 	 * @return an <code>AffineTransform</code> object that is a rotation transformation, created with the specified
@@ -589,25 +589,25 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * (S3).
 	 * <p>
 	 * This operation is equivalent to the following sequence of calls:
-	 * 
+	 *
 	 * <pre>
 	 * AffineTransform Tx = new AffineTransform();
 	 * Tx.translate(anchorx, anchory); // S3: final translation
 	 * Tx.rotate(theta); // S2: rotate around anchor
 	 * Tx.translate(-anchorx, -anchory); // S1: translate anchor to origin
 	 * </pre>
-	 * 
+	 *
 	 * The matrix representing the returned transform is:
-	 * 
+	 *
 	 * <pre>
 	 *          [   cos(theta)    -sin(theta)    x-x*cos+y*sin  ]
 	 *          [   sin(theta)     cos(theta)    y-x*sin-y*cos  ]
 	 *          [       0              0               1        ]
 	 * </pre>
-	 * 
+	 *
 	 * Rotating by a positive angle theta rotates points on the positive X axis toward the positive Y axis. Note also
 	 * the discussion of <a href="#quadrantapproximation">Handling 90-Degree Rotations</a> above.
-	 * 
+	 *
 	 * @param theta
 	 *            the angle of rotation measured in radians
 	 * @param anchorx
@@ -630,11 +630,11 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * subsequently align with the vector pointing from the origin to the specified vector coordinates. If both
 	 * <code>vecx</code> and <code>vecy</code> are 0.0, an identity transform is returned. This operation is equivalent
 	 * to calling:
-	 * 
+	 *
 	 * <pre>
 	 * AffineTransform.getRotateInstance(Math.atan2(vecy, vecx));
 	 * </pre>
-	 * 
+	 *
 	 * @param vecx
 	 *            the X coordinate of the rotation vector
 	 * @param vecy
@@ -655,11 +655,11 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * coordinates along the former positive X axis will subsequently align with the vector pointing from the origin to
 	 * the specified vector coordinates. If both <code>vecx</code> and <code>vecy</code> are 0.0, an identity transform
 	 * is returned. This operation is equivalent to calling:
-	 * 
+	 *
 	 * <pre>
 	 * AffineTransform.getRotateInstance(Math.atan2(vecy, vecx), anchorx, anchory);
 	 * </pre>
-	 * 
+	 *
 	 * @param vecx
 	 *            the X coordinate of the rotation vector
 	 * @param vecy
@@ -681,13 +681,13 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	/**
 	 * Returns a transform that rotates coordinates by the specified number of quadrants. This operation is equivalent
 	 * to calling:
-	 * 
+	 *
 	 * <pre>
 	 * AffineTransform.getRotateInstance(numquadrants * Math.PI / 2.0);
 	 * </pre>
-	 * 
+	 *
 	 * Rotating by a positive number of quadrants rotates points on the positive X axis toward the positive Y axis.
-	 * 
+	 *
 	 * @param numquadrants
 	 *            the number of 90 degree arcs to rotate by
 	 * @return an <code>AffineTransform</code> object that rotates coordinates by the specified number of quadrants.
@@ -702,13 +702,13 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	/**
 	 * Returns a transform that rotates coordinates by the specified number of quadrants around the specified anchor
 	 * point. This operation is equivalent to calling:
-	 * 
+	 *
 	 * <pre>
 	 * AffineTransform.getRotateInstance(numquadrants * Math.PI / 2.0, anchorx, anchory);
 	 * </pre>
-	 * 
+	 *
 	 * Rotating by a positive number of quadrants rotates points on the positive X axis toward the positive Y axis.
-	 * 
+	 *
 	 * @param numquadrants
 	 *            the number of 90 degree arcs to rotate by
 	 * @param anchorx
@@ -727,13 +727,13 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 
 	/**
 	 * Returns a transform representing a scaling transformation. The matrix representing the returned transform is:
-	 * 
+	 *
 	 * <pre>
 	 *          [   sx   0    0   ]
 	 *          [   0    sy   0   ]
 	 *          [   0    0    1   ]
 	 * </pre>
-	 * 
+	 *
 	 * @param sx
 	 *            the factor by which coordinates are scaled along the X axis direction
 	 * @param sy
@@ -749,13 +749,13 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 
 	/**
 	 * Returns a transform representing a shearing transformation. The matrix representing the returned transform is:
-	 * 
+	 *
 	 * <pre>
 	 *          [   1   shx   0   ]
 	 *          [  shy   1    0   ]
 	 *          [   0    0    1   ]
 	 * </pre>
-	 * 
+	 *
 	 * @param shx
 	 *            the multiplier by which coordinates are shifted in the direction of the positive X axis as a factor of
 	 *            their Y coordinate
@@ -777,7 +777,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * combination of flag bits is an exclusive OR operation that can combine the TYPE_TRANSLATION flag bit in addition
 	 * to either of the TYPE_UNIFORM_SCALE or TYPE_GENERAL_SCALE flag bits as well as either of the
 	 * TYPE_QUADRANT_ROTATION or TYPE_GENERAL_ROTATION flag bits.
-	 * 
+	 *
 	 * @return the OR combination of any of the indicated flags that apply to this transform
 	 * @see #TYPE_IDENTITY
 	 * @see #TYPE_TRANSLATION
@@ -797,7 +797,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 
 	/**
 	 * This is the utility function to calculate the flag bits when they have not been cached.
-	 * 
+	 *
 	 * @see #getType
 	 */
 	private void calculateType() {
@@ -931,13 +931,13 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * transforms are possible.
 	 * <p>
 	 * Mathematically, the determinant is calculated using the formula:
-	 * 
+	 *
 	 * <pre>
 	 *          |  m00  m01  m02  |
 	 *          |  m10  m11  m12  |  =  m00 * m11 - m01 * m10
 	 *          |   0    0    1   |
 	 * </pre>
-	 * 
+	 *
 	 * @return the determinant of the matrix used to transform the coordinates.
 	 * @see #getType
 	 * @see #createInverse
@@ -970,11 +970,11 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * state. The following table specifies what the various settings of the state field say about the values of the
 	 * corresponding matrix element fields. Note that the rules governing the SCALE fields are slightly different
 	 * depending on whether the SHEAR flag is also set.
-	 * 
+	 *
 	 * <pre>
 	 *                     SCALE            SHEAR          TRANSLATE
 	 *                    m00/m11          m01/m10          m02/m12
-	 * 
+	 *
 	 * IDENTITY             1.0              0.0              0.0
 	 * TRANSLATE (TR)       1.0              0.0          not both 0.0
 	 * SCALE (SC)       not both 1.0         0.0              0.0
@@ -1038,7 +1038,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * {&nbsp;m00&nbsp;m10&nbsp;m01&nbsp;m11&nbsp;m02&nbsp;m12&nbsp;}. An array of 4 doubles can also be specified, in
 	 * which case only the first four elements representing the non-transform parts of the array are retrieved and the
 	 * values are stored into the array as {&nbsp;m00&nbsp;m10&nbsp;m01&nbsp;m11&nbsp;}
-	 * 
+	 *
 	 * @param flatmatrix
 	 *            the double array used to store the returned values.
 	 * @see #getScaleX
@@ -1062,7 +1062,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 
 	/**
 	 * Returns the X coordinate scaling element (m00) of the 3x3 affine transformation matrix.
-	 * 
+	 *
 	 * @return a double value that is the X coordinate of the scaling element of the affine transformation matrix.
 	 * @see #getMatrix
 	 * @since 1.2
@@ -1073,7 +1073,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 
 	/**
 	 * Returns the Y coordinate scaling element (m11) of the 3x3 affine transformation matrix.
-	 * 
+	 *
 	 * @return a double value that is the Y coordinate of the scaling element of the affine transformation matrix.
 	 * @see #getMatrix
 	 * @since 1.2
@@ -1084,7 +1084,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 
 	/**
 	 * Returns the X coordinate shearing element (m01) of the 3x3 affine transformation matrix.
-	 * 
+	 *
 	 * @return a double value that is the X coordinate of the shearing element of the affine transformation matrix.
 	 * @see #getMatrix
 	 * @since 1.2
@@ -1095,7 +1095,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 
 	/**
 	 * Returns the Y coordinate shearing element (m10) of the 3x3 affine transformation matrix.
-	 * 
+	 *
 	 * @return a double value that is the Y coordinate of the shearing element of the affine transformation matrix.
 	 * @see #getMatrix
 	 * @since 1.2
@@ -1106,7 +1106,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 
 	/**
 	 * Returns the X coordinate of the translation element (m02) of the 3x3 affine transformation matrix.
-	 * 
+	 *
 	 * @return a double value that is the X coordinate of the translation element of the affine transformation matrix.
 	 * @see #getMatrix
 	 * @since 1.2
@@ -1117,7 +1117,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 
 	/**
 	 * Returns the Y coordinate of the translation element (m12) of the 3x3 affine transformation matrix.
-	 * 
+	 *
 	 * @return a double value that is the Y coordinate of the translation element of the affine transformation matrix.
 	 * @see #getMatrix
 	 * @since 1.2
@@ -1129,13 +1129,13 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	/**
 	 * Concatenates this transform with a translation transformation. This is equivalent to calling concatenate(T),
 	 * where T is an <code>AffineTransform</code> represented by the following matrix:
-	 * 
+	 *
 	 * <pre>
 	 *          [   1    0    tx  ]
 	 *          [   0    1    ty  ]
 	 *          [   0    0    1   ]
 	 * </pre>
-	 * 
+	 *
 	 * @param tx
 	 *            the distance by which coordinates are translated in the X axis direction
 	 * @param ty
@@ -1223,7 +1223,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	// Utility methods to optimize rotate methods.
 	// These tables translate the flags during predictable quadrant
 	// rotations where the shear and scale values are swapped and negated.
-	private static final int rot90conversion[] = {
+	private static final int[] rot90conversion = {
 	/* IDENTITY => */APPLY_SHEAR,
 	/* TRANSLATE (TR) => */APPLY_SHEAR | APPLY_TRANSLATE,
 	/* SCALE (SC) => */APPLY_SHEAR,
@@ -1287,16 +1287,16 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	/**
 	 * Concatenates this transform with a rotation transformation. This is equivalent to calling concatenate(R), where R
 	 * is an <code>AffineTransform</code> represented by the following matrix:
-	 * 
+	 *
 	 * <pre>
 	 *          [   cos(theta)    -sin(theta)    0   ]
 	 *          [   sin(theta)     cos(theta)    0   ]
 	 *          [       0              0         1   ]
 	 * </pre>
-	 * 
+	 *
 	 * Rotating by a positive angle theta rotates points on the positive X axis toward the positive Y axis. Note also
 	 * the discussion of <a href="#quadrantapproximation">Handling 90-Degree Rotations</a> above.
-	 * 
+	 *
 	 * @param theta
 	 *            the angle of rotation measured in radians
 	 * @since 1.2
@@ -1333,16 +1333,16 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * of the original anchor point (S3).
 	 * <p>
 	 * This operation is equivalent to the following sequence of calls:
-	 * 
+	 *
 	 * <pre>
 	 * translate(anchorx, anchory); // S3: final translation
 	 * rotate(theta); // S2: rotate around anchor
 	 * translate(-anchorx, -anchory); // S1: translate anchor to origin
 	 * </pre>
-	 * 
+	 *
 	 * Rotating by a positive angle theta rotates points on the positive X axis toward the positive Y axis. Note also
 	 * the discussion of <a href="#quadrantapproximation">Handling 90-Degree Rotations</a> above.
-	 * 
+	 *
 	 * @param theta
 	 *            the angle of rotation measured in radians
 	 * @param anchorx
@@ -1364,11 +1364,11 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * former positive X axis will subsequently align with the vector pointing from the origin to the specified vector
 	 * coordinates. If both <code>vecx</code> and <code>vecy</code> are 0.0, no additional rotation is added to this
 	 * transform. This operation is equivalent to calling:
-	 * 
+	 *
 	 * <pre>
 	 * rotate(Math.atan2(vecy, vecx));
 	 * </pre>
-	 * 
+	 *
 	 * @param vecx
 	 *            the X coordinate of the rotation vector
 	 * @param vecy
@@ -1411,11 +1411,11 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * rotation is such that coordinates along the former positive X axis will subsequently align with the vector
 	 * pointing from the origin to the specified vector coordinates. If both <code>vecx</code> and <code>vecy</code> are
 	 * 0.0, the transform is not modified in any way. This method is equivalent to calling:
-	 * 
+	 *
 	 * <pre>
 	 * rotate(Math.atan2(vecy, vecx), anchorx, anchory);
 	 * </pre>
-	 * 
+	 *
 	 * @param vecx
 	 *            the X coordinate of the rotation vector
 	 * @param vecy
@@ -1436,13 +1436,13 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	/**
 	 * Concatenates this transform with a transform that rotates coordinates by the specified number of quadrants. This
 	 * is equivalent to calling:
-	 * 
+	 *
 	 * <pre>
 	 * rotate(numquadrants * Math.PI / 2.0);
 	 * </pre>
-	 * 
+	 *
 	 * Rotating by a positive number of quadrants rotates points on the positive X axis toward the positive Y axis.
-	 * 
+	 *
 	 * @param numquadrants
 	 *            the number of 90 degree arcs to rotate by
 	 * @since 1.6
@@ -1468,13 +1468,13 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	/**
 	 * Concatenates this transform with a transform that rotates coordinates by the specified number of quadrants around
 	 * the specified anchor point. This method is equivalent to calling:
-	 * 
+	 *
 	 * <pre>
 	 * rotate(numquadrants * Math.PI / 2.0, anchorx, anchory);
 	 * </pre>
-	 * 
+	 *
 	 * Rotating by a positive number of quadrants rotates points on the positive X axis toward the positive Y axis.
-	 * 
+	 *
 	 * @param numquadrants
 	 *            the number of 90 degree arcs to rotate by
 	 * @param anchorx
@@ -1515,13 +1515,13 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	/**
 	 * Concatenates this transform with a scaling transformation. This is equivalent to calling concatenate(S), where S
 	 * is an <code>AffineTransform</code> represented by the following matrix:
-	 * 
+	 *
 	 * <pre>
 	 *          [   sx   0    0   ]
 	 *          [   0    sy   0   ]
 	 *          [   0    0    1   ]
 	 * </pre>
-	 * 
+	 *
 	 * @param sx
 	 *            the factor by which coordinates are scaled along the X axis direction
 	 * @param sy
@@ -1580,13 +1580,13 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	/**
 	 * Concatenates this transform with a shearing transformation. This is equivalent to calling concatenate(SH), where
 	 * SH is an <code>AffineTransform</code> represented by the following matrix:
-	 * 
+	 *
 	 * <pre>
 	 *          [   1   shx   0   ]
 	 *          [  shy   1    0   ]
 	 *          [   0    0    1   ]
 	 * </pre>
-	 * 
+	 *
 	 * @param shx
 	 *            the multiplier by which coordinates are shifted in the direction of the positive X axis as a factor of
 	 *            their Y coordinate
@@ -1648,7 +1648,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 
 	/**
 	 * Resets this transform to the Identity transform.
-	 * 
+	 *
 	 * @since 1.2
 	 */
 	public void setToIdentity() {
@@ -1660,13 +1660,13 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 
 	/**
 	 * Sets this transform to a translation transformation. The matrix representing this transform becomes:
-	 * 
+	 *
 	 * <pre>
 	 *          [   1    0    tx  ]
 	 *          [   0    1    ty  ]
 	 *          [   0    0    1   ]
 	 * </pre>
-	 * 
+	 *
 	 * @param tx
 	 *            the distance by which coordinates are translated in the X axis direction
 	 * @param ty
@@ -1691,16 +1691,16 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 
 	/**
 	 * Sets this transform to a rotation transformation. The matrix representing this transform becomes:
-	 * 
+	 *
 	 * <pre>
 	 *          [   cos(theta)    -sin(theta)    0   ]
 	 *          [   sin(theta)     cos(theta)    0   ]
 	 *          [       0              0         1   ]
 	 * </pre>
-	 * 
+	 *
 	 * Rotating by a positive angle theta rotates points on the positive X axis toward the positive Y axis. Note also
 	 * the discussion of <a href="#quadrantapproximation">Handling 90-Degree Rotations</a> above.
-	 * 
+	 *
 	 * @param theta
 	 *            the angle of rotation measured in radians
 	 * @since 1.2
@@ -1742,24 +1742,24 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * (S3).
 	 * <p>
 	 * This operation is equivalent to the following sequence of calls:
-	 * 
+	 *
 	 * <pre>
 	 * setToTranslation(anchorx, anchory); // S3: final translation
 	 * rotate(theta); // S2: rotate around anchor
 	 * translate(-anchorx, -anchory); // S1: translate anchor to origin
 	 * </pre>
-	 * 
+	 *
 	 * The matrix representing this transform becomes:
-	 * 
+	 *
 	 * <pre>
 	 *          [   cos(theta)    -sin(theta)    x-x*cos+y*sin  ]
 	 *          [   sin(theta)     cos(theta)    y-x*sin-y*cos  ]
 	 *          [       0              0               1        ]
 	 * </pre>
-	 * 
+	 *
 	 * Rotating by a positive angle theta rotates points on the positive X axis toward the positive Y axis. Note also
 	 * the discussion of <a href="#quadrantapproximation">Handling 90-Degree Rotations</a> above.
-	 * 
+	 *
 	 * @param theta
 	 *            the angle of rotation measured in radians
 	 * @param anchorx
@@ -1786,11 +1786,11 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * former positive X axis will subsequently align with the vector pointing from the origin to the specified vector
 	 * coordinates. If both <code>vecx</code> and <code>vecy</code> are 0.0, the transform is set to an identity
 	 * transform. This operation is equivalent to calling:
-	 * 
+	 *
 	 * <pre>
 	 * setToRotation(Math.atan2(vecy, vecx));
 	 * </pre>
-	 * 
+	 *
 	 * @param vecx
 	 *            the X coordinate of the rotation vector
 	 * @param vecy
@@ -1836,11 +1836,11 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * rotation is such that coordinates along the former positive X axis will subsequently align with the vector
 	 * pointing from the origin to the specified vector coordinates. If both <code>vecx</code> and <code>vecy</code> are
 	 * 0.0, the transform is set to an identity transform. This operation is equivalent to calling:
-	 * 
+	 *
 	 * <pre>
 	 * setToTranslation(Math.atan2(vecy, vecx), anchorx, anchory);
 	 * </pre>
-	 * 
+	 *
 	 * @param vecx
 	 *            the X coordinate of the rotation vector
 	 * @param vecy
@@ -1866,13 +1866,13 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	/**
 	 * Sets this transform to a rotation transformation that rotates coordinates by the specified number of quadrants.
 	 * This operation is equivalent to calling:
-	 * 
+	 *
 	 * <pre>
 	 * setToRotation(numquadrants * Math.PI / 2.0);
 	 * </pre>
-	 * 
+	 *
 	 * Rotating by a positive number of quadrants rotates points on the positive X axis toward the positive Y axis.
-	 * 
+	 *
 	 * @param numquadrants
 	 *            the number of 90 degree arcs to rotate by
 	 * @since 1.6
@@ -1927,13 +1927,13 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	/**
 	 * Sets this transform to a translated rotation transformation that rotates coordinates by the specified number of
 	 * quadrants around the specified anchor point. This operation is equivalent to calling:
-	 * 
+	 *
 	 * <pre>
 	 * setToRotation(numquadrants * Math.PI / 2.0, anchorx, anchory);
 	 * </pre>
-	 * 
+	 *
 	 * Rotating by a positive number of quadrants rotates points on the positive X axis toward the positive Y axis.
-	 * 
+	 *
 	 * @param numquadrants
 	 *            the number of 90 degree arcs to rotate by
 	 * @param anchorx
@@ -2006,13 +2006,13 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 
 	/**
 	 * Sets this transform to a scaling transformation. The matrix representing this transform becomes:
-	 * 
+	 *
 	 * <pre>
 	 *          [   sx   0    0   ]
 	 *          [   0    sy   0   ]
 	 *          [   0    0    1   ]
 	 * </pre>
-	 * 
+	 *
 	 * @param sx
 	 *            the factor by which coordinates are scaled along the X axis direction
 	 * @param sy
@@ -2037,13 +2037,13 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 
 	/**
 	 * Sets this transform to a shearing transformation. The matrix representing this transform becomes:
-	 * 
+	 *
 	 * <pre>
 	 *          [   1   shx   0   ]
 	 *          [  shy   1    0   ]
 	 *          [   0    0    1   ]
 	 * </pre>
-	 * 
+	 *
 	 * @param shx
 	 *            the multiplier by which coordinates are shifted in the direction of the positive X axis as a factor of
 	 *            their Y coordinate
@@ -2070,7 +2070,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 
 	/**
 	 * Sets this transform to a copy of the transform in the specified <code>AffineTransform</code> object.
-	 * 
+	 *
 	 * @param Tx
 	 *            the <code>AffineTransform</code> object from which to copy the transform
 	 * @since 1.2
@@ -2088,7 +2088,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 
 	/**
 	 * Sets this transform to the matrix specified by the 6 double precision values.
-	 * 
+	 *
 	 * @param m00
 	 *            the X coordinate scaling element of the 3x3 matrix
 	 * @param m10
@@ -2120,11 +2120,11 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * to first transforming p by <code>Tx</code> and then transforming the result by the original transform Cx like
 	 * this: Cx'(p) = Cx(Tx(p)) In matrix notation, if this transform Cx is represented by the matrix [this] and
 	 * <code>Tx</code> is represented by the matrix [Tx] then this method does the following:
-	 * 
+	 *
 	 * <pre>
 	 *          [this] = [this] x [Tx]
 	 * </pre>
-	 * 
+	 *
 	 * @param Tx
 	 *            the <code>AffineTransform</code> object to be concatenated with this <code>AffineTransform</code>
 	 *            object.
@@ -2328,11 +2328,11 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * transform Cx and then transforming the result by <code>Tx</code> like this: Cx'(p) = Tx(Cx(p)) In matrix
 	 * notation, if this transform Cx is represented by the matrix [this] and <code>Tx</code> is represented by the
 	 * matrix [Tx] then this method does the following:
-	 * 
+	 *
 	 * <pre>
 	 *          [this] = [Tx] x [this]
 	 * </pre>
-	 * 
+	 *
 	 * @param Tx
 	 *            the <code>AffineTransform</code> object to be concatenated with this <code>AffineTransform</code>
 	 *            object.
@@ -2545,7 +2545,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * that do not lie on the destination point or line will not have an inverse mapping. The
 	 * <code>getDeterminant</code> method can be used to determine if this transform has no inverse, in which case an
 	 * exception will be thrown if the <code>createInverse</code> method is called.
-	 * 
+	 *
 	 * @return a new <code>AffineTransform</code> object representing the inverse transformation.
 	 * @see #getDeterminant
 	 * @exception NoninvertibleTransformException
@@ -2611,7 +2611,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * that do not lie on the destination point or line will not have an inverse mapping. The
 	 * <code>getDeterminant</code> method can be used to determine if this transform has no inverse, in which case an
 	 * exception will be thrown if the <code>invert</code> method is called.
-	 * 
+	 *
 	 * @see #getDeterminant
 	 * @exception NoninvertibleTransformException
 	 *                if the matrix cannot be inverted.
@@ -2734,14 +2734,14 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 		}
 	}
 
-	/**
-	 * Transforms the specified <code>ptSrc</code> and stores the result in <code>ptDst</code>. If <code>ptDst</code> is
-	 * <code>null</code>, a new {@link Point2D} object is allocated and then the result of the transformation is stored
-	 * in this object. In either case, <code>ptDst</code>, which contains the transformed point, is returned for
-	 * convenience. If <code>ptSrc</code> and <code>ptDst</code> are the same object, the input point is correctly
-	 * overwritten with the transformed point.
-	 * 
-	 * @param ptSrc
+	/*
+	  Transforms the specified <code>ptSrc</code> and stores the result in <code>ptDst</code>. If <code>ptDst</code> is
+	  <code>null</code>, a new {@link Point2D} object is allocated and then the result of the transformation is stored
+	  in this object. In either case, <code>ptDst</code>, which contains the transformed point, is returned for
+	  convenience. If <code>ptSrc</code> and <code>ptDst</code> are the same object, the input point is correctly
+	  overwritten with the transformed point.
+
+	  @param ptSrc
 	 *            the specified <code>Point2D</code> to be transformed
 	 * @param ptDst
 	 *            the specified <code>Point2D</code> that stores the result of transforming <code>ptSrc</code>
@@ -2794,20 +2794,20 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	// /* NOTREACHED */
 	// }
 
-	/**
-	 * Transforms an array of point objects by this transform. If any element of the <code>ptDst</code> array is
-	 * <code>null</code>, a new <code>Point2D</code> object is allocated and stored into that element before storing the
-	 * results of the transformation.
-	 * <p>
-	 * Note that this method does not take any precautions to avoid problems caused by storing results into
-	 * <code>Point2D</code> objects that will be used as the source for calculations further down the source array. This
-	 * method does guarantee that if a specified <code>Point2D</code> object is both the source and destination for the
-	 * same single point transform operation then the results will not be stored until the calculations are complete to
-	 * avoid storing the results on top of the operands. If, however, the destination <code>Point2D</code> object for
-	 * one operation is the same object as the source <code>Point2D</code> object for another operation further down the
-	 * source array then the original coordinates in that point are overwritten before they can be converted.
-	 * 
-	 * @param ptSrc
+	/*
+	  Transforms an array of point objects by this transform. If any element of the <code>ptDst</code> array is
+	  <code>null</code>, a new <code>Point2D</code> object is allocated and stored into that element before storing the
+	  results of the transformation.
+	  <p>
+	  Note that this method does not take any precautions to avoid problems caused by storing results into
+	  <code>Point2D</code> objects that will be used as the source for calculations further down the source array. This
+	  method does guarantee that if a specified <code>Point2D</code> object is both the source and destination for the
+	  same single point transform operation then the results will not be stored until the calculations are complete to
+	  avoid storing the results on top of the operands. If, however, the destination <code>Point2D</code> object for
+	  one operation is the same object as the source <code>Point2D</code> object for another operation further down the
+	  source array then the original coordinates in that point are overwritten before they can be converted.
+
+	  @param ptSrc
 	 *            the array containing the source point objects
 	 * @param ptDst
 	 *            the array into which the transform point objects are returned
@@ -2879,7 +2879,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * This method ensures that no source coordinates are overwritten by a previous operation before they can be
 	 * transformed. The coordinates are stored in the arrays starting at the specified offset in the order
 	 * <code>[x0, y0, x1, y1, ..., xn, yn]</code>.
-	 * 
+	 *
 	 * @param srcPts
 	 *            the array containing the source point coordinates. Each point is stored as a pair of x,&nbsp;y
 	 *            coordinates.
@@ -3001,7 +3001,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * This method ensures that no source coordinates are overwritten by a previous operation before they can be
 	 * transformed. The coordinates are stored in the arrays starting at the indicated offset in the order
 	 * <code>[x0, y0, x1, y1, ..., xn, yn]</code>.
-	 * 
+	 *
 	 * @param srcPts
 	 *            the array containing the source point coordinates. Each point is stored as a pair of x,&nbsp;y
 	 *            coordinates.
@@ -3121,7 +3121,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * Transforms an array of floating point coordinates by this transform and stores the results into an array of
 	 * doubles. The coordinates are stored in the arrays starting at the specified offset in the order
 	 * <code>[x0, y0, x1, y1, ..., xn, yn]</code>.
-	 * 
+	 *
 	 * @param srcPts
 	 *            the array containing the source point coordinates. Each point is stored as a pair of x,&nbsp;y
 	 *            coordinates.
@@ -3229,7 +3229,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * Transforms an array of double precision coordinates by this transform and stores the results into an array of
 	 * floats. The coordinates are stored in the arrays starting at the specified offset in the order
 	 * <code>[x0, y0, x1, y1, ..., xn, yn]</code>.
-	 * 
+	 *
 	 * @param srcPts
 	 *            the array containing the source point coordinates. Each point is stored as a pair of x,&nbsp;y
 	 *            coordinates.
@@ -3333,14 +3333,14 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 		/* NOTREACHED */
 	}
 
-	/**
-	 * Inverse transforms the specified <code>ptSrc</code> and stores the result in <code>ptDst</code>. If
-	 * <code>ptDst</code> is <code>null</code>, a new <code>Point2D</code> object is allocated and then the result of
-	 * the transform is stored in this object. In either case, <code>ptDst</code>, which contains the transformed point,
-	 * is returned for convenience. If <code>ptSrc</code> and <code>ptDst</code> are the same object, the input point is
-	 * correctly overwritten with the transformed point.
-	 * 
-	 * @param ptSrc
+	/*
+	  Inverse transforms the specified <code>ptSrc</code> and stores the result in <code>ptDst</code>. If
+	  <code>ptDst</code> is <code>null</code>, a new <code>Point2D</code> object is allocated and then the result of
+	  the transform is stored in this object. In either case, <code>ptDst</code>, which contains the transformed point,
+	  is returned for convenience. If <code>ptSrc</code> and <code>ptDst</code> are the same object, the input point is
+	  correctly overwritten with the transformed point.
+
+	  @param ptSrc
 	 *            the point to be inverse transformed
 	 * @param ptDst
 	 *            the resulting transformed point
@@ -3416,7 +3416,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	 * results. This method ensures that no source coordinates are overwritten by a previous operation before they can
 	 * be transformed. The coordinates are stored in the arrays starting at the specified offset in the order
 	 * <code>[x0, y0, x1, y1, ..., xn, yn]</code>.
-	 * 
+	 *
 	 * @param srcPts
 	 *            the array containing the source point coordinates. Each point is stored as a pair of x,&nbsp;y
 	 *            coordinates.
@@ -3556,23 +3556,23 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 		/* NOTREACHED */
 	}
 
-	/**
-	 * Transforms the relative distance vector specified by <code>ptSrc</code> and stores the result in
-	 * <code>ptDst</code>. A relative distance vector is transformed without applying the translation components of the
-	 * affine transformation matrix using the following equations:
-	 * 
-	 * <pre>
-	 *  [  x' ]   [  m00  m01 (m02) ] [  x  ]   [ m00x + m01y ]
-	 *  [  y' ] = [  m10  m11 (m12) ] [  y  ] = [ m10x + m11y ]
-	 *  [ (1) ]   [  (0)  (0) ( 1 ) ] [ (1) ]   [     (1)     ]
-	 * </pre>
-	 * 
-	 * If <code>ptDst</code> is <code>null</code>, a new <code>Point2D</code> object is allocated and then the result of
-	 * the transform is stored in this object. In either case, <code>ptDst</code>, which contains the transformed point,
-	 * is returned for convenience. If <code>ptSrc</code> and <code>ptDst</code> are the same object, the input point is
-	 * correctly overwritten with the transformed point.
-	 * 
-	 * @param ptSrc
+	/*
+	  Transforms the relative distance vector specified by <code>ptSrc</code> and stores the result in
+	  <code>ptDst</code>. A relative distance vector is transformed without applying the translation components of the
+	  affine transformation matrix using the following equations:
+
+	  <pre>
+	   [  x' ]   [  m00  m01 (m02) ] [  x  ]   [ m00x + m01y ]
+	   [  y' ] = [  m10  m11 (m12) ] [  y  ] = [ m10x + m11y ]
+	   [ (1) ]   [  (0)  (0) ( 1 ) ] [ (1) ]   [     (1)     ]
+	  </pre>
+
+	  If <code>ptDst</code> is <code>null</code>, a new <code>Point2D</code> object is allocated and then the result of
+	  the transform is stored in this object. In either case, <code>ptDst</code>, which contains the transformed point,
+	  is returned for convenience. If <code>ptSrc</code> and <code>ptDst</code> are the same object, the input point is
+	  correctly overwritten with the transformed point.
+
+	  @param ptSrc
 	 *            the distance vector to be delta transformed
 	 * @param ptDst
 	 *            the resulting transformed distance vector
@@ -3618,18 +3618,18 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	/**
 	 * Transforms an array of relative distance vectors by this transform. A relative distance vector is transformed
 	 * without applying the translation components of the affine transformation matrix using the following equations:
-	 * 
+	 *
 	 * <pre>
 	 *  [  x' ]   [  m00  m01 (m02) ] [  x  ]   [ m00x + m01y ]
 	 *  [  y' ] = [  m10  m11 (m12) ] [  y  ] = [ m10x + m11y ]
 	 *  [ (1) ]   [  (0)  (0) ( 1 ) ] [ (1) ]   [     (1)     ]
 	 * </pre>
-	 * 
+	 *
 	 * The two coordinate array sections can be exactly the same or can be overlapping sections of the same array
 	 * without affecting the validity of the results. This method ensures that no source coordinates are overwritten by
 	 * a previous operation before they can be transformed. The coordinates are stored in the arrays starting at the
 	 * indicated offset in the order <code>[x0, y0, x1, y1, ..., xn, yn]</code>.
-	 * 
+	 *
 	 * @param srcPts
 	 *            the array containing the source distance vectors. Each vector is stored as a pair of relative
 	 *            x,&nbsp;y coordinates.
@@ -3706,10 +3706,10 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 		/* NOTREACHED */
 	}
 
-	/**
+	/*
 	 * Returns a new {@link Shape} object defined by the geometry of the specified <code>Shape</code> after it has been
 	 * transformed by this transform.
-	 * 
+	 *
 	 * @param pSrc
 	 *            the specified <code>Shape</code> object to be transformed by this transform.
 	 * @return a new <code>Shape</code> object that defines the geometry of the transformed <code>Shape</code>, or null
@@ -3731,10 +3731,11 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 
 	/**
 	 * Returns a <code>String</code> that represents the value of this {@link Object}.
-	 * 
+	 *
 	 * @return a <code>String</code> representing the value of this <code>Object</code>.
 	 * @since 1.2
 	 */
+	@NonNull
 	public String toString() {
 		return ("AffineTransform[[" + _matround(m00) + ", " + _matround(m01) + ", " + _matround(m02) + "], ["
 				+ _matround(m10) + ", " + _matround(m11) + ", " + _matround(m12) + "]]");
@@ -3742,7 +3743,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 
 	/**
 	 * Returns <code>true</code> if this <code>AffineTransform</code> is an identity transform.
-	 * 
+	 *
 	 * @return <code>true</code> if this <code>AffineTransform</code> is an identity transform; <code>false</code>
 	 *         otherwise.
 	 * @since 1.2
@@ -3753,10 +3754,11 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 
 	/**
 	 * Returns a copy of this <code>AffineTransform</code> object.
-	 * 
+	 *
 	 * @return an <code>Object</code> that is a copy of this <code>AffineTransform</code> object.
 	 * @since 1.2
 	 */
+	@NonNull
 	public Object clone() {
 		try {
 			return super.clone();
@@ -3768,7 +3770,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 
 	/**
 	 * Returns the hashcode for this transform.
-	 * 
+	 *
 	 * @return a hash code for this transform.
 	 * @since 1.2
 	 */
@@ -3785,7 +3787,7 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
 	/**
 	 * Returns <code>true</code> if this <code>AffineTransform</code> represents the same affine coordinate transform as
 	 * the specified argument.
-	 * 
+	 *
 	 * @param obj
 	 *            the <code>Object</code> to test for equality with this <code>AffineTransform</code>
 	 * @return <code>true</code> if <code>obj</code> equals this <code>AffineTransform</code> object; <code>false</code>

@@ -29,6 +29,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import androidx.annotation.NonNull;
+
 /**
  * <code>AudioFormat</code> is the class that specifies a particular arrangement of data in a sound stream. By examing
  * the information stored in the audio format, you can discover how to interpret the bits in the binary sound data.
@@ -58,7 +60,7 @@ import java.util.Map;
  * some other sorts of encodings a frame can contain a bundle of compressed data for a whole series of samples, as well
  * as additional, non-sample data. For such encodings, the sample rate and sample size refer to the data after it is
  * decoded into PCM, and so they are completely different from the frame rate and frame size.
- * 
+ *
  * <p>
  * An <code>AudioFormat</code> object can include a set of properties. A property is a pair of key and value: the key is
  * of type <code>String</code>, the associated property value is an arbitrary object. Properties specify additional
@@ -67,10 +69,10 @@ import java.util.Map;
  * the {@link #matches(AudioFormat)} method. However, methods which rely on the installed service providers, like
  * {@link AudioSystem#isConversionSupported (AudioFormat, AudioFormat) isConversionSupported} may consider properties,
  * depending on the respective service provider implementation.
- * 
+ *
  * <p>
  * The following table lists some common properties which service providers should use, if applicable:
- * 
+ *
  * <table border=0>
  * <tr>
  * <th>Property key</th>
@@ -93,11 +95,11 @@ import java.util.Map;
  * <td>encoding/conversion quality, 1..100</td>
  * </tr>
  * </table>
- * 
+ *
  * <p>
  * Vendors of service providers (plugins) are encouraged to seek information about other already established properties
  * in third party plugins, and follow the same conventions.
- * 
+ *
  * @author Kara Kytle
  * @author Florian Bomers
  * @see DataLine#getFormat
@@ -151,7 +153,7 @@ public class AudioFormat {
 	/**
 	 * Constructs an <code>AudioFormat</code> with the given parameters. The encoding specifies the convention used to
 	 * represent the data. The other parameters are further explained in the {@link AudioFormat class description}.
-	 * 
+	 *
 	 * @param encoding
 	 *            the audio encoding technique
 	 * @param sampleRate
@@ -184,7 +186,7 @@ public class AudioFormat {
 	/**
 	 * Constructs an <code>AudioFormat</code> with the given parameters. The encoding specifies the convention used to
 	 * represent the data. The other parameters are further explained in the {@link AudioFormat class description}.
-	 * 
+	 *
 	 * @param encoding
 	 *            the audio encoding technique
 	 * @param sampleRate
@@ -202,20 +204,20 @@ public class AudioFormat {
 	 *            means little-endian)
 	 * @param properties
 	 *            a <code>Map&lt;String,Object&gt;</code> object containing format properties
-	 * 
+	 *
 	 * @since 1.5
 	 */
 	public AudioFormat(Encoding encoding, float sampleRate, int sampleSizeInBits, int channels, int frameSize,
 			float frameRate, boolean bigEndian, Map<String, Object> properties) {
 		this(encoding, sampleRate, sampleSizeInBits, channels, frameSize, frameRate, bigEndian);
-		this.properties = new HashMap<String, Object>(properties);
+		this.properties = new HashMap<>(properties);
 	}
 
 	/**
 	 * Constructs an <code>AudioFormat</code> with a linear PCM encoding and the given parameters. The frame size is set
 	 * to the number of bytes required to contain one sample from each channel, and the frame rate is set to the sample
 	 * rate.
-	 * 
+	 *
 	 * @param sampleRate
 	 *            the number of samples per second
 	 * @param sampleSizeInBits
@@ -241,7 +243,7 @@ public class AudioFormat {
 
 	/**
 	 * Obtains the type of encoding for sounds in this format.
-	 * 
+	 *
 	 * @return the encoding type
 	 * @see Encoding#PCM_SIGNED
 	 * @see Encoding#PCM_UNSIGNED
@@ -261,9 +263,9 @@ public class AudioFormat {
 	 * <code>AudioSystem.NOT_SPECIFIED</code> means that any sample rate is acceptable.
 	 * <code>AudioSystem.NOT_SPECIFIED</code> is also returned when the sample rate is not defined for this audio
 	 * format.
-	 * 
+	 *
 	 * @return the number of samples per second, or <code>AudioSystem.NOT_SPECIFIED</code>
-	 * 
+	 *
 	 * @see #getFrameRate()
 	 * @see AudioSystem#NOT_SPECIFIED
 	 */
@@ -280,9 +282,9 @@ public class AudioFormat {
 	 * <code>AudioSystem.NOT_SPECIFIED</code> means that any sample size is acceptable.
 	 * <code>AudioSystem.NOT_SPECIFIED</code> is also returned when the sample size is not defined for this audio
 	 * format.
-	 * 
+	 *
 	 * @return the number of bits in each sample, or <code>AudioSystem.NOT_SPECIFIED</code>
-	 * 
+	 *
 	 * @see #getFrameSize()
 	 * @see AudioSystem#NOT_SPECIFIED
 	 */
@@ -296,9 +298,9 @@ public class AudioFormat {
 	 * {@link AudioSystem#isConversionSupported(AudioFormat, AudioFormat) AudioSystem.isConversionSupported}) or
 	 * capabilities (e.g. {@link DataLine.Info#getFormats() DataLine.Info.getFormats}), a return value of
 	 * <code>AudioSystem.NOT_SPECIFIED</code> means that any (positive) number of channels is acceptable.
-	 * 
+	 *
 	 * @return The number of channels (1 for mono, 2 for stereo, etc.), or <code>AudioSystem.NOT_SPECIFIED</code>
-	 * 
+	 *
 	 * @see AudioSystem#NOT_SPECIFIED
 	 */
 	public int getChannels() {
@@ -312,9 +314,9 @@ public class AudioFormat {
 	 * capabilities (e.g. {@link DataLine.Info#getFormats() DataLine.Info.getFormats}), a frame size of
 	 * <code>AudioSystem.NOT_SPECIFIED</code> means that any frame size is acceptable.
 	 * <code>AudioSystem.NOT_SPECIFIED</code> is also returned when the frame size is not defined for this audio format.
-	 * 
+	 *
 	 * @return the number of bytes per frame, or <code>AudioSystem.NOT_SPECIFIED</code>
-	 * 
+	 *
 	 * @see #getSampleSizeInBits()
 	 * @see AudioSystem#NOT_SPECIFIED
 	 */
@@ -329,9 +331,9 @@ public class AudioFormat {
 	 * capabilities (e.g. {@link DataLine.Info#getFormats() DataLine.Info.getFormats}), a frame rate of
 	 * <code>AudioSystem.NOT_SPECIFIED</code> means that any frame rate is acceptable.
 	 * <code>AudioSystem.NOT_SPECIFIED</code> is also returned when the frame rate is not defined for this audio format.
-	 * 
+	 *
 	 * @return the number of frames per second, or <code>AudioSystem.NOT_SPECIFIED</code>
-	 * 
+	 *
 	 * @see #getSampleRate()
 	 * @see AudioSystem#NOT_SPECIFIED
 	 */
@@ -343,7 +345,7 @@ public class AudioFormat {
 	/**
 	 * Indicates whether the audio data is stored in big-endian or little-endian byte order. If the sample size is not
 	 * more than one byte, the return value is irrelevant.
-	 * 
+	 *
 	 * @return <code>true</code> if the data is stored in big-endian byte order, <code>false</code> if little-endian
 	 */
 	public boolean isBigEndian() {
@@ -354,10 +356,10 @@ public class AudioFormat {
 	/**
 	 * Obtain an unmodifiable map of properties. The concept of properties is further explained in the
 	 * {@link AudioFileFormat class description}.
-	 * 
+	 *
 	 * @return a <code>Map&lt;String,Object&gt;</code> object containing all properties. If no properties are
 	 *         recognized, an empty map is returned.
-	 * 
+	 *
 	 * @see #getProperty(String)
 	 * @since 1.5
 	 */
@@ -365,7 +367,7 @@ public class AudioFormat {
 	public Map<String, Object> properties() {
 		Map<String, Object> ret;
 		if (properties == null) {
-			ret = new HashMap<String, Object>(0);
+			ret = new HashMap<>(0);
 		} else {
 			ret = (Map<String, Object>) (properties.clone());
 		}
@@ -375,14 +377,14 @@ public class AudioFormat {
 	/**
 	 * Obtain the property value specified by the key. The concept of properties is further explained in the
 	 * {@link AudioFileFormat class description}.
-	 * 
+	 *
 	 * <p>
 	 * If the specified property is not defined for a particular file format, this method returns <code>null</code>.
-	 * 
+	 *
 	 * @param key
 	 *            the key of the desired property
 	 * @return the value of the property with the specified key, or <code>null</code> if the property does not exist.
-	 * 
+	 *
 	 * @see #properties()
 	 * @since 1.5
 	 */
@@ -400,7 +402,7 @@ public class AudioFormat {
 	 * <code>AudioSystem.NOT_SPECIFIED</code>, which any sample rate will match. The frame rates must similarly be
 	 * equal, unless the specified format has the frame rate value <code>AudioSystem.NOT_SPECIFIED</code>. The byte
 	 * order (big-endian or little-endian) must match if the sample size is greater than one byte.
-	 * 
+	 *
 	 * @param format
 	 *            format to test for match
 	 * @return <code>true</code> if this format matches the one specified, <code>false</code> otherwise.
@@ -425,9 +427,10 @@ public class AudioFormat {
 	/**
 	 * Returns a string that describes the format, such as: "PCM SIGNED 22050 Hz 16 bit mono big-endian". The contents
 	 * of the string may vary between implementations of Java Sound.
-	 * 
+	 *
 	 * @return a string that describes the format parameters
 	 */
+	@NonNull
 	public String toString() {
 		String sEncoding = "";
 		if (getEncoding() != null) {
@@ -509,10 +512,10 @@ public class AudioFormat {
 	 * The <code>Encoding</code> class is static, so that all <code>AudioFormat</code> objects that have the same
 	 * encoding will refer to the same object (rather than different instances of the same class). This allows matches
 	 * to be made by checking that two format's encodings are equal.
-	 * 
+	 *
 	 * @see AudioFormat
 	 * @see javax.sound.sampled.spi.FormatConversionProvider
-	 * 
+	 *
 	 * @author Kara Kytle
 	 * @since 1.3
 	 */
@@ -551,7 +554,7 @@ public class AudioFormat {
 
 		/**
 		 * Constructs a new encoding.
-		 * 
+		 *
 		 * @param name
 		 *            the name of the new type of encoding
 		 */
@@ -588,9 +591,10 @@ public class AudioFormat {
 		 * Provides the <code>String</code> representation of the encoding. This <code>String</code> is the same name
 		 * that was passed to the constructor. For the predefined encodings, the name is similar to the encoding's
 		 * variable (field) name. For example, <code>PCM_SIGNED.toString()</code> returns the name "pcm_signed".
-		 * 
+		 *
 		 * @return the encoding name
 		 */
+		@NonNull
 		public final String toString() {
 			return name;
 		}

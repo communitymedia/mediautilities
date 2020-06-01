@@ -25,6 +25,8 @@ import java.io.OutputStream;
 
 import com.bric.io.GuardedOutputStream;
 
+import androidx.annotation.NonNull;
+
 /**
  * As samples are added to a media, they are collected into chunks that allow optimized data access. A chunk contains
  * one or more samples. Chunks in a media may have different sizes, and the samples within a chunk may have different
@@ -109,6 +111,7 @@ public class SampleToChunkAtom extends LeafAtom {
 		}
 	}
 
+	@NonNull
 	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
@@ -171,6 +174,7 @@ class SampleToChunkEntry {
 		sampleDescriptionID = Atom.read32Int(in);
 	}
 
+	@NonNull
 	@Override
 	public String toString() {
 		return "[ " + firstChunk + ", " + samplesPerChunk + ", " + sampleDescriptionID + "]";

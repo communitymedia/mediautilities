@@ -20,9 +20,11 @@
 
 package net.javazoom.jl.decoder;
 
+import androidx.annotation.NonNull;
+
 /**
  * The <code>Decoder</code> class encapsulates the details of decoding an MPEG audio frame.
- * 
+ *
  * @author MDM
  * @version 0.0.7 12/12/99
  * @since 0.0.5
@@ -30,8 +32,8 @@ package net.javazoom.jl.decoder;
 public class Decoder implements DecoderErrors {
 	static private final Params DEFAULT_PARAMS = new Params();
 
-	/**
-	 * The Bistream from which the MPEG audio frames are read.
+	/*
+	  The Bistream from which the MPEG audio frames are read.
 	 */
 	// private Bitstream stream;
 
@@ -76,8 +78,8 @@ public class Decoder implements DecoderErrors {
 
 	/**
 	 * Creates a new <code>Decoder</code> instance with default parameters.
-	 * 
-	 * @param params The <code>Params</code> instance that describes the customizable aspects of the decoder.
+	 *
+	 * @param params0 The <code>Params</code> instance that describes the customizable aspects of the decoder.
 	 */
 	public Decoder(Params params0) {
 		if (params0 == null)
@@ -112,10 +114,10 @@ public class Decoder implements DecoderErrors {
 
 	/**
 	 * Decodes one frame from an MPEG audio bitstream.
-	 * 
+	 *
 	 * @param header The header describing the frame to decode.
-	 * @param bitstream The bistream that provides the bits for the body of the frame.
-	 * 
+	 * @param stream The bitstream that provides the bits for the body of the frame.
+	 *
 	 * @return A SampleBuffer containing the decoded samples.
 	 */
 	public Obuffer decodeFrame(Header header, Bitstream stream) throws DecoderException {
@@ -146,8 +148,8 @@ public class Decoder implements DecoderErrors {
 	/**
 	 * Retrieves the sample frequency of the PCM samples output by this decoder. This typically corresponds to the
 	 * sample rate encoded in the MPEG audio stream.
-	 * 
-	 * @param the sample rate (in Hz) of the samples written to the output buffer when decoding.
+	 *
+	 * @return the sample rate (in Hz) of the samples written to the output buffer when decoding.
 	 */
 	public int getOutputFrequency() {
 		return outputFrequency;
@@ -156,9 +158,9 @@ public class Decoder implements DecoderErrors {
 	/**
 	 * Retrieves the number of channels of PCM samples output by this decoder. This usually corresponds to the number of
 	 * channels in the MPEG audio stream, although it may differ.
-	 * 
+	 *
 	 * @return The number of output channels in the decoded samples: 1 for mono, or 2 for stereo.
-	 * 
+	 *
 	 */
 	public int getOutputChannels() {
 		return outputChannels;
@@ -169,7 +171,7 @@ public class Decoder implements DecoderErrors {
 	 * can be used to help calculate the size of other buffers whose size is based upon the number of samples written to
 	 * the output buffer. NB: this is an upper bound and fewer samples may actually be written, depending upon the
 	 * sample rate and number of channels.
-	 * 
+	 *
 	 * @return The maximum number of samples that are written to the output buffer when decoding a single frame of MPEG
 	 *         audio.
 	 */
@@ -262,6 +264,7 @@ public class Decoder implements DecoderErrors {
 		public Params() {
 		}
 
+		@NonNull
 		public Object clone() {
 			try {
 				return super.clone();
@@ -287,11 +290,11 @@ public class Decoder implements DecoderErrors {
 		 * The <code>Equalizer</code> instance returned cannot be changed in real time to affect the decoder output as
 		 * it is used only to initialize the decoders EQ settings. To affect the decoder's output in realtime, use the
 		 * Equalizer returned from the getEqualizer() method on the decoder.
-		 * 
+		 *
 		 * @return The <code>Equalizer</code> used to initialize the EQ settings of the decoder.
 		 */
 		public Equalizer getInitialEqualizerSettings() {
 			return equalizer;
 		}
-	};
+	}
 }

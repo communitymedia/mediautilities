@@ -1,19 +1,19 @@
 /*
  * 11/19/04	 1.0 moved to LGPL.
- * 
+ *
  * 18/06/01  Michael Scheerer,  Fixed bugs which causes
- *           negative indexes in method huffmann_decode and in method 
+ *           negative indexes in method huffmann_decode and in method
  *           dequanisize_sample.
  *
  * 16/07/01  Michael Scheerer, Catched a bug in method
  *           huffmann_decode, which causes an outOfIndexException.
  *           Cause : Indexnumber of 24 at SfBandIndex,
- *           which has only a length of 22. I have simply and dirty 
+ *           which has only a length of 22. I have simply and dirty
  *           fixed the index to <= 22, because I'm not really be able
- *           to fix the bug. The Indexnumber is taken from the MP3 
- *           file and the origin Ma-Player with the same code works 
- *           well.      
- * 
+ *           to fix the bug. The Indexnumber is taken from the MP3
+ *           file and the origin Ma-Player with the same code works
+ *           well.
+ *
  * 02/19/99  Java Conversion by E.B, javalayer@javazoom.net
  *-----------------------------------------------------------------------
  *   This program is free software; you can redistribute it and/or modify
@@ -36,7 +36,7 @@ package net.javazoom.jl.decoder;
 
 /**
  * Class Implementing Layer 3 Decoder.
- * 
+ *
  * @since 0.0
  */
 final class LayerIIIDecoder implements FrameDecoder {
@@ -841,7 +841,7 @@ final class LayerIIIDecoder implements FrameDecoder {
 	/**
 	 *
 	 */
-	private void dequantize_sample(float xr[][], int ch, int gr) {
+	private void dequantize_sample(float[][] xr, int ch, int gr) {
 		gr_info_s gr_info = (si.ch[ch].gr[gr]);
 		int cb = 0;
 		int next_cb_boundary;
@@ -995,7 +995,7 @@ final class LayerIIIDecoder implements FrameDecoder {
 	/**
 	 *
 	 */
-	private void reorder(float xr[][], int ch, int gr) {
+	private void reorder(float[][] xr, int ch, int gr) {
 		gr_info_s gr_info = (si.ch[ch].gr[gr]);
 		int freq, freq3;
 		int index;
@@ -1810,7 +1810,7 @@ final class LayerIIIDecoder implements FrameDecoder {
 	// This may be adjusted for performance without any problems.
 	// public static final int POW_TABLE_LIMIT=512;
 
-	/************************************************************/
+	/**********************************************************/
 	/* L3TABLE */
 	/************************************************************/
 
@@ -1910,14 +1910,14 @@ final class LayerIIIDecoder implements FrameDecoder {
 	// }
 	// }
 
-	private static final int slen[][] = { { 0, 0, 0, 0, 3, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4 },
+	private static final int[][] slen = { { 0, 0, 0, 0, 3, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4 },
 			{ 0, 1, 2, 3, 0, 1, 2, 3, 1, 2, 3, 1, 2, 3, 2, 3 } };
 
-	public static final int pretab[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 3, 3, 3, 2, 0 };
+	public static final int[] pretab = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 3, 3, 3, 2, 0 };
 
 	private SBI[] sfBandIndex; // Init in the constructor.
 
-	public static final float two_to_negative_half_pow[] = { 1.0000000000E+00f, 7.0710678119E-01f, 5.0000000000E-01f,
+	public static final float[] two_to_negative_half_pow = { 1.0000000000E+00f, 7.0710678119E-01f, 5.0000000000E-01f,
 			3.5355339059E-01f, 2.5000000000E-01f, 1.7677669530E-01f, 1.2500000000E-01f, 8.8388347648E-02f,
 			6.2500000000E-02f, 4.4194173824E-02f, 3.1250000000E-02f, 2.2097086912E-02f, 1.5625000000E-02f,
 			1.1048543456E-02f, 7.8125000000E-03f, 5.5242717280E-03f, 3.9062500000E-03f, 2.7621358640E-03f,
@@ -1932,7 +1932,7 @@ final class LayerIIIDecoder implements FrameDecoder {
 			1.8626451492E-09f, 1.3170890160E-09f, 9.3132257462E-10f, 6.5854450798E-10f, 4.6566128731E-10f,
 			3.2927225399E-10f };
 
-	public static final float t_43[] = create_t_43();
+	public static final float[] t_43 = create_t_43();
 
 	static private float[] create_t_43() {
 		float[] t43 = new float[8192];
@@ -1944,7 +1944,7 @@ final class LayerIIIDecoder implements FrameDecoder {
 		return t43;
 	}
 
-	public static final float io[][] = {
+	public static final float[][] io = {
 			{ 1.0000000000E+00f, 8.4089641526E-01f, 7.0710678119E-01f, 5.9460355751E-01f, 5.0000000001E-01f,
 					4.2044820763E-01f, 3.5355339060E-01f, 2.9730177876E-01f, 2.5000000001E-01f, 2.1022410382E-01f,
 					1.7677669530E-01f, 1.4865088938E-01f, 1.2500000000E-01f, 1.0511205191E-01f, 8.8388347652E-02f,
@@ -1960,7 +1960,7 @@ final class LayerIIIDecoder implements FrameDecoder {
 					1.7263349151E-04f, 1.2207031251E-04f, 8.6316745755E-05f, 6.1035156254E-05f, 4.3158372878E-05f,
 					3.0517578127E-05f, 2.1579186439E-05f } };
 
-	public static final float TAN12[] = { 0.0f, 0.26794919f, 0.57735027f, 1.0f, 1.73205081f, 3.73205081f,
+	public static final float[] TAN12 = { 0.0f, 0.26794919f, 0.57735027f, 1.0f, 1.73205081f, 3.73205081f,
 			9.9999999e10f, -3.73205081f, -1.73205081f, -1.0f, -0.57735027f, -0.26794919f, 0.0f, 0.26794919f,
 			0.57735027f, 1.0f };
 
@@ -2007,7 +2007,7 @@ final class LayerIIIDecoder implements FrameDecoder {
 	 * 12, 13, 14, 15, 16, 17, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 0, 1, 2, 3, 4, 5, 6, 7, 8,
 	 * 9, 10, 11, 12, 13, 14, 15, 16, 17 };
 	 */
-	private static/* final */int reorder_table[][]/* = loadReorderTable() */; // SZD: will be generated on demand
+	private static/* final */ int[][] reorder_table/* = loadReorderTable() */; // SZD: will be generated on demand
 
 	/**
 	 * Loads the data for the reorder
@@ -2018,9 +2018,9 @@ final class LayerIIIDecoder implements FrameDecoder {
 	 * 6); return (int[][])o; } catch (IOException ex) { throw new ExceptionInInitializerError(ex); } }
 	 */
 
-	static int[] reorder(int scalefac_band[]) { // SZD: converted from LAME
+	static int[] reorder(int[] scalefac_band) { // SZD: converted from LAME
 		int j = 0;
-		int ix[] = new int[576];
+		int[] ix = new int[576];
 		for (int sfb = 0; sfb < 13; sfb++) {
 			int start = scalefac_band[sfb];
 			int end = scalefac_band[sfb + 1];
@@ -2230,28 +2230,28 @@ final class LayerIIIDecoder implements FrameDecoder {
 	 * 570,547,559,571,548,560,572,549,561,573,550,562,574,551,563,575} };
 	 */
 
-	private static final float cs[] = { 0.857492925712f, 0.881741997318f, 0.949628649103f, 0.983314592492f,
+	private static final float[] cs = { 0.857492925712f, 0.881741997318f, 0.949628649103f, 0.983314592492f,
 			0.995517816065f, 0.999160558175f, 0.999899195243f, 0.999993155067f };
 
-	private static final float ca[] = { -0.5144957554270f, -0.4717319685650f, -0.3133774542040f, -0.1819131996110f,
+	private static final float[] ca = { -0.5144957554270f, -0.4717319685650f, -0.3133774542040f, -0.1819131996110f,
 			-0.0945741925262f, -0.0409655828852f, -0.0141985685725f, -0.00369997467375f };
 
-	/************************************************************/
+	/**********************************************************/
 	/* END OF L3TABLE */
-	/************************************************************/
+	/**********************************************************/
 
-	/************************************************************/
+	/**********************************************************/
 	/* L3TYPE */
-	/************************************************************/
+	/**********************************************************/
 
-	/***************************************************************/
+	/*************************************************************/
 	/* END OF L3TYPE */
-	/***************************************************************/
+	/*************************************************************/
 
-	/***************************************************************/
+	/*************************************************************/
 	/* INV_MDCT */
 	/***************************************************************/
-	public static final float win[][] = {
+	public static final float[][] win = {
 			{ -1.6141214951E-02f, -5.3603178919E-02f, -1.0070713296E-01f, -1.6280817573E-01f, -4.9999999679E-01f,
 					-3.8388735032E-01f, -6.2061144372E-01f, -1.1659756083E+00f, -3.8720752656E+00f, -4.2256286556E+00f,
 					-1.5195289984E+00f, -9.7416483388E-01f, -7.3744074053E-01f, -1.2071067773E+00f, -5.1636156596E-01f,
@@ -2288,7 +2288,7 @@ final class LayerIIIDecoder implements FrameDecoder {
 					-1.2103922149E-01f, -2.0710679058E-01f, -8.4752577594E-02f, -6.4157525656E-02f, -4.1131172614E-02f,
 					-1.4790705759E-02f } };
 
-	/***************************************************************/
+	/*************************************************************/
 	/* END OF INV_MDCT */
 	/***************************************************************/
 
@@ -2309,7 +2309,7 @@ final class LayerIIIDecoder implements FrameDecoder {
 
 	public Sftable sftable;
 
-	public static final int nr_of_sfb_block[][][] = { { { 6, 5, 5, 5 }, { 9, 9, 9, 9 }, { 6, 9, 9, 9 } },
+	public static final int[][][] nr_of_sfb_block = { { { 6, 5, 5, 5 }, { 9, 9, 9, 9 }, { 6, 9, 9, 9 } },
 			{ { 6, 5, 7, 3 }, { 9, 9, 12, 6 }, { 6, 9, 12, 6 } },
 			{ { 11, 10, 0, 0 }, { 18, 18, 0, 0 }, { 15, 18, 0, 0 } },
 			{ { 7, 7, 7, 0 }, { 12, 12, 12, 0 }, { 6, 15, 12, 0 } },

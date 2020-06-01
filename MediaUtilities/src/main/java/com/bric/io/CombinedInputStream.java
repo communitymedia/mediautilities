@@ -6,14 +6,14 @@
  * Copyright (c) 2011 by Jeremy Wood.
  * All rights reserved.
  *
- * The copyright of this software is owned by Jeremy Wood. 
- * You may not use, copy or modify this software, except in  
- * accordance with the license agreement you entered into with  
+ * The copyright of this software is owned by Jeremy Wood.
+ * You may not use, copy or modify this software, except in
+ * accordance with the license agreement you entered into with
  * Jeremy Wood. For details see accompanying license terms.
- * 
+ *
  * This software is probably, but not necessarily, discussed here:
  * http://javagraphics.java.net/
- * 
+ *
  * That site should also contain the most recent official version
  * of this software.  (See the SVN repository for more details.)
  */
@@ -21,6 +21,8 @@ package com.bric.io;
 
 import java.io.IOException;
 import java.io.InputStream;
+
+import androidx.annotation.NonNull;
 
 /**
  * This is a combination of multiple <code>InputStreams</code>. One the first stream is finished, the next stream is
@@ -116,7 +118,7 @@ public class CombinedInputStream extends InputStream {
 	}
 
 	@Override
-	public int read(byte[] b, int off, int len) throws IOException {
+	public int read(@NonNull byte[] b, int off, int len) throws IOException {
 		if (inputs.length == 0)
 			return -1;
 
@@ -129,7 +131,7 @@ public class CombinedInputStream extends InputStream {
 	}
 
 	@Override
-	public int read(byte[] b) throws IOException {
+	public int read(@NonNull byte[] b) throws IOException {
 		return read(b, 0, b.length);
 	}
 

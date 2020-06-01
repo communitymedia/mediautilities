@@ -6,14 +6,14 @@
  * Copyright (c) 2011 by Jeremy Wood.
  * All rights reserved.
  *
- * The copyright of this software is owned by Jeremy Wood. 
- * You may not use, copy or modify this software, except in  
- * accordance with the license agreement you entered into with  
+ * The copyright of this software is owned by Jeremy Wood.
+ * You may not use, copy or modify this software, except in
+ * accordance with the license agreement you entered into with
  * Jeremy Wood. For details see accompanying license terms.
- * 
+ *
  * This software is probably, but not necessarily, discussed here:
  * http://javagraphics.java.net/
- * 
+ *
  * That site should also contain the most recent official version
  * of this software.  (See the SVN repository for more details.)
  */
@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import com.bric.io.GuardedOutputStream;
+
+import androidx.annotation.NonNull;
 
 /**
  * This is not a public class because I expect to make some significant changes to this project in the next year.
@@ -73,6 +75,7 @@ public class VideoMediaInformationHeaderAtom extends LeafAtom {
 		write48Int(out, opColor);
 	}
 
+	@NonNull
 	@Override
 	public String toString() {
 		return "VideoMediaInformationHeaderAtom[ version=" + version + ", " + "flags=" + flags + ", " + "graphicsMode="

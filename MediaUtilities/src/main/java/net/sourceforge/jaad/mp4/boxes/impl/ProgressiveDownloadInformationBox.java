@@ -1,16 +1,16 @@
 /*
  *  Copyright (C) 2011 in-somnia
- * 
+ *
  *  This file is part of JAAD.
- * 
- *  JAAD is free software; you can redistribute it and/or modify it 
- *  under the terms of the GNU Lesser General Public License as 
- *  published by the Free Software Foundation; either version 3 of the 
+ *
+ *  JAAD is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License as
+ *  published by the Free Software Foundation; either version 3 of the
  *  License, or (at your option) any later version.
  *
- *  JAAD is distributed in the hope that it will be useful, but WITHOUT 
- *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General 
+ *  JAAD is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General
  *  Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public
@@ -29,10 +29,10 @@ import net.sourceforge.jaad.mp4.boxes.FullBox;
  * The Progressive download information box aids the progressive download of an ISO file. The box contains pairs of
  * numbers (to the end of the box) specifying combinations of effective file download bitrate in units of bytes/sec and
  * a suggested initial playback delay in units of milliseconds.
- * 
+ *
  * The download rate can be estimated from the download rate and obtain an upper estimate for a suitable initial delay
  * by linear interpolation between pairs, or by extrapolation from the first or last entry.
- * 
+ *
  * @author in-somnia
  */
 public class ProgressiveDownloadInformationBox extends FullBox {
@@ -41,7 +41,7 @@ public class ProgressiveDownloadInformationBox extends FullBox {
 
 	public ProgressiveDownloadInformationBox() {
 		super("Progressive Download Information Box");
-		pairs = new HashMap<Long, Long>();
+		pairs = new HashMap<>();
 	}
 
 	@Override
@@ -58,7 +58,7 @@ public class ProgressiveDownloadInformationBox extends FullBox {
 
 	/**
 	 * The map contains pairs of bitrates and playback delay.
-	 * 
+	 *
 	 * @return the information pairs
 	 */
 	public Map<Long, Long> getInformationPairs() {

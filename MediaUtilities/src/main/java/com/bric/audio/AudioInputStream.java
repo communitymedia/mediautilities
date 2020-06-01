@@ -28,6 +28,8 @@ package com.bric.audio;
 import java.io.IOException;
 import java.io.InputStream;
 
+import androidx.annotation.NonNull;
+
 /**
  * An audio input stream is an input stream with a specified audio format and length. The length is expressed in sample
  * frames, not bytes. Several methods are provided for reading a certain number of bytes from the stream, or an
@@ -42,11 +44,11 @@ import java.io.InputStream;
  * <li>write an external file from an audio input stream
  * <li>convert an audio input stream to a different audio format
  * </ul>
- * 
+ *
  * @author David Rivas
  * @author Kara Kytle
  * @author Florian Bomers
- * 
+ *
  * @see AudioSystem
  * @see Clip#open(AudioInputStream) Clip.open(AudioInputStream)
  * @since 1.3
@@ -107,7 +109,7 @@ public class AudioInputStream extends InputStream {
 	/**
 	 * Constructs an audio input stream that has the requested format and length in sample frames, using audio data from
 	 * the specified input stream.
-	 * 
+	 *
 	 * @param stream
 	 *            the stream on which this <code>AudioInputStream</code> object is based
 	 * @param format
@@ -137,7 +139,7 @@ public class AudioInputStream extends InputStream {
 	/**
 	 * Constructs an audio input stream that reads its data from the target data line indicated. The format of the
 	 * stream is the same as that of the target data line, and the length is AudioSystem#NOT_SPECIFIED.
-	 * 
+	 *
 	 * @param line
 	 *            the target data line from which this stream obtains its data.
 	 * @see AudioSystem#NOT_SPECIFIED
@@ -159,7 +161,7 @@ public class AudioInputStream extends InputStream {
 
 	/**
 	 * Obtains the audio format of the sound data in this audio input stream.
-	 * 
+	 *
 	 * @return an audio format object describing this stream's format
 	 */
 	public AudioFormat getFormat() {
@@ -168,7 +170,7 @@ public class AudioInputStream extends InputStream {
 
 	/**
 	 * Obtains the length of the stream, expressed in sample frames rather than bytes.
-	 * 
+	 *
 	 * @return the length in sample frames
 	 */
 	public long getFrameLength() {
@@ -178,7 +180,7 @@ public class AudioInputStream extends InputStream {
 	/**
 	 * Reads the next byte of data from the audio input stream. The audio input stream's frame size must be one byte, or
 	 * an <code>IOException</code> will be thrown.
-	 * 
+	 *
 	 * @return the next byte of data, or -1 if the end of the stream is reached
 	 * @throws IOException
 	 *             if an input or output error occurs
@@ -208,7 +210,7 @@ public class AudioInputStream extends InputStream {
 	 * This method will always read an integral number of frames. If the length of the array is not an integral number
 	 * of frames, a maximum of <code>b.length - (b.length % frameSize)
 	 * </code> bytes will be read.
-	 * 
+	 *
 	 * @param b
 	 *            the buffer into which the data is read
 	 * @return the total number of bytes read into the buffer, or -1 if there is no more data because the end of the
@@ -219,7 +221,7 @@ public class AudioInputStream extends InputStream {
 	 * @see #read()
 	 * @see #available
 	 */
-	public int read(byte[] b) throws IOException {
+	public int read(@NonNull byte[] b) throws IOException {
 		return read(b, 0, b.length);
 	}
 
@@ -230,7 +232,7 @@ public class AudioInputStream extends InputStream {
 	 * This method will always read an integral number of frames. If <code>len</code> does not specify an integral
 	 * number of frames, a maximum of <code>len - (len % frameSize)
 	 * </code> bytes will be read.
-	 * 
+	 *
 	 * @param b
 	 *            the buffer into which the data is read
 	 * @param off
@@ -246,7 +248,7 @@ public class AudioInputStream extends InputStream {
 	 * @see #skip
 	 * @see #available
 	 */
-	public int read(byte[] b, int off, int len) throws IOException {
+	public int read(@NonNull byte[] b, int off, int len) throws IOException {
 
 		// make sure we don't read fractions of a frame.
 		if ((len % frameSize) != 0) {
@@ -307,7 +309,7 @@ public class AudioInputStream extends InputStream {
 
 	/**
 	 * Skips over and discards a specified number of bytes from this audio input stream.
-	 * 
+	 *
 	 * @param n
 	 *            the requested number of bytes to be skipped
 	 * @return the actual number of bytes skipped
@@ -350,7 +352,7 @@ public class AudioInputStream extends InputStream {
 	 * blocking. This limit applies only to the next invocation of a <code>read</code> or <code>skip</code> method for
 	 * this audio input stream; the limit can vary each time these methods are invoked. Depending on the underlying
 	 * stream,an IOException may be thrown if this stream is closed.
-	 * 
+	 *
 	 * @return the number of bytes that can be read from this audio input stream without blocking
 	 * @throws IOException
 	 *             if an input or output error occurs
@@ -373,7 +375,7 @@ public class AudioInputStream extends InputStream {
 
 	/**
 	 * Closes this audio input stream and releases any system resources associated with the stream.
-	 * 
+	 *
 	 * @throws IOException
 	 *             if an input or output error occurs
 	 */
@@ -383,7 +385,7 @@ public class AudioInputStream extends InputStream {
 
 	/**
 	 * Marks the current position in this audio input stream.
-	 * 
+	 *
 	 * @param readlimit
 	 *            the maximum number of bytes that can be read before the mark position becomes invalid.
 	 * @see #reset
@@ -409,7 +411,7 @@ public class AudioInputStream extends InputStream {
 	/**
 	 * Repositions this audio input stream to the position it had at the time its <code>mark</code> method was last
 	 * invoked.
-	 * 
+	 *
 	 * @throws IOException
 	 *             if an input or output error occurs.
 	 * @see #mark
@@ -431,7 +433,7 @@ public class AudioInputStream extends InputStream {
 
 	/**
 	 * Tests whether this audio input stream supports the <code>mark</code> and <code>reset</code> methods.
-	 * 
+	 *
 	 * @return <code>true</code> if this stream supports the <code>mark</code> and <code>reset</code> methods;
 	 *         <code>false</code> otherwise
 	 * @see #mark
@@ -493,7 +495,7 @@ public class AudioInputStream extends InputStream {
 			return value;
 		}
 
-		public int read(byte[] b, int off, int len) throws IOException {
+		public int read(@NonNull byte[] b, int off, int len) throws IOException {
 			try {
 				return line.read(b, off, len);
 			} catch (IllegalArgumentException e) {

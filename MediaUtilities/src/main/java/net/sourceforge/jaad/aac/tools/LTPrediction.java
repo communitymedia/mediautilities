@@ -30,8 +30,6 @@ import net.sourceforge.jaad.aac.syntax.ICStream;
 
 import java.util.Arrays;
 
-import ac.robinson.util.AndroidUtilities;
-
 /**
  * Long-term prediction
  *

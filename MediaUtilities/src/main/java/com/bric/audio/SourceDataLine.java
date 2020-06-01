@@ -27,7 +27,7 @@ package com.bric.audio;
  * to the buffer without blocking is the difference between the buffer size and the amount of queued data. If the
  * delivery of audio output stops due to underflow, a <code>{@link LineEvent.Type#STOP STOP}</code> event is generated.
  * A <code>{@link LineEvent.Type#START START}</code> event is generated when the audio output resumes.
- * 
+ *
  * @author Kara Kytle
  * @version 1.20 03/12/19
  * @see Mixer
@@ -54,7 +54,7 @@ public interface SourceDataLine extends DataLine {
 	 * <p>
 	 * Note that some lines, once closed, cannot be reopened. Attempts to reopen such a line will always result in a
 	 * <code>LineUnavailableException</code>.
-	 * 
+	 *
 	 * @param format the desired audio format
 	 * @param bufferSize the desired buffer size
 	 * @throws LineUnavailableException if the line cannot be opened due to resource restrictions
@@ -62,7 +62,7 @@ public interface SourceDataLine extends DataLine {
 	 *             <code>format</code> is not fully specified or invalid
 	 * @throws IllegalStateException if the line is already open
 	 * @throws SecurityException if the line cannot be opened due to security restrictions
-	 * 
+	 *
 	 * @see #open(AudioFormat)
 	 * @see Line#open
 	 * @see Line#close
@@ -74,7 +74,7 @@ public interface SourceDataLine extends DataLine {
 	/**
 	 * Opens the line with the specified format, causing the line to acquire any required system resources and become
 	 * operational.
-	 * 
+	 *
 	 * <p>
 	 * The implementation chooses a buffer size, which is measured in bytes but which encompasses an integral number of
 	 * sample frames. The buffer size that the system has chosen may be queried by subsequently calling
@@ -88,13 +88,13 @@ public interface SourceDataLine extends DataLine {
 	 * <p>
 	 * Note that some lines, once closed, cannot be reopened. Attempts to reopen such a line will always result in a
 	 * <code>LineUnavailableException</code>.
-	 * 
+	 *
 	 * @param format the desired audio format
 	 * @throws LineUnavailableException if the line cannot be opened due to resource restrictions
 	 * @throws IllegalArgumentException if <code>format</code> is not fully specified or invalid
 	 * @throws IllegalStateException if the line is already open
 	 * @throws SecurityException if the line cannot be opened due to security restrictions
-	 * 
+	 *
 	 * @see #open(AudioFormat, int)
 	 * @see Line#open
 	 * @see Line#close
@@ -122,7 +122,7 @@ public interface SourceDataLine extends DataLine {
 	 * The return value will always meet this requirement. A request to write a number of bytes representing a
 	 * non-integral number of sample frames cannot be fulfilled and may result in an
 	 * <code>IllegalArgumentException</code>.
-	 * 
+	 *
 	 * @param b a byte array containing data to be written to the data line
 	 * @param len the length, in bytes, of the valid data in the array (in other words, the requested amount of data to
 	 *            write, in bytes)
@@ -132,17 +132,17 @@ public interface SourceDataLine extends DataLine {
 	 *             frames, or if <code>len</code> is negative
 	 * @throws ArrayIndexOutOfBoundsException if <code>off</code> is negative, or <code>off+len</code> is greater than
 	 *             the length of the array <code>b</code>.
-	 * 
+	 *
 	 * @see TargetDataLine#read
 	 * @see DataLine#available
 	 */
 	public int write(byte[] b, int off, int len);
 
-	/**
-	 * Obtains the number of sample frames of audio data that can be written to the mixer, via this data line, without
-	 * blocking. Note that the return value measures sample frames, not bytes.
-	 * 
-	 * @return the number of sample frames currently available for writing
+	/*
+	  Obtains the number of sample frames of audio data that can be written to the mixer, via this data line, without
+	  blocking. Note that the return value measures sample frames, not bytes.
+
+	  @return the number of sample frames currently available for writing
 	 * @see TargetDataLine#availableRead
 	 */
 	// public int availableWrite();

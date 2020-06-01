@@ -1,16 +1,16 @@
 /*
  *  Copyright (C) 2011 in-somnia
- * 
+ *
  *  This file is part of JAAD.
- * 
- *  JAAD is free software; you can redistribute it and/or modify it 
- *  under the terms of the GNU Lesser General Public License as 
- *  published by the Free Software Foundation; either version 3 of the 
+ *
+ *  JAAD is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License as
+ *  published by the Free Software Foundation; either version 3 of the
  *  License, or (at your option) any later version.
  *
- *  JAAD is distributed in the hope that it will be useful, but WITHOUT 
- *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General 
+ *  JAAD is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General
  *  Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public
@@ -19,10 +19,12 @@
  */
 package net.sourceforge.jaad.aac;
 
+import androidx.annotation.NonNull;
+
 /**
  * Different AAC profiles. The function <code>Decoder.canDecode</code> specifies if the decoder can handle a given
  * format. More precisely, the ISO standard calls these 'object types'.
- * 
+ *
  * @author in-somnia
  */
 public enum Profile {
@@ -41,7 +43,7 @@ public enum Profile {
 	/**
 	 * Returns a profile instance for the given index. If the index is not between 1 and 23 inclusive, UNKNOWN is
 	 * returned.
-	 * 
+	 *
 	 * @return a profile with the given index
 	 */
 	public static Profile forInt(int i) {
@@ -57,7 +59,7 @@ public enum Profile {
 	private final String descr;
 	private final boolean supported;
 
-	private Profile(int num, String descr, boolean supported) {
+	Profile(int num, String descr, boolean supported) {
 		this.num = num;
 		this.descr = descr;
 		this.supported = supported;
@@ -65,7 +67,7 @@ public enum Profile {
 
 	/**
 	 * Returns this profile's index between 1 and 23 or -1 if this is the <code>UNKNOWN</code> instance.
-	 * 
+	 *
 	 * @return the profile's index
 	 */
 	public int getIndex() {
@@ -74,7 +76,7 @@ public enum Profile {
 
 	/**
 	 * Returns a short description of this profile.
-	 * 
+	 *
 	 * @return the profile's description
 	 */
 	public String getDescription() {
@@ -83,9 +85,10 @@ public enum Profile {
 
 	/**
 	 * Returns a string representation of this profile. The method is identical to <code>getDescription()</code>.
-	 * 
+	 *
 	 * @return the profile's description
 	 */
+	@NonNull
 	@Override
 	public String toString() {
 		return descr;
@@ -93,7 +96,7 @@ public enum Profile {
 
 	/**
 	 * Returns a boolean, indicating if this profile can be decoded by the <code>Decoder</code>.
-	 * 
+	 *
 	 * @see Decoder#canDecode(net.sourceforge.jaad.aac.Profile)
 	 * @return true if the profile is supported
 	 */
@@ -104,7 +107,7 @@ public enum Profile {
 	/**
 	 * Returns a boolean, indicating if this profile contains error resilient tools. That is, if it's index is higher
 	 * than 16, since the first error resilient profile is ER_AAC_LC (17). This method is mainly used internally.
-	 * 
+	 *
 	 * @return true if the profile uses error resilience
 	 */
 	public boolean isErrorResilientProfile() {

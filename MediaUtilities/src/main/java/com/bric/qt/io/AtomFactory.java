@@ -45,7 +45,7 @@ class AtomFactory {
 		try {
 			in = new FileInputStream(file);
 			MeasuredInputStream in2 = new MeasuredInputStream(in);
-			Vector<Atom> v = new Vector<Atom>();
+			Vector<Atom> v = new Vector<>();
 			while (in2.getReadBytes() < file.length()) {
 				Atom atom = read(null, in2);
 				v.add(atom);
@@ -61,7 +61,7 @@ class AtomFactory {
 
 	static byte[] sizeArray = new byte[4];
 	static byte[] bigSizeArray = new byte[8];
-	static Vector<String> parentTypes = new Vector<String>();
+	static Vector<String> parentTypes = new Vector<>();
 	private static final String[] PARENT_NODES = new String[] { "moov", "udta", "trak", "edts", "mdia", "minf", "dinf",
 			"stbl", "tref" };
 	static {

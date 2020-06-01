@@ -1,16 +1,16 @@
 /*
  *  Copyright (C) 2011 in-somnia
- * 
+ *
  *  This file is part of JAAD.
- * 
- *  JAAD is free software; you can redistribute it and/or modify it 
- *  under the terms of the GNU Lesser General Public License as 
- *  published by the Free Software Foundation; either version 3 of the 
+ *
+ *  JAAD is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License as
+ *  published by the Free Software Foundation; either version 3 of the
  *  License, or (at your option) any later version.
  *
- *  JAAD is distributed in the hope that it will be useful, but WITHOUT 
- *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General 
+ *  JAAD is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General
  *  Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public
@@ -45,58 +45,58 @@ import net.sourceforge.jaad.mp4.boxes.impl.meta.ThreeGPPMetadataBox;
 /**
  * This class contains the metadata for a movie. It parses different metadata types (iTunes tags, ID3). The fields can
  * be read via the <code>get(Field)</code> method using one of the predefined <code>Field</code>s.
- * 
+ *
  * @author in-somnia
  */
 public class MetaData {
 
 	public static class Field<T> {
 
-		public static final Field<String> ARTIST = new Field<String>("Artist");
-		public static final Field<String> TITLE = new Field<String>("Title");
-		public static final Field<String> ALBUM_ARTIST = new Field<String>("Album Artist");
-		public static final Field<String> ALBUM = new Field<String>("Album");
-		public static final Field<Integer> TRACK_NUMBER = new Field<Integer>("Track Number");
-		public static final Field<Integer> TOTAL_TRACKS = new Field<Integer>("Total Tracks");
-		public static final Field<Integer> DISK_NUMBER = new Field<Integer>("Disk Number");
-		public static final Field<Integer> TOTAL_DISKS = new Field<Integer>("Total disks");
-		public static final Field<String> COMPOSER = new Field<String>("Composer");
-		public static final Field<String> COMMENTS = new Field<String>("Comments");
-		public static final Field<Integer> TEMPO = new Field<Integer>("Tempo");
-		public static final Field<Integer> LENGTH_IN_MILLISECONDS = new Field<Integer>("Length in milliseconds");
-		public static final Field<Date> RELEASE_DATE = new Field<Date>("Release Date");
-		public static final Field<String> GENRE = new Field<String>("Genre");
-		public static final Field<String> ENCODER_NAME = new Field<String>("Encoder Name");
-		public static final Field<String> ENCODER_TOOL = new Field<String>("Encoder Tool");
-		public static final Field<Date> ENCODING_DATE = new Field<Date>("Encoding Date");
-		public static final Field<String> COPYRIGHT = new Field<String>("Copyright");
-		public static final Field<String> PUBLISHER = new Field<String>("Publisher");
-		public static final Field<Boolean> COMPILATION = new Field<Boolean>("Part of compilation");
-		public static final Field<List<Artwork>> COVER_ARTWORKS = new Field<List<Artwork>>("Cover Artworks");
-		public static final Field<String> GROUPING = new Field<String>("Grouping");
-		public static final Field<String> LOCATION = new Field<String>("Location");
-		public static final Field<String> LYRICS = new Field<String>("Lyrics");
-		public static final Field<Integer> RATING = new Field<Integer>("Rating");
-		public static final Field<Integer> PODCAST = new Field<Integer>("Podcast");
-		public static final Field<String> PODCAST_URL = new Field<String>("Podcast URL");
-		public static final Field<String> CATEGORY = new Field<String>("Category");
-		public static final Field<String> KEYWORDS = new Field<String>("Keywords");
-		public static final Field<Integer> EPISODE_GLOBAL_UNIQUE_ID = new Field<Integer>("Episode Global Unique ID");
-		public static final Field<String> DESCRIPTION = new Field<String>("Description");
-		public static final Field<String> TV_SHOW = new Field<String>("TV Show");
-		public static final Field<String> TV_NETWORK = new Field<String>("TV Network");
-		public static final Field<String> TV_EPISODE = new Field<String>("TV Episode");
-		public static final Field<Integer> TV_EPISODE_NUMBER = new Field<Integer>("TV Episode Number");
-		public static final Field<Integer> TV_SEASON = new Field<Integer>("TV Season");
-		public static final Field<String> INTERNET_RADIO_STATION = new Field<String>("Internet Radio Station");
-		public static final Field<String> PURCHASE_DATE = new Field<String>("Purchase Date");
-		public static final Field<String> GAPLESS_PLAYBACK = new Field<String>("Gapless Playback");
-		public static final Field<Boolean> HD_VIDEO = new Field<Boolean>("HD Video");
-		public static final Field<Locale> LANGUAGE = new Field<Locale>("Language");
+		public static final Field<String> ARTIST = new Field<>("Artist");
+		public static final Field<String> TITLE = new Field<>("Title");
+		public static final Field<String> ALBUM_ARTIST = new Field<>("Album Artist");
+		public static final Field<String> ALBUM = new Field<>("Album");
+		public static final Field<Integer> TRACK_NUMBER = new Field<>("Track Number");
+		public static final Field<Integer> TOTAL_TRACKS = new Field<>("Total Tracks");
+		public static final Field<Integer> DISK_NUMBER = new Field<>("Disk Number");
+		public static final Field<Integer> TOTAL_DISKS = new Field<>("Total disks");
+		public static final Field<String> COMPOSER = new Field<>("Composer");
+		public static final Field<String> COMMENTS = new Field<>("Comments");
+		public static final Field<Integer> TEMPO = new Field<>("Tempo");
+		public static final Field<Integer> LENGTH_IN_MILLISECONDS = new Field<>("Length in milliseconds");
+		public static final Field<Date> RELEASE_DATE = new Field<>("Release Date");
+		public static final Field<String> GENRE = new Field<>("Genre");
+		public static final Field<String> ENCODER_NAME = new Field<>("Encoder Name");
+		public static final Field<String> ENCODER_TOOL = new Field<>("Encoder Tool");
+		public static final Field<Date> ENCODING_DATE = new Field<>("Encoding Date");
+		public static final Field<String> COPYRIGHT = new Field<>("Copyright");
+		public static final Field<String> PUBLISHER = new Field<>("Publisher");
+		public static final Field<Boolean> COMPILATION = new Field<>("Part of compilation");
+		public static final Field<List<Artwork>> COVER_ARTWORKS = new Field<>("Cover Artworks");
+		public static final Field<String> GROUPING = new Field<>("Grouping");
+		public static final Field<String> LOCATION = new Field<>("Location");
+		public static final Field<String> LYRICS = new Field<>("Lyrics");
+		public static final Field<Integer> RATING = new Field<>("Rating");
+		public static final Field<Integer> PODCAST = new Field<>("Podcast");
+		public static final Field<String> PODCAST_URL = new Field<>("Podcast URL");
+		public static final Field<String> CATEGORY = new Field<>("Category");
+		public static final Field<String> KEYWORDS = new Field<>("Keywords");
+		public static final Field<Integer> EPISODE_GLOBAL_UNIQUE_ID = new Field<>("Episode Global Unique ID");
+		public static final Field<String> DESCRIPTION = new Field<>("Description");
+		public static final Field<String> TV_SHOW = new Field<>("TV Show");
+		public static final Field<String> TV_NETWORK = new Field<>("TV Network");
+		public static final Field<String> TV_EPISODE = new Field<>("TV Episode");
+		public static final Field<Integer> TV_EPISODE_NUMBER = new Field<>("TV Episode Number");
+		public static final Field<Integer> TV_SEASON = new Field<>("TV Season");
+		public static final Field<String> INTERNET_RADIO_STATION = new Field<>("Internet Radio Station");
+		public static final Field<String> PURCHASE_DATE = new Field<>("Purchase Date");
+		public static final Field<String> GAPLESS_PLAYBACK = new Field<>("Gapless Playback");
+		public static final Field<Boolean> HD_VIDEO = new Field<>("HD Video");
+		public static final Field<Locale> LANGUAGE = new Field<>("Language");
 		// sorting
-		public static final Field<String> ARTIST_SORT_TEXT = new Field<String>("Artist Sort Text");
-		public static final Field<String> TITLE_SORT_TEXT = new Field<String>("Title Sort Text");
-		public static final Field<String> ALBUM_SORT_TEXT = new Field<String>("Album Sort Text");
+		public static final Field<String> ARTIST_SORT_TEXT = new Field<>("Artist Sort Text");
+		public static final Field<String> TITLE_SORT_TEXT = new Field<>("Title Sort Text");
+		public static final Field<String> ALBUM_SORT_TEXT = new Field<>("Album Sort Text");
 		private String name;
 
 		private Field(String name) {
@@ -133,7 +133,7 @@ public class MetaData {
 	private Map<Field<?>, Object> contents;
 
 	MetaData() {
-		contents = new HashMap<Field<?>, Object>();
+		contents = new HashMap<>();
 	}
 
 	/*
@@ -247,7 +247,7 @@ public class MetaData {
 				if (contents.containsKey(Field.COVER_ARTWORKS))
 					get(Field.COVER_ARTWORKS).add(aw);
 				else {
-					final List<Artwork> list = new ArrayList<Artwork>();
+					final List<Artwork> list = new ArrayList<>();
 					list.add(aw);
 					put(Field.COVER_ARTWORKS, list);
 				}

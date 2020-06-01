@@ -6,14 +6,14 @@
  * Copyright (c) 2012 by Jeremy Wood.
  * All rights reserved.
  *
- * The copyright of this software is owned by Jeremy Wood. 
- * You may not use, copy or modify this software, except in  
- * accordance with the license agreement you entered into with  
+ * The copyright of this software is owned by Jeremy Wood.
+ * You may not use, copy or modify this software, except in
+ * accordance with the license agreement you entered into with
  * Jeremy Wood. For details see accompanying license terms.
- * 
+ *
  * This software is probably, but not necessarily, discussed here:
  * http://javagraphics.java.net/
- * 
+ *
  * That site should also contain the most recent official version
  * of this software.  (See the SVN repository for more details.)
  */
@@ -25,9 +25,11 @@ import java.util.Arrays;
 
 import com.bric.audio.AudioFormat.Encoding;
 
+import androidx.annotation.NonNull;
+
 /**
  * A silent AudioInputStream.
- * 
+ *
  */
 public class SilentAudioInputStream extends AudioInputStream {
 
@@ -35,7 +37,7 @@ public class SilentAudioInputStream extends AudioInputStream {
 
 	/**
 	 * A silent AudioInputStream that lasts a fixed number of samples.
-	 * 
+	 *
 	 * @param format
 	 * @param sampleCount
 	 *            the number of samples to read.
@@ -63,12 +65,12 @@ public class SilentAudioInputStream extends AudioInputStream {
 		}
 
 		@Override
-		public int read(byte[] b) throws IOException {
+		public int read(@NonNull byte[] b) throws IOException {
 			return read(b, 0, b.length);
 		}
 
 		@Override
-		public int read(byte[] b, int off, int len) throws IOException {
+		public int read(@NonNull byte[] b, int off, int len) throws IOException {
 			Arrays.fill(b, off, off + len, value);
 			bytesRead += len;
 			return len;

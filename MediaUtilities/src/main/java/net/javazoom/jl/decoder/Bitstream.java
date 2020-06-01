@@ -1,9 +1,9 @@
 /*
  * 11/19/04  1.0 moved to LGPL.
- * 
- * 11/17/04	 Uncomplete frames discarded. E.B, javalayer@javazoom.net 
  *
- * 12/05/03	 ID3v2 tag returned. E.B, javalayer@javazoom.net 
+ * 11/17/04	 Uncomplete frames discarded. E.B, javalayer@javazoom.net
+ *
+ * 12/05/03	 ID3v2 tag returned. E.B, javalayer@javazoom.net
  *
  * 12/12/99	 Based on Ibitstream. Exceptions thrown on errors,
  *			 Temporary removed seek functionality. mdm@techie.com
@@ -43,7 +43,7 @@ import java.io.PushbackInputStream;
 
 /**
  * The <code>Bistream</code> class is responsible for parsing an MPEG audio bitstream.
- * 
+ *
  * <b>REVIEW:</b> much of the parsing currently occurs in the various decoders. This should be moved into this class and
  * associated inner classes.
  */
@@ -106,7 +106,7 @@ public final class Bitstream implements BitstreamErrors {
 	// private int current_frame_number;
 	// private int last_frame_number;
 
-	private final int bitmask[] = {
+	private final int[] bitmask = {
 			0, // dummy
 			0x00000001, 0x00000003, 0x00000007, 0x0000000F, 0x0000001F, 0x0000003F, 0x0000007F, 0x000000FF, 0x000001FF,
 			0x000003FF, 0x000007FF, 0x00000FFF, 0x00001FFF, 0x00003FFF, 0x00007FFF, 0x0000FFFF, 0x0001FFFF };
@@ -115,7 +115,7 @@ public final class Bitstream implements BitstreamErrors {
 
 	private final Header header = new Header();
 
-	private final byte syncbuf[] = new byte[4];
+	private final byte[] syncbuf = new byte[4];
 
 	private Crc16[] crc = new Crc16[1];
 
@@ -125,7 +125,7 @@ public final class Bitstream implements BitstreamErrors {
 
 	/**
 	 * Construct a IBitstream that reads data from a given InputStream.
-	 * 
+	 *
 	 * @param in The InputStream to read from.
 	 */
 	public Bitstream(InputStream in) {
@@ -144,7 +144,7 @@ public final class Bitstream implements BitstreamErrors {
 
 	/**
 	 * Return position of the first audio header.
-	 * 
+	 *
 	 * @return size of ID3v2 tag frames.
 	 */
 	public int header_pos() {
@@ -153,7 +153,7 @@ public final class Bitstream implements BitstreamErrors {
 
 	/**
 	 * Load ID3v2 frames.
-	 * 
+	 *
 	 * @param in MP3 InputStream.
 	 * @author JavaZOOM
 	 */
@@ -184,7 +184,7 @@ public final class Bitstream implements BitstreamErrors {
 
 	/**
 	 * Parse ID3v2 tag header to find out size of ID3v2 frames.
-	 * 
+	 *
 	 * @param in MP3 InputStream
 	 * @return size of ID3v2 frames + header
 	 * @throws IOException
@@ -207,7 +207,7 @@ public final class Bitstream implements BitstreamErrors {
 
 	/**
 	 * Return raw ID3v2 frames + header.
-	 * 
+	 *
 	 * @return ID3v2 InputStream or null if ID3v2 frames are not available.
 	 */
 	public InputStream getRawID3v2() {
@@ -221,7 +221,7 @@ public final class Bitstream implements BitstreamErrors {
 
 	/**
 	 * Close the Bitstream.
-	 * 
+	 *
 	 * @throws BitstreamException
 	 */
 	public void close() throws BitstreamException {
@@ -234,7 +234,7 @@ public final class Bitstream implements BitstreamErrors {
 
 	/**
 	 * Reads and parses the next frame from the input source.
-	 * 
+	 *
 	 * @return the Header describing details of the frame read, or null if the end of the stream has been reached.
 	 */
 	public Header readFrame() throws BitstreamException {
@@ -269,7 +269,7 @@ public final class Bitstream implements BitstreamErrors {
 
 	/**
 	 * Read next MP3 frame.
-	 * 
+	 *
 	 * @return MP3 frame header.
 	 * @throws BitstreamException
 	 */
@@ -282,7 +282,7 @@ public final class Bitstream implements BitstreamErrors {
 
 	/**
 	 * Read next MP3 frame.
-	 * 
+	 *
 	 * @throws BitstreamException
 	 */
 	private void nextFrame() throws BitstreamException {
@@ -292,7 +292,7 @@ public final class Bitstream implements BitstreamErrors {
 
 	/**
 	 * Unreads the bytes read from the frame.
-	 * 
+	 *
 	 * @throws BitstreamException
 	 */
 	// REVIEW: add new error codes for this.
@@ -522,11 +522,11 @@ public final class Bitstream implements BitstreamErrors {
 
 	/**
 	 * Reads the exact number of bytes from the source input stream into a byte array.
-	 * 
+	 *
 	 * @param b The byte array to read the specified number of bytes into.
 	 * @param offs The index in the array where the first byte read should be stored.
 	 * @param len the number of bytes to read.
-	 * 
+	 *
 	 * @exception BitstreamException is thrown if the specified number of bytes could not be read from the stream.
 	 */
 	private int readFully(byte[] b, int offs, int len) throws BitstreamException {

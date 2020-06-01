@@ -37,6 +37,8 @@ import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
+
 public class GestureImageView extends ImageView  {
 
 	public static final String GLOBAL_NS = "http://schemas.android.com/apk/res/android";
@@ -326,7 +328,7 @@ public class GestureImageView extends ImageView  {
 
 	/**
 	 * Waits for a draw
-	 * @param max time to wait for draw (ms)
+	 * @param timeout max time to wait for draw (ms)
 	 * @throws InterruptedException
 	 */
 	public boolean waitForDraw(long timeout) throws InterruptedException {
@@ -603,7 +605,7 @@ public class GestureImageView extends ImageView  {
 	}
 
 	@Override
-	public void invalidateDrawable(Drawable dr) {
+	public void invalidateDrawable(@NonNull Drawable dr) {
 		if(strict) {
 			throw new UnsupportedOperationException("Not supported");
 		}

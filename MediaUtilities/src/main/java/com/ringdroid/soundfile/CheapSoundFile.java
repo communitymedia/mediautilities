@@ -29,7 +29,7 @@ import java.util.Locale;
  * volume level of each frame. Each subclass is able to: - open a sound file - return the sample rate and number of
  * frames - return an approximation of the volume level of each frame - write a new sound file with a subset of the
  * frames
- * 
+ *
  * A frame should represent no less than 1 ms and no more than 100 ms of audio. This is compatible with the native frame
  * sizes of most audio file formats already, but if not, this class should expose virtual frames in that size range.
  */
@@ -51,8 +51,8 @@ public class CheapSoundFile {
 	static Factory[] sSubclassFactories = new Factory[] { CheapAAC.getFactory(), CheapAMR.getFactory() };
 	// CheapMP3.getFactory(), CheapWAV.getFactory(), };
 
-	static ArrayList<String> sSupportedExtensions = new ArrayList<String>();
-	static HashMap<String, Factory> sExtensionMap = new HashMap<String, Factory>();
+	static ArrayList<String> sSupportedExtensions = new ArrayList<>();
+	static HashMap<String, Factory> sExtensionMap = new HashMap<>();
 
 	static {
 		for (Factory f : sSubclassFactories) {
@@ -65,7 +65,7 @@ public class CheapSoundFile {
 
 	/**
 	 * Static method to create the appropriate CheapSoundFile subclass given a filename.
-	 * 
+	 *
 	 * TODO: make this more modular rather than hardcoding the logic
 	 */
 	public static CheapSoundFile create(String fileName, ProgressListener progressListener)
@@ -75,7 +75,7 @@ public class CheapSoundFile {
 
 	/**
 	 * Static method to create the appropriate CheapSoundFile subclass given a filename.
-	 * 
+	 *
 	 * TODO: make this more modular rather than hardcoding the logic
 	 */
 	public static CheapSoundFile create(String fileName, boolean readHeaderOnly, ProgressListener progressListener)
@@ -180,8 +180,8 @@ public class CheapSoundFile {
 	private static final char[] HEX_CHARS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd',
 			'e', 'f' };
 
-	public static String bytesToHex(byte hash[]) {
-		char buf[] = new char[hash.length * 2];
+	public static String bytesToHex(byte[] hash) {
+		char[] buf = new char[hash.length * 2];
 		for (int i = 0, x = 0; i < hash.length; i++) {
 			buf[x++] = HEX_CHARS[(hash[i] >>> 4) & 0xf];
 			buf[x++] = HEX_CHARS[hash[i] & 0xf];
@@ -226,6 +226,6 @@ public class CheapSoundFile {
 	}
 
 	public long addSoundFile(CheapSoundFile newFile) {
-		return -1l;
+		return -1L;
 	}
-};
+}

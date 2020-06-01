@@ -1,16 +1,16 @@
 /*
  *  Copyright (C) 2011 in-somnia
- * 
+ *
  *  This file is part of JAAD.
- * 
- *  JAAD is free software; you can redistribute it and/or modify it 
- *  under the terms of the GNU Lesser General Public License as 
- *  published by the Free Software Foundation; either version 3 of the 
+ *
+ *  JAAD is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License as
+ *  published by the Free Software Foundation; either version 3 of the
  *  License, or (at your option) any later version.
  *
- *  JAAD is distributed in the hope that it will be useful, but WITHOUT 
- *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General 
+ *  JAAD is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General
  *  Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public
@@ -33,7 +33,7 @@ class ID3Tag {
 	private final int tag, flags, len;
 
 	ID3Tag(DataInputStream in) throws IOException {
-		frames = new ArrayList<ID3Frame>();
+		frames = new ArrayList<>();
 
 		// id3v2 header
 		tag = (in.read() << 16) | (in.read() << 8) | in.read(); // 'ID3'

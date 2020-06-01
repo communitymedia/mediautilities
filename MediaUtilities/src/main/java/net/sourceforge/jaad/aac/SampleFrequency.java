@@ -1,16 +1,16 @@
 /*
  *  Copyright (C) 2011 in-somnia
- * 
+ *
  *  This file is part of JAAD.
- * 
- *  JAAD is free software; you can redistribute it and/or modify it 
- *  under the terms of the GNU Lesser General Public License as 
- *  published by the Free Software Foundation; either version 3 of the 
+ *
+ *  JAAD is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License as
+ *  published by the Free Software Foundation; either version 3 of the
  *  License, or (at your option) any later version.
  *
- *  JAAD is distributed in the hope that it will be useful, but WITHOUT 
- *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General 
+ *  JAAD is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General
  *  Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public
@@ -21,7 +21,7 @@ package net.sourceforge.jaad.aac;
 
 /**
  * An enumeration that represents all possible sample frequencies AAC data can have.
- * 
+ *
  * @author in-somnia
  */
 public enum SampleFrequency {
@@ -43,7 +43,7 @@ public enum SampleFrequency {
 	/**
 	 * Returns a sample frequency instance for the given index. If the index is not between 0 and 11 inclusive,
 	 * SAMPLE_FREQUENCY_NONE is returned.
-	 * 
+	 *
 	 * @return a sample frequency with the given index
 	 */
 	public static SampleFrequency forInt(int i) {
@@ -72,7 +72,7 @@ public enum SampleFrequency {
 	private final int index, frequency;
 	private final int[] prediction, maxTNS_SFB;
 
-	private SampleFrequency(int index, int freqency, int[] prediction, int[] maxTNS_SFB) {
+	SampleFrequency(int index, int freqency, int[] prediction, int[] maxTNS_SFB) {
 		this.index = index;
 		this.frequency = freqency;
 		this.prediction = prediction;
@@ -81,7 +81,7 @@ public enum SampleFrequency {
 
 	/**
 	 * Returns this sample frequency's index between 0 (96000) and 11 (8000) or -1 if this is SAMPLE_FREQUENCY_NONE.
-	 * 
+	 *
 	 * @return the sample frequency's index
 	 */
 	public int getIndex() {
@@ -91,7 +91,7 @@ public enum SampleFrequency {
 	/**
 	 * Returns the sample frequency as integer value. This may be a value between 96000 and 8000, or 0 if this is
 	 * SAMPLE_FREQUENCY_NONE.
-	 * 
+	 *
 	 * @return the sample frequency
 	 */
 	public int getFrequency() {
@@ -101,7 +101,7 @@ public enum SampleFrequency {
 	/**
 	 * Returns the highest scale factor band allowed for ICPrediction at this sample frequency. This method is mainly
 	 * used internally.
-	 * 
+	 *
 	 * @return the highest prediction SFB
 	 */
 	public int getMaximalPredictionSFB() {
@@ -111,7 +111,7 @@ public enum SampleFrequency {
 	/**
 	 * Returns the number of predictors allowed for ICPrediction at this sample frequency. This method is mainly used
 	 * internally.
-	 * 
+	 *
 	 * @return the number of ICPredictors
 	 */
 	public int getPredictorCount() {
@@ -121,7 +121,7 @@ public enum SampleFrequency {
 	/**
 	 * Returns the highest scale factor band allowed for TNS at this sample frequency. This method is mainly used
 	 * internally.
-	 * 
+	 *
 	 * @return the highest SFB for TNS
 	 */
 	public int getMaximalTNS_SFB(boolean shortWindow) {
@@ -131,7 +131,7 @@ public enum SampleFrequency {
 	/**
 	 * Returns a string representation of this sample frequency. The method is identical to
 	 * <code>getDescription()</code>.
-	 * 
+	 *
 	 * @return the sample frequency's description
 	 */
 	@Override

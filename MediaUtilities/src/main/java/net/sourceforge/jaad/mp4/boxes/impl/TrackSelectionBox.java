@@ -1,16 +1,16 @@
 /*
  *  Copyright (C) 2011 in-somnia
- * 
+ *
  *  This file is part of JAAD.
- * 
- *  JAAD is free software; you can redistribute it and/or modify it 
- *  under the terms of the GNU Lesser General Public License as 
- *  published by the Free Software Foundation; either version 3 of the 
+ *
+ *  JAAD is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License as
+ *  published by the Free Software Foundation; either version 3 of the
  *  License, or (at your option) any later version.
  *
- *  JAAD is distributed in the hope that it will be useful, but WITHOUT 
- *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General 
+ *  JAAD is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General
  *  Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public
@@ -31,26 +31,26 @@ import net.sourceforge.jaad.mp4.boxes.FullBox;
  * etc. Such a file may include several video tracks, although, at any point in time, only one of them should be played
  * or streamed. This is achieved by assigning all video tracks to the same alternate group. (See subclause 8.3.2 for the
  * definition of alternate groups.)
- * 
+ *
  * All tracks in an alternate group are candidates for media selection, but it may not make sense to switch between some
  * of those tracks during a session. One may for instance allow switching between video tracks at different bitrates and
  * keep frame size but not allow switching between tracks of different frame size. In the same manner it may be
  * desirable to enable selection - but not switching - between tracks of different video codecs or different audio
  * languages.
- * 
+ *
  * The distinction between tracks for selection and switching is addressed by assigning tracks to switch groups in
  * addition to alternate groups. One alternate group may contain one or more switch groups. All tracks in an alternate
  * group are candidates for media selection, while tracks in a switch group are also available for switching during a
  * session. Different switch groups represent different operation points, such as different frame size, high/low
  * quality, etc.
- * 
+ *
  * For the case of non-scalable bitstreams, several tracks may be included in a switch group. The same also applies to
  * non-layered scalable bitstreams, such as traditional AVC streams.
- * 
+ *
  * By labelling tracks with attributes it is possible to characterize them. Each track can be labelled with a list of
  * attributes which can be used to describe tracks in a particular switch group or differentiate tracks that belong to
  * different switch groups.
- * 
+ *
  * @author in-somnia
  */
 public class TrackSelectionBox extends FullBox {
@@ -60,7 +60,7 @@ public class TrackSelectionBox extends FullBox {
 
 	public TrackSelectionBox() {
 		super("Track Selection Box");
-		attributes = new ArrayList<Long>();
+		attributes = new ArrayList<>();
 	}
 
 	@Override
@@ -91,7 +91,7 @@ public class TrackSelectionBox extends FullBox {
 	 * same alternate or switch group. Each differentiating attribute is associated with a pointer to the field or
 	 * information that distinguishes the track.
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * The following attributes are descriptive:
 	 * <table>
@@ -127,7 +127,7 @@ public class TrackSelectionBox extends FullBox {
 	 * </tr>
 	 * </table>
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * The following attributes are differentiating:
 	 * <table>
@@ -173,7 +173,7 @@ public class TrackSelectionBox extends FullBox {
 	 * </tr>
 	 * </table>
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * Descriptive attributes characterize the tracks they modify, whereas differentiating attributes differentiate
 	 * between tracks that belong to the same alternate or switch groups. The pointer of a differentiating attribute

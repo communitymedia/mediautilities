@@ -25,6 +25,8 @@
 
 package com.bric.audio;
 
+import androidx.annotation.NonNull;
+
 /**
  * <code>DataLine</code> adds media-related functionality to its superinterface, <code>{@link Line}</code>. This
  * functionality includes transport-control methods that start, stop, drain, and flush the audio data that passes
@@ -49,7 +51,7 @@ package com.bric.audio;
  * Mixers often support synchronized control of multiple data lines. Synchronization can be established through the
  * Mixer interface's <code>{@link Mixer#synchronize synchronize}</code> method. See the description of the
  * <code>{@link Mixer Mixer}</code> interface for a more complete description.
- * 
+ *
  * @author Kara Kytle
  * @see LineEvent
  * @since 1.3
@@ -63,7 +65,7 @@ public interface DataLine extends Line {
 	 * until the line is running and the data queue becomes empty. If <code>drain()</code> is invoked by one thread, and
 	 * another continues to fill the data queue, the operation will not complete. This method always returns when the
 	 * data line is closed.
-	 * 
+	 *
 	 * @see #flush()
 	 */
 	public void drain();
@@ -75,7 +77,7 @@ public interface DataLine extends Line {
 	 * pausing a line (the normal case) if you want to skip the "stale" data when you restart playback or capture. (It
 	 * is legal to flush a line that is not stopped, but doing so on an active line is likely to cause a discontinuity
 	 * in the data, resulting in a perceptible click.)
-	 * 
+	 *
 	 * @see #stop()
 	 * @see #drain()
 	 */
@@ -86,7 +88,7 @@ public interface DataLine extends Line {
 	 * Unless the data in the buffer has been flushed, the line resumes I/O starting with the first frame that was
 	 * unprocessed at the time the line was stopped. When audio capture or playback starts, a
 	 * <code>{@link LineEvent.Type#START START}</code> event is generated.
-	 * 
+	 *
 	 * @see #stop()
 	 * @see #isRunning()
 	 * @see LineEvent
@@ -101,7 +103,7 @@ public interface DataLine extends Line {
 	 * condition continues for too long, input or output samples might be dropped.) If desired, the retained data can be
 	 * discarded by invoking the <code>flush</code> method. When audio capture or playback stops, a
 	 * <code>{@link LineEvent.Type#STOP STOP}</code> event is generated.
-	 * 
+	 *
 	 * @see #start()
 	 * @see #isRunning()
 	 * @see #flush()
@@ -113,7 +115,7 @@ public interface DataLine extends Line {
 	 * Indicates whether the line is running. The default is <code>false</code>. An open line begins running when the
 	 * first data is presented in response to an invocation of the <code>start</code> method, and continues until
 	 * presentation ceases in response to a call to <code>stop</code> or because playback completes.
-	 * 
+	 *
 	 * @return <code>true</code> if the line is running, otherwise <code>false</code>
 	 * @see #start()
 	 * @see #stop()
@@ -124,7 +126,7 @@ public interface DataLine extends Line {
 	 * Indicates whether the line is engaging in active I/O (such as playback or capture). When an inactive line becomes
 	 * active, it sends a <code>{@link LineEvent.Type#START START}</code> event to its listeners. Similarly, when an
 	 * active line becomes inactive, it sends a <code>{@link LineEvent.Type#STOP STOP}</code> event.
-	 * 
+	 *
 	 * @return <code>true</code> if the line is actively capturing or rendering sound, otherwise <code>false</code>
 	 * @see #isOpen
 	 * @see #addLineListener
@@ -136,14 +138,14 @@ public interface DataLine extends Line {
 
 	/**
 	 * Obtains the current format (encoding, sample rate, number of channels, etc.) of the data line's audio data.
-	 * 
+	 *
 	 * <p>
 	 * If the line is not open and has never been opened, it returns the default format. The default format is an
 	 * implementation specific audio format, or, if the <code>DataLine.Info</code> object, which was used to retrieve
 	 * this <code>DataLine</code>, specifies at least one fully qualified audio format, the last one will be used as the
 	 * default format. Opening the line with a specific audio format (e.g. {@link SourceDataLine#open(AudioFormat)})
 	 * will override the default format.
-	 * 
+	 *
 	 * @return current audio data format
 	 * @see AudioFormat
 	 */
@@ -154,7 +156,7 @@ public interface DataLine extends Line {
 	 * line, this is the size of the buffer to which data can be written. For a target data line, it is the size of the
 	 * buffer from which data can be read. Note that the units used are bytes, but will always correspond to an integral
 	 * number of sample frames of audio data.
-	 * 
+	 *
 	 * @return the size of the buffer in bytes
 	 */
 	public int getBufferSize();
@@ -172,7 +174,7 @@ public interface DataLine extends Line {
 	 * An application is guaranteed that a read or write operation of up to the number of bytes returned from
 	 * <code>available()</code> will not block; however, there is no guarantee that attempts to read or write more data
 	 * will block.
-	 * 
+	 *
 	 * @return the amount of data available, in bytes
 	 */
 	public int available();
@@ -181,7 +183,7 @@ public interface DataLine extends Line {
 	 * Obtains the current position in the audio data, in sample frames. The frame position measures the number of
 	 * sample frames captured by, or rendered from, the line since it was opened. This return value will wrap around
 	 * after 2^31 frames. It is recommended to use <code>getLongFramePosition</code> instead.
-	 * 
+	 *
 	 * @return the number of frames already processed since the line was opened
 	 * @see #getLongFramePosition()
 	 */
@@ -190,7 +192,7 @@ public interface DataLine extends Line {
 	/**
 	 * Obtains the current position in the audio data, in sample frames. The frame position measures the number of
 	 * sample frames captured by, or rendered from, the line since it was opened.
-	 * 
+	 *
 	 * @return the number of frames already processed since the line was opened
 	 * @since 1.5
 	 */
@@ -202,7 +204,7 @@ public interface DataLine extends Line {
 	 * level of precision is not guaranteed. For example, an implementation might calculate the microsecond position
 	 * from the current frame position and the audio sample frame rate. The precision in microseconds would then be
 	 * limited to the number of microseconds per sample frame.
-	 * 
+	 *
 	 * @return the number of microseconds of data processed since the line was opened
 	 */
 	public long getMicrosecondPosition();
@@ -211,7 +213,7 @@ public interface DataLine extends Line {
 	 * Obtains the current volume level for the line. This level is a measure of the signal's current amplitude, and
 	 * should not be confused with the current setting of a gain control. The range is from 0.0 (silence) to 1.0
 	 * (maximum possible amplitude for the sound waveform). The units measure linear amplitude, not decibels.
-	 * 
+	 *
 	 * @return the current amplitude of the signal in this line, or <code>{@link AudioSystem#NOT_SPECIFIED}</code>
 	 */
 	public float getLevel();
@@ -228,7 +230,7 @@ public interface DataLine extends Line {
 	 * <code>{@link TargetDataLine}</code>, and <code>{@link Clip}</code>. You can query a mixer for lines of any of
 	 * these types, passing an appropriate instance of <code>DataLine.Info</code> as the argument to a method such as
 	 * <code>{@link Mixer#getLine Mixer.getLine(Line.Info)}</code>.
-	 * 
+	 *
 	 * @see Line.Info
 	 * @author Kara Kytle
 	 * @since 1.3
@@ -243,7 +245,7 @@ public interface DataLine extends Line {
 		 * Constructs a data line's info object from the specified information, which includes a set of supported audio
 		 * formats and a range for the buffer size. This constructor is typically used by mixer implementations when
 		 * returning information about a supported line.
-		 * 
+		 *
 		 * @param lineClass
 		 *            the class of the data line described by the info object
 		 * @param formats
@@ -270,7 +272,7 @@ public interface DataLine extends Line {
 		/**
 		 * Constructs a data line's info object from the specified information, which includes a single audio format and
 		 * a desired buffer size. This constructor is typically used by an application to describe a desired line.
-		 * 
+		 *
 		 * @param lineClass
 		 *            the class of the data line described by the info object
 		 * @param format
@@ -296,7 +298,7 @@ public interface DataLine extends Line {
 		/**
 		 * Constructs a data line's info object from the specified information, which includes a single audio format.
 		 * This constructor is typically used by an application to describe a desired line.
-		 * 
+		 *
 		 * @param lineClass
 		 *            the class of the data line described by the info object
 		 * @param format
@@ -312,13 +314,13 @@ public interface DataLine extends Line {
 		 * that are missing from the set returned by <code>getFormats()</code>. The reverse is not the case:
 		 * <code>isFormatSupported(AudioFormat)</code> is guaranteed to return <code>true</code> for all formats
 		 * returned by <code>getFormats()</code>.
-		 * 
+		 *
 		 * Some fields in the AudioFormat instances can be set to
-		 * {@link ac.robinson.mov.audio.sound.sampled.AudioSystem#NOT_SPECIFIED NOT_SPECIFIED} if that field does not
+		 * {@link AudioSystem#NOT_SPECIFIED NOT_SPECIFIED} if that field does not
 		 * apply to the format, or if the format supports a wide range of values for that field. For example, a
 		 * multi-channel device supporting up to 64 channels, could set the channel field in the
 		 * <code>AudioFormat</code> instances returned by this method to <code>NOT_SPECIFIED</code>.
-		 * 
+		 *
 		 * @return a set of supported audio formats.
 		 * @see #isFormatSupported(AudioFormat)
 		 */
@@ -332,7 +334,7 @@ public interface DataLine extends Line {
 		/**
 		 * Indicates whether this data line supports a particular audio format. The default implementation of this
 		 * method simply returns <code>true</code> if the specified format matches any of the supported formats.
-		 * 
+		 *
 		 * @param format
 		 *            the audio format for which support is queried.
 		 * @return <code>true</code> if the format is supported, otherwise <code>false</code>
@@ -352,7 +354,7 @@ public interface DataLine extends Line {
 
 		/**
 		 * Obtains the minimum buffer size supported by the data line.
-		 * 
+		 *
 		 * @return minimum buffer size in bytes, or <code>AudioSystem.NOT_SPECIFIED</code>
 		 */
 		public int getMinBufferSize() {
@@ -361,7 +363,7 @@ public interface DataLine extends Line {
 
 		/**
 		 * Obtains the maximum buffer size supported by the data line.
-		 * 
+		 *
 		 * @return maximum buffer size in bytes, or <code>AudioSystem.NOT_SPECIFIED</code>
 		 */
 		public int getMaxBufferSize() {
@@ -373,7 +375,7 @@ public interface DataLine extends Line {
 		 * must be met. In addition, this object's minimum buffer size must be at least as large as that of the object
 		 * specified, its maximum buffer size must be at most as large as that of the object specified, and all of its
 		 * formats must match formats supported by the object specified.
-		 * 
+		 *
 		 * @return <code>true</code> if this object matches the one specified, otherwise <code>false</code>.
 		 */
 		public boolean matches(Line.Info info) {
@@ -417,9 +419,10 @@ public interface DataLine extends Line {
 
 		/**
 		 * Obtains a textual description of the data line info.
-		 * 
+		 *
 		 * @return a string description
 		 */
+		@NonNull
 		public String toString() {
 
 			StringBuffer buf = new StringBuffer();

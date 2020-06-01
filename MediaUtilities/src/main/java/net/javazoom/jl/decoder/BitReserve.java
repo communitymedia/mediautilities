@@ -1,7 +1,7 @@
 /*
  * 11/19/04			1.0 moved to LGPL.
- * 
- * 12/12/99 0.0.7	Implementation stores single bits 
+ *
+ * 12/12/99 0.0.7	Implementation stores single bits
  *					as ints for better performance. mdm@techie.com.
  *
  * 02/28/99 0.0     Java Conversion by E.B, javalayer@javazoom.net
@@ -71,7 +71,7 @@ final class BitReserve {
 
 	/**
 	 * Read a number bits from the bit stream.
-	 * 
+	 *
 	 * @param N the number of
 	 */
 	public int hgetbits(int N) {
@@ -96,8 +96,8 @@ final class BitReserve {
 		return val;
 	}
 
-	/**
-	 * Read 1 bit from the bit stream.
+	/*
+	  Read 1 bit from the bit stream.
 	 */
 	/*
 	 * public int hget1bit_old() { int val; totbit++; if (buf_bit_idx == 0) { buf_bit_idx = 8; buf_byte_idx++; } //
@@ -106,7 +106,7 @@ final class BitReserve {
 	 */
 	/**
 	 * Returns next bit from reserve.
-	 * 
+	 *
 	 * @returns 0 if next bit is reset, or 1 if next bit is set.
 	 */
 	public int hget1bit() {
@@ -116,8 +116,8 @@ final class BitReserve {
 		return val;
 	}
 
-	/**
-	 * Retrieves bits from the reserve.
+	/*
+	  Retrieves bits from the reserve.
 	 */
 	/*
 	 * public int readBits(int[] out, int len) { if (buf_bit_idx == 0) { buf_bit_idx = 8; buf_byte_idx++; current =

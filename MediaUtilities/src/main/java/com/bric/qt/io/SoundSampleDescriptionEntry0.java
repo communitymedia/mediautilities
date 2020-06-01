@@ -6,14 +6,14 @@
  * Copyright (c) 2011 by Jeremy Wood.
  * All rights reserved.
  *
- * The copyright of this software is owned by Jeremy Wood. 
- * You may not use, copy or modify this software, except in  
- * accordance with the license agreement you entered into with  
+ * The copyright of this software is owned by Jeremy Wood.
+ * You may not use, copy or modify this software, except in
+ * accordance with the license agreement you entered into with
  * Jeremy Wood. For details see accompanying license terms.
- * 
+ *
  * This software is probably, but not necessarily, discussed here:
  * http://javagraphics.java.net/
- * 
+ *
  * That site should also contain the most recent official version
  * of this software.  (See the SVN repository for more details.)
  */
@@ -22,6 +22,8 @@ package com.bric.qt.io;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+
+import androidx.annotation.NonNull;
 
 /** A sound sample description entry, version 0. */
 public class SoundSampleDescriptionEntry0 extends SampleDescriptionEntry {
@@ -101,6 +103,7 @@ public class SoundSampleDescriptionEntry0 extends SampleDescriptionEntry {
 		}
 	}
 
+	@NonNull
 	public String toString() {
 		return "SoundSampleDescriptionEntry0[ type = \"" + type + "\", dataRef = " + dataReference + ", version = "
 				+ version + ", revision = " + revision + ", vendor = " + vendor + ", channelCount = " + channelCount

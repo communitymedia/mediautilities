@@ -29,7 +29,7 @@ import java.util.Locale;
 
 import net.sourceforge.jaad.mp4.MP4InputStream;
 import net.sourceforge.jaad.mp4.boxes.FullBox;
-import ac.robinson.util.AndroidUtilities;
+
 import ac.robinson.util.StringUtilities;
 
 /**
@@ -72,7 +72,7 @@ public class ITunesMetadataBox extends FullBox {
 				null, GIF, JPEG, PNG, URL, DURATION, DATETIME, GENRE, null, null, INTEGER, null, null, RIAA, UPC, null,
 				BMP };
 
-		private DataType() {
+		DataType() {
 		}
 
 		private static DataType forInt(int i) {

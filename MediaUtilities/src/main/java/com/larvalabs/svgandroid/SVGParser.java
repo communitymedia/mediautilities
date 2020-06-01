@@ -74,13 +74,13 @@ import android.util.Log;
  * Entry point for parsing SVG files for Android. Use one of the various static methods for parsing SVGs by resource,
  * asset or input stream. Optionally, a single color can be searched and replaced in the SVG while parsing. You can also
  * parse an svg path directly.
- * 
+ *
  * @see #getSVGFromResource(android.content.res.Resources, int)
  * @see #getSVGFromAsset(android.content.res.AssetManager, String)
  * @see #getSVGFromString(String)
  * @see #getSVGFromInputStream(java.io.InputStream)
  * @see #parsePath(String)
- * 
+ *
  * @author Larva Labs, LLC
  */
 public class SVGParser {
@@ -89,7 +89,7 @@ public class SVGParser {
 
 	/**
 	 * Parse SVG data from an input stream.
-	 * 
+	 *
 	 * @param svgData the input stream, with SVG XML data in UTF-8 character encoding.
 	 * @return the parsed SVG.
 	 * @throws SVGParseException if there is an error while parsing.
@@ -100,7 +100,7 @@ public class SVGParser {
 
 	/**
 	 * Parse SVG data from a string.
-	 * 
+	 *
 	 * @param svgData the string containing SVG XML data.
 	 * @return the parsed SVG.
 	 * @throws SVGParseException if there is an error while parsing.
@@ -111,7 +111,7 @@ public class SVGParser {
 
 	/**
 	 * Parse SVG data from an Android application resource.
-	 * 
+	 *
 	 * @param resources the Android context resources.
 	 * @param resId the ID of the raw resource SVG.
 	 * @return the parsed SVG.
@@ -123,7 +123,7 @@ public class SVGParser {
 
 	/**
 	 * Parse SVG data from an Android application asset.
-	 * 
+	 *
 	 * @param assetMngr the Android asset manager.
 	 * @param svgPath the path to the SVG file in the application's assets.
 	 * @return the parsed SVG.
@@ -139,7 +139,7 @@ public class SVGParser {
 
 	/**
 	 * Parse SVG data from an input stream, replacing a single color with another color.
-	 * 
+	 *
 	 * @param svgData the input stream, with SVG XML data in UTF-8 character encoding.
 	 * @param searchColor the color in the SVG to replace.
 	 * @param replaceColor the color with which to replace the search color.
@@ -153,7 +153,7 @@ public class SVGParser {
 
 	/**
 	 * Parse SVG data from a string.
-	 * 
+	 *
 	 * @param svgData the string containing SVG XML data.
 	 * @param searchColor the color in the SVG to replace.
 	 * @param replaceColor the color with which to replace the search color.
@@ -166,7 +166,7 @@ public class SVGParser {
 
 	/**
 	 * Parse SVG data from an Android application resource.
-	 * 
+	 *
 	 * @param resources the Android context
 	 * @param resId the ID of the raw resource SVG.
 	 * @param searchColor the color in the SVG to replace.
@@ -181,7 +181,7 @@ public class SVGParser {
 
 	/**
 	 * Parse SVG data from an Android application asset.
-	 * 
+	 *
 	 * @param assetMngr the Android asset manager.
 	 * @param svgPath the path to the SVG file in the application's assets.
 	 * @param searchColor the color in the SVG to replace.
@@ -201,7 +201,7 @@ public class SVGParser {
 	/**
 	 * Parses a single SVG path and returns it as a <code>android.graphics.Path</code> object. An example path is
 	 * <code>M250,150L150,350L350,350Z</code>, which draws a triangle.
-	 * 
+	 *
 	 * @param pathString the SVG path, see the specification <a href="http://www.w3.org/TR/SVG/paths.html">here</a>.
 	 */
 	public static Path parsePath(String pathString) {
@@ -254,7 +254,7 @@ public class SVGParser {
 		// Util.debug("Parsing numbers from: '" + s + "'");
 		int n = s.length();
 		int p = 0;
-		ArrayList<Float> numbers = new ArrayList<Float>();
+		ArrayList<Float> numbers = new ArrayList<>();
 		boolean skipChar = false;
 		for (int i = 1; i < n; i++) {
 			if (skipChar) {
@@ -438,7 +438,7 @@ public class SVGParser {
 	 * <p/>
 	 * Numbers are separate by whitespace, comma or nothing at all (!) if they are self-delimiting, (ie. begin with a -
 	 * sign)
-	 * 
+	 *
 	 * @param s the path string from the XML
 	 */
 	private static Path doPath(String s) {
@@ -828,8 +828,8 @@ public class SVGParser {
 		boolean isLinear;
 		float x1, y1, x2, y2;
 		float x, y, radius;
-		ArrayList<Float> positions = new ArrayList<Float>();
-		ArrayList<Integer> colors = new ArrayList<Integer>();
+		ArrayList<Float> positions = new ArrayList<>();
+		ArrayList<Integer> colors = new ArrayList<>();
 		Matrix matrix = null;
 
 		public Gradient createChild(Gradient g) {
@@ -861,7 +861,7 @@ public class SVGParser {
 	}
 
 	private static class StyleSet {
-		HashMap<String, String> styleMap = new HashMap<String, String>();
+		HashMap<String, String> styleMap = new HashMap<>();
 
 		private StyleSet(String string) {
 			if (string != null) {
@@ -941,7 +941,7 @@ public class SVGParser {
 	}
 
 	private static class IDHandler extends DefaultHandler {
-		HashMap<String, String> idXml = new HashMap<String, String>();
+		HashMap<String, String> idXml = new HashMap<>();
 
 		class IdRecording {
 			String id;
@@ -955,7 +955,7 @@ public class SVGParser {
 			}
 		}
 
-		Stack<IdRecording> idRecordingStack = new Stack<IdRecording>();
+		Stack<IdRecording> idRecordingStack = new Stack<>();
 
 		/**
 		 * @param namespaceURI (unused)
@@ -1013,20 +1013,20 @@ public class SVGParser {
 	private static class SVGHandler extends DefaultHandler {
 		// public StringBuilder parsed = new StringBuilder();
 
-		HashMap<String, String> idXml = new HashMap<String, String>();
+		HashMap<String, String> idXml = new HashMap<>();
 
 		Picture picture;
 		Canvas canvas;
 
 		Paint strokePaint;
 		boolean strokeSet = false;
-		Stack<Paint> strokePaintStack = new Stack<Paint>();
-		Stack<Boolean> strokeSetStack = new Stack<Boolean>();
+		Stack<Paint> strokePaintStack = new Stack<>();
+		Stack<Boolean> strokeSetStack = new Stack<>();
 
 		Paint fillPaint;
 		boolean fillSet = false;
-		Stack<Paint> fillPaintStack = new Stack<Paint>();
-		Stack<Boolean> fillSetStack = new Stack<Boolean>();
+		Stack<Paint> fillPaintStack = new Stack<>();
+		Stack<Boolean> fillSetStack = new Stack<>();
 
 		// Scratch rect (so we aren't constantly making new ones)
 		RectF rect = new RectF();
@@ -1046,8 +1046,8 @@ public class SVGParser {
 		private int hiddenLevel = 0;
 		private boolean boundsMode = false;
 
-		HashMap<String, Shader> gradientMap = new HashMap<String, Shader>();
-		HashMap<String, Gradient> gradientRefMap = new HashMap<String, Gradient>();
+		HashMap<String, Shader> gradientMap = new HashMap<>();
+		HashMap<String, Gradient> gradientRefMap = new HashMap<>();
 		Gradient gradient = null;
 		SvgText text = null;
 
@@ -1678,7 +1678,7 @@ public class SVGParser {
 		}
 
 		@Override
-		public void characters(char ch[], int start, int length) {
+		public void characters(char[] ch, int start, int length) {
 			// Log.i(TAG, new String(ch) + " " + start + "/" + length);
 			if (text != null) {
 				text.setText(ch, start, length);

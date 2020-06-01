@@ -6,14 +6,14 @@
  * Copyright (c) 2011 by Jeremy Wood.
  * All rights reserved.
  *
- * The copyright of this software is owned by Jeremy Wood. 
- * You may not use, copy or modify this software, except in  
- * accordance with the license agreement you entered into with  
+ * The copyright of this software is owned by Jeremy Wood.
+ * You may not use, copy or modify this software, except in
+ * accordance with the license agreement you entered into with
  * Jeremy Wood. For details see accompanying license terms.
- * 
+ *
  * This software is probably, but not necessarily, discussed here:
  * http://javagraphics.java.net/
- * 
+ *
  * That site should also contain the most recent official version
  * of this software.  (See the SVN repository for more details.)
  */
@@ -62,7 +62,7 @@ public abstract class Atom implements TreeNode {
 	}
 
 	protected static String getFieldName(Class<?> c, int i) {
-		Vector<String> answers = new Vector<String>();
+		Vector<String> answers = new Vector<>();
 		Field[] f = c.getFields();
 		for (int a = 0; a < f.length; a++) {
 			if (((f[a].getModifiers() & Modifier.STATIC) > 0)
@@ -417,7 +417,7 @@ public abstract class Atom implements TreeNode {
 	 * Subclasses are encouraged to override this method if it is easy to calculate the number of bytes that will be
 	 * written. By default this method uses a <code>NullOutputStream</code> to actually write the data and measure its
 	 * length.
-	 * 
+	 *
 	 * @return the complete size of this atom.
 	 */
 	protected long getSize() {
@@ -448,7 +448,7 @@ public abstract class Atom implements TreeNode {
 	 * <P>
 	 * (Although this uses a <code>java.lang.String</code>, serious badness will follow if this value is not exactly
 	 * 4-bytes long.
-	 * 
+	 *
 	 * @return the 4-byte identifier this atom uses (such as "moov", "trak", etc.)
 	 */
 	protected abstract String getIdentifier();
@@ -458,7 +458,7 @@ public abstract class Atom implements TreeNode {
 	 * <P>
 	 * (The first 8 bytes are always the size of this atom, and its identifier. Those are already written when this is
 	 * called.)
-	 * 
+	 *
 	 * @param out a <code>GuardedOutputStream</code> that is restricted to write only a fixed number of bytes.
 	 * @throws IOException
 	 */
@@ -505,7 +505,7 @@ public abstract class Atom implements TreeNode {
 	/**
 	 * Call this on the root of the dom tree to identify all <code>TrackHeaderAtoms</code> and determine the highest
 	 * track ID used in this movie
-	 * 
+	 *
 	 * @return the highest track ID contained in this node
 	 */
 	public long getHighestTrackID() {

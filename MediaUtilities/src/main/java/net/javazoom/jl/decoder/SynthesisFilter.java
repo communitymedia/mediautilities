@@ -1,10 +1,10 @@
 /*
  * 11/19/04 1.0 moved to LGPL.
- * 
+ *
  * 04/01/00 Fixes for running under build 23xx Microsoft JVM. mdm.
- * 
- * 19/12/99 Performance improvements to compute_pcm_samples().  
- *			Mat McGowan. mdm@techie.com. 
+ *
+ * 19/12/99 Performance improvements to compute_pcm_samples().
+ *			Mat McGowan. mdm@techie.com.
  *
  * 16/02/99 Java Conversion by E.B , javalayer@javazoom.net
  *
@@ -44,8 +44,8 @@ final class SynthesisFilter {
 	private float scalefactor;
 	private float[] eq;
 
-	/**
-	 * Quality value for controlling CPU usage/quality tradeoff.
+	/*
+	  Quality value for controlling CPU usage/quality tradeoff.
 	 */
 	/*
 	 * private int quality; private int v_inc; public static final int HIGH_QUALITY = 1; public static final int
@@ -393,7 +393,7 @@ final class SynthesisFilter {
 
 		// insert V[0-15] (== new_v[0-15]) into actual v:
 		// float[] x2 = actual_v + actual_write_pos;
-		float dest[] = actual_v;
+		float[] dest = actual_v;
 
 		int pos = actual_write_pos;
 
@@ -489,8 +489,8 @@ final class SynthesisFilter {
 		 */
 	}
 
-	/**
-	 * Compute new values via a fast cosine transform.
+	/*
+	  Compute new values via a fast cosine transform.
 	 */
 	/*
 	 * private void compute_new_v_old() { // p is fully initialized from x1 // float[] p = _p; // pp is fully
@@ -932,7 +932,7 @@ final class SynthesisFilter {
 		// fat chance of having this loop unroll
 		for (int i = 0; i < 32; i++) {
 			float pcm_sample;
-			final float dp[] = d16[i];
+			final float[] dp = d16[i];
 			pcm_sample = (float) (((vp[15 + dvp] * dp[0]) + (vp[14 + dvp] * dp[1]) + (vp[13 + dvp] * dp[2])
 					+ (vp[12 + dvp] * dp[3]) + (vp[11 + dvp] * dp[4]) + (vp[10 + dvp] * dp[5]) + (vp[9 + dvp] * dp[6])
 					+ (vp[8 + dvp] * dp[7]) + (vp[7 + dvp] * dp[8]) + (vp[6 + dvp] * dp[9]) + (vp[5 + dvp] * dp[10])
@@ -1074,9 +1074,9 @@ final class SynthesisFilter {
 	// reduce size and increase speed. For Android that approach is more complex without a Context for loading from
 	// Resources, so we switch back to a static float[] in d_data. Note that this is still "loaded" on-demand so that
 	// we can split into d16 when needed.
-	private static float d[] = null;
+	private static float[] d = null;
 
-	private static float d_data[] = {0.000000000f, -0.000442505f, 0.003250122f, -0.007003784f, 0.031082153f,
+	private static float[] d_data = {0.000000000f, -0.000442505f, 0.003250122f, -0.007003784f, 0.031082153f,
 			-0.078628540f, 0.100311279f, -0.572036743f, 1.144989014f, 0.572036743f, 0.100311279f, 0.078628540f,
 			0.031082153f, 0.007003784f, 0.003250122f, 0.000442505f, -0.000015259f, -0.000473022f, 0.003326416f,
 			-0.007919312f, 0.030517578f, -0.084182739f, 0.090927124f, -0.600219727f, 1.144287109f, 0.543823242f,
@@ -1155,7 +1155,7 @@ final class SynthesisFilter {
 	 * d[] split into subarrays of length 16. This provides for more faster access by allowing a block of 16 to be
 	 * addressed with constant offset.
 	 **/
-	private static float d16[][] = null;
+	private static float[][] d16 = null;
 
 	/**
 	 * Converts a 1D array into a number of smaller arrays. This is used to achieve offset + constant indexing into an

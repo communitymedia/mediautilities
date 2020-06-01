@@ -6,14 +6,14 @@
  * Copyright (c) 2012 by Jeremy Wood.
  * All rights reserved.
  *
- * The copyright of this software is owned by Jeremy Wood. 
- * You may not use, copy or modify this software, except in  
- * accordance with the license agreement you entered into with  
+ * The copyright of this software is owned by Jeremy Wood.
+ * You may not use, copy or modify this software, except in
+ * accordance with the license agreement you entered into with
  * Jeremy Wood. For details see accompanying license terms.
- * 
+ *
  * This software is probably, but not necessarily, discussed here:
  * http://javagraphics.java.net/
- * 
+ *
  * That site should also contain the most recent official version
  * of this software.  (See the SVN repository for more details.)
  */
@@ -24,6 +24,8 @@ import com.bric.io.GuardedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
+import androidx.annotation.NonNull;
 
 public class EditListAtom extends LeafAtom {
 
@@ -65,6 +67,7 @@ public class EditListAtom extends LeafAtom {
 			Atom.write16_16Float(out, mediaRate);
 		}
 
+		@NonNull
 		@Override
 		public String toString() {
 			return "EditListTableEntry[ trackDuration=" + trackDuration + ", mediaTime=" + mediaTime + ", mediaRate="
@@ -84,8 +87,8 @@ public class EditListAtom extends LeafAtom {
 		version = Atom.read8Int(in);
 		flags = Atom.read24Int(in);
 
-		/**
-		 * A 32-bit integer that specifies the number of entries in the edit list atom that follows.
+		/*
+		  A 32-bit integer that specifies the number of entries in the edit list atom that follows.
 		 */
 		int numberOfEntries = (int) Atom.read32Int(in);
 
@@ -127,6 +130,7 @@ public class EditListAtom extends LeafAtom {
 		}
 	}
 
+	@NonNull
 	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer("EditListAtom[ version=" + version + ", flags=" + flags + ", data=[");

@@ -1,16 +1,16 @@
 /*
  *  Copyright (C) 2011 in-somnia
- * 
+ *
  *  This file is part of JAAD.
- * 
- *  JAAD is free software; you can redistribute it and/or modify it 
- *  under the terms of the GNU Lesser General Public License as 
- *  published by the Free Software Foundation; either version 3 of the 
+ *
+ *  JAAD is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License as
+ *  published by the Free Software Foundation; either version 3 of the
  *  License, or (at your option) any later version.
  *
- *  JAAD is distributed in the hope that it will be useful, but WITHOUT 
- *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General 
+ *  JAAD is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General
  *  Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public
@@ -44,7 +44,7 @@ public class Movie {
 		// create tracks
 		mvhd = (MovieHeaderBox) moov.getChild(BoxTypes.MOVIE_HEADER_BOX);
 		List<Box> trackBoxes = moov.getChildren(BoxTypes.TRACK_BOX);
-		tracks = new ArrayList<Track>(trackBoxes.size());
+		tracks = new ArrayList<>(trackBoxes.size());
 		Track track;
 		for (int i = 0; i < trackBoxes.size(); i++) {
 			track = createTrack(trackBoxes.get(i));
@@ -63,7 +63,7 @@ public class Movie {
 		}
 
 		// detect DRM
-		protections = new ArrayList<Protection>();
+		protections = new ArrayList<>();
 		if (moov.hasChild(BoxTypes.ITEM_PROTECTION_BOX)) {
 			Box ipro = moov.getChild(BoxTypes.ITEM_PROTECTION_BOX);
 			for (Box sinf : ipro.getChildren(BoxTypes.PROTECTION_SCHEME_INFORMATION_BOX)) {
@@ -92,7 +92,7 @@ public class Movie {
 	/**
 	 * Returns an unmodifiable list of all tracks in this movie. The tracks are ordered as they appeare in the
 	 * file/stream.
-	 * 
+	 *
 	 * @return the tracks contained by this movie
 	 */
 	public List<Track> getTracks() {
@@ -102,11 +102,11 @@ public class Movie {
 	/**
 	 * Returns an unmodifiable list of all tracks in this movie with the specified type. The tracks are ordered as they
 	 * appeare in the file/stream.
-	 * 
+	 *
 	 * @return the tracks contained by this movie with the passed type
 	 */
 	public List<Track> getTracks(Type type) {
-		final List<Track> l = new ArrayList<Track>();
+		final List<Track> l = new ArrayList<>();
 		for (Track t : tracks) {
 			if (t.getType().equals(type))
 				l.add(t);
@@ -117,11 +117,11 @@ public class Movie {
 	/**
 	 * Returns an unmodifiable list of all tracks in this movie whose samples are encoded with the specified codec. The
 	 * tracks are ordered as they appeare in the file/stream.
-	 * 
+	 *
 	 * @return the tracks contained by this movie with the passed type
 	 */
 	public List<Track> getTracks(Track.Codec codec) {
-		final List<Track> l = new ArrayList<Track>();
+		final List<Track> l = new ArrayList<>();
 		for (Track t : tracks) {
 			if (t.getCodec().equals(codec))
 				l.add(t);
@@ -132,7 +132,7 @@ public class Movie {
 	/**
 	 * Indicates if this movie contains metadata. If false the <code>MetaData</code> object returned by
 	 * <code>getMetaData()</code> will not contain any field.
-	 * 
+	 *
 	 * @return true if this movie contains any metadata
 	 */
 	public boolean containsMetaData() {
@@ -141,7 +141,7 @@ public class Movie {
 
 	/**
 	 * Returns the MetaData object for this movie.
-	 * 
+	 *
 	 * @return the MetaData for this movie
 	 */
 	public MetaData getMetaData() {
@@ -151,7 +151,7 @@ public class Movie {
 	/**
 	 * Returns the <code>ProtectionInformation</code> objects that contains details about the DRM systems used. If no
 	 * protection is present the returned list will be empty.
-	 * 
+	 *
 	 * @return a list of protection informations
 	 */
 	public List<Protection> getProtections() {
@@ -161,7 +161,7 @@ public class Movie {
 	// mvhd
 	/**
 	 * Returns the time this movie was created.
-	 * 
+	 *
 	 * @return the creation time
 	 */
 	public Date getCreationTime() {
@@ -170,7 +170,7 @@ public class Movie {
 
 	/**
 	 * Returns the last time this movie was modified.
-	 * 
+	 *
 	 * @return the modification time
 	 */
 	public Date getModificationTime() {
@@ -179,7 +179,7 @@ public class Movie {
 
 	/**
 	 * Returns the duration in seconds.
-	 * 
+	 *
 	 * @return the duration
 	 */
 	public double getDuration() {
@@ -188,7 +188,7 @@ public class Movie {
 
 	/**
 	 * Indicates if there are more frames to be read in this movie.
-	 * 
+	 *
 	 * @return true if there is at least one track in this movie that has at least one more frame to read.
 	 */
 	public boolean hasMoreFrames() {
@@ -202,7 +202,7 @@ public class Movie {
 	/**
 	 * Reads the next frame from this movie (from one of the contained tracks). The frame is the next in time-order,
 	 * thus the next for playback. If none of the tracks contains any more frames, null is returned.
-	 * 
+	 *
 	 * @return the next frame or null if there are no more frames to read from this movie.
 	 * @throws IOException if reading fails
 	 */

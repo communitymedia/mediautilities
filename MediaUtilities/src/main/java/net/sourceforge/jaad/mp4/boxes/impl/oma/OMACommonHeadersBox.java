@@ -1,16 +1,16 @@
 /*
  *  Copyright (C) 2011 in-somnia
- * 
+ *
  *  This file is part of JAAD.
- * 
- *  JAAD is free software; you can redistribute it and/or modify it 
- *  under the terms of the GNU Lesser General Public License as 
- *  published by the Free Software Foundation; either version 3 of the 
+ *
+ *  JAAD is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License as
+ *  published by the Free Software Foundation; either version 3 of the
  *  License, or (at your option) any later version.
  *
- *  JAAD is distributed in the hope that it will be useful, but WITHOUT 
- *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General 
+ *  JAAD is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General
  *  Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public
@@ -53,7 +53,7 @@ public class OMACommonHeadersBox extends FullBox {
 		rightsIssuerURL = new byte[rightsIssuerURLLength];
 		in.readBytes(rightsIssuerURL);
 
-		textualHeaders = new HashMap<String, String>();
+		textualHeaders = new HashMap<>();
 		String key, value;
 		while (textualHeadersLength > 0) {
 			key = new String(in.readTerminated((int) getLeft(in), ':'));
@@ -69,7 +69,7 @@ public class OMACommonHeadersBox extends FullBox {
 	/**
 	 * The encryption method defines how the encrypted content can be decrypted. Values for the field are defined in the
 	 * following table:
-	 * 
+	 *
 	 * <table>
 	 * <tr>
 	 * <th>Value</th>
@@ -97,7 +97,7 @@ public class OMACommonHeadersBox extends FullBox {
 	 * (modulo 2128). No padding.</td>
 	 * </tr>
 	 * </table>
-	 * 
+	 *
 	 * @return the encryption method
 	 */
 	public int getEncryptionMethod() {
@@ -107,7 +107,7 @@ public class OMACommonHeadersBox extends FullBox {
 	/**
 	 * The padding scheme defines how the last block of ciphertext is padded. Values of the padding scheme field are
 	 * defined in the following table:
-	 * 
+	 *
 	 * <table>
 	 * <tr>
 	 * <th>Value</th>
@@ -122,7 +122,7 @@ public class OMACommonHeadersBox extends FullBox {
 	 * <td>Padding according to RFC 2630</td>
 	 * </tr>
 	 * </table>
-	 * 
+	 *
 	 * @return the padding scheme
 	 */
 	public int getPaddingScheme() {

@@ -28,7 +28,7 @@ import ac.robinson.util.IOUtilities;
  * CheapAMR is a CheapSoundFile implementation for AMR (Adaptive Multi-Rate) encoded sound files, which is one of the
  * native formats supported by Android's MediaRecorder library. It supports files with a full 3GPP header, and also
  * files with only a basic AMR header.
- * 
+ *
  * While there are 8 bitrates and several other frame types in AMR, this implementation currently only supports
  * frametype=1, MR515, 10.3 kbits / sec, which is the format encoded on Android 1.0 phones. In the future it may be
  * necessary to support other bitrates.
@@ -120,8 +120,8 @@ public class CheapAMR extends CheapSoundFile {
 		mBitRate = 10;
 		mOffset = 0;
 
-		mAdditionalInputFiles = new ArrayList<File>();
-		mOriginalFrameLengths = new ArrayList<Integer>();
+		mAdditionalInputFiles = new ArrayList<>();
+		mOriginalFrameLengths = new ArrayList<>();
 
 		// No need to handle filesizes larger than can fit in a 32-bit int
 		mFileSize = (int) mInputFile.length();
@@ -608,27 +608,27 @@ public class CheapAMR extends CheapSoundFile {
 	// Block size in bytes for each of the 16 frame types, not
 	// counting the initial byte that indicates the frame type.
 	// Can be used to skip over unsupported frame types.
-	static private int BLOCK_SIZES[] = { 12, 13, 15, 17, 19, 20, 26, 31, 5, 0, 0, 0, 0, 0, 0, 0 };
+	static private int[] BLOCK_SIZES = { 12, 13, 15, 17, 19, 20, 26, 31, 5, 0, 0, 0, 0, 0, 0, 0 };
 
-	static private int GAIN_FAC_MR515[] = { 28753, 2785, 6594, 7413, 10444, 1269, 4423, 1556, 12820, 2498, 4833, 2498,
+	static private int[] GAIN_FAC_MR515 = { 28753, 2785, 6594, 7413, 10444, 1269, 4423, 1556, 12820, 2498, 4833, 2498,
 			7864, 1884, 3153, 1802, 20193, 3031, 5857, 4014, 8970, 1392, 4096, 655, 13926, 3112, 4669, 2703, 6553, 901,
 			2662, 655, 23511, 2457, 5079, 4096, 8560, 737, 4259, 2088, 12288, 1474, 4628, 1433, 7004, 737, 2252, 1228,
 			17326, 2334, 5816, 3686, 8601, 778, 3809, 614, 9256, 1761, 3522, 1966, 5529, 737, 3194, 778 };
 
-	static private int QUA_ENER_MR515[] = { 17333, -3431, 4235, 5276, 8325, -10422, 683, -8609, 10148, -4398, 1472,
+	static private int[] QUA_ENER_MR515 = { 17333, -3431, 4235, 5276, 8325, -10422, 683, -8609, 10148, -4398, 1472,
 			-4398, 5802, -6907, -2327, -7303, 14189, -2678, 3181, -180, 6972, -9599, 0, -16305, 10884, -2444, 1165,
 			-3697, 4180, -13468, -3833, -16305, 15543, -4546, 1913, 0, 6556, -15255, 347, -5993, 9771, -9090, 1086,
 			-9341, 4772, -15255, -5321, -10714, 12827, -5002, 3118, -938, 6598, -14774, -646, -16879, 7251, -7508,
 			-1343, -6529, 2668, -15255, -2212, -2454, -14774 };
 
-	static private int QUA_GAIN_CODE[] = { 159, -3776, -22731, 206, -3394, -20428, 268, -3005, -18088, 349, -2615,
+	static private int[] QUA_GAIN_CODE = { 159, -3776, -22731, 206, -3394, -20428, 268, -3005, -18088, 349, -2615,
 			-15739, 419, -2345, -14113, 482, -2138, -12867, 554, -1932, -11629, 637, -1726, -10387, 733, -1518, -9139,
 			842, -1314, -7906, 969, -1106, -6656, 1114, -900, -5416, 1281, -694, -4173, 1473, -487, -2931, 1694, -281,
 			-1688, 1948, -75, -445, 2241, 133, 801, 2577, 339, 2044, 2963, 545, 3285, 3408, 752, 4530, 3919, 958, 5772,
 			4507, 1165, 7016, 5183, 1371, 8259, 5960, 1577, 9501, 6855, 1784, 10745, 7883, 1991, 11988, 9065, 2197,
 			13231, 10425, 2404, 14474, 12510, 2673, 16096, 16263, 3060, 18429, 21142, 3448, 20763, 27485, 3836, 23097 };
 
-	static private int GAIN_FAC_MR475[] = { 812, 128, 542, 140, 2873, 1135, 2266, 3402, 2067, 563, 12677, 647, 4132,
+	static private int[] GAIN_FAC_MR475 = { 812, 128, 542, 140, 2873, 1135, 2266, 3402, 2067, 563, 12677, 647, 4132,
 			1798, 5601, 5285, 7689, 374, 3735, 441, 10912, 2638, 11807, 2494, 20490, 797, 5218, 675, 6724, 8354, 5282,
 			1696, 1488, 428, 5882, 452, 5332, 4072, 3583, 1268, 2469, 901, 15894, 1005, 14982, 3271, 10331, 4858, 3635,
 			2021, 2596, 835, 12360, 4892, 12206, 1704, 13432, 1604, 9118, 2341, 3968, 1538, 5479, 9936, 3795, 417,
@@ -690,16 +690,16 @@ public class CheapAMR extends CheapSoundFile {
 			11116, 3297, 16762, 2424, 18853, 6715, 17171, 9887, 12743, 2605, 8937, 3140, 19033, 7764, 18347, 3880,
 			20475, 3682, 19602, 3380, 13044, 19373, 10526, 23124 };
 
-	static private int GRAY[] = { 0, 1, 3, 2, 5, 6, 4, 7 };
+	static private int[] GRAY = { 0, 1, 3, 2, 5, 6, 4, 7 };
 
-	static private int QUA_GAIN_PITCH[] = { 0, 3277, 6556, 8192, 9830, 11469, 12288, 13107, 13926, 14746, 15565, 16384,
+	static private int[] QUA_GAIN_PITCH = { 0, 3277, 6556, 8192, 9830, 11469, 12288, 13107, 13926, 14746, 15565, 16384,
 			17203, 18022, 18842, 19661 };
 
 	// this is a hack, destructively altering the original CheapSoundFile but it works for our purpose, so no real need
 	// to fix just yet
 	public long addSoundFile(CheapSoundFile newFile) {
 		if (!(newFile instanceof CheapAMR)) {
-			return -1l; // TODO: throw
+			return -1L; // TODO: throw
 		}
 		CheapAMR newAMRFile = (CheapAMR) newFile;
 
@@ -735,8 +735,8 @@ public class CheapAMR extends CheapSoundFile {
 		return (mNumFrames * 1000) / (getSampleRate() / getSamplesPerFrame());
 	}
 
-	/**
-	 * For debugging public static void main(String[] argv) throws Exception { File f = new File(""); CheapAMR c = new
-	 * CheapAMR(); c.ReadFile(f); c.WriteFile(new File(""), 0, c.getNumFrames()); }
-	 **/
-};
+	/*
+	  For debugging public static void main(String[] argv) throws Exception { File f = new File(""); CheapAMR c = new
+	  CheapAMR(); c.ReadFile(f); c.WriteFile(new File(""), 0, c.getNumFrames()); }
+	 */
+}

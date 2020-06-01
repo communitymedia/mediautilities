@@ -1,7 +1,7 @@
 /*
  * 11/19/04 : 1.0 moved to LGPL.
  *            VBRI header support added, E.B javalayer@javazoom.net
- * 
+ *
  * 12/04/03 : VBR (XING) header support added, E.B javalayer@javazoom.net
  *
  * 02/13/99 : Java Conversion by JavaZOOM , E.B javalayer@javazoom.net
@@ -203,14 +203,14 @@ public final class Header {
 
 	/**
 	 * Parse frame to extract optionnal VBR frame.
-	 * 
+	 *
 	 * @param firstframe
 	 * @author E.B (javalayer@javazoom.net)
 	 */
 	void parseVBR(byte[] firstframe) throws BitstreamException {
 		// Trying Xing header.
 		String xing = "Xing";
-		byte tmp[] = new byte[4];
+		byte[] tmp = new byte[4];
 		int offset = 0;
 		// Compute "Xing" offset depending on MPEG version and channels.
 		if (h_version == MPEG1) {
@@ -237,7 +237,7 @@ public final class Header {
 
 				int length = 4;
 				// Read flags.
-				byte flags[] = new byte[4];
+				byte[] flags = new byte[4];
 				System.arraycopy(firstframe, offset + length, flags, 0, flags.length);
 				length += flags.length;
 				// Read number of frames (if available).
@@ -373,7 +373,7 @@ public final class Header {
 
 	/**
 	 * Return VBR.
-	 * 
+	 *
 	 * @return true if VBR header is found
 	 */
 	public boolean vbr() {
@@ -382,7 +382,7 @@ public final class Header {
 
 	/**
 	 * Return VBR scale.
-	 * 
+	 *
 	 * @return scale of -1 if not available
 	 */
 	public int vbr_scale() {
@@ -391,7 +391,7 @@ public final class Header {
 
 	/**
 	 * Return VBR TOC.
-	 * 
+	 *
 	 * @return vbr toc ot null if not available
 	 */
 	public byte[] vbr_toc() {
@@ -431,7 +431,7 @@ public final class Header {
 	}
 
 	// E.B -> private to public
-	public static final int bitrates[][][] = {
+	public static final int[][][] bitrates = {
 			{
 					{ 0 /* free format */, 32000, 48000, 56000, 64000, 80000, 96000, 112000, 128000, 144000, 160000,
 							176000, 192000, 224000, 256000, 0 },
@@ -498,7 +498,7 @@ public final class Header {
 
 	/**
 	 * Returns the maximum number of frames in the stream.
-	 * 
+	 *
 	 * @param streamsize
 	 * @return number of frames
 	 */
@@ -516,7 +516,7 @@ public final class Header {
 
 	/**
 	 * Returns the maximum number of frames in the stream.
-	 * 
+	 *
 	 * @param streamsize
 	 * @return number of frames
 	 */
@@ -534,7 +534,7 @@ public final class Header {
 
 	/**
 	 * Returns ms/frame.
-	 * 
+	 *
 	 * @return milliseconds per frame
 	 */
 	public float ms_per_frame() // E.B
@@ -545,7 +545,7 @@ public final class Header {
 				tpf /= 2;
 			return ((float) (tpf * 1000));
 		} else {
-			float ms_per_frame_array[][] = { { 8.707483f, 8.0f, 12.0f }, { 26.12245f, 24.0f, 36.0f },
+			float[][] ms_per_frame_array = { { 8.707483f, 8.0f, 12.0f }, { 26.12245f, 24.0f, 36.0f },
 					{ 26.12245f, 24.0f, 36.0f } };
 			return (ms_per_frame_array[h_layer - 1][h_sample_frequency]);
 		}
@@ -553,7 +553,7 @@ public final class Header {
 
 	/**
 	 * Returns total ms.
-	 * 
+	 *
 	 * @param streamsize
 	 * @return total milliseconds
 	 */
@@ -587,7 +587,7 @@ public final class Header {
 	}
 
 	// E.B -> private to public
-	public static final String bitrate_str[][][] = {
+	public static final String[][][] bitrate_str = {
 			{
 					{ "free format", "32 kbit/s", "48 kbit/s", "56 kbit/s", "64 kbit/s", "80 kbit/s", "96 kbit/s",
 							"112 kbit/s", "128 kbit/s", "144 kbit/s", "160 kbit/s", "176 kbit/s", "192 kbit/s",
@@ -623,7 +623,7 @@ public final class Header {
 
 	/**
 	 * Return Bitrate.
-	 * 
+	 *
 	 * @return bitrate in bps
 	 */
 	public String bitrate_string() {
@@ -635,7 +635,7 @@ public final class Header {
 
 	/**
 	 * Return Bitrate.
-	 * 
+	 *
 	 * @return bitrate in bps and average bitrate for VBR header
 	 */
 	public int bitrate() {
@@ -647,7 +647,7 @@ public final class Header {
 
 	/**
 	 * Return Instant Bitrate. Bitrate for VBR is not constant.
-	 * 
+	 *
 	 * @return bitrate in bps
 	 */
 	public int bitrate_instant() {
@@ -656,7 +656,7 @@ public final class Header {
 
 	/**
 	 * Returns Frequency
-	 * 
+	 *
 	 * @return frequency string in kHz
 	 */
 	public String sample_frequency_string() {
@@ -708,7 +708,7 @@ public final class Header {
 
 	/**
 	 * Returns Version.
-	 * 
+	 *
 	 * @return MPEG-1 or MPEG-2 LSF or MPEG-2.5 LSF
 	 */
 	public String version_string() {
@@ -725,7 +725,7 @@ public final class Header {
 
 	/**
 	 * Returns the number of subbands in the current frame.
-	 * 
+	 *
 	 * @return number of subbands
 	 */
 	public int number_of_subbands() {
@@ -735,7 +735,7 @@ public final class Header {
 	/**
 	 * Returns Intensity Stereo. (Layer II joint stereo only). Returns the number of subbands which are in stereo mode,
 	 * subbands above that limit are in intensity stereo mode.
-	 * 
+	 *
 	 * @return intensity
 	 */
 	public int intensity_stereo_bound() {

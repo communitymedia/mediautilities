@@ -291,4 +291,4 @@ public class CheapWAV extends CheapSoundFile {
 			IOUtilities.closeStream(out);
 		}
 	}
-};
+}

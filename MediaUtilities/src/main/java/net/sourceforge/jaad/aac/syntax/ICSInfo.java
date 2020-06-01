@@ -28,8 +28,6 @@ import net.sourceforge.jaad.aac.tools.LTPrediction;
 
 import java.util.Arrays;
 
-import ac.robinson.util.AndroidUtilities;
-
 public class ICSInfo implements Constants, ScaleFactorBands {
 
 	public static final int WINDOW_SHAPE_SINE = 0;
@@ -37,7 +35,7 @@ public class ICSInfo implements Constants, ScaleFactorBands {
 	public static final int PREVIOUS = 0;
 	public static final int CURRENT = 1;
 
-	public static enum WindowSequence {
+	public enum WindowSequence {
 
 		ONLY_LONG_SEQUENCE, LONG_START_SEQUENCE, EIGHT_SHORT_SEQUENCE, LONG_STOP_SEQUENCE;
 

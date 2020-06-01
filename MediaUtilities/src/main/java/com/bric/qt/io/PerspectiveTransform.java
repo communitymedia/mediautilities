@@ -15,27 +15,27 @@ import java.io.Serializable;
 
 /**
  * A 2D perspective (or projective) transform, used by various OpImages.
- * 
+ *
  * <p>
  * A perspective transformation is capable of mapping an arbitrary quadrilateral into another arbitrary quadrilateral,
  * while preserving the straightness of lines. Unlike an affine transformation, the parallelism of lines in the source
  * is not necessarily preserved in the output.
- * 
+ *
  * <p>
  * Such a coordinate transformation can be represented by a 3x3 matrix which transforms homogenous source coordinates
  * <code>(x,&nbsp;y,&nbsp;1)</code> into destination coordinates <code>(x',&nbsp;y',&nbsp;w)</code>. To convert back
  * into non-homogenous coordinates (X, Y), <code>x'</code> and <code>y'</code> are divided by <code>w</code>.
- * 
+ *
  * <pre>
  * [ x']   [  m00  m01  m02  ] [ x ]   [ m00x + m01y + m02 ]
  * [ y'] = [  m10  m11  m12  ] [ y ] = [ m10x + m11y + m12 ]
  * [ w ]   [  m20  m21  m22  ] [ 1 ]   [ m20x + m21y + m22 ]
- * 
+ *
  *   x' = (m00x + m01y + m02)
  *   y' = (m10x + m11y + m12)
- * 
+ *
  *        w  = (m20x + m21y + m22)
- * 
+ *
  *        X = x' / w
  *        Y = y' / w
  * </pre>
@@ -57,7 +57,7 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 
 	/**
 	 * Constructs a new PerspectiveTransform from a two-dimensional array of doubles.
-	 * 
+	 *
 	 * @throws IllegalArgumentException
 	 *             if matrix is null
 	 * @throws ArrayIndexOutOfBoundsException
@@ -81,7 +81,7 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 
 	/**
 	 * Constructs a new PerspectiveTransform with the same effect as an existing AffineTransform.
-	 * 
+	 *
 	 * @throws IllegalArgumentException
 	 *             if transform is null
 	 */
@@ -179,7 +179,7 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 
 	/**
 	 * Creates a PerspectiveTransform that maps the unit square onto an arbitrary quadrilateral.
-	 * 
+	 *
 	 * <pre>
 	 * (0, 0) -> (x0, y0)
 	 * (1, 0) -> (x1, y1)
@@ -196,7 +196,7 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 
 	/**
 	 * Creates a PerspectiveTransform that maps the unit square onto an arbitrary quadrilateral.
-	 * 
+	 *
 	 * <pre>
 	 * (0, 0) -> (x0, y0)
 	 * (1, 0) -> (x1, y1)
@@ -212,7 +212,7 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 
 	/**
 	 * Creates a PerspectiveTransform that maps an arbitrary quadrilateral onto the unit square.
-	 * 
+	 *
 	 * <pre>
 	 * (x0, y0) -> (0, 0)
 	 * (x1, y1) -> (1, 0)
@@ -230,7 +230,7 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 
 	/**
 	 * Creates a PerspectiveTransform that maps an arbitrary quadrilateral onto the unit square.
-	 * 
+	 *
 	 * <pre>
 	 * (x0, y0) -> (0, 0)
 	 * (x1, y1) -> (1, 0)
@@ -246,7 +246,7 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 
 	/**
 	 * Creates a PerspectiveTransform that maps an arbitrary quadrilateral onto another arbitrary quadrilateral.
-	 * 
+	 *
 	 * <pre>
 	 * (x0, y0) -> (x0p, y0p)
 	 * (x1, y1) -> (x1p, y1p)
@@ -267,7 +267,7 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 
 	/**
 	 * Creates a PerspectiveTransform that maps an arbitrary quadrilateral onto another arbitrary quadrilateral.
-	 * 
+	 *
 	 * <pre>
 	 * (x0, y0) -> (x0p, y0p)
 	 * (x1, y1) -> (x1p, y1p)
@@ -293,7 +293,7 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 	/**
 	 * Retrieves the 9 specifiable values in the 3x3 affine transformation matrix into an array of double precision
 	 * values. The values are stored into the array as { m00 m01 m02 m10 m11 m12 m20 m21 m22 }.
-	 * 
+	 *
 	 * @param flatmatrix
 	 *            The double array used to store the returned values. The length of the array is assumed to be at least
 	 *            9.
@@ -323,7 +323,7 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 	 * Retrieves the 9 specifiable values in the 3x3 affine transformation matrix into a 2-dimensional array of double
 	 * precision values. The values are stored into the 2-dimensional array using the row index as the first subscript
 	 * and the column index as the second.
-	 * 
+	 *
 	 * @param matrix
 	 *            The 2-dimensional double array to store the returned values. The array is assumed to be at least 3x3.
 	 * @throws ArrayIndexOutOfBoundsException
@@ -350,7 +350,7 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 	/**
 	 * Concatenates this transform with a translation transformation. This is equivalent to calling concatenate(T),
 	 * where T is an PerspectiveTransform represented by the following matrix:
-	 * 
+	 *
 	 * <pre>
 	 * 	[   1    0    tx  ]
 	 * 	[   0    1    ty  ]
@@ -366,15 +366,15 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 	/**
 	 * Concatenates this transform with a rotation transformation. This is equivalent to calling concatenate(R), where R
 	 * is an PerspectiveTransform represented by the following matrix:
-	 * 
+	 *
 	 * <pre>
 	 * 	[   cos(theta)    -sin(theta)    0   ]
 	 * 	[   sin(theta)     cos(theta)    0   ]
 	 * 	[       0              0         1   ]
 	 * </pre>
-	 * 
+	 *
 	 * Rotating with a positive angle theta rotates points on the positive X axis toward the positive Y axis.
-	 * 
+	 *
 	 * @param theta
 	 *            The angle of rotation in radians.
 	 */
@@ -387,15 +387,15 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 	/**
 	 * Concatenates this transform with a translated rotation transformation. This is equivalent to the following
 	 * sequence of calls:
-	 * 
+	 *
 	 * <pre>
 	 * translate(x, y);
 	 * rotate(theta);
 	 * translate(-x, -y);
 	 * </pre>
-	 * 
+	 *
 	 * Rotating with a positive angle theta rotates points on the positive X axis toward the positive Y axis.
-	 * 
+	 *
 	 * @param theta
 	 *            The angle of rotation in radians.
 	 * @param x
@@ -412,13 +412,13 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 	/**
 	 * Concatenates this transform with a scaling transformation. This is equivalent to calling concatenate(S), where S
 	 * is an PerspectiveTransform represented by the following matrix:
-	 * 
+	 *
 	 * <pre>
 	 * 	[   sx   0    0   ]
 	 * 	[   0    sy   0   ]
 	 * 	[   0    0    1   ]
 	 * </pre>
-	 * 
+	 *
 	 * @param sx
 	 *            The X axis scale factor.
 	 * @param sy
@@ -433,13 +433,13 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 	/**
 	 * Concatenates this transform with a shearing transformation. This is equivalent to calling concatenate(SH), where
 	 * SH is an PerspectiveTransform represented by the following matrix:
-	 * 
+	 *
 	 * <pre>
 	 * 	[   1   shx   0   ]
 	 * 	[  shy   1    0   ]
 	 * 	[   0    0    1   ]
 	 * </pre>
-	 * 
+	 *
 	 * @param shx
 	 *            The factor by which coordinates are shifted towards the positive X axis direction according to their Y
 	 *            coordinate.
@@ -463,13 +463,13 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 
 	/**
 	 * Sets this transform to a translation transformation. The matrix representing this transform becomes:
-	 * 
+	 *
 	 * <pre>
 	 * 	[   1    0    tx  ]
 	 * 	[   0    1    ty  ]
 	 * 	[   0    0    1   ]
 	 * </pre>
-	 * 
+	 *
 	 * @param tx
 	 *            The distance by which coordinates are translated in the X axis direction
 	 * @param ty
@@ -489,15 +489,15 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 
 	/**
 	 * Sets this transform to a rotation transformation. The matrix representing this transform becomes:
-	 * 
+	 *
 	 * <pre>
 	 * 	[   cos(theta)    -sin(theta)    0   ]
 	 * 	[   sin(theta)     cos(theta)    0   ]
 	 * 	[       0              0         1   ]
 	 * </pre>
-	 * 
+	 *
 	 * Rotating with a positive angle theta rotates points on the positive X axis toward the positive Y axis.
-	 * 
+	 *
 	 * @param theta
 	 *            The angle of rotation in radians.
 	 */
@@ -516,15 +516,15 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 	/**
 	 * Sets this transform to a rotation transformation about a specified point (x, y). This is equivalent to the
 	 * following sequence of calls:
-	 * 
+	 *
 	 * <pre>
 	 * setToTranslate(x, y);
 	 * rotate(theta);
 	 * translate(-x, -y);
 	 * </pre>
-	 * 
+	 *
 	 * Rotating with a positive angle theta rotates points on the positive X axis toward the positive Y axis.
-	 * 
+	 *
 	 * @param theta
 	 *            The angle of rotation in radians.
 	 * @param x
@@ -543,13 +543,13 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 	/**
 	 * Sets this transform to a scale transformation with scale factors sx and sy. The matrix representing this
 	 * transform becomes:
-	 * 
+	 *
 	 * <pre>
 	 * 	[   sx   0    0   ]
 	 * 	[   0    sy   0   ]
 	 * 	[   0    0    1   ]
 	 * </pre>
-	 * 
+	 *
 	 * @param sx
 	 *            The X axis scale factor.
 	 * @param sy
@@ -570,13 +570,13 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 	/**
 	 * Sets this transform to a shearing transformation with shear factors sx and sy. The matrix representing this
 	 * transform becomes:
-	 * 
+	 *
 	 * <pre>
 	 * 	[   1  shx    0   ]
 	 * 	[ shy    1    0   ]
 	 * 	[   0    0    1   ]
 	 * </pre>
-	 * 
+	 *
 	 * @param shx
 	 *            The factor by which coordinates are shifted towards the positive X axis direction according to their Y
 	 *            coordinate.
@@ -598,7 +598,7 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 
 	/**
 	 * Sets this transform to a given AffineTransform.
-	 * 
+	 *
 	 * @throws IllegalArgumentException
 	 *             if Tx is null
 	 */
@@ -620,7 +620,7 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 
 	/**
 	 * Sets this transform to a given PerspectiveTransform.
-	 * 
+	 *
 	 * @throws IllegalArgumentException
 	 *             if Tx is null
 	 */
@@ -643,7 +643,7 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 	/**
 	 * Sets this transform using a two-dimensional array of double precision values. The row index is first, and the
 	 * column index is second.
-	 * 
+	 *
 	 * @param matrix
 	 *            The 2D double array to be used for setting this transform. The array is assumed to be at least 3x3.
 	 * @throws IllegalArgumentException
@@ -670,7 +670,7 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 
 	/**
 	 * Post-concatenates a given AffineTransform to this transform.
-	 * 
+	 *
 	 * @throws IllegalArgumentException
 	 *             if Tx is null
 	 */
@@ -711,7 +711,7 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 
 	/**
 	 * Post-concatenates a given PerspectiveTransform to this transform.
-	 * 
+	 *
 	 * @throws IllegalArgumentException
 	 *             if Tx is null
 	 */
@@ -743,7 +743,7 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 
 	/**
 	 * Pre-concatenates a given AffineTransform to this transform.
-	 * 
+	 *
 	 * @throws IllegalArgumentException
 	 *             if Tx is null
 	 */
@@ -784,7 +784,7 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 
 	/**
 	 * Pre-concatenates a given PerspectiveTransform to this transform.
-	 * 
+	 *
 	 * @throws IllegalArgumentException
 	 *             if Tx is null
 	 */
@@ -816,7 +816,7 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 
 	/**
 	 * Returns a new PerpectiveTransform that is the inverse of the current transform.
-	 * 
+	 *
 	 * @throws NoninvertibleTransformException
 	 *             if transform cannot be inverted
 	 */
@@ -835,7 +835,7 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 	 * Returns a new PerpectiveTransform that is the adjoint, of the current transform. The adjoint is defined as the
 	 * matrix of cofactors, which in turn are the determinants of the submatrices defined by removing the row and column
 	 * of each element from the original matrix in turn.
-	 * 
+	 *
 	 * <p>
 	 * The adjoint is a scalar multiple of the inverse matrix. Because points to be transformed are converted into
 	 * homogeneous coordinates, where scalar factors are irrelevant, the adjoint may be used in place of the true
@@ -849,13 +849,13 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 		return tx;
 	}
 
-	/**
-	 * Transforms the specified ptSrc and stores the result in ptDst. If ptDst is null, a new Point2D object will be
-	 * allocated before storing. In either case, ptDst containing the transformed point is returned for convenience.
-	 * Note that ptSrc and ptDst can the same. In this case, the input point will be overwritten with the transformed
-	 * point.
-	 * 
-	 * @param ptSrc
+	/*
+	  Transforms the specified ptSrc and stores the result in ptDst. If ptDst is null, a new Point2D object will be
+	  allocated before storing. In either case, ptDst containing the transformed point is returned for convenience.
+	  Note that ptSrc and ptDst can the same. In this case, the input point will be overwritten with the transformed
+	  point.
+
+	  @param ptSrc
 	 *            The array containing the source point objects.
 	 * @param ptDst
 	 *            The array where the transform point objects are returned.
@@ -883,10 +883,10 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 	// return ptDst;
 	// }
 
-	/**
-	 * Transforms an array of point objects by this transform.
-	 * 
-	 * @param ptSrc
+	/*
+	  Transforms an array of point objects by this transform.
+
+	  @param ptSrc
 	 *            The array containing the source point objects.
 	 * @param ptDst
 	 *            The array where the transform point objects are returned.
@@ -937,7 +937,7 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 
 	/**
 	 * Transforms an array of floating point coordinates by this transform.
-	 * 
+	 *
 	 * @param srcPts
 	 *            The array containing the source point coordinates. Each point is stored as a pair of x,y coordinates.
 	 * @param srcOff
@@ -981,7 +981,7 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 
 	/**
 	 * Transforms an array of double precision coordinates by this transform.
-	 * 
+	 *
 	 * @param srcPts
 	 *            The array containing the source point coordinates. Each point is stored as a pair of x,y coordinates.
 	 * @param dstPts
@@ -1026,7 +1026,7 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 	/**
 	 * Transforms an array of floating point coordinates by this transform, storing the results into an array of
 	 * doubles.
-	 * 
+	 *
 	 * @param srcPts
 	 *            The array containing the source point coordinates. Each point is stored as a pair of x,y coordinates.
 	 * @param srcOff
@@ -1071,7 +1071,7 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 	/**
 	 * Transforms an array of double precision coordinates by this transform, storing the results into an array of
 	 * floats.
-	 * 
+	 *
 	 * @param srcPts
 	 *            The array containing the source point coordinates. Each point is stored as a pair of x,y coordinates.
 	 * @param dstPts
@@ -1113,13 +1113,13 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 		}
 	}
 
-	/**
-	 * Inverse transforms the specified ptSrc and stores the result in ptDst. If ptDst is null, a new Point2D object
-	 * will be allocated before storing. In either case, ptDst containing the transformed point is returned for
-	 * convenience. Note that ptSrc and ptDst can the same. In this case, the input point will be overwritten with the
-	 * transformed point.
-	 * 
-	 * @param ptSrc
+	/*
+	  Inverse transforms the specified ptSrc and stores the result in ptDst. If ptDst is null, a new Point2D object
+	  will be allocated before storing. In either case, ptDst containing the transformed point is returned for
+	  convenience. Note that ptSrc and ptDst can the same. In this case, the input point will be overwritten with the
+	  transformed point.
+
+	  @param ptSrc
 	 *            The point to be inverse transformed.
 	 * @param ptDst
 	 *            The resulting transformed point.
@@ -1163,7 +1163,7 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 
 	/**
 	 * Inverse transforms an array of double precision coordinates by this transform.
-	 * 
+	 *
 	 * @param srcPts
 	 *            The array containing the source point coordinates. Each point is stored as a pair of x,y coordinates.
 	 * @param dstPts
@@ -1264,7 +1264,7 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 
 	/**
 	 * Tests if this PerspectiveTransform equals a supplied one.
-	 * 
+	 *
 	 * @param obj
 	 *            The PerspectiveTransform to be compared to this one.
 	 */

@@ -25,7 +25,7 @@ import ac.robinson.util.IOUtilities;
 /**
  * CheapMP3 represents an MP3 file by doing a "cheap" scan of the file, parsing the frame headers only and getting an
  * extremely rough estimate of the volume level of each frame.
- * 
+ *
  * TODO: Useful unit tests might be to look for sync in various places: FF FA FF FB 00 FF FA FF FF FA ([ 00 ] * 12) FF
  * FA ([ 00 ] * 13) FF FA
  */
@@ -313,8 +313,8 @@ public class CheapMP3 extends CheapSoundFile {
 		}
 	}
 
-	static private int BITRATES_MPEG1_L3[] = { 0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 0 };
-	static private int BITRATES_MPEG2_L3[] = { 0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160, 0 };
-	static private int SAMPLERATES_MPEG1_L3[] = { 44100, 48000, 32000, 0 };
-	static private int SAMPLERATES_MPEG2_L3[] = { 22050, 24000, 16000, 0 };
-};
+	static private int[] BITRATES_MPEG1_L3 = { 0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 0 };
+	static private int[] BITRATES_MPEG2_L3 = { 0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160, 0 };
+	static private int[] SAMPLERATES_MPEG1_L3 = { 44100, 48000, 32000, 0 };
+	static private int[] SAMPLERATES_MPEG2_L3 = { 22050, 24000, 16000, 0 };
+}

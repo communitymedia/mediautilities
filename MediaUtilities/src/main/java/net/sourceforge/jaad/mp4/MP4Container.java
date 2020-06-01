@@ -1,16 +1,16 @@
 /*
  *  Copyright (C) 2011 in-somnia
- * 
+ *
  *  This file is part of JAAD.
- * 
- *  JAAD is free software; you can redistribute it and/or modify it 
- *  under the terms of the GNU Lesser General Public License as 
- *  published by the Free Software Foundation; either version 3 of the 
+ *
+ *  JAAD is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License as
+ *  published by the Free Software Foundation; either version 3 of the
  *  License, or (at your option) any later version.
  *
- *  JAAD is distributed in the hope that it will be useful, but WITHOUT 
- *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General 
+ *  JAAD is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General
  *  Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public
@@ -40,13 +40,13 @@ import net.sourceforge.jaad.mp4.boxes.impl.ProgressiveDownloadInformationBox;
 /**
  * The MP4Container is the central class for the MP4 demultiplexer. It reads the container and gives access to the
  * containing data.
- * 
+ *
  * The data source can be either an <code>InputStream</code> or a <code>RandomAccessFile</code>. Since the specification
  * does not decree a specific order of the content, the data needed for parsing (the sample tables) may be at the end of
  * the stream. In this case, random access is needed and reading from an <code>InputSteam</code> will cause an
  * exception. Thus, whenever possible, a <code>RandomAccessFile</code> should be used for local files. Parsing from an
  * <code>InputStream</code> is useful when reading from a network stream.
- * 
+ *
  * Each <code>MP4Container</code> can return the used file brand (file format version). Optionally, the following data
  * may be present:
  * <ul>
@@ -54,10 +54,10 @@ import net.sourceforge.jaad.mp4.boxes.impl.ProgressiveDownloadInformationBox;
  * {@link #getDownloadInformationPairs() getDownloadInformationPairs()}</li>
  * <li>a <code>Movie</code></li>
  * </ul>
- * 
+ *
  * Additionally it gives access to the underlying MP4 boxes, that can be retrieved by <code>getBoxes()</code>. However,
  * it is not recommended to access the boxes directly.
- * 
+ *
  * @author in-somnia
  */
 public class MP4Container {
@@ -84,14 +84,14 @@ public class MP4Container {
 
 	public MP4Container(InputStream in) throws IOException {
 		this.in = new MP4InputStream(in);
-		boxes = new ArrayList<Box>();
+		boxes = new ArrayList<>();
 
 		readContent();
 	}
 
 	public MP4Container(RandomAccessFile in) throws IOException {
 		this.in = new MP4InputStream(in);
-		boxes = new ArrayList<Box>();
+		boxes = new ArrayList<>();
 
 		readContent();
 	}

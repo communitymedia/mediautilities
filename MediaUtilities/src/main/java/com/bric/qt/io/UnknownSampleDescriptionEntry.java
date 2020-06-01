@@ -6,14 +6,14 @@
  * Copyright (c) 2011 by Jeremy Wood.
  * All rights reserved.
  *
- * The copyright of this software is owned by Jeremy Wood. 
- * You may not use, copy or modify this software, except in  
- * accordance with the license agreement you entered into with  
+ * The copyright of this software is owned by Jeremy Wood.
+ * You may not use, copy or modify this software, except in
+ * accordance with the license agreement you entered into with
  * Jeremy Wood. For details see accompanying license terms.
- * 
+ *
  * This software is probably, but not necessarily, discussed here:
  * http://javagraphics.java.net/
- * 
+ *
  * That site should also contain the most recent official version
  * of this software.  (See the SVN repository for more details.)
  */
@@ -22,6 +22,8 @@ package com.bric.qt.io;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
+import androidx.annotation.NonNull;
 
 public class UnknownSampleDescriptionEntry extends SampleDescriptionEntry {
 
@@ -49,7 +51,7 @@ public class UnknownSampleDescriptionEntry extends SampleDescriptionEntry {
 	/**
 	 * If it is possible to convert this to a more specific SampleDescriptionEntry: then this method will do that.
 	 * Otherwise this returns this UnknownSampleDescription.
-	 * 
+	 *
 	 */
 	public SampleDescriptionEntry convert() {
 		if (data.length == 20 && type.equals("sowt")) {
@@ -67,6 +69,7 @@ public class UnknownSampleDescriptionEntry extends SampleDescriptionEntry {
 		out.write(data);
 	}
 
+	@NonNull
 	@Override
 	public String toString() {
 		if (data.length == 0) {

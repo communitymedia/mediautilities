@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import androidx.annotation.NonNull;
+
 public class SoundSampleDescriptionEntry extends SampleDescriptionEntry {
 
 	/**
@@ -164,6 +166,7 @@ public class SoundSampleDescriptionEntry extends SampleDescriptionEntry {
 		return 16 + 20 + 16;
 	}
 
+	@NonNull
 	@Override
 	public String toString() {
 		if (version == 0) {

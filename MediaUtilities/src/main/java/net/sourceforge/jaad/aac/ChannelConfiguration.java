@@ -1,16 +1,16 @@
 /*
  *  Copyright (C) 2011 in-somnia
- * 
+ *
  *  This file is part of JAAD.
- * 
- *  JAAD is free software; you can redistribute it and/or modify it 
- *  under the terms of the GNU Lesser General Public License as 
- *  published by the Free Software Foundation; either version 3 of the 
+ *
+ *  JAAD is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License as
+ *  published by the Free Software Foundation; either version 3 of the
  *  License, or (at your option) any later version.
  *
- *  JAAD is distributed in the hope that it will be useful, but WITHOUT 
- *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General 
+ *  JAAD is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General
  *  Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public
@@ -19,9 +19,11 @@
  */
 package net.sourceforge.jaad.aac;
 
+import androidx.annotation.NonNull;
+
 /**
  * All possible channel configurations for AAC.
- * 
+ *
  * @author in-somnia
  */
 public enum ChannelConfiguration {
@@ -74,7 +76,7 @@ public enum ChannelConfiguration {
 	private final int chCount;
 	private final String descr;
 
-	private ChannelConfiguration(int chCount, String descr) {
+	ChannelConfiguration(int chCount, String descr) {
 		this.chCount = chCount;
 		this.descr = descr;
 	}
@@ -88,7 +90,7 @@ public enum ChannelConfiguration {
 
 	/**
 	 * Returns a short description of this configuration.
-	 * 
+	 *
 	 * @return the channel configuration's description
 	 */
 	public String getDescription() {
@@ -98,9 +100,10 @@ public enum ChannelConfiguration {
 	/**
 	 * Returns a string representation of this channel configuration. The method is identical to
 	 * <code>getDescription()</code>.
-	 * 
+	 *
 	 * @return the channel configuration's description
 	 */
+	@NonNull
 	@Override
 	public String toString() {
 		return descr;

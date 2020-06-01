@@ -22,12 +22,14 @@ package net.javazoom.jl.decoder;
 
 import java.io.PrintStream;
 
+import androidx.annotation.NonNull;
+
 /**
  * The JavaLayerException is the base class for all API-level exceptions thrown by JavaLayer. To facilitate conversion
  * and common handling of exceptions from other domains, the class can delegate some functionality to a contained
  * Throwable instance.
  * <p>
- * 
+ *
  * @author MDM
  */
 public class JavaLayerException extends Exception {
@@ -55,7 +57,7 @@ public class JavaLayerException extends Exception {
 		printStackTrace(System.err);
 	}
 
-	public void printStackTrace(PrintStream ps) {
+	public void printStackTrace(@NonNull PrintStream ps) {
 		if (this.exception == null) {
 			super.printStackTrace(ps);
 		} else {

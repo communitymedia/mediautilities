@@ -43,7 +43,7 @@ package com.bric.audio;
  * can use the <code>{@link DataLine#available available}</code> method defined in the <code>DataLine</code> interface
  * to determine the amount of data currently queued in the data line's buffer. If the buffer does overflow, the oldest
  * queued data is discarded and replaced by new data.
- * 
+ *
  * @author Kara Kytle
  * @see Mixer
  * @see DataLine
@@ -69,7 +69,7 @@ public interface TargetDataLine extends DataLine {
 	 * <p>
 	 * Some lines, once closed, cannot be reopened. Attempts to reopen such a line will always result in a
 	 * <code>LineUnavailableException</code>.
-	 * 
+	 *
 	 * @param format
 	 *            the desired audio format
 	 * @param bufferSize
@@ -83,7 +83,7 @@ public interface TargetDataLine extends DataLine {
 	 *             if the line is already open
 	 * @throws SecurityException
 	 *             if the line cannot be opened due to security restrictions
-	 * 
+	 *
 	 * @see #open(AudioFormat)
 	 * @see Line#open
 	 * @see Line#close
@@ -95,7 +95,7 @@ public interface TargetDataLine extends DataLine {
 	/**
 	 * Opens the line with the specified format, causing the line to acquire any required system resources and become
 	 * operational.
-	 * 
+	 *
 	 * <p>
 	 * The implementation chooses a buffer size, which is measured in bytes but which encompasses an integral number of
 	 * sample frames. The buffer size that the system has chosen may be queried by subsequently calling
@@ -109,7 +109,7 @@ public interface TargetDataLine extends DataLine {
 	 * <p>
 	 * Some lines, once closed, cannot be reopened. Attempts to reopen such a line will always result in a
 	 * <code>LineUnavailableException</code>.
-	 * 
+	 *
 	 * @param format
 	 *            the desired audio format
 	 * @throws LineUnavailableException
@@ -120,7 +120,7 @@ public interface TargetDataLine extends DataLine {
 	 *             if the line is already open
 	 * @throws SecurityException
 	 *             if the line cannot be opened due to security restrictions
-	 * 
+	 *
 	 * @see #open(AudioFormat, int)
 	 * @see Line#open
 	 * @see Line#close
@@ -144,7 +144,7 @@ public interface TargetDataLine extends DataLine {
 	 * <center><code>[ bytes read ] % [frame size in bytes ] == 0</code> </center> <br>
 	 * The return value will always meet this requirement. A request to read a number of bytes representing a
 	 * non-integral number of sample frames cannot be fulfilled and may result in an IllegalArgumentException.
-	 * 
+	 *
 	 * @param b
 	 *            a byte array that will contain the requested input data when this method returns
 	 * @param off
@@ -158,17 +158,17 @@ public interface TargetDataLine extends DataLine {
 	 * @throws ArrayIndexOutOfBoundsException
 	 *             if <code>off</code> is negative, or <code>off+len</code> is greater than the length of the array
 	 *             <code>b</code>.
-	 * 
+	 *
 	 * @see SourceDataLine#write
 	 * @see DataLine#available
 	 */
 	public int read(byte[] b, int off, int len);
 
-	/**
-	 * Obtains the number of sample frames of audio data that can be read from the target data line without blocking.
-	 * Note that the return value measures sample frames, not bytes.
-	 * 
-	 * @return the number of sample frames currently available for reading
+	/*
+	  Obtains the number of sample frames of audio data that can be read from the target data line without blocking.
+	  Note that the return value measures sample frames, not bytes.
+
+	  @return the number of sample frames currently available for reading
 	 * @see SourceDataLine#availableWrite
 	 */
 	// public int availableRead();

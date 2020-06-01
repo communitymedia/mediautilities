@@ -25,6 +25,8 @@
 
 package com.bric.audio;
 
+import androidx.annotation.NonNull;
+
 /**
  * The <code>Line</code> interface represents a mono or multi-channel audio feed. A line is an element of the digital
  * audio "pipeline," such as a mixer, an input or output port, or a data path into or out of a mixer.
@@ -53,9 +55,9 @@ package com.bric.audio;
  * <p>
  * Certain line operations, such as open and close, can generate security exceptions if invoked by unprivileged code
  * when the line is a shared audio resource.
- * 
+ *
  * @author Kara Kytle
- * 
+ *
  * @see LineEvent
  * @since 1.3
  */
@@ -63,7 +65,7 @@ public interface Line {
 
 	/**
 	 * Obtains the <code>Line.Info</code> object describing this line.
-	 * 
+	 *
 	 * @return description of the line
 	 */
 	public Line.Info getLineInfo();
@@ -90,14 +92,14 @@ public interface Line {
 	 * <p>
 	 * For <code>DataLine</code>'s, if the <code>DataLine.Info</code> object which was used to retrieve the line,
 	 * specifies at least one fully qualified audio format, the last one will be used as the default format.
-	 * 
+	 *
 	 * @throws IllegalArgumentException
 	 *             if this method is called on a Clip instance.
 	 * @throws LineUnavailableException
 	 *             if the line cannot be opened due to resource restrictions.
 	 * @throws SecurityException
 	 *             if the line cannot be opened due to security restrictions.
-	 * 
+	 *
 	 * @see #close
 	 * @see #isOpen
 	 * @see LineEvent
@@ -110,10 +112,10 @@ public interface Line {
 	/**
 	 * Closes the line, indicating that any system resources in use by the line can be released. If this operation
 	 * succeeds, the line is marked closed and a <code>CLOSE</code> event is dispatched to the line's listeners.
-	 * 
+	 *
 	 * @throws SecurityException
 	 *             if the line cannot be closed due to security restrictions.
-	 * 
+	 *
 	 * @see #open
 	 * @see #isOpen
 	 * @see LineEvent
@@ -123,9 +125,9 @@ public interface Line {
 	/**
 	 * Indicates whether the line is open, meaning that it has reserved system resources and is operational, although it
 	 * might not currently be playing or capturing sound.
-	 * 
+	 *
 	 * @return <code>true</code> if the line is open, otherwise <code>false</code>
-	 * 
+	 *
 	 * @see #open()
 	 * @see #close()
 	 */
@@ -134,7 +136,7 @@ public interface Line {
 	/**
 	 * Obtains the set of controls associated with this line. Some controls may only be available when the line is open.
 	 * If there are no controls, this method returns an array of length 0.
-	 * 
+	 *
 	 * @return the array of controls
 	 * @see #getControl
 	 */
@@ -143,7 +145,7 @@ public interface Line {
 	/**
 	 * Indicates whether the line supports a control of the specified type. Some controls may only be available when the
 	 * line is open.
-	 * 
+	 *
 	 * @param control
 	 *            the type of the control for which support is queried
 	 * @return <code>true</code> if at least one control of the specified type is supported, otherwise
@@ -154,7 +156,7 @@ public interface Line {
 	/**
 	 * Obtains a control of the specified type, if there is any. Some controls may only be available when the line is
 	 * open.
-	 * 
+	 *
 	 * @param control
 	 *            the type of the requested control
 	 * @return a control of the specified type
@@ -168,7 +170,7 @@ public interface Line {
 	/**
 	 * Adds a listener to this line. Whenever the line's status changes, the listener's <code>update()</code> method is
 	 * called with a <code>LineEvent</code> object that describes the change.
-	 * 
+	 *
 	 * @param listener
 	 *            the object to add as a listener to this line
 	 * @see #removeLineListener
@@ -179,7 +181,7 @@ public interface Line {
 
 	/**
 	 * Removes the specified listener from this line's list of listeners.
-	 * 
+	 *
 	 * @param listener
 	 *            listener to remove
 	 * @see #addLineListener
@@ -195,9 +197,9 @@ public interface Line {
 	 * A <code>Line.Info</code> can be retrieved using various methods of the <code>Line</code>, <code>Mixer</code>, and
 	 * <code>AudioSystem</code> interfaces. Other such methods let you pass a <code>Line.Info</code> as an argument, to
 	 * learn whether lines matching the specified configuration are available and to obtain them.
-	 * 
+	 *
 	 * @author Kara Kytle
-	 * 
+	 *
 	 * @see Line#getLineInfo
 	 * @see Mixer#getSourceLineInfo
 	 * @see Mixer#getTargetLineInfo
@@ -221,7 +223,7 @@ public interface Line {
 		/**
 		 * Constructs an info object that describes a line of the specified class. This constructor is typically used by
 		 * an application to describe a desired line.
-		 * 
+		 *
 		 * @param lineClass
 		 *            the class of the line that the new Line.Info object describes
 		 */
@@ -236,7 +238,7 @@ public interface Line {
 
 		/**
 		 * Obtains the class of the line that this Line.Info object describes.
-		 * 
+		 *
 		 * @return the described line's class
 		 */
 		public Class<?> getLineClass() {
@@ -250,7 +252,7 @@ public interface Line {
 		 * object must be compatible with the capabilities of this one. Specifically, the routing configuration for the
 		 * specified info object must be compatible with that of this one. Subclasses may add other criteria to
 		 * determine whether the two objects match.
-		 * 
+		 *
 		 * @param info
 		 *            the info object which is being compared to this one
 		 * @return <code>true</code> if the specified object matches this one, <code>false</code> otherwise
@@ -307,9 +309,10 @@ public interface Line {
 
 		/**
 		 * Obtains a textual description of the line info.
-		 * 
+		 *
 		 * @return a string description
 		 */
+		@NonNull
 		public String toString() {
 
 			String fullPackagePath = "javax.sound.sampled.";

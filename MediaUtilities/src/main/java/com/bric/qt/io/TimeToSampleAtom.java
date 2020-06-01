@@ -6,14 +6,14 @@
  * Copyright (c) 2011 by Jeremy Wood.
  * All rights reserved.
  *
- * The copyright of this software is owned by Jeremy Wood. 
- * You may not use, copy or modify this software, except in  
- * accordance with the license agreement you entered into with  
+ * The copyright of this software is owned by Jeremy Wood.
+ * You may not use, copy or modify this software, except in
+ * accordance with the license agreement you entered into with
  * Jeremy Wood. For details see accompanying license terms.
- * 
+ *
  * This software is probably, but not necessarily, discussed here:
  * http://javagraphics.java.net/
- * 
+ *
  * That site should also contain the most recent official version
  * of this software.  (See the SVN repository for more details.)
  */
@@ -24,6 +24,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import com.bric.io.GuardedOutputStream;
+
+import androidx.annotation.NonNull;
 
 public class TimeToSampleAtom extends LeafAtom {
 	int version = 0;
@@ -71,6 +73,7 @@ public class TimeToSampleAtom extends LeafAtom {
 		}
 	}
 
+	@NonNull
 	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
@@ -89,7 +92,7 @@ public class TimeToSampleAtom extends LeafAtom {
 
 	/**
 	 * Add a new sample time to this atom.
-	 * 
+	 *
 	 * @param duration the new duration, relative to the enclosing media's time scale.
 	 */
 	public void addSampleTime(long duration) {
@@ -98,7 +101,7 @@ public class TimeToSampleAtom extends LeafAtom {
 
 	/**
 	 * Add a new sample time to this atom.
-	 * 
+	 *
 	 * @param duration the new duration, relative to the enclosing media's time scale.
 	 * @param forceNew whether to force a new entry in the table, regardless of whether the duration is the same as that
 	 *            of the previous entry
@@ -142,6 +145,7 @@ class TimeToSampleEntry {
 		sampleDuration = Atom.read32Int(in);
 	}
 
+	@NonNull
 	public String toString() {
 		return "[" + sampleCount + ", " + sampleDuration + "]";
 	}

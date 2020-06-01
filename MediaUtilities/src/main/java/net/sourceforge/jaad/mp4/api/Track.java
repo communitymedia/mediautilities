@@ -1,16 +1,16 @@
 /*
  *  Copyright (C) 2011 in-somnia
- * 
+ *
  *  This file is part of JAAD.
- * 
- *  JAAD is free software; you can redistribute it and/or modify it 
- *  under the terms of the GNU Lesser General Public License as 
- *  published by the Free Software Foundation; either version 3 of the 
+ *
+ *  JAAD is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License as
+ *  published by the Free Software Foundation; either version 3 of the
  *  License, or (at your option) any later version.
  *
- *  JAAD is distributed in the hope that it will be useful, but WITHOUT 
- *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General 
+ *  JAAD is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General
  *  Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public
@@ -48,10 +48,10 @@ import net.sourceforge.jaad.mp4.od.Descriptor;
 
 /**
  * This class represents a track in a movie.
- * 
+ *
  * Each track contains either a decoder specific info as a byte array or a <code>DecoderInfo</code> object that contains
  * necessary information for the decoder.
- * 
+ *
  * @author in-somnia
  */
 // TODO: expand javadoc; use generics for subclasses?
@@ -110,7 +110,7 @@ public abstract class Track {
 		// sample table
 		final Box stbl = minf.getChild(BoxTypes.SAMPLE_TABLE_BOX);
 		if (stbl.hasChildren()) {
-			frames = new ArrayList<Frame>();
+			frames = new ArrayList<>();
 			parseSampleTable(stbl);
 		} else
 			frames = Collections.emptyList();
@@ -226,7 +226,7 @@ public abstract class Track {
 	// tkhd
 	/**
 	 * Returns true if the track is enabled. A disabled track is treated as if it were not present.
-	 * 
+	 *
 	 * @return true if the track is enabled
 	 */
 	public boolean isEnabled() {
@@ -235,7 +235,7 @@ public abstract class Track {
 
 	/**
 	 * Returns true if the track is used in the presentation.
-	 * 
+	 *
 	 * @return true if the track is used
 	 */
 	public boolean isUsed() {
@@ -244,7 +244,7 @@ public abstract class Track {
 
 	/**
 	 * Returns true if the track is used in previews.
-	 * 
+	 *
 	 * @return true if the track is used in previews
 	 */
 	public boolean isUsedForPreview() {
@@ -253,7 +253,7 @@ public abstract class Track {
 
 	/**
 	 * Returns the time this track was created.
-	 * 
+	 *
 	 * @return the creation time
 	 */
 	public Date getCreationTime() {
@@ -262,7 +262,7 @@ public abstract class Track {
 
 	/**
 	 * Returns the last time this track was modified.
-	 * 
+	 *
 	 * @return the modification time
 	 */
 	public Date getModificationTime() {
@@ -272,7 +272,7 @@ public abstract class Track {
 	// mdhd
 	/**
 	 * Returns the language for this media.
-	 * 
+	 *
 	 * @return the language
 	 */
 	public Locale getLanguage() {
@@ -282,7 +282,7 @@ public abstract class Track {
 	/**
 	 * Returns true if the data for this track is present in this file (stream). If not, <code>getLocation()</code>
 	 * returns the URL where the data can be found.
-	 * 
+	 *
 	 * @return true if the data is in this file (stream), false otherwise
 	 */
 	public boolean isInFile() {
@@ -292,7 +292,7 @@ public abstract class Track {
 	/**
 	 * If the data for this track is not present in this file (if <code>isInFile</code> returns false), this method
 	 * returns the data's location. Else null is returned.
-	 * 
+	 *
 	 * @return the data's location or null if the data is in this file
 	 */
 	public URL getLocation() {
@@ -303,7 +303,7 @@ public abstract class Track {
 	/**
 	 * Returns the decoder specific info, if present. It contains configuration data for the decoder. If the decoder
 	 * specific info is not present, the track contains a <code>DecoderInfo</code>.
-	 * 
+	 *
 	 * @see #getDecoderInfo()
 	 * @return the decoder specific info
 	 */
@@ -314,7 +314,7 @@ public abstract class Track {
 	/**
 	 * Returns the <code>DecoderInfo</code>, if present. It contains configuration information for the decoder. If the
 	 * structure is not present, the track contains a decoder specific info.
-	 * 
+	 *
 	 * @see #getDecoderSpecificInfo()
 	 * @return the codec specific structure
 	 */
@@ -325,7 +325,7 @@ public abstract class Track {
 	/**
 	 * Returns the <code>ProtectionInformation</code> object that contains details about the DRM system used. If no
 	 * protection is present this method returns null.
-	 * 
+	 *
 	 * @return a <code>ProtectionInformation</code> object or null if no protection is used
 	 */
 	public Protection getProtection() {
@@ -335,7 +335,7 @@ public abstract class Track {
 	// reading
 	/**
 	 * Indicates if there are more frames to be read in this track.
-	 * 
+	 *
 	 * @return true if there is at least one more frame to read.
 	 */
 	public boolean hasMoreFrames() {
@@ -344,7 +344,7 @@ public abstract class Track {
 
 	/**
 	 * Reads the next frame from this track. If it contains no more frames to read, null is returned.
-	 * 
+	 *
 	 * @return the next frame or null if there are no more frames to read
 	 * @throws IOException if reading fails
 	 */
@@ -384,7 +384,7 @@ public abstract class Track {
 	/**
 	 * This method tries to seek to the frame that is nearest to the given timestamp. It returns the timestamp of the
 	 * frame it seeked to or -1 if none was found.
-	 * 
+	 *
 	 * @param timestamp a timestamp to seek to
 	 * @return the frame's timestamp that the method seeked to
 	 */
@@ -404,7 +404,7 @@ public abstract class Track {
 	/**
 	 * Returns the timestamp of the next frame to be read. This is needed to read frames from a movie that contains
 	 * multiple tracks.
-	 * 
+	 *
 	 * @return the next frame's timestamp
 	 */
 	double getNextTimeStamp() {

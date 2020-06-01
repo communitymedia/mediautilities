@@ -55,7 +55,7 @@ public class SSRC {
 	/** */
 	private int FFTFIRLEN = 1;
 
-	/** */
+	/* */
 //  private static final int M = 15;
 
 	/** */
@@ -67,13 +67,13 @@ public class SSRC {
 	}
 
 	/** */
-	private static final int scoeffreq[] = {0, 48000, 44100, 37800, 32000, 22050, 48000, 44100};
+	private static final int[] scoeffreq = {0, 48000, 44100, 37800, 32000, 22050, 48000, 44100};
 
 	/** */
-	private static final int scoeflen[] = {1, 16, 20, 16, 16, 15, 16, 15};
+	private static final int[] scoeflen = {1, 16, 20, 16, 16, 15, 16, 15};
 
 	/** */
-	private static final int samp[] = {8, 18, 27, 8, 8, 8, 10, 9};
+	private static final int[] samp = {8, 18, 27, 8, 8, 8, 10, 9};
 
 	/** */
 	private static final double[][] shapercoefs = {{-1}, // triangular dither
@@ -1771,7 +1771,7 @@ public class SSRC {
 	}
 
 	/** */
-	private static final double presets[] = {0.7, 0.9, 0.18};
+	private static final double[] presets = {0.7, 0.9, 0.18};
 
 	public SSRC() {
 	}

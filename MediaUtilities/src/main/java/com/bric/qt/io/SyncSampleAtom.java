@@ -4,6 +4,8 @@ import com.bric.io.GuardedOutputStream;
 
 import java.io.IOException;
 
+import androidx.annotation.NonNull;
+
 // Format documentation says this atom is automatically implied if not present, but VLC does not seem to respect this
 public class SyncSampleAtom extends LeafAtom {
 	int version = 0;
@@ -50,6 +52,7 @@ public class SyncSampleAtom extends LeafAtom {
 		}
 	}
 
+	@NonNull
 	@Override
 	public String toString() {
 		String entriesString;

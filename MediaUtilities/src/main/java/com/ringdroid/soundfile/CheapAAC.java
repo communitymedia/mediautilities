@@ -48,7 +48,7 @@ public class CheapAAC extends CheapSoundFile {
 		public int start;
 		public int len; // including header
 		public byte[] data;
-	};
+	}
 
 	public static final int kDINF = 0x64696e66;
 	public static final int kFTYP = 0x66747970;
@@ -172,10 +172,10 @@ public class CheapAAC extends CheapSoundFile {
 		mMdatOffset = -1;
 		mMdatLength = -1;
 
-		mAdditionalInputFiles = new ArrayList<File>();
-		mOriginalFrameLengths = new ArrayList<Integer>();
+		mAdditionalInputFiles = new ArrayList<>();
+		mOriginalFrameLengths = new ArrayList<>();
 
-		mAtomMap = new HashMap<Integer, Atom>();
+		mAtomMap = new HashMap<>();
 
 		// No need to handle filesizes larger than can fit in a 32-bit int
 		mFileSize = (int) mInputFile.length();
@@ -711,7 +711,7 @@ public class CheapAAC extends CheapSoundFile {
 	// to fix just yet
 	public long addSoundFile(CheapSoundFile newFile) {
 		if (!(newFile instanceof CheapAAC)) {
-			return -1l; // TODO: throw
+			return -1L; // TODO: throw
 		}
 		CheapAAC newAACFile = (CheapAAC) newFile;
 
@@ -785,8 +785,8 @@ public class CheapAAC extends CheapSoundFile {
 		return newDuration;
 	}
 
-	/**
-	 * For debugging public static void main(String[] argv) throws Exception { File f = new File(""); CheapAAC c = new
-	 * CheapAAC(); c.ReadFile(f); c.WriteFile(new File(""), 0, c.getNumFrames()); }
-	 **/
-};
+	/*
+	  For debugging public static void main(String[] argv) throws Exception { File f = new File(""); CheapAAC c = new
+	  CheapAAC(); c.ReadFile(f); c.WriteFile(new File(""), 0, c.getNumFrames()); }
+	 */
+}

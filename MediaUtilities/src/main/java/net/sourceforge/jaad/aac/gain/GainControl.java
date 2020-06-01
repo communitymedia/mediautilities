@@ -25,8 +25,6 @@ import net.sourceforge.jaad.aac.syntax.ICSInfo.WindowSequence;
 
 import java.util.Arrays;
 
-import ac.robinson.util.AndroidUtilities;
-
 public class GainControl implements GCConstants {
 
 	private final int frameLen, lbLong, lbShort;
