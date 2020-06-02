@@ -38,11 +38,16 @@ import android.util.TypedValue;
 import android.view.Display;
 import android.view.Surface;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
 import java.util.List;
+
+import androidx.core.view.OnApplyWindowInsetsListener;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 public class UIUtilities {
 
@@ -276,5 +281,32 @@ public class UIUtilities {
 		}
 
 		background.setColorFilter(normalColour);
+	}
+
+	public static void addFullscreenMarginsCorrectorListener(final Activity activity, int rootView, final int[] insetViews) {
+		// better fullscreen with insets (fix bugs with incorrect margins when switching between fullscreen and normal views)
+		// see: https://stackoverflow.com/a/50775459/1993220
+		ViewCompat.setOnApplyWindowInsetsListener(activity.findViewById(rootView), new OnApplyWindowInsetsListener() {
+			@Override
+			public WindowInsetsCompat onApplyWindowInsets(View v, WindowInsetsCompat insets) {
+				// perhaps related to notch handling (see themes-v28) for some reason this gets called twice, once all zero
+				int left = insets.getSystemWindowInsetLeft();
+				int top = insets.getSystemWindowInsetTop();
+				int right = insets.getSystemWindowInsetRight();
+				int bottom = insets.getSystemWindowInsetBottom();
+
+				if (left != 0 || top != 0 || right != 0 || bottom != 0) {
+					for (int view : insetViews) {
+						View controlsView = activity.findViewById(view);
+						if (controlsView.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+							ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) controlsView.getLayoutParams();
+							p.setMargins(left, top, right, bottom);
+							controlsView.requestLayout();
+						}
+					}
+				}
+				return insets.consumeSystemWindowInsets();
+			}
+		});
 	}
 }

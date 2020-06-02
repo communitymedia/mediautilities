@@ -373,13 +373,13 @@ public class PlaybackController extends FrameLayout {
 		if (mShareButton != null) {
 			mShareButton.setOnClickListener(mShareListener);
 			mShareButton.setEnabled(mShareListener != null);
-			((LinearLayout) mShareButton.getParent()).setVisibility(mShareListener != null ? View.VISIBLE : View.GONE);
+			((LinearLayout) mShareButton.getParent()).setVisibility(mShareListener != null ? View.VISIBLE : View.INVISIBLE);
 		}
 
 		if (mBackButton != null) {
 			mBackButton.setOnClickListener(mBackListener);
 			mBackButton.setEnabled(mBackListener != null);
-			((LinearLayout) mBackButton.getParent()).setVisibility(mBackListener != null ? View.VISIBLE : View.GONE);
+			((LinearLayout) mBackButton.getParent()).setVisibility(mBackListener != null ? View.VISIBLE : View.INVISIBLE);
 		}
 	}
 
