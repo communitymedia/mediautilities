@@ -22,6 +22,7 @@ package ac.robinson.view;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
@@ -31,6 +32,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
@@ -39,6 +41,9 @@ import java.util.Formatter;
 import java.util.Locale;
 
 import ac.robinson.mediautilities.R;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.BlendModeColorFilterCompat;
+import androidx.core.graphics.BlendModeCompat;
 
 // TODO: this class and CustomMediaController should be combined (lots of duplicate code)
 public class PlaybackController extends FrameLayout {
@@ -48,6 +53,9 @@ public class PlaybackController extends FrameLayout {
 	private static final int PROGRESS_BAR_STEPS = 100;
 	private static final int SEEK_FORWARD_MILLIS = 9000;
 	private static final int SEEK_BACKWARD_MILLIS = 3000;
+
+	private static final int PAUSE_ICON = R.drawable.ic_menu_pause;
+	private static final int PLAY_ICON = R.drawable.ic_menu_play;
 
 	private MediaPlayerControl mPlayerControl;
 
@@ -66,11 +74,17 @@ public class PlaybackController extends FrameLayout {
 	private ImageButton mFfwdButton;
 	private ImageButton mRewButton;
 
+	private int mPauseIcon = PAUSE_ICON;
+	private int mPlayIcon = PLAY_ICON;
+
 	private ImageButton mBackButton;
 	private ImageButton mShareButton;
 
 	private boolean mUseCustomSeekButtons;
 	private boolean mDragging;
+
+	private ProgressBar mRecordIndicator;
+	private boolean mRecording;
 
 	public PlaybackController(Context context) {
 		this(context, null);
@@ -263,14 +277,39 @@ public class PlaybackController extends FrameLayout {
 		}
 	};
 
+	public void setRecordingMode(boolean recording) {
+		if (recording) {
+			mPlayIcon = R.drawable.ic_menu_record;
+			if (mRecordIndicator == null) {
+				mRecordIndicator = findViewById(R.id.record);
+				Drawable progressDrawable = mRecordIndicator.getIndeterminateDrawable().mutate();
+				progressDrawable.setColorFilter(BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
+						ContextCompat.getColor(getContext(), R.color.media_controller_recording), BlendModeCompat.SRC_IN));
+				mRecordIndicator.setIndeterminateDrawable(progressDrawable);
+			}
+			mRecording = true;
+		} else {
+			mPlayIcon = PLAY_ICON;
+			mPauseIcon = PAUSE_ICON;
+			mRecording = false;
+		}
+		updatePausePlay();
+	}
+
 	private void updatePausePlay() {
 		if (mPlayerControl == null || mPauseButton == null) {
 			return;
 		}
 		if (mPlayerControl.isPlaying()) {
-			mPauseButton.setImageResource(R.drawable.ic_menu_pause);
+			mPauseButton.setImageResource(mPauseIcon);
+			if (mRecording) {
+				mRecordIndicator.setVisibility(View.VISIBLE);
+			}
 		} else {
-			mPauseButton.setImageResource(R.drawable.ic_menu_play);
+			mPauseButton.setImageResource(mPlayIcon);
+			if (mRecording) {
+				mRecordIndicator.setVisibility(View.GONE);
+			}
 		}
 	}
 

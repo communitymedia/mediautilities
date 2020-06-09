@@ -3,5 +3,6 @@
 
     <color name="media_controller_background">#cc666666</color>
     <color name="media_controller_text">#ffffffff</color>
+    <color name="media_controller_recording">#ffe53935</color>
 
 </resources>

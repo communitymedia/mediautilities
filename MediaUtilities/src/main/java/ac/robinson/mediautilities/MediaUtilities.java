@@ -35,6 +35,7 @@ public class MediaUtilities {
 	public static final String HTML_FILE_EXTENSION = ".html";
 	public static final String MP4_FILE_EXTENSION = ".mp4";
 	public static final String MOV_FILE_EXTENSION = ".mov";
+	public static final String SUBTITLE_FILE_EXTENSION = ".srt";
 
 	// audio file types that are compatible with our video export (no dots)
 	// TODO: handle this in a better way? (see CheapSoundFile, for example)

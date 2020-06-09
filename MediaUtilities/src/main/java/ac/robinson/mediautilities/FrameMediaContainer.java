@@ -38,13 +38,9 @@ public class FrameMediaContainer {
 	public int mForegroundColour = 0;
 
 	public String mTextContent = null;
-	public int mTextDuration = -1; // milliseconds, only set if the user has set a specific duration for this item
 
 	public String mImagePath = null;
-	public int mImageDuration = -1; // milliseconds, only set if the user has set a specific duration for this item
-
 	public boolean mImageIsFrontCamera = false;
-	public boolean mImageIsLandscape = false;
 
 	public ArrayList<Integer> mAudioDurations = new ArrayList<>();
 	public ArrayList<String> mAudioPaths = new ArrayList<>();

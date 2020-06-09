@@ -71,7 +71,7 @@ public class ImportingService extends Service {
 			unregisterReceiver(mBluetoothStateReceiver);
 		} catch (Throwable t) {
 			// on some devices (Kindle, for example) the registerReceiver call fails and returns null; however, on other
-			// devices (HTC Desire S for example) the registerReciever call succeeds and *still* returns null - because
+			// devices (HTC Desire S for example) the registerReceiver call succeeds and *still* returns null - because
 			// of this we must catch the inevitable Exception when we unregister a receiver that is not registered
 		}
 	}
