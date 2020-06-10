@@ -54,7 +54,6 @@ public class PlaybackController extends FrameLayout {
 	private static final int SEEK_FORWARD_MILLIS = 9000;
 	private static final int SEEK_BACKWARD_MILLIS = 3000;
 
-	private static final int PAUSE_ICON = R.drawable.ic_menu_pause;
 	private static final int PLAY_ICON = R.drawable.ic_menu_play;
 
 	private MediaPlayerControl mPlayerControl;
@@ -74,7 +73,6 @@ public class PlaybackController extends FrameLayout {
 	private ImageButton mFfwdButton;
 	private ImageButton mRewButton;
 
-	private int mPauseIcon = PAUSE_ICON;
 	private int mPlayIcon = PLAY_ICON;
 
 	private ImageButton mBackButton;
@@ -278,22 +276,21 @@ public class PlaybackController extends FrameLayout {
 	};
 
 	public void setRecordingMode(boolean recording) {
+		if (mRecordIndicator == null) {
+			mRecordIndicator = findViewById(R.id.record);
+			Drawable progressDrawable = mRecordIndicator.getIndeterminateDrawable().mutate();
+			progressDrawable.setColorFilter(BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
+					ContextCompat.getColor(getContext(), R.color.media_controller_recording), BlendModeCompat.SRC_IN));
+			mRecordIndicator.setIndeterminateDrawable(progressDrawable);
+		}
 		if (recording) {
 			mPlayIcon = R.drawable.ic_menu_record;
-			if (mRecordIndicator == null) {
-				mRecordIndicator = findViewById(R.id.record);
-				Drawable progressDrawable = mRecordIndicator.getIndeterminateDrawable().mutate();
-				progressDrawable.setColorFilter(BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-						ContextCompat.getColor(getContext(), R.color.media_controller_recording), BlendModeCompat.SRC_IN));
-				mRecordIndicator.setIndeterminateDrawable(progressDrawable);
-			}
 			mRecording = true;
 		} else {
 			mPlayIcon = PLAY_ICON;
-			mPauseIcon = PAUSE_ICON;
 			mRecording = false;
 		}
-		updatePausePlay();
+		refreshController();
 	}
 
 	private void updatePausePlay() {
@@ -301,13 +298,13 @@ public class PlaybackController extends FrameLayout {
 			return;
 		}
 		if (mPlayerControl.isPlaying()) {
-			mPauseButton.setImageResource(mPauseIcon);
+			mPauseButton.setImageResource(R.drawable.ic_menu_pause);
 			if (mRecording) {
 				mRecordIndicator.setVisibility(View.VISIBLE);
 			}
 		} else {
 			mPauseButton.setImageResource(mPlayIcon);
-			if (mRecording) {
+			if (mRecordIndicator != null) {
 				mRecordIndicator.setVisibility(View.GONE);
 			}
 		}

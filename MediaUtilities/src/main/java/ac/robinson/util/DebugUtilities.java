@@ -41,20 +41,6 @@ public class DebugUtilities {
 		return o.getClass().getName();
 	}
 
-	@Deprecated // does not work with recent Android Studio - see: https://code.google.com/p/android/issues/detail?id=220039
-	public static String getApplicationBuildTime(PackageManager packageManager, String packageName) {
-		try {
-			ApplicationInfo applicationInfo = packageManager.getApplicationInfo(packageName, 0);
-			ZipFile zipFile = new ZipFile(applicationInfo.sourceDir);
-			ZipEntry zipEntry = zipFile.getEntry("classes.dex");
-			SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yy HH:mm", Locale.ENGLISH);
-			dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-			return dateFormat.format(new java.util.Date(zipEntry.getTime()));
-		} catch (Exception ignored) {
-		}
-		return "unknown";
-	}
-
 	public static String getScreenDensityString(Resources resources) {
 		switch (resources.getDisplayMetrics().densityDpi) {
 			case DisplayMetrics.DENSITY_LOW:
