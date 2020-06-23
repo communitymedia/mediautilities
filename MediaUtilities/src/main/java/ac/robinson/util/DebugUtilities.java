@@ -38,7 +38,7 @@ import java.util.zip.ZipFile;
 
 public class DebugUtilities {
 	public static String getLogTag(Object o) {
-		return o.getClass().getName();
+		return o.getClass().getSimpleName();
 	}
 
 	public static String getScreenDensityString(Resources resources) {
