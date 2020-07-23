@@ -150,15 +150,15 @@ public class UIUtilities {
 							ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 					break;
 				case Surface.ROTATION_90:
-					activity.setRequestedOrientation(naturallyPortrait ? ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE :
-							reversePortrait);
+					activity.setRequestedOrientation(
+							naturallyPortrait ? ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE : reversePortrait);
 					break;
 				case Surface.ROTATION_180:
 					activity.setRequestedOrientation(naturallyPortrait ? reversePortrait : reverseLandscape);
 					break;
 				case Surface.ROTATION_270:
-					activity.setRequestedOrientation(naturallyPortrait ? reverseLandscape :
-							ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+					activity.setRequestedOrientation(
+							naturallyPortrait ? reverseLandscape : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 					break;
 				default:
 					break;
@@ -283,9 +283,31 @@ public class UIUtilities {
 		background.setColorFilter(normalColour);
 	}
 
-	public static void addFullscreenMarginsCorrectorListener(final Activity activity, int rootView, final int[] insetViews) {
-		// better fullscreen with insets (fix bugs with incorrect margins when switching between fullscreen and normal views)
-		// see: https://stackoverflow.com/a/50775459/1993220
+	public static class MarginCorrectorPrefsContainer {
+		final int mViewId;
+		final boolean mIgnoreLeft;
+		final boolean mIgnoreTop;
+		final boolean mIgnoreRight;
+		final boolean mIgnoreBottom;
+
+		public MarginCorrectorPrefsContainer(int viewId) {
+			this(viewId, false, false, false, false);
+		}
+
+		public MarginCorrectorPrefsContainer(int viewId, boolean ignoreLeft, boolean ignoreTop, boolean ignoreRight,
+											 boolean ignoreBottom) {
+			mViewId = viewId;
+			mIgnoreLeft = ignoreLeft;
+			mIgnoreTop = ignoreTop;
+			mIgnoreRight = ignoreRight;
+			mIgnoreBottom = ignoreBottom;
+		}
+	}
+
+	// better fullscreen with insets (fix bugs with incorrect margins when switching between fullscreen and normal views)
+	// see: https://stackoverflow.com/a/50775459/1993220 and https://chris.banes.dev/2019/04/12/insets-listeners-to-layouts/
+	public static void addFullscreenMarginsCorrectorListener(final Activity activity, int rootView,
+															 final MarginCorrectorPrefsContainer[] insetViews) {
 		ViewCompat.setOnApplyWindowInsetsListener(activity.findViewById(rootView), new OnApplyWindowInsetsListener() {
 			@Override
 			public WindowInsetsCompat onApplyWindowInsets(View v, WindowInsetsCompat insets) {
@@ -296,11 +318,14 @@ public class UIUtilities {
 				int bottom = insets.getSystemWindowInsetBottom();
 
 				if (left != 0 || top != 0 || right != 0 || bottom != 0) {
-					for (int view : insetViews) {
-						View controlsView = activity.findViewById(view);
+					for (MarginCorrectorPrefsContainer viewContainer : insetViews) {
+						View controlsView = activity.findViewById(viewContainer.mViewId);
 						if (controlsView.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
 							ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) controlsView.getLayoutParams();
-							p.setMargins(left, top, right, bottom);
+							p.setMargins(viewContainer.mIgnoreLeft ? p.leftMargin : left,
+									viewContainer.mIgnoreTop ? p.topMargin : top,
+									viewContainer.mIgnoreRight ? p.rightMargin : right,
+									viewContainer.mIgnoreBottom ? p.bottomMargin : bottom);
 							controlsView.requestLayout();
 						}
 					}
