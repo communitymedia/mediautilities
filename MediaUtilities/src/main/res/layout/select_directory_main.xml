@@ -43,7 +43,7 @@
 		<ImageButton
 			android:id="@+id/path_bar_icon"
 			android:background="?android:attr/actionBarItemBackground"
-			android:contentDescription="@android:string/cancel"
+			android:contentDescription="@string/menu_cancel"
 			android:layout_gravity="center_vertical"
 			android:layout_height="match_parent"
 			android:layout_width="wrap_content"
