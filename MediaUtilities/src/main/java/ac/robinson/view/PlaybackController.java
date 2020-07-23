@@ -45,7 +45,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.graphics.BlendModeColorFilterCompat;
 import androidx.core.graphics.BlendModeCompat;
 
-// TODO: this class and CustomMediaController should be combined (lots of duplicate code)
+// TODO: this class and CustomMediaController could be combined (lots of duplicate code, though recording mode is only here)
 public class PlaybackController extends FrameLayout {
 
 	private static final int UPDATE_INTERVAL_MILLIS = 250;
@@ -278,10 +278,12 @@ public class PlaybackController extends FrameLayout {
 	public void setRecordingMode(boolean recording) {
 		if (mRecordIndicator == null) {
 			mRecordIndicator = findViewById(R.id.record);
-			Drawable progressDrawable = mRecordIndicator.getIndeterminateDrawable().mutate();
-			progressDrawable.setColorFilter(BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-					ContextCompat.getColor(getContext(), R.color.media_controller_recording), BlendModeCompat.SRC_IN));
-			mRecordIndicator.setIndeterminateDrawable(progressDrawable);
+			if (mRecordIndicator != null) {
+				Drawable progressDrawable = mRecordIndicator.getIndeterminateDrawable().mutate();
+				progressDrawable.setColorFilter(BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
+						ContextCompat.getColor(getContext(), R.color.media_controller_recording), BlendModeCompat.SRC_IN));
+				mRecordIndicator.setIndeterminateDrawable(progressDrawable);
+			}
 		}
 		if (recording) {
 			mPlayIcon = R.drawable.ic_menu_record;
@@ -299,7 +301,7 @@ public class PlaybackController extends FrameLayout {
 		}
 		if (mPlayerControl.isPlaying()) {
 			mPauseButton.setImageResource(R.drawable.ic_menu_pause);
-			if (mRecording) {
+			if (mRecording && mRecordIndicator != null) {
 				mRecordIndicator.setVisibility(View.VISIBLE);
 			}
 		} else {

@@ -59,7 +59,7 @@ import ac.robinson.mediautilities.R;
  * </ul>
  */
 
-// TODO: this class and PlaybackController should be combined (lots of duplicate code)
+// TODO: this class and PlaybackController could be combined (lots of duplicate code)
 public class CustomMediaController extends FrameLayout {
 
 	public static final int DEFAULT_VISIBILITY_TIMEOUT = 3000;

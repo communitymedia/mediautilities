@@ -283,19 +283,19 @@ public class UIUtilities {
 		background.setColorFilter(normalColour);
 	}
 
-	public static class MarginCorrectorPrefsContainer {
+	public static class MarginCorrectorHolder {
 		final int mViewId;
 		final boolean mIgnoreLeft;
 		final boolean mIgnoreTop;
 		final boolean mIgnoreRight;
 		final boolean mIgnoreBottom;
 
-		public MarginCorrectorPrefsContainer(int viewId) {
+		public MarginCorrectorHolder(int viewId) {
 			this(viewId, false, false, false, false);
 		}
 
-		public MarginCorrectorPrefsContainer(int viewId, boolean ignoreLeft, boolean ignoreTop, boolean ignoreRight,
-											 boolean ignoreBottom) {
+		public MarginCorrectorHolder(int viewId, boolean ignoreLeft, boolean ignoreTop, boolean ignoreRight,
+									 boolean ignoreBottom) {
 			mViewId = viewId;
 			mIgnoreLeft = ignoreLeft;
 			mIgnoreTop = ignoreTop;
@@ -307,7 +307,7 @@ public class UIUtilities {
 	// better fullscreen with insets (fix bugs with incorrect margins when switching between fullscreen and normal views)
 	// see: https://stackoverflow.com/a/50775459/1993220 and https://chris.banes.dev/2019/04/12/insets-listeners-to-layouts/
 	public static void addFullscreenMarginsCorrectorListener(final Activity activity, int rootView,
-															 final MarginCorrectorPrefsContainer[] insetViews) {
+															 final MarginCorrectorHolder[] insetViews) {
 		ViewCompat.setOnApplyWindowInsetsListener(activity.findViewById(rootView), new OnApplyWindowInsetsListener() {
 			@Override
 			public WindowInsetsCompat onApplyWindowInsets(View v, WindowInsetsCompat insets) {
@@ -318,7 +318,7 @@ public class UIUtilities {
 				int bottom = insets.getSystemWindowInsetBottom();
 
 				if (left != 0 || top != 0 || right != 0 || bottom != 0) {
-					for (MarginCorrectorPrefsContainer viewContainer : insetViews) {
+					for (MarginCorrectorHolder viewContainer : insetViews) {
 						View controlsView = activity.findViewById(viewContainer.mViewId);
 						if (controlsView.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
 							ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) controlsView.getLayoutParams();
