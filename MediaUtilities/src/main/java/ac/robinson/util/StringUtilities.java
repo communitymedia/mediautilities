@@ -75,8 +75,8 @@ public class StringUtilities {
 		// TODO: use StringBuilder for efficiency?
 		return (hours > 0 ? hours + ":" : "") + (hours > 0 ? String.format(Locale.US, int2sd, minutes) : minutes) + ":" +
 				String.format(Locale.US, int2sd, seconds) + (includeMilliseconds ? "." +
-				(highPrecision ? String.format(Locale.US, int3sd, millisecondsIn) : String.format(Locale.US, int1sd,
-						millisecondsIn / 100)) : "");
+				(highPrecision ? String.format(Locale.US, int3sd, millisecondsIn) :
+						String.format(Locale.US, int1sd, millisecondsIn / 100)) : "");
 	}
 
 	public static String sha1Hash(String input) {
@@ -96,5 +96,12 @@ public class StringUtilities {
 	public static String normaliseToAscii(String input) {
 		String normalisedName = Normalizer.normalize(input, Normalizer.Form.NFD);
 		return normalisedName.replaceAll("[^\\p{ASCII}]", ""); // remove accents
+	}
+
+	public static int wordCount(String textString) {
+		if (!TextUtils.isEmpty(textString)) {
+			return textString.split("[ \\n]+").length;
+		}
+		return 0;
 	}
 }
