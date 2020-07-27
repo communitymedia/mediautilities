@@ -289,6 +289,10 @@ public class UIUtilities {
 		final boolean mIgnoreTop;
 		final boolean mIgnoreRight;
 		final boolean mIgnoreBottom;
+		final int mAddLeft;
+		final int mAddTop;
+		final int mAddRight;
+		final int mAddBottom;
 
 		public MarginCorrectorHolder(int viewId) {
 			this(viewId, false, false, false, false);
@@ -296,17 +300,27 @@ public class UIUtilities {
 
 		public MarginCorrectorHolder(int viewId, boolean ignoreLeft, boolean ignoreTop, boolean ignoreRight,
 									 boolean ignoreBottom) {
+			this(viewId, ignoreLeft, ignoreTop, ignoreRight, ignoreBottom, 0, 0, 0, 0);
+		}
+
+		public MarginCorrectorHolder(int viewId, boolean ignoreLeft, boolean ignoreTop, boolean ignoreRight,
+									 boolean ignoreBottom,
+									 int addLeft, int addTop, int addRight, int addBottom) {
 			mViewId = viewId;
 			mIgnoreLeft = ignoreLeft;
 			mIgnoreTop = ignoreTop;
 			mIgnoreRight = ignoreRight;
 			mIgnoreBottom = ignoreBottom;
+			mAddLeft = addLeft;
+			mAddTop = addTop;
+			mAddRight = addRight;
+			mAddBottom = addBottom;
 		}
 	}
 
 	// better fullscreen with insets (fix bugs with incorrect margins when switching between fullscreen and normal views)
 	// see: https://stackoverflow.com/a/50775459/1993220 and https://chris.banes.dev/2019/04/12/insets-listeners-to-layouts/
-	public static void addFullscreenMarginsCorrectorListener(final Activity activity, int rootView,
+	public static void addFullscreenMarginsCorrectorListener(final Activity activity, final int rootView,
 															 final MarginCorrectorHolder[] insetViews) {
 		ViewCompat.setOnApplyWindowInsetsListener(activity.findViewById(rootView), new OnApplyWindowInsetsListener() {
 			@Override
@@ -322,10 +336,10 @@ public class UIUtilities {
 						View controlsView = activity.findViewById(viewContainer.mViewId);
 						if (controlsView.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
 							ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) controlsView.getLayoutParams();
-							p.setMargins(viewContainer.mIgnoreLeft ? p.leftMargin : left,
-									viewContainer.mIgnoreTop ? p.topMargin : top,
-									viewContainer.mIgnoreRight ? p.rightMargin : right,
-									viewContainer.mIgnoreBottom ? p.bottomMargin : bottom);
+							p.setMargins((viewContainer.mIgnoreLeft ? p.leftMargin : left + viewContainer.mAddLeft),
+									(viewContainer.mIgnoreTop ? p.topMargin : top + viewContainer.mAddTop),
+									(viewContainer.mIgnoreRight ? p.rightMargin : right + viewContainer.mAddRight),
+									(viewContainer.mIgnoreBottom ? p.bottomMargin : bottom + viewContainer.mAddBottom));
 							controlsView.requestLayout();
 						}
 					}
