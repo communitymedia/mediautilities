@@ -57,9 +57,9 @@ public class SubtitleUtilities {
 					outputStream.write(frame.mTextContent + "\n\n");
 					subtitleCount += 1;
 					frame.mTextContent = null;
+					hasSubtitles = true;
 				}
 				currentTime += frame.mFrameMaxDuration;
-				hasSubtitles = true;
 			}
 		} catch (FileNotFoundException e) {
 			return false;

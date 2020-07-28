@@ -143,8 +143,7 @@ public class MP4Encoder {
 				// PCM 'frame' is 2 bytes (e.g., see AudioFormat: ((sampleSizeInBits + 7) / 8) * channels); length in frames is
 				// therefore file size / 2
 				audioInputStream = new AudioInputStream(new FileInputStream(combinedAudioTrack.mCombinedPCMFile),
-						combinedAudioTrack.mCombinedPCMAudioFormat,
-						combinedAudioTrack.mCombinedPCMFile.length() / 2);
+						combinedAudioTrack.mCombinedPCMAudioFormat, combinedAudioTrack.mCombinedPCMFile.length() / 2);
 			}
 
 			long startTime = System.nanoTime();
@@ -152,7 +151,10 @@ public class MP4Encoder {
 			long videoPresentationTimeNs = 0;
 			long videoPresentationTimeIncrementNs = (long) (1000000000L / (float) FRAME_RATE);
 
-			FrameMediaContainer currentNarrativeFrame = videoFrames.remove(0);
+			FrameMediaContainer currentNarrativeFrame;
+			do {
+				currentNarrativeFrame = videoFrames.remove(0);
+			} while (videoFrames.size() > 0 && currentNarrativeFrame.mFrameMaxDuration <= 0); // skip zero-length items
 			long currentFrameEndNs = currentNarrativeFrame.mFrameMaxDuration * 1000000L;
 
 			mAudioEnded = false;
@@ -189,11 +191,18 @@ public class MP4Encoder {
 					}
 					if (videoFrames.size() > 0) {
 						currentNarrativeFrame = videoFrames.remove(0);
-						videoPresentationTimeNs = currentFrameEndNs;
-						currentFrameEndNs += currentNarrativeFrame.mFrameMaxDuration * 1000000L;
-						if (VERBOSE) {
-							Log.d(LOG_TAG,
-									"New video time: " + videoPresentationTimeNs + "; frame end time " + currentFrameEndNs);
+						if (currentNarrativeFrame.mFrameMaxDuration > 0) {
+							videoPresentationTimeNs = currentFrameEndNs;
+							currentFrameEndNs += currentNarrativeFrame.mFrameMaxDuration * 1000000L;
+							if (VERBOSE) {
+								Log.d(LOG_TAG,
+										"New video time: " + videoPresentationTimeNs + "; frame end time " + currentFrameEndNs);
+							}
+						} else {
+							if (VERBOSE) {
+								Log.d(LOG_TAG, "End of video output reached (empty frame)");
+							}
+							mEndOfOutputReached = true;
 						}
 					} else {
 						if (VERBOSE) {
@@ -271,8 +280,8 @@ public class MP4Encoder {
 					Log.i(LOG_TAG, "Queueing " + inputLength + " audio bytes at " + mAudioPresentationTimeUs +
 							" microseconds (end of stream: " + endOfStream + ")");
 				}
-				mAudioEncoder.queueInputBuffer(inputBufferIndex, 0, inputLength, mAudioPresentationTimeUs, endOfStream ?
-						MediaCodec.BUFFER_FLAG_END_OF_STREAM : 0);
+				mAudioEncoder.queueInputBuffer(inputBufferIndex, 0, inputLength, mAudioPresentationTimeUs,
+						endOfStream ? MediaCodec.BUFFER_FLAG_END_OF_STREAM : 0);
 
 				long inputTime = (long) (1000000 / (sampleRate / (float) inputLength) / 2f); // chunk length, microseconds
 				mAudioPresentationTimeUs += inputTime;
@@ -367,7 +376,8 @@ public class MP4Encoder {
 	 * <p>
 	 * An audioSampleRate value <= 0 indicates that there is no audio stream
 	 */
-	private void prepareEncoder(File outputFile, int videoWidth, int videoHeight, int iFrameInterval, int audioSampleRate) throws IOException {
+	private void prepareEncoder(File outputFile, int videoWidth, int videoHeight, int iFrameInterval,
+								int audioSampleRate) throws IOException {
 		mVideoBufferInfo = new MediaCodec.BufferInfo();
 		mVideoTrackInfo = new TrackInfo();
 

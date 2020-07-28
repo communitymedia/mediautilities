@@ -152,6 +152,10 @@ public class MOVUtilities {
 			int imageBitmapTop;
 			for (FrameMediaContainer frame : framesToSend) {
 
+				if (frame.mFrameMaxDuration <= 0) {
+					continue;
+				}
+
 				imageLoaded = false;
 				baseCanvas.drawColor(frame.mBackgroundColour < 0 ? frame.mBackgroundColour : backgroundColour);
 
