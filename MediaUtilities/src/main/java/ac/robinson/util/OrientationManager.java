@@ -28,6 +28,7 @@ import android.view.Surface;
 
 import java.util.List;
 
+@Deprecated
 public class OrientationManager {
 
 	private static Sensor mOrientationSensor;
