@@ -26,6 +26,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.os.Build;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
@@ -38,7 +39,11 @@ import java.util.zip.ZipFile;
 
 public class DebugUtilities {
 	public static String getLogTag(Object o) {
-		return o.getClass().getSimpleName();
+		String logTag = o.getClass().getSimpleName();
+		if (TextUtils.isEmpty(logTag)) {
+			logTag = o.getClass().getName();
+		}
+		return logTag;
 	}
 
 	public static String getScreenDensityString(Resources resources) {
