@@ -25,6 +25,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.webkit.MimeTypeMap;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -123,9 +124,15 @@ public class HTMLUtilities {
 							// for images larger than the html it's best to use max-width for scaling automatically
 							// playerOutputFileWriter.write(" width=\"" + imageDimensions.outWidth + "\" height=\""
 							// + imageDimensions.outHeight + "\"");
-							playerOutputFileWriter.write(" src=\"data:image/jpeg;base64,");
-							playerOutputFileWriter.write(Base64.encodeToString(IOUtilities.readFileToByteArray(frame.mImagePath)
-									, 0));
+
+							String fileExtension = IOUtilities.getFileExtension(frame.mImagePath);
+							String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExtension);
+							if (TextUtils.isEmpty(mimeType)) {
+								mimeType = "image/jpeg";
+							}
+							playerOutputFileWriter.write(" src=\"data:" + mimeType + ";base64,");
+							playerOutputFileWriter.write(
+									Base64.encodeToString(IOUtilities.readFileToByteArray(frame.mImagePath), 0));
 							playerOutputFileWriter.write("\" alt=\"" + frame.mFrameId + "\">\n");
 							imageLoaded = true;
 						}
@@ -149,8 +156,15 @@ public class HTMLUtilities {
 								playerOutputFileWriter.write("<img class=\"audio-icon\" alt=\"audio-icon\">\n");
 							}
 
-							// TODO: use the correct type for other files (e.g. mp3)
-							playerOutputFileWriter.write("<audio src=\"data:audio/mpeg;base64,");
+							String fileExtension = IOUtilities.getFileExtension(audioPath);
+							String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExtension);
+							if (TextUtils.isEmpty(mimeType)) {
+								mimeType = "audio/mpeg";
+							} else {
+								// MimeTypeMap sometimes wrongly assumes video; all of our content here is audio
+								mimeType = mimeType.replace("video/", "audio/");
+							}
+							playerOutputFileWriter.write("<audio src=\"data:" + mimeType + ";base64,");
 							playerOutputFileWriter.write(Base64.encodeToString(IOUtilities.readFileToByteArray(audioPath), 0));
 							playerOutputFileWriter.write("\"></audio>\n");
 							audioLoaded = true;

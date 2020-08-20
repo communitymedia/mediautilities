@@ -51,9 +51,8 @@ div.player span p {
 }
 
 div.player span p.full-screen {
-	display:table;
-	top:0;
-	margin:auto;
+	top: 50%;
+	transform: translate(0, -50%);
 }
 
 div.player span img.portrait {
@@ -202,7 +201,12 @@ var play_narrative = function() {
 				if (play_audio) {
 					//compatibility with browsers that can't cope with audio
 					if(!!document.createElement('audio').canPlayType) {
-						audio_elements[i].play();
+						var mimeType = audio_elements[i].src.split(';')[0].split(':')[1];
+						if (audio_elements[i].canPlayType(mimeType)) {
+							audio_elements[i].play();
+						} else {
+							throw 'Incompatible audio format: ' + mimeType;
+						}
 					}
 				} else {
 					//TODO: use currentTime for proper time control
@@ -215,7 +219,7 @@ var play_narrative = function() {
 			}
 		} catch(e) {
 			try {
-				console.log('Unable to play audio (format is not M4A, or unable to play M4A) - skipping');
+				console.log('Unable to play audio format - skipping (error: ' + e + ')');
 			} catch(e2) {}
 		}
 		return max_duration * 1000; //convert to milliseconds
@@ -258,7 +262,7 @@ var play_narrative = function() {
 
 		audio_elements = frame.getElementsByTagName('audio');
 
-		var frame_duration = 2500; //TODO: fix default frame duration and incorporate text length
+		var frame_duration = 2500; //TODO: fix default frame duration and incorporate text length, spanning media, etc
 		var audio_duration = load_audio(audio_elements, playing);
 		if (audio_duration > 0) {
 			frame_duration = audio_duration;
