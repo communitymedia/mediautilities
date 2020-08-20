@@ -41,6 +41,7 @@ import java.util.Map;
 
 import ac.robinson.mediautilities.FrameMediaContainer;
 import ac.robinson.mediautilities.MediaUtilities;
+import ac.robinson.util.AndroidUtilities;
 import ac.robinson.util.BitmapUtilities;
 
 // Based on examples at http://bigflake.com/mediacodec/CameraToMpegTest.java.txt and http://magroune.net/?p=63
@@ -280,8 +281,8 @@ class MP4DrawSurface {
 
 			if (nextFrame.mImagePath != null) {
 				// scale image size to make sure it is small enough to fit in the container
-				Bitmap imageBitmap = BitmapUtilities.loadAndCreateScaledBitmap(nextFrame.mImagePath, mCanvasWidth, mCanvasHeight
-						, BitmapUtilities.ScalingLogic.FIT, true);
+				Bitmap imageBitmap = BitmapUtilities.loadAndCreateScaledBitmap(nextFrame.mImagePath, mCanvasWidth, mCanvasHeight,
+						BitmapUtilities.ScalingLogic.FIT, true);
 
 				if (imageBitmap != null) {
 					int imageBitmapLeft = Math.round((mCanvasWidth - imageBitmap.getWidth()) / 2f);
@@ -295,8 +296,8 @@ class MP4DrawSurface {
 			// TODO: we don't actually pass the value of @dimen/export_maximum_text_height_with_image
 			if (!TextUtils.isEmpty(nextFrame.mTextContent)) {
 				BitmapUtilities.drawScaledText(nextFrame.mTextContent, mCurrentFrameCanvas, mCurrentFramePaint,
-						nextFrame.mForegroundColour <
-								0 ? nextFrame.mForegroundColour : (imageLoaded ? mTextColourWithImage : mTextColourNoImage),
+						nextFrame.mForegroundColour < 0 ? nextFrame.mForegroundColour :
+								(imageLoaded ? mTextColourWithImage : mTextColourNoImage),
 						(imageLoaded ? mTextBackgroundColour : 0), mTextSpacing, mTextCornerRadius, imageLoaded, 0,
 						mTextBackgroundSpanWidth, mCanvasHeight, mTextMaxFontSize, mTextMaxCharsPerLine);
 
@@ -304,15 +305,17 @@ class MP4DrawSurface {
 				// quicker to do this than load the SVG for narratives that have no audio
 				// TODO: this is the only reason we need the Resources object - should we just preload and pass this object?
 				// TODO: use SVG.getBitmap()?
-				if (mAudioIconResourceId < 0 && mAudioSVG == null) { // only load the icon if one is specified
+				// only load the icon if one is specified
+				if (mAudioIconResourceId != AndroidUtilities.NO_RESOURCE && mAudioSVG == null) {
 					mAudioSVG = SVGParser.getSVGFromResource(mResources, mAudioIconResourceId);
 				}
 				if (mAudioSVG != null) {
 					int audioBitmapSize = Math.min(mCanvasWidth, mCanvasHeight);
 					int audioBitmapLeft = Math.round((mCanvasWidth - audioBitmapSize) / 2f);
 					int audioBitmapTop = Math.round((mCanvasHeight - audioBitmapSize) / 2f);
-					mCurrentFrameCanvas.drawPicture(mAudioSVG.getPicture(), new RectF(audioBitmapLeft, audioBitmapTop,
-							audioBitmapLeft + audioBitmapSize, audioBitmapTop + audioBitmapSize));
+					mCurrentFrameCanvas.drawPicture(mAudioSVG.getPicture(),
+							new RectF(audioBitmapLeft, audioBitmapTop, audioBitmapLeft + audioBitmapSize,
+									audioBitmapTop + audioBitmapSize));
 				}
 			}
 

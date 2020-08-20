@@ -111,17 +111,16 @@ public class MOVUtilities {
 			// individual tracks is similar in speed to segmented tracks, but typically only works with QuickTime
 			// Player (hence this is not a user editable preference)
 			if (audioResamplingRate != 0) {
-				AudioUtilities.CombinedAudioTrack resampledAudioTrack =
-						AudioUtilities.createCombinedNarrativeAudioTrack(framesToSend, audioResamplingRate, outputFile
-						.getParentFile());
+				AudioUtilities.CombinedAudioTrack resampledAudioTrack = AudioUtilities.createCombinedNarrativeAudioTrack(
+						framesToSend, audioResamplingRate, outputFile.getParentFile());
 
 				if (resampledAudioTrack.mCombinedPCMFile != null) {
 					AudioInputStream pcmAudioStream;
 					try {
 						// output from converters and/or SSRC is mono signed 16-bit little-endian integers
 						pcmAudioStream = new AudioInputStream(new FileInputStream(resampledAudioTrack.mCombinedPCMFile),
-								resampledAudioTrack.mCombinedPCMAudioFormat, (long) (
-								resampledAudioTrack.mCombinedPCMAudioFormat.getFrameRate() *
+								resampledAudioTrack.mCombinedPCMAudioFormat,
+								(long) (resampledAudioTrack.mCombinedPCMAudioFormat.getFrameRate() *
 										(resampledAudioTrack.mCombinedPCMDurationMs / 1000f)));
 
 						// new source: pumpernickel/pump-quicktime/src/main/java/com/pump/animation/quicktime/MovWriter.java
@@ -175,20 +174,22 @@ public class MOVUtilities {
 
 				if (!TextUtils.isEmpty(frame.mTextContent)) {
 					// TODO: we don't actually pass the value of @dimen/export_maximum_text_height_with_image
-					BitmapUtilities.drawScaledText(frame.mTextContent, baseCanvas, basePaint, frame.mForegroundColour <
-							0 ? frame.mForegroundColour : (imageLoaded ? textColourWithImage : textColourNoImage), (imageLoaded
-							? textBackgroundColour : 0), textSpacing, textCornerRadius, imageLoaded, 0, textBackgroundSpanWidth,
-							outputHeight, textMaxFontSize, textMaxCharsPerLine);
+					BitmapUtilities.drawScaledText(frame.mTextContent, baseCanvas, basePaint,
+							frame.mForegroundColour < 0 ? frame.mForegroundColour :
+									(imageLoaded ? textColourWithImage : textColourNoImage),
+							(imageLoaded ? textBackgroundColour : 0), textSpacing, textCornerRadius, imageLoaded, 0,
+							textBackgroundSpanWidth, outputHeight, textMaxFontSize, textMaxCharsPerLine);
 
 				} else if (!imageLoaded) {
 					// quicker to do this than load the SVG for narratives that have no audio
-					if (audioIconResourceId < 0 && audioSVG == null) {  // only load the icon if one is specified
-						audioSVG = SVGParser.getSVGFromResource(res, audioIconResourceId);
+					if (audioIconResourceId != AndroidUtilities.NO_RESOURCE && audioSVG == null) {
+						audioSVG = SVGParser.getSVGFromResource(res, audioIconResourceId); // only load icon if one is specified
 					}
 					if (audioSVG != null) {
 						// we can't use PNG compression reliably in the MOV file, so convert to JPEG
-						baseCanvas.drawPicture(audioSVG.getPicture(), new RectF(audioBitmapLeft, audioBitmapTop,
-								audioBitmapLeft + audioBitmapSize, audioBitmapTop + audioBitmapSize));
+						baseCanvas.drawPicture(audioSVG.getPicture(),
+								new RectF(audioBitmapLeft, audioBitmapTop, audioBitmapLeft + audioBitmapSize,
+										audioBitmapTop + audioBitmapSize));
 					}
 				}
 
@@ -345,10 +346,10 @@ public class MOVUtilities {
 
 					// then add to the MOV output file if successful (pcmAudioStream is closed in MovWriter)
 					if (!decodingError && audioFormat != null) {
-						pcmAudioStream = new AudioInputStream(new FileInputStream(outputPCMFile), audioFormat, (long) (
-								audioFormat.getFrameRate() * (audioDuration / 1000f)));
-						outputFileWriter.addAudioTrack(pcmAudioStream,
-								frameStartTime / 1000f, (frameStartTime + audioDuration) / 1000f);
+						pcmAudioStream = new AudioInputStream(new FileInputStream(outputPCMFile), audioFormat,
+								(long) (audioFormat.getFrameRate() * (audioDuration / 1000f)));
+						outputFileWriter.addAudioTrack(pcmAudioStream, frameStartTime / 1000f,
+								(frameStartTime + audioDuration) / 1000f);
 					}
 
 				} catch (Exception e) {
@@ -654,8 +655,8 @@ public class MOVUtilities {
 			if (audioWritten && audioFormat != null) { // only write if at least one part of the stream succeeded
 				AudioInputStream pcmAudioStream;
 				try {
-					pcmAudioStream = new AudioInputStream(new FileInputStream(outputPCMFile), audioFormat, (long) (
-							audioFormat.getFrameRate() * (audioTotalDuration / 1000f)));
+					pcmAudioStream = new AudioInputStream(new FileInputStream(outputPCMFile), audioFormat,
+							(long) (audioFormat.getFrameRate() * (audioTotalDuration / 1000f)));
 
 					int arraySize = audioOffsetsList.size();
 					float[] audioOffsets = new float[arraySize];

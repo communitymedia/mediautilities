@@ -58,6 +58,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import ac.robinson.util.AndroidUtilities;
 import ac.robinson.util.BitmapUtilities;
 import ac.robinson.util.IOUtilities;
 import ac.robinson.util.ImageCacheUtilities;
@@ -199,9 +200,8 @@ public class SMILUtilities {
 								currentFrame.updateFrameMaxDuration(elementDuration);
 
 							} else {
-								currentFrame.addMediaFromSMIL(mediaElements.item(j)
-										.getNodeName(), sourceFile, elementId, elementDuration, elementRegion,
-										validateAudioLengths);
+								currentFrame.addMediaFromSMIL(mediaElements.item(j).getNodeName(), sourceFile, elementId,
+										elementDuration, elementRegion, validateAudioLengths);
 							}
 						}
 					}
@@ -301,6 +301,11 @@ public class SMILUtilities {
 		File tempAudioIconFile = new File(outputDirectory, String.format("%s-audio.png", narrativeName));
 		Bitmap audioIconBitmap = Bitmap.createBitmap(audioBitmapSize, audioBitmapSize,
 				ImageCacheUtilities.mBitmapFactoryOptions.inPreferredConfig);
+		audioIconBitmap.eraseColor(backgroundColour);
+		if (BitmapUtilities.saveBitmap(audioIconBitmap, Bitmap.CompressFormat.PNG, 100, tempAudioIconFile)) {
+			// always include the background, even if blank, so we don't hang waiting for this file on imports with no audio icon
+			filesToSend.add(Uri.fromFile(tempAudioIconFile));
+		}
 
 		// would be better to use data:image/png URI, but this breaks Quicktime playback
 		File tempBackgroundFile = new File(outputDirectory, String.format("%s-background.png", narrativeName));
@@ -347,22 +352,20 @@ public class SMILUtilities {
 					// scale the image dimensions for coping with smil "meet" scaling
 					BitmapFactory.Options imageDimensions = BitmapUtilities.getImageDimensions(frame.mImagePath);
 					int maxDimension = Math.max(imageDimensions.outWidth, imageDimensions.outHeight);
-					Point imageSize = new Point(Math.round(
-							(outputWidth / (float) maxDimension) * imageDimensions.outWidth), Math.round(
-							(outputHeight / (float) maxDimension) * imageDimensions.outHeight));
+					Point imageSize = new Point(Math.round((outputWidth / (float) maxDimension) * imageDimensions.outWidth),
+							Math.round((outputHeight / (float) maxDimension) * imageDimensions.outHeight));
 
-					addRegion(smilSerializer, tagNamespace, getImageRegion(frame), Integer.toString(Math.round(
-							(outputWidth - imageSize.x) / 2f)), Integer.toString(Math.round(
-							(outputHeight - imageSize.y) / 2f)), "100%", "100%", "meet");
+					addRegion(smilSerializer, tagNamespace, getImageRegion(frame),
+							Integer.toString(Math.round((outputWidth - imageSize.x) / 2f)),
+							Integer.toString(Math.round((outputHeight - imageSize.y) / 2f)), "100%", "100%", "meet");
 				}
 			}
 
 			addRegion(smilSerializer, tagNamespace, "fill-area", "0", "0", "100%", "100%", "fill");
-			addRegion(smilSerializer, tagNamespace, "audio-icon", Integer.toString(
-					(outputWidth - audioIconBitmap.getWidth()) / 2), Integer.toString(
-					(outputHeight - audioIconBitmap.getHeight()) /
-							2), Integer.toString(audioIconBitmap.getWidth()), Integer.toString(audioIconBitmap.getHeight()),
-					"fill");
+			addRegion(smilSerializer, tagNamespace, "audio-icon",
+					Integer.toString((outputWidth - audioIconBitmap.getWidth()) / 2),
+					Integer.toString((outputHeight - audioIconBitmap.getHeight()) / 2),
+					Integer.toString(audioIconBitmap.getWidth()), Integer.toString(audioIconBitmap.getHeight()), "fill");
 			// TODO: top of 540 into attrs
 			addRegion(smilSerializer, tagNamespace, "text-subtitles", "0", "540", "100%", "100%", "meet");
 
@@ -397,8 +400,8 @@ public class SMILUtilities {
 					// output files must be in a public directory for sending (/data/ directory will *not* work)
 					if (IOUtilities.isInternalPath(frame.mImagePath)) { // so we can send private files
 						savedFile = copySmilFileToOutput(frame.mImagePath, outputDirectory, narrativeName,
-								frame.mFrameSequenceId, 0, IOUtilities
-								.getFileExtension(frame.mImagePath));
+								frame.mFrameSequenceId,
+								0, IOUtilities.getFileExtension(frame.mImagePath));
 					} else {
 						savedFile = new File(frame.mImagePath);
 					}
@@ -448,8 +451,8 @@ public class SMILUtilities {
 					// crop to the actual size of the text to show as much as possible of the image
 					Bitmap textBitmapCropped;
 					if (imageLoaded) {
-						textBitmapCropped = Bitmap.createBitmap(textBitmap, 0,
-								outputHeight - textHeight - 1, outputWidth, textHeight, null, false);
+						textBitmapCropped = Bitmap.createBitmap(textBitmap, 0, outputHeight - textHeight - 1, outputWidth,
+								textHeight, null, false);
 					} else {
 						textBitmapCropped = textBitmap;
 					}
@@ -465,7 +468,7 @@ public class SMILUtilities {
 
 				// clear the background - could use a SMIL brush, but the Quicktime plugin doesn't recognise these
 				addSmilTag(smilSerializer, tagNamespace, "img", tempBackgroundFile.getName(), frame.mFrameMaxDuration,
-						"fill" + "-area", false);
+						"fill-area", false);
 
 				if (imageLoaded) {
 					addSmilTag(smilSerializer, tagNamespace, "img", displayMedia, frame.mFrameMaxDuration, displayMediaRegion,
@@ -477,8 +480,8 @@ public class SMILUtilities {
 					}
 				} else {
 					if (textLoaded) {
-						addSmilTag(smilSerializer, tagNamespace, "img", savedFile.getName(), frame.mFrameMaxDuration, "fill-area"
-								, false);
+						addSmilTag(smilSerializer, tagNamespace, "img", savedFile.getName(), frame.mFrameMaxDuration,
+								"fill" + "-area", false);
 						addTextTag(smilSerializer, tagNamespace, frame.mTextContent);
 					} else {
 						addSmilTag(smilSerializer, tagNamespace, "img", displayMedia, frame.mFrameMaxDuration,
@@ -492,14 +495,14 @@ public class SMILUtilities {
 			// blank frame to clear the screen, and also useful for syncing, so we always know all sent files
 			smilSerializer.startTag(tagNamespace, "par");
 			smilSerializer.attribute(tagNamespace, "id", "blank");
-			if (narrativeHasAudio && audioResourceId < 0) { // only load the icon if one is specified
+			if (narrativeHasAudio && audioResourceId != AndroidUtilities.NO_RESOURCE) { // only load the icon if one is specified
 				SVG audioSVG = SVGParser.getSVGFromResource(res, audioResourceId);
 				Canvas audioIconCanvas = new Canvas(audioIconBitmap);
-				audioIconCanvas.drawPicture(audioSVG.getPicture(), new RectF(audioBitmapLeft, audioBitmapTop,
-						audioBitmapLeft + audioBitmapSize, audioBitmapTop + audioBitmapSize));
+				audioIconCanvas.drawPicture(audioSVG.getPicture(),
+						new RectF(audioBitmapLeft, audioBitmapTop, audioBitmapLeft + audioBitmapSize,
+								audioBitmapTop + audioBitmapSize));
 				if (BitmapUtilities.saveBitmap(audioIconBitmap, Bitmap.CompressFormat.PNG, 100, tempAudioIconFile)) {
 					addSmilTag(smilSerializer, tagNamespace, "meta-data", tempAudioIconFile.getName(), 2, "fill-area", false);
-					filesToSend.add(Uri.fromFile(tempAudioIconFile));
 				} // if this fails, audio playback won't have an icon
 			}
 			addSmilTag(smilSerializer, tagNamespace, "meta-data", storyPlayerFile.getName(), 2, "fill-area", false);
@@ -591,7 +594,8 @@ public class SMILUtilities {
 	}
 
 	private static void addRegion(XmlSerializer smilSerializer, String tagNamespace, String regionId, String regionLeft,
-								  String regionTop, String regionWidth, String regionHeight, String regionFit) throws IOException {
+								  String regionTop, String regionWidth, String regionHeight,
+								  String regionFit) throws IOException {
 		smilSerializer.startTag(tagNamespace, "region");
 		smilSerializer.attribute(tagNamespace, "id", regionId);
 		smilSerializer.attribute(tagNamespace, "top", regionTop);

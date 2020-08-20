@@ -23,6 +23,11 @@ package ac.robinson.util;
 public class AndroidUtilities {
 
 	/**
+	 * Helper value to avoid errors when validating resource IDs - a value of 0 means a resource ID is empty
+	 */
+	public static final int NO_RESOURCE = 0;
+
+	/**
 	 * Check if an array contains the item given - could use Arrays.binarySearch, but that requires a sorted array
 	 */
 	public static <T> boolean arrayContains(T[] array, T item) {
