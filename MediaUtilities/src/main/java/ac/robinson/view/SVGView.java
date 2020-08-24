@@ -86,7 +86,7 @@ public class SVGView extends View {
 
 	@Override
 	public void onLayout(boolean changed, int l, int t, int r, int b) {
-		if ((changed || mBitmapChanged) && !isInEditMode()) { // isInEditMode so the Eclipse visual editor can load this
+		if ((changed || mBitmapChanged) && !isInEditMode()) { // isInEditMode so the IDE's visual editor can load this
 			mBitmapChanged = false;
 			try {
 				SVG svg = SVGParser.getSVGFromResource(getResources(), mResourceId);

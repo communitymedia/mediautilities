@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<!-- based on @android:style/MediaButton, but without the @null background -->
+	<style name="MediaButton">
+		<!-- note: selectableItemBackground also works for the play/pause button, but borderless appearance is better -->
+		<item name="android:background">?android:selectableItemBackgroundBorderless</item>
+		<item name="android:layout_width">71dip</item>
+		<item name="android:layout_height">52dip</item>
+	</style>
+
+</resources>

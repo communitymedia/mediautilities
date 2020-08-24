@@ -25,12 +25,12 @@ import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.widget.Button;
 
 import ac.robinson.mediautilities.R;
 import ac.robinson.util.UIUtilities;
+import androidx.appcompat.widget.AppCompatButton;
 
-public class CenteredImageTextButton extends Button {
+public class CenteredImageTextButton extends AppCompatButton {
 
 	// for calculating the default padding
 	private int mDrawableSize;
@@ -69,12 +69,11 @@ public class CenteredImageTextButton extends Button {
 	// xmlns:util="http://util.robinson.ac/schema" vs. xmlns:util="http://schemas.android.com/apk/res-auto"
 	private void setStyles(Context context, AttributeSet attrs) {
 		TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.CenteredImageTextButton);
-		int colourDefault = attributes.getColor(R.styleable.CenteredImageTextButton_filterColorDefault, 0xffffffff);
-		int colourTouched = attributes.getColor(R.styleable.CenteredImageTextButton_filterColorTouched, 0xffffffff);
+		int filterColour = attributes.getColor(R.styleable.CenteredImageTextButton_filterColor, 0xffffffff);
 		attributes.recycle();
 
-		if (!isInEditMode()) { // so the Eclipse visual editor can load this component
-			UIUtilities.setButtonColorFilters(this, colourDefault, colourTouched);
+		if (!isInEditMode()) { // so the IDE's visual editor can load this component
+			UIUtilities.setButtonColorFilters(this, filterColour);
 		}
 	}
 

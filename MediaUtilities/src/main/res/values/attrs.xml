@@ -8,8 +8,7 @@
         <attr name="ellipsize" format="boolean" />
     </declare-styleable>
     <declare-styleable name="CenteredImageTextButton">
-        <attr name="filterColorDefault" format="color" />
-        <attr name="filterColorTouched" format="color" />
+        <attr name="filterColor" format="color" />
     </declare-styleable>
     <declare-styleable name="SVGView">
         <attr name="resource" format="integer" />

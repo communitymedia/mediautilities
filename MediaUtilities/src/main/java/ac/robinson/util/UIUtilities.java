@@ -258,10 +258,8 @@ public class UIUtilities {
 	 *
 	 * @param button       The button to set colour filters for
 	 * @param defaultColor The normal (untouched) colour for the button
-	 * @param touchedColor The touch colour - currently ignored. For API 11 and above the coloured filter is applied to
-	 *                     the touched button; for For API 10 and below the normal platform button touch colour is used
 	 */
-	public static void setButtonColorFilters(View button, final int defaultColor, final int touchedColor) {
+	public static void setButtonColorFilters(View button, final int defaultColor) {
 		Drawable background = button.getBackground();
 		if (background == null) {
 			return;

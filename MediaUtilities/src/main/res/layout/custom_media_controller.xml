@@ -15,7 +15,6 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
 	android:orientation="vertical">
@@ -44,33 +43,29 @@
 
 			<ImageButton
 				android:id="@+id/prev"
-				style="@android:style/MediaButton"
+				style="@style/MediaButton"
 				android:layout_width="wrap_content"
 				android:contentDescription="@string/back_description"
-				android:src="@drawable/ic_menu_back"
-				tools:ignore="RequiredSize" /><!-- sizes are inherited from @android:style/MediaButton -->
+				android:src="@drawable/ic_menu_back" />
 		</LinearLayout>
 
 		<ImageButton
 			android:id="@+id/rew"
-			style="@android:style/MediaButton"
+			style="@style/MediaButton"
 			android:contentDescription="@string/rew_description"
-			android:src="@drawable/ic_menu_rewind"
-			tools:ignore="RequiredSize" /><!-- sizes are inherited from @android:style/MediaButton -->
+			android:src="@drawable/ic_menu_rewind" />
 
 		<ImageButton
 			android:id="@+id/pause"
-			style="@android:style/MediaButton"
+			style="@style/MediaButton"
 			android:contentDescription="@string/play_description"
-			android:src="@drawable/ic_menu_pause"
-			tools:ignore="RequiredSize" /><!-- sizes are inherited from @android:style/MediaButton -->
+			android:src="@drawable/ic_menu_pause" />
 
 		<ImageButton
 			android:id="@+id/ffwd"
-			style="@android:style/MediaButton"
+			style="@style/MediaButton"
 			android:contentDescription="@string/ffwd_description"
-			android:src="@drawable/ic_menu_fastforward"
-			tools:ignore="RequiredSize" /><!-- sizes are inherited from @android:style/MediaButton -->
+			android:src="@drawable/ic_menu_fastforward" />
 
 		<LinearLayout
 			android:layout_width="0dp"
@@ -82,11 +77,10 @@
 
 			<ImageButton
 				android:id="@+id/next"
-				style="@android:style/MediaButton"
+				style="@style/MediaButton"
 				android:layout_width="wrap_content"
 				android:contentDescription="@string/export_description"
-				android:src="@drawable/ic_menu_share"
-				tools:ignore="RequiredSize" /><!-- sizes are inherited from @android:style/MediaButton -->
+				android:src="@drawable/ic_menu_share" />
 		</LinearLayout>
 	</LinearLayout>
 

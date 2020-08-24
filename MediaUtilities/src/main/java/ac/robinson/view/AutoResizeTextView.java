@@ -31,11 +31,11 @@ import android.text.TextPaint;
 import android.text.TextUtils.TruncateAt;
 import android.util.AttributeSet;
 import android.util.TypedValue;
-import android.widget.TextView;
 
 import ac.robinson.mediautilities.R;
+import androidx.appcompat.widget.AppCompatTextView;
 
-public class AutoResizeTextView extends TextView {
+public class AutoResizeTextView extends AppCompatTextView {
 
 	// max height and min/max text size are loaded from XML attrs on create; these values are defaults
 	private int mMaxTextHeight = 0; // the maximum allowed height for the text in this view (not including padding)
@@ -116,10 +116,11 @@ public class AutoResizeTextView extends TextView {
 		int horizontalPadding = getCompoundPaddingLeft() + getCompoundPaddingRight();
 		int verticalPadding = getCompoundPaddingTop() + getCompoundPaddingBottom();
 		boolean useResizedDimensions = mMaxTextHeight > 0;
-		Point fittedTextSize = resizeTextToFit(requestedWidth - horizontalPadding, useResizedDimensions ? Math.min(
-				requestedHeight - verticalPadding, mMaxTextHeight - verticalPadding) : requestedHeight - verticalPadding);
-		setMeasuredDimension(useResizedDimensions ? fittedTextSize.x + horizontalPadding : requestedWidth, useResizedDimensions ?
-				fittedTextSize.y + verticalPadding : requestedHeight);
+		Point fittedTextSize = resizeTextToFit(requestedWidth - horizontalPadding,
+				useResizedDimensions ? Math.min(requestedHeight - verticalPadding, mMaxTextHeight - verticalPadding) :
+						requestedHeight - verticalPadding);
+		setMeasuredDimension(useResizedDimensions ? fittedTextSize.x + horizontalPadding : requestedWidth,
+				useResizedDimensions ? fittedTextSize.y + verticalPadding : requestedHeight);
 	}
 
 	/**
