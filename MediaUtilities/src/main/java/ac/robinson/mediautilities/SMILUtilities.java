@@ -30,6 +30,7 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Xml;
 
 import com.larvalabs.svgandroid.SVG;
@@ -67,6 +68,7 @@ import ac.robinson.util.StringUtilities;
 public class SMILUtilities {
 
 	public static final String SMIL_MILLISECOND_STRING = "ms";
+	public static final String SMIL_NORMAL_PLAY_TIME_STRING = "npt=";
 	public static final String SMIL_BACK_IMAGE_STRING = "back-";
 	public static final String SMIL_FRONT_IMAGE_STRING = "front-";
 
@@ -77,8 +79,7 @@ public class SMILUtilities {
 	 * Get a list of the additional files that are part of a SMIL narrative file
 	 *
 	 * @param smilFile                The SMIL file to parse
-	 * @param includeNonMediaElements Whether to include those files that are not actual content (i.e. background
-	 *                                images, etc.)
+	 * @param includeNonMediaElements Whether to include files that are not actual content (i.e. background images, etc.)
 	 * @return The files used in the SMIL narrative
 	 */
 	public static ArrayList<String> getSimpleSMILFileList(File smilFile, boolean includeNonMediaElements) {
@@ -143,10 +144,15 @@ public class SMILUtilities {
 	}
 
 	/**
-	 * Get a list of the frames in a SMIL narrative file. Each frame is returned in a FrameMediaContainer, and non-media
-	 * element files are deleted from the file system
+	 * Get a list of the frames in a SMIL narrative file. Each frame is returned in a FrameMediaContainer.
 	 *
-	 * @param smilFile The SMIL file to parse
+	 * @param smilFile               The SMIL file to parse
+	 * @param sequenceIncrement      The increment to add to the frame counter on each new frame
+	 * @param deleteNonMediaElements Whether to delete non-media element files from the file system (to help with cleanup)
+	 * @param frameLimit             The number of frames to return (i.e., a subset of the full narrative); 0 or a negative
+	 *                               value returns the whole narrative
+	 * @param validateAudioLengths   Whether to check audio durations (i.e., by loading the file) - necessary if audio spans
+	 *                               over multiple frames because it will not have a dur attribute
 	 * @return The frames of the SMIL narrative
 	 */
 	public static ArrayList<FrameMediaContainer> getSMILFrameList(File smilFile, int sequenceIncrement,
@@ -200,6 +206,7 @@ public class SMILUtilities {
 								currentFrame.updateFrameMaxDuration(elementDuration);
 
 							} else {
+								Log.d("blah", "dur: " + elementDuration);
 								currentFrame.addMediaFromSMIL(mediaElements.item(j).getNodeName(), sourceFile, elementId,
 										elementDuration, elementRegion, validateAudioLengths);
 							}
@@ -380,7 +387,7 @@ public class SMILUtilities {
 			// find all the story components
 			boolean imageLoaded;
 			boolean textLoaded;
-			int audioId;
+			int audioIndex;
 			String displayMedia;
 			String displayMediaRegion;
 			boolean narrativeHasAudio = false;
@@ -406,28 +413,41 @@ public class SMILUtilities {
 						savedFile = new File(frame.mImagePath);
 					}
 					if (savedFile != null) {
-						filesToSend.add(Uri.fromFile(savedFile));
+						Uri imageUri = Uri.fromFile(savedFile);
+						if (!filesToSend.contains(imageUri)) {
+							filesToSend.add(imageUri);
+						}
 						displayMedia = savedFile.getName();
 						displayMediaRegion = getImageRegion(frame);
 						imageLoaded = true;
 					}
 				}
 
-				audioId = 0;
+				audioIndex = 0;
 				for (String audioPath : frame.mAudioPaths) {
 					if (audioPath != null && new File(audioPath).exists()) {
 						// output files must be in a public directory for sending (/data/ directory will *not* work)
 						if (IOUtilities.isInternalPath(audioPath)) { // so we can send private files
 							savedFile = copySmilFileToOutput(audioPath, outputDirectory, narrativeName, frame.mFrameSequenceId,
-									audioId + 1, IOUtilities.getFileExtension(audioPath));
+									audioIndex + 1, IOUtilities.getFileExtension(audioPath));
 						} else {
 							savedFile = new File(audioPath);
 						}
 						if (savedFile != null) {
-							filesToSend.add(Uri.fromFile(savedFile));
-							addSmilTag(smilSerializer, tagNamespace, "audio", savedFile.getName(),
-									frame.mAudioDurations.get(audioId), null, true);
-							audioId += 1;
+							Uri audioUri = Uri.fromFile(savedFile);
+							if (!filesToSend.contains(audioUri)) {
+								filesToSend.add(audioUri);
+							}
+							// see: https://www.w3.org/TR/SMIL2/extended-media-object.html#adef-clipBegin (we use v1 for compat)
+							if (frame.mSpanningAudioIndex == audioIndex) {
+								addSmilTag(smilSerializer, tagNamespace, "audio", savedFile.getName(), frame.mSpanningAudioStart,
+										frame.mSpanningAudioStart + frame.mFrameMaxDuration, null, true);
+							} else {
+								addSmilTag(smilSerializer, tagNamespace, "audio", savedFile.getName(), 0,
+										frame.mFrameMaxDuration,
+										null, true);
+							}
+							audioIndex += 1;
 							narrativeHasAudio = true;
 						}
 					}
@@ -441,8 +461,8 @@ public class SMILUtilities {
 					textBitmapPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
 
 					// TODO: the text background isn't really necessary here, as transparency breaks SMIL so all text
-					// background is black by default... remove? (but bear in mind height is only calculated properly
-					// when there's a background to draw)
+					//  background is black by default... remove? (but bear in mind height is only calculated properly
+					//  when there's a background to draw)
 					int textHeight = BitmapUtilities.drawScaledText(frame.mTextContent, textBitmapCanvas, textBitmapPaint,
 							(imageLoaded ? textColourWithImage : textColourNoImage), (imageLoaded ? textBackgroundColour : 0),
 							textSpacing, textCornerRadius, imageLoaded, 0, textBackgroundSpanWidth, textMaxHeightWithImage,
@@ -462,29 +482,32 @@ public class SMILUtilities {
 					savedFile = new File(outputDirectory, frame.mFrameId + ".png");
 					BitmapUtilities.saveBitmap(textBitmapCropped, Bitmap.CompressFormat.PNG, 100, savedFile);
 
-					filesToSend.add(Uri.fromFile(savedFile));
+					Uri textUri = Uri.fromFile(savedFile);
+					if (!filesToSend.contains(textUri)) {
+						filesToSend.add(textUri);
+					}
 					textLoaded = true;
 				}
 
 				// clear the background - could use a SMIL brush, but the Quicktime plugin doesn't recognise these
-				addSmilTag(smilSerializer, tagNamespace, "img", tempBackgroundFile.getName(), frame.mFrameMaxDuration,
+				addSmilTag(smilSerializer, tagNamespace, "img", tempBackgroundFile.getName(), 0, frame.mFrameMaxDuration,
 						"fill-area", false);
 
 				if (imageLoaded) {
-					addSmilTag(smilSerializer, tagNamespace, "img", displayMedia, frame.mFrameMaxDuration, displayMediaRegion,
+					addSmilTag(smilSerializer, tagNamespace, "img", displayMedia, 0, frame.mFrameMaxDuration, displayMediaRegion,
 							true);
 					if (textLoaded) {
-						addSmilTag(smilSerializer, tagNamespace, "img", savedFile.getName(), frame.mFrameMaxDuration,
+						addSmilTag(smilSerializer, tagNamespace, "img", savedFile.getName(), 0, frame.mFrameMaxDuration,
 								"text" + "-subtitles", false);
 						addTextTag(smilSerializer, tagNamespace, frame.mTextContent);
 					}
 				} else {
 					if (textLoaded) {
-						addSmilTag(smilSerializer, tagNamespace, "img", savedFile.getName(), frame.mFrameMaxDuration,
+						addSmilTag(smilSerializer, tagNamespace, "img", savedFile.getName(), 0, frame.mFrameMaxDuration,
 								"fill" + "-area", false);
 						addTextTag(smilSerializer, tagNamespace, frame.mTextContent);
 					} else {
-						addSmilTag(smilSerializer, tagNamespace, "img", displayMedia, frame.mFrameMaxDuration,
+						addSmilTag(smilSerializer, tagNamespace, "img", displayMedia, 0, frame.mFrameMaxDuration,
 								displayMediaRegion, false);
 					}
 				}
@@ -502,12 +525,12 @@ public class SMILUtilities {
 						new RectF(audioBitmapLeft, audioBitmapTop, audioBitmapLeft + audioBitmapSize,
 								audioBitmapTop + audioBitmapSize));
 				if (BitmapUtilities.saveBitmap(audioIconBitmap, Bitmap.CompressFormat.PNG, 100, tempAudioIconFile)) {
-					addSmilTag(smilSerializer, tagNamespace, "meta-data", tempAudioIconFile.getName(), 2, "fill-area", false);
+					addSmilTag(smilSerializer, tagNamespace, "meta-data", tempAudioIconFile.getName(), 0, 2, "fill-area", false);
 				} // if this fails, audio playback won't have an icon
 			}
-			addSmilTag(smilSerializer, tagNamespace, "meta-data", storyPlayerFile.getName(), 2, "fill-area", false);
-			addSmilTag(smilSerializer, tagNamespace, "meta-data", syncFile.getName(), 2, "fill-area", false);
-			addSmilTag(smilSerializer, tagNamespace, "img", tempBackgroundFile.getName(), 2, "fill-area", false);
+			addSmilTag(smilSerializer, tagNamespace, "meta-data", storyPlayerFile.getName(), 0, 2, "fill-area", false);
+			addSmilTag(smilSerializer, tagNamespace, "meta-data", syncFile.getName(), 0, 2, "fill-area", false);
+			addSmilTag(smilSerializer, tagNamespace, "img", tempBackgroundFile.getName(), 0, 2, "fill-area", false);
 			smilSerializer.endTag(tagNamespace, "par");
 			smilSerializer.endTag(tagNamespace, "seq");
 			smilSerializer.endTag(tagNamespace, "body");
@@ -612,11 +635,21 @@ public class SMILUtilities {
 		smilSerializer.endTag(tagNamespace, "text-media");
 	}
 
-	private static void addSmilTag(XmlSerializer smilSerializer, String tagNamespace, String tagName, String fileName,
+	private static void addSmilTag(XmlSerializer smilSerializer, String tagNamespace, String tagName, String fileName, int begin,
 								   int duration, String region, boolean isMedia) throws IOException {
 		smilSerializer.startTag(tagNamespace, tagName);
 		smilSerializer.attribute(tagNamespace, "src", fileName);
-		smilSerializer.attribute(tagNamespace, "dur", duration + SMIL_MILLISECOND_STRING);
+		if (begin != 0) {
+			// the documentation doesn't seem to mention it, but if we use clip-begin and clip-end, player apps - e.g., Ambulant
+			// Player, QuickTime Player 7 - then specifying a dur value overrides this (another option would be to use negative
+			// begin values, as detailed at https://www.w3.org/TR/SMIL2/smil-timing.html#Timing-DurValueSemantics, but neither
+			// player seems to be able to handle these
+			smilSerializer.attribute(tagNamespace, "clip-begin", SMIL_NORMAL_PLAY_TIME_STRING + begin + SMIL_MILLISECOND_STRING);
+			smilSerializer.attribute(tagNamespace, "clip-end",
+					SMIL_NORMAL_PLAY_TIME_STRING + duration + SMIL_MILLISECOND_STRING);
+		} else {
+			smilSerializer.attribute(tagNamespace, "dur", duration + SMIL_MILLISECOND_STRING);
+		}
 		if (region != null) {
 			smilSerializer.attribute(tagNamespace, "region", region);
 		}

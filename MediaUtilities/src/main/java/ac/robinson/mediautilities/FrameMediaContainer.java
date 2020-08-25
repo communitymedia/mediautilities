@@ -118,7 +118,7 @@ public class FrameMediaContainer {
 				int preciseDuration = mediaDuration;
 
 				// check the audio duration - having the correct audio duration stored used to be critical for correct
-				// playback; now it is less important, but it still helps for dividing other media over long-running
+				// playback; now it is less of an issue, but it still helps for dividing other media over long-running
 				// audio items, so we continue to check lengths where appropriate
 				if (validateAudioLengths) {
 					int audioDuration = IOUtilities.getAudioFileLength(mediaFile);
