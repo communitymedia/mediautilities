@@ -30,6 +30,10 @@ import androidx.annotation.NonNull;
 
 public class FrameMediaContainer {
 
+	public enum SpanType {
+		SPAN_NONE, SPAN_ROOT, SPAN_EXTENSION
+	}
+
 	public String mParentId = null;
 	public String mFrameId;
 	public int mFrameSequenceId;
@@ -39,15 +43,19 @@ public class FrameMediaContainer {
 	public int mForegroundColour = 0;
 
 	public String mTextContent = null;
+	public SpanType mSpanningTextType = SpanType.SPAN_NONE;
 
 	public String mImagePath = null;
 	public boolean mImageIsFrontCamera = false;
+	public SpanType mSpanningImageType = SpanType.SPAN_NONE;
 
+	// image and text items can simply span or not span; audio is more complex, because we can have both types in one frame
 	public ArrayList<Integer> mAudioDurations = new ArrayList<>();
 	public ArrayList<String> mAudioPaths = new ArrayList<>();
 	public int mSpanningAudioIndex = -1; // only one spanning item per frame; if this is not -1 then that item spans
 	public int mSpanningAudioStart = 0; // hint for SMIL/HTML exports to indicate where (ms) audio should start on spanned frames
 	public boolean mSpanningAudioRoot = false; // whether this spanning audio item is the first part, or inherited
+	public boolean mEndsPreviousSpanningAudio = false; // whether other inherited audio should end here (SMIL import only)
 
 	public FrameMediaContainer(String frameId, int frameSequenceId) {
 		mFrameId = frameId;
@@ -86,9 +94,10 @@ public class FrameMediaContainer {
 	 * @param mediaId       the id of the media item (not currently used)
 	 * @param mediaDuration the duration of this text item, in milliseconds
 	 */
-	public void addTextFromSMIL(String textContent, String mediaId, int mediaDuration) {
-		if (!TextUtils.isEmpty(textContent)) {
+	public void addTextFromSMIL(String textContent, String mediaId, int mediaDuration, SpanType spanType) {
+		if (!TextUtils.isEmpty(textContent) && spanType != SpanType.SPAN_EXTENSION) {
 			mTextContent = textContent;
+			mSpanningTextType = spanType;
 			updateFrameMaxDuration(mediaDuration);
 		}
 	}
@@ -102,19 +111,22 @@ public class FrameMediaContainer {
 	 * @param mediaId              the id of the media item (not currently used)
 	 * @param mediaDuration        the duration of the item, in milliseconds
 	 * @param mediaRegion          the region - applicable to images only; SMIL_FRONT_IMAGE_STRING or SMIL_BACK_IMAGE_STRING
+	 * @param spanType             for spanning media, whether this is the original item, or an inherited version
+	 * @param endPreviousSpan      whether this item replaces inherited spanning media (currently applies to audio only)
 	 * @param validateAudioLengths whether to re-calculate the duration of imported audio items
 	 */
 	public void addMediaFromSMIL(String mediaType, File mediaFile, String mediaId, int mediaDuration, String mediaRegion,
-								 boolean validateAudioLengths) {
-		if (mediaFile.exists() && mediaFile.length() > 0) {
-			if ("img".equals(mediaType)) {
+								 SpanType spanType, boolean endPreviousSpan, boolean validateAudioLengths) {
+		if (mediaFile.exists() && mediaFile.length() > 0 && spanType != SpanType.SPAN_EXTENSION) {
+			if (SMILUtilities.SMIL_MEDIA_IMAGE.equals(mediaType)) {
 				mImagePath = mediaFile.getAbsolutePath();
 				if (mediaRegion.startsWith(SMILUtilities.SMIL_FRONT_IMAGE_STRING)) {
 					mImageIsFrontCamera = true;
 				}
+				mSpanningImageType = spanType;
 				updateFrameMaxDuration(mediaDuration);
-			} else if ("audio".equals(mediaType)) {
 
+			} else if (SMILUtilities.SMIL_MEDIA_AUDIO.equals(mediaType)) {
 				int preciseDuration = mediaDuration;
 
 				// check the audio duration - having the correct audio duration stored used to be critical for correct
@@ -126,7 +138,12 @@ public class FrameMediaContainer {
 						preciseDuration = audioDuration;
 					}
 				}
-				addAudioFile(mediaFile.getAbsolutePath(), preciseDuration);
+				int audioIndex = addAudioFile(mediaFile.getAbsolutePath(), preciseDuration);
+				if (spanType == SpanType.SPAN_ROOT) {
+					mSpanningAudioIndex = audioIndex;
+					mSpanningAudioRoot = true;
+				}
+				mEndsPreviousSpanningAudio = endPreviousSpan;
 
 				updateFrameMaxDuration(preciseDuration);
 			}
@@ -139,8 +156,10 @@ public class FrameMediaContainer {
 		return "FrameMediaContainer{" + "mParentId='" + mParentId + '\'' + ", mFrameId='" + mFrameId + '\'' +
 				", mFrameSequenceId=" + mFrameSequenceId + ", mFrameMaxDuration=" + mFrameMaxDuration + ", mBackgroundColour=" +
 				mBackgroundColour + ", mForegroundColour=" + mForegroundColour + ", mTextContent='" + mTextContent + '\'' +
-				", mImagePath='" + mImagePath + '\'' + ", mImageIsFrontCamera=" + mImageIsFrontCamera + ", mAudioDurations=" +
-				mAudioDurations + ", mAudioPaths=" + mAudioPaths + ", mSpanningAudioIndex=" + mSpanningAudioIndex +
-				", mSpanningAudioRoot=" + mSpanningAudioRoot + '}';
+				", mSpanningTextType=" + mSpanningTextType + ", mImagePath='" + mImagePath + '\'' + ", mImageIsFrontCamera=" +
+				mImageIsFrontCamera + ", mSpanningImageType=" + mSpanningImageType + ", mAudioDurations=" + mAudioDurations +
+				", mAudioPaths=" + mAudioPaths + ", mSpanningAudioIndex=" + mSpanningAudioIndex + ", mSpanningAudioStart=" +
+				mSpanningAudioStart + ", mSpanningAudioRoot=" + mSpanningAudioRoot + ", mEndsPreviousSpanningAudio=" +
+				mEndsPreviousSpanningAudio + '}';
 	}
 }

@@ -30,7 +30,6 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Xml;
 
 import com.larvalabs.svgandroid.SVG;
@@ -59,18 +58,27 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import ac.robinson.mediautilities.FrameMediaContainer.SpanType;
 import ac.robinson.util.AndroidUtilities;
 import ac.robinson.util.BitmapUtilities;
 import ac.robinson.util.IOUtilities;
 import ac.robinson.util.ImageCacheUtilities;
 import ac.robinson.util.StringUtilities;
+import androidx.annotation.NonNull;
 
 public class SMILUtilities {
+
+	public static final String SMIL_MEDIA_IMAGE = "img";
+	public static final String SMIL_MEDIA_AUDIO = "audio";
+	public static final String SMIL_MEDIA_TEXT = "text-media";
 
 	public static final String SMIL_MILLISECOND_STRING = "ms";
 	public static final String SMIL_NORMAL_PLAY_TIME_STRING = "npt=";
 	public static final String SMIL_BACK_IMAGE_STRING = "back-";
 	public static final String SMIL_FRONT_IMAGE_STRING = "front-";
+	public static final String SMIL_SPANNING_MEDIA_STRING = "span-type";
+	public static final String SMIL_SPAN_TYPE_ROOT = "root";
+	public static final String SMIL_SPAN_TYPE_EXTENSION = "extension";
 
 	private static final String COMPONENT_FILE_NAME_WITH_ID = "%s-%d-%d.%s";
 	private static final String COMPONENT_FILE_NAME_WITHOUT_ID = "%s-%d.%s";
@@ -177,6 +185,8 @@ public class SMILUtilities {
 			frameLimit = frameLimit <= 0 ? n : frameLimit;
 			for (int i = 0; i < n && i < frameLimit; i++) {
 
+				// note: we preserve the original frame ID here for potential future use, but must be careful *not* to use it
+				// when actually importing, as that could lead to us overwriting the original if exporting/importing locally
 				Element parElement = (Element) nodeList.item(i);
 				FrameMediaContainer currentFrame = new FrameMediaContainer(parElement.getAttribute("id"), frameSequenceId);
 
@@ -189,9 +199,12 @@ public class SMILUtilities {
 						String elementRegion = mediaElement.getAttribute("region");
 						String elementSrc = mediaElement.getAttribute("src");
 						int elementDuration = getDurationFromString(mediaElement.getAttribute("dur"));
+						SpanType elementSpanType = getSpanTypeFromString(mediaElement.getAttribute(SMIL_SPANNING_MEDIA_STRING));
+						boolean endPreviousSpan = "true".equals(mediaElement.getAttribute("end-span"));
 
 						if ("text-media".equals(mediaElements.item(j).getNodeName())) {
-							currentFrame.addTextFromSMIL(mediaElement.getTextContent(), elementId, elementDuration);
+							currentFrame.addTextFromSMIL(mediaElement.getTextContent(), elementId, elementDuration,
+									elementSpanType);
 
 						} else if (!TextUtils.isEmpty(elementSrc)) {
 							File sourceFile = new File(smilFile.getParent(), elementSrc);
@@ -206,9 +219,8 @@ public class SMILUtilities {
 								currentFrame.updateFrameMaxDuration(elementDuration);
 
 							} else {
-								Log.d("blah", "dur: " + elementDuration);
 								currentFrame.addMediaFromSMIL(mediaElements.item(j).getNodeName(), sourceFile, elementId,
-										elementDuration, elementRegion, validateAudioLengths);
+										elementDuration, elementRegion, elementSpanType, endPreviousSpan, validateAudioLengths);
 							}
 						}
 					}
@@ -247,6 +259,20 @@ public class SMILUtilities {
 			}
 		}
 		return 0;
+	}
+
+	public static SpanType getSpanTypeFromString(String spanType) {
+		if (!TextUtils.isEmpty(spanType)) {
+			switch (spanType) {
+				case SMIL_SPAN_TYPE_ROOT:
+					return SpanType.SPAN_ROOT;
+				case SMIL_SPAN_TYPE_EXTENSION:
+					return SpanType.SPAN_EXTENSION;
+				default:
+					return SpanType.SPAN_NONE;
+			}
+		}
+		return SpanType.SPAN_NONE;
 	}
 
 	/**
@@ -439,13 +465,16 @@ public class SMILUtilities {
 								filesToSend.add(audioUri);
 							}
 							// see: https://www.w3.org/TR/SMIL2/extended-media-object.html#adef-clipBegin (we use v1 for compat)
+							// this is a spanning audio item - we must crop to the part we need and tag as such
 							if (frame.mSpanningAudioIndex == audioIndex) {
 								addSmilTag(smilSerializer, tagNamespace, "audio", savedFile.getName(), frame.mSpanningAudioStart,
-										frame.mSpanningAudioStart + frame.mFrameMaxDuration, null, true);
+										frame.mSpanningAudioStart + frame.mFrameMaxDuration, null, true,
+										frame.mSpanningAudioRoot ? SpanType.SPAN_ROOT : SpanType.SPAN_EXTENSION,
+										frame.mEndsPreviousSpanningAudio);
 							} else {
 								addSmilTag(smilSerializer, tagNamespace, "audio", savedFile.getName(), 0,
 										frame.mFrameMaxDuration,
-										null, true);
+										null, true, SpanType.SPAN_NONE, frame.mEndsPreviousSpanningAudio);
 							}
 							audioIndex += 1;
 							narrativeHasAudio = true;
@@ -491,24 +520,24 @@ public class SMILUtilities {
 
 				// clear the background - could use a SMIL brush, but the Quicktime plugin doesn't recognise these
 				addSmilTag(smilSerializer, tagNamespace, "img", tempBackgroundFile.getName(), 0, frame.mFrameMaxDuration,
-						"fill-area", false);
+						"fill-area", false, SpanType.SPAN_NONE, false);
 
 				if (imageLoaded) {
 					addSmilTag(smilSerializer, tagNamespace, "img", displayMedia, 0, frame.mFrameMaxDuration, displayMediaRegion,
-							true);
+							true, frame.mSpanningImageType, false);
 					if (textLoaded) {
 						addSmilTag(smilSerializer, tagNamespace, "img", savedFile.getName(), 0, frame.mFrameMaxDuration,
-								"text" + "-subtitles", false);
-						addTextTag(smilSerializer, tagNamespace, frame.mTextContent);
+								"text" + "-subtitles", false, SpanType.SPAN_NONE, false);
+						addTextTag(smilSerializer, tagNamespace, frame.mTextContent, frame.mSpanningTextType);
 					}
 				} else {
 					if (textLoaded) {
 						addSmilTag(smilSerializer, tagNamespace, "img", savedFile.getName(), 0, frame.mFrameMaxDuration,
-								"fill" + "-area", false);
-						addTextTag(smilSerializer, tagNamespace, frame.mTextContent);
+								"fill" + "-area", false, SpanType.SPAN_NONE, false);
+						addTextTag(smilSerializer, tagNamespace, frame.mTextContent, frame.mSpanningTextType);
 					} else {
 						addSmilTag(smilSerializer, tagNamespace, "img", displayMedia, 0, frame.mFrameMaxDuration,
-								displayMediaRegion, false);
+								displayMediaRegion, false, SpanType.SPAN_NONE, false);
 					}
 				}
 
@@ -525,12 +554,16 @@ public class SMILUtilities {
 						new RectF(audioBitmapLeft, audioBitmapTop, audioBitmapLeft + audioBitmapSize,
 								audioBitmapTop + audioBitmapSize));
 				if (BitmapUtilities.saveBitmap(audioIconBitmap, Bitmap.CompressFormat.PNG, 100, tempAudioIconFile)) {
-					addSmilTag(smilSerializer, tagNamespace, "meta-data", tempAudioIconFile.getName(), 0, 2, "fill-area", false);
+					addSmilTag(smilSerializer, tagNamespace, "meta-data", tempAudioIconFile.getName(), 0, 2, "fill-area", false,
+							SpanType.SPAN_NONE, false);
 				} // if this fails, audio playback won't have an icon
 			}
-			addSmilTag(smilSerializer, tagNamespace, "meta-data", storyPlayerFile.getName(), 0, 2, "fill-area", false);
-			addSmilTag(smilSerializer, tagNamespace, "meta-data", syncFile.getName(), 0, 2, "fill-area", false);
-			addSmilTag(smilSerializer, tagNamespace, "img", tempBackgroundFile.getName(), 0, 2, "fill-area", false);
+			addSmilTag(smilSerializer, tagNamespace, "meta-data", storyPlayerFile.getName(), 0, 2, "fill-area", false,
+					SpanType.SPAN_NONE, false);
+			addSmilTag(smilSerializer, tagNamespace, "meta-data", syncFile.getName(), 0, 2, "fill-area", false,
+					SpanType.SPAN_NONE, false);
+			addSmilTag(smilSerializer, tagNamespace, "img", tempBackgroundFile.getName(), 0, 2, "fill-area", false,
+					SpanType.SPAN_NONE, false);
 			smilSerializer.endTag(tagNamespace, "par");
 			smilSerializer.endTag(tagNamespace, "seq");
 			smilSerializer.endTag(tagNamespace, "body");
@@ -629,14 +662,21 @@ public class SMILUtilities {
 		smilSerializer.endTag(tagNamespace, "region");
 	}
 
-	private static void addTextTag(XmlSerializer smilSerializer, String tagNamespace, String textString) throws IOException {
+	private static void addTextTag(XmlSerializer smilSerializer, String tagNamespace, String textString,
+								   @NonNull SpanType spanType) throws IOException {
 		smilSerializer.startTag(tagNamespace, "text-media");
+		if (spanType != SpanType.SPAN_NONE) {
+			// if this is a spanning text item, is it the root or a subsequent (i.e., duplicate) extension
+			smilSerializer.attribute(tagNamespace, SMIL_SPANNING_MEDIA_STRING,
+					spanType == SpanType.SPAN_ROOT ? SMIL_SPAN_TYPE_ROOT : SMIL_SPAN_TYPE_EXTENSION);
+		}
 		smilSerializer.text(textString);
 		smilSerializer.endTag(tagNamespace, "text-media");
 	}
 
 	private static void addSmilTag(XmlSerializer smilSerializer, String tagNamespace, String tagName, String fileName, int begin,
-								   int duration, String region, boolean isMedia) throws IOException {
+								   int duration, String region, boolean isMedia, @NonNull SpanType spanType,
+								   boolean endPreviousSpan) throws IOException {
 		smilSerializer.startTag(tagNamespace, tagName);
 		smilSerializer.attribute(tagNamespace, "src", fileName);
 		if (begin != 0) {
@@ -654,6 +694,14 @@ public class SMILUtilities {
 			smilSerializer.attribute(tagNamespace, "region", region);
 		}
 		smilSerializer.attribute(tagNamespace, "is-media", Boolean.toString(isMedia));
+		if (spanType != SpanType.SPAN_NONE) {
+			// if this is a spanning text item, is it the root or a subsequent (i.e., duplicate) extension
+			smilSerializer.attribute(tagNamespace, SMIL_SPANNING_MEDIA_STRING,
+					spanType == SpanType.SPAN_ROOT ? SMIL_SPAN_TYPE_ROOT : SMIL_SPAN_TYPE_EXTENSION);
+		}
+		if (endPreviousSpan) {
+			smilSerializer.attribute(tagNamespace, "end-span", "true");
+		}
 		// plugin has strange flashing issues if this is enabled
 		// smilSerializer.attribute(tagNamespace, "qt:composite-mode", "alpha");
 		smilSerializer.endTag(tagNamespace, tagName);
