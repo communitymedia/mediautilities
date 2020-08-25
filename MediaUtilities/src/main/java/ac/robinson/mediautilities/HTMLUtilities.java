@@ -92,6 +92,7 @@ public class HTMLUtilities {
 				} else if (readLine.contains(partsIdentifier)) {
 
 					// find all the story components
+					// TODO: currently we repeatedly add spanning media, rather than truly spanning - is it worth fixing this?
 					int frameId = 0;
 					boolean imageLoaded;
 					boolean textLoaded;
@@ -133,7 +134,9 @@ public class HTMLUtilities {
 							playerOutputFileWriter.write(" src=\"data:" + mimeType + ";base64,");
 							playerOutputFileWriter.write(
 									Base64.encodeToString(IOUtilities.readFileToByteArray(frame.mImagePath), 0));
-							playerOutputFileWriter.write("\" alt=\"" + frame.mFrameId + "\">\n");
+							playerOutputFileWriter.write(
+									"\" alt=\"" + frame.mFrameId + "\" data-frame-duration=\"" + frame.mFrameMaxDuration +
+											"\">\n");
 							imageLoaded = true;
 						}
 
@@ -143,13 +146,14 @@ public class HTMLUtilities {
 								textPositioning = " class=\"full-screen\"";
 							}
 
-							playerOutputFileWriter.write("<p" + textPositioning + ">");
+							playerOutputFileWriter.write(
+									"<p" + textPositioning + " data-frame-duration=\"" + frame.mFrameMaxDuration + "\">");
 							playerOutputFileWriter.write(frame.mTextContent.replace("\n", "<br>"));
 							playerOutputFileWriter.write("</p>\n");
 							textLoaded = true;
 						}
 
-						// TODO: need to add durations for re-importing
+						int audioIndex = 0;
 						for (String audioPath : frame.mAudioPaths) {
 							if (!audioLoaded && !imageLoaded && !textLoaded) {
 								// must be before audio TODO: does this affect text?
@@ -166,8 +170,12 @@ public class HTMLUtilities {
 							}
 							playerOutputFileWriter.write("<audio src=\"data:" + mimeType + ";base64,");
 							playerOutputFileWriter.write(Base64.encodeToString(IOUtilities.readFileToByteArray(audioPath), 0));
-							playerOutputFileWriter.write("\"></audio>\n");
+							playerOutputFileWriter.write("\" data-frame-duration=\"" + frame.mFrameMaxDuration + "\"" +
+									(frame.mSpanningAudioIndex == audioIndex ?
+											(" data-audio-start=\"" + frame.mSpanningAudioStart + "\"") : "") + "></audio" +
+									">\n");
 							audioLoaded = true;
+							audioIndex += 1;
 						}
 
 						playerOutputFileWriter.write("</span>\n");

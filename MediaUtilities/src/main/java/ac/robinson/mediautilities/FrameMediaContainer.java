@@ -26,6 +26,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 import ac.robinson.util.IOUtilities;
+import androidx.annotation.NonNull;
 
 public class FrameMediaContainer {
 
@@ -45,6 +46,7 @@ public class FrameMediaContainer {
 	public ArrayList<Integer> mAudioDurations = new ArrayList<>();
 	public ArrayList<String> mAudioPaths = new ArrayList<>();
 	public int mSpanningAudioIndex = -1; // only one spanning item per frame; if this is not -1 then that item spans
+	public int mSpanningAudioStart = 0; // hint for SMIL/HTML exports to indicate where (ms) audio should start on spanned frames
 	public boolean mSpanningAudioRoot = false; // whether this spanning audio item is the first part, or inherited
 
 	public FrameMediaContainer(String frameId, int frameSequenceId) {
@@ -129,5 +131,16 @@ public class FrameMediaContainer {
 				updateFrameMaxDuration(preciseDuration);
 			}
 		}
+	}
+
+	@NonNull
+	@Override
+	public String toString() {
+		return "FrameMediaContainer{" + "mParentId='" + mParentId + '\'' + ", mFrameId='" + mFrameId + '\'' +
+				", mFrameSequenceId=" + mFrameSequenceId + ", mFrameMaxDuration=" + mFrameMaxDuration + ", mBackgroundColour=" +
+				mBackgroundColour + ", mForegroundColour=" + mForegroundColour + ", mTextContent='" + mTextContent + '\'' +
+				", mImagePath='" + mImagePath + '\'' + ", mImageIsFrontCamera=" + mImageIsFrontCamera + ", mAudioDurations=" +
+				mAudioDurations + ", mAudioPaths=" + mAudioPaths + ", mSpanningAudioIndex=" + mSpanningAudioIndex +
+				", mSpanningAudioRoot=" + mSpanningAudioRoot + '}';
 	}
 }
