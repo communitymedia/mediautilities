@@ -55,7 +55,7 @@ public class FrameMediaContainer {
 	public int mSpanningAudioIndex = -1; // only one spanning item per frame; if this is not -1 then that item spans
 	public int mSpanningAudioStart = 0; // hint for SMIL/HTML exports to indicate where (ms) audio should start on spanned frames
 	public boolean mSpanningAudioRoot = false; // whether this spanning audio item is the first part, or inherited
-	public boolean mEndsPreviousSpanningAudio = false; // whether other inherited audio should end here (SMIL import only)
+	public boolean mEndsPreviousSpanningAudio = false; // whether other inherited audio should end here (for SMIL imports)
 
 	public FrameMediaContainer(String frameId, int frameSequenceId) {
 		mFrameId = frameId;

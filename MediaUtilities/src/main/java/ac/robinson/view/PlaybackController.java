@@ -31,7 +31,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
@@ -411,13 +410,13 @@ public class PlaybackController extends FrameLayout {
 		if (mShareButton != null) {
 			mShareButton.setOnClickListener(mShareListener);
 			mShareButton.setEnabled(mShareListener != null);
-			((LinearLayout) mShareButton.getParent()).setVisibility(mShareListener != null ? View.VISIBLE : View.INVISIBLE);
+			mShareButton.setVisibility(mShareListener != null ? View.VISIBLE : View.GONE);
 		}
 
 		if (mBackButton != null) {
 			mBackButton.setOnClickListener(mBackListener);
 			mBackButton.setEnabled(mBackListener != null);
-			((LinearLayout) mBackButton.getParent()).setVisibility(mBackListener != null ? View.VISIBLE : View.INVISIBLE);
+			mBackButton.setVisibility(mBackListener != null ? View.VISIBLE : View.GONE);
 		}
 	}
 

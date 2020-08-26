@@ -20,17 +20,22 @@
 
 package ac.robinson.view;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.widget.Button;
 
 import ac.robinson.mediautilities.R;
 import ac.robinson.util.UIUtilities;
-import androidx.appcompat.widget.AppCompatButton;
 
-public class CenteredImageTextButton extends AppCompatButton {
+// we don't extend AppCompatButton because it has a bug where on some versions of Android (pre-5.0?) XML-defined onclick
+// listeners do not work (see: https://stackoverflow.com/questions/54028752/, https://stackoverflow.com/questions/58136795/ and
+// https://issuetracker.google.com/issues/37048075 (status: wontfix))
+@SuppressLint("AppCompatCustomView")
+public class CenteredImageTextButton extends Button {
 
 	// for calculating the default padding
 	private int mDrawableSize;

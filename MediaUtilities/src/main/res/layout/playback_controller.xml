@@ -1,124 +1,122 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
-	android:orientation="vertical">
+	android:background="@color/media_controller_background">
 
 	<ImageView
+		android:id="@+id/mediacontroller_spacer"
 		android:layout_width="match_parent"
 		android:layout_height="1dp"
+		android:layout_alignParentTop="true"
+		android:layout_marginBottom="4dp"
 		android:background="@android:drawable/divider_horizontal_dark"
 		android:contentDescription="@null" />
 
-	<LinearLayout
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:background="@color/media_controller_background"
-		android:gravity="center"
-		android:orientation="horizontal"
-		android:paddingTop="4dp">
+	<ImageButton
+		android:id="@+id/back"
+		style="@style/MediaButton"
+		android:layout_width="wrap_content"
+		android:layout_below="@id/mediacontroller_spacer"
+		android:layout_alignParentStart="true"
+		android:layout_alignParentLeft="true"
+		android:contentDescription="@string/back_description"
+		android:src="@drawable/ic_menu_back" />
 
-		<LinearLayout
-			android:layout_width="0dp"
-			android:layout_height="match_parent"
-			android:layout_weight="1"
-			android:background="@null"
-			android:gravity="start"
-			android:orientation="horizontal"
-			android:visibility="gone">
-
-			<ImageButton
-				android:id="@+id/back"
-				style="@style/MediaButton"
-				android:layout_width="wrap_content"
-				android:contentDescription="@string/back_description"
-				android:src="@drawable/ic_menu_back" />
-		</LinearLayout>
+	<RelativeLayout
+		android:id="@+id/pause_record_container"
+		style="@style/MediaButton"
+		android:layout_below="@id/mediacontroller_spacer"
+		android:layout_centerHorizontal="true"
+		android:background="@null">
 
 		<ImageButton
-			android:id="@+id/rew"
+			android:id="@+id/pause"
 			style="@style/MediaButton"
-			android:contentDescription="@string/rew_description"
-			android:src="@drawable/ic_menu_rewind" />
+			android:contentDescription="@string/play_description"
+			android:src="@drawable/ic_menu_pause" />
 
-		<RelativeLayout style="@style/MediaButton">
-
-			<ImageButton
-				android:id="@+id/pause"
-				style="@style/MediaButton"
-				android:contentDescription="@string/play_description"
-				android:src="@drawable/ic_menu_pause" />
-
-			<ProgressBar
-				android:id="@+id/record"
-				android:layout_width="match_parent"
-				android:layout_height="match_parent"
-				android:indeterminate="true"
-				android:visibility="gone" />
-		</RelativeLayout>
-
-		<ImageButton
-			android:id="@+id/ffwd"
-			style="@style/MediaButton"
-			android:contentDescription="@string/ffwd_description"
-			android:src="@drawable/ic_menu_fastforward" />
-
-		<LinearLayout
-			android:layout_width="0dp"
+		<ProgressBar
+			android:id="@+id/record"
+			android:layout_width="match_parent"
 			android:layout_height="match_parent"
-			android:layout_weight="1"
-			android:background="@null"
-			android:gravity="end"
-			android:orientation="horizontal"
-			android:visibility="gone">
+			android:indeterminate="true"
+			android:visibility="gone" />
+	</RelativeLayout>
 
-			<ImageButton
-				android:id="@+id/share"
-				style="@style/MediaButton"
-				android:layout_width="wrap_content"
-				android:contentDescription="@string/export_description"
-				android:src="@drawable/ic_menu_share" />
-		</LinearLayout>
-	</LinearLayout>
+	<ImageButton
+		android:id="@+id/rew"
+		style="@style/MediaButton"
+		android:layout_below="@id/mediacontroller_spacer"
+		android:layout_toStartOf="@id/pause_record_container"
+		android:layout_toLeftOf="@id/pause_record_container"
+		android:contentDescription="@string/rew_description"
+		android:src="@drawable/ic_menu_rewind" />
 
-	<LinearLayout
-		android:layout_width="match_parent"
+	<ImageButton
+		android:id="@+id/ffwd"
+		style="@style/MediaButton"
+		android:layout_below="@id/mediacontroller_spacer"
+		android:layout_toEndOf="@id/pause_record_container"
+		android:layout_toRightOf="@id/pause_record_container"
+		android:contentDescription="@string/ffwd_description"
+		android:src="@drawable/ic_menu_fastforward" />
+
+	<ImageButton
+		android:id="@+id/share"
+		style="@style/MediaButton"
+		android:layout_width="wrap_content"
+		android:layout_below="@id/mediacontroller_spacer"
+		android:layout_alignParentEnd="true"
+		android:layout_alignParentRight="true"
+		android:contentDescription="@string/export_description"
+		android:src="@drawable/ic_menu_share" />
+
+	<TextView
+		android:id="@+id/time_current"
+		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:background="@color/media_controller_background"
-		android:orientation="horizontal">
+		android:layout_below="@id/pause_record_container"
+		android:layout_alignParentStart="true"
+		android:layout_alignParentLeft="true"
+		android:layout_gravity="center_horizontal"
+		android:paddingLeft="4dp"
+		android:paddingTop="4dp"
+		android:paddingRight="4dp"
+		android:textColor="@color/media_controller_text"
+		android:textIsSelectable="false"
+		android:textSize="14sp"
+		android:textStyle="bold"
+		tools:text="0:01" />
 
-		<TextView
-			android:id="@+id/time_current"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_gravity="center_horizontal"
-			android:paddingLeft="4dp"
-			android:paddingTop="4dp"
-			android:paddingRight="4dp"
-			android:textColor="@color/media_controller_text"
-			android:textIsSelectable="false"
-			android:textSize="14sp"
-			android:textStyle="bold" />
+	<TextView
+		android:id="@+id/time"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_below="@id/pause_record_container"
+		android:layout_alignParentEnd="true"
+		android:layout_alignParentRight="true"
+		android:layout_gravity="center_horizontal"
+		android:paddingLeft="4dp"
+		android:paddingTop="4dp"
+		android:paddingRight="4dp"
+		android:textColor="@color/media_controller_text"
+		android:textIsSelectable="false"
+		android:textSize="14sp"
+		android:textStyle="bold"
+		tools:text="1:00" />
 
-		<SeekBar
-			android:id="@+id/mediacontroller_progress"
-			style="?android:attr/seekBarStyle"
-			android:layout_width="0dp"
-			android:layout_height="30dp"
-			android:layout_weight="1" />
+	<SeekBar
+		android:id="@+id/mediacontroller_progress"
+		style="?android:attr/seekBarStyle"
+		android:layout_width="match_parent"
+		android:layout_height="30dp"
+		android:layout_below="@id/pause_record_container"
+		android:layout_toStartOf="@id/time"
+		android:layout_toLeftOf="@id/time"
+		android:layout_toEndOf="@id/time_current"
+		android:layout_toRightOf="@id/time_current"
+		android:contentDescription="@string/progress_description" />
 
-		<TextView
-			android:id="@+id/time"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_gravity="center_horizontal"
-			android:paddingLeft="4dp"
-			android:paddingTop="4dp"
-			android:paddingRight="4dp"
-			android:textColor="@color/media_controller_text"
-			android:textIsSelectable="false"
-			android:textSize="14sp"
-			android:textStyle="bold" />
-	</LinearLayout>
-
-</LinearLayout>
+</RelativeLayout>

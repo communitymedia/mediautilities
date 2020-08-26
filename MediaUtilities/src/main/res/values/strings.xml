@@ -19,6 +19,7 @@
 	<string name="rew_description">Rewind</string>
 	<string name="play_description">Play / pause</string>
 	<string name="ffwd_description">Fast-forward</string>
+	<string name="progress_description">Playback progress</string>
 	<string name="export_description">Export this narrative</string> <!-- doesn't matter about narrative/media - only used in MediaPhone -->
 
 </resources>
