@@ -8,7 +8,7 @@
 	<string name="parent_directory">Dossier parent</string>
 	<string name="directory_browser_error">Erreur : impossible d\'ouvrir le dossier – veuillez réessayer</string>
 
-	<!-- menu item -->
+	<!-- menu items -->
 	<string name="menu_save">Enregistrer</string>
 	<string name="menu_cancel">Annuler</string>
 
@@ -17,6 +17,7 @@
 	<string name="rew_description">Revenir en arrière</string>
 	<string name="play_description">Lire/pause</string>
 	<string name="ffwd_description">Avance rapide</string>
+	<string name="progress_description">Progression de la lecture</string>
 	<string name="export_description">Exporter cette narration</string> <!-- doesn't matter about narrative/media - only used in MediaPhone -->
 
 </resources>

@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
 	<!-- TODO: remove these strings into individual projects to make translation easier -->
@@ -8,7 +8,7 @@
 	<string name="parent_directory">Directorio raíz</string>
 	<string name="directory_browser_error">Error: no se puede abrir la carpeta - por favor, inténtelo de nuevo</string>
 
-	<!-- menu item -->
+	<!-- menu items -->
 	<string name="menu_save">Guardar</string>
 	<string name="menu_cancel">Cancelar</string>
 
@@ -17,5 +17,7 @@
 	<string name="rew_description">Retroceder</string>
 	<string name="play_description">Reproducir/ pausar</string>
 	<string name="ffwd_description">Adelantar</string>
-	<string name="export_description">Exportar esta narrativa</string> <!--doesn't matter about narrative/media - only used in MediaPhone-->
+	<string name="progress_description">Progreso de la reproducción</string>
+	<string name="export_description">Exportar esta narrativa</string> <!-- doesn't matter about narrative/media - only used in MediaPhone -->
+
 </resources>

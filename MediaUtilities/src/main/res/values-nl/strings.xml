@@ -8,7 +8,7 @@
 	<string name="parent_directory">Bovenliggende map</string>
 	<string name="directory_browser_error">Fout: map kan niet worden geopend – probeer het opnieuw</string>
 
-	<!-- menu item -->
+	<!-- menu items -->
 	<string name="menu_save">Opslaan</string>
 	<string name="menu_cancel">Annuleren</string>
 
@@ -17,6 +17,7 @@
 	<string name="rew_description">Terugspoelen</string>
 	<string name="play_description">Afspelen/pauzeren</string>
 	<string name="ffwd_description">Vooruitspoelen</string>
+	<string name="progress_description">Vooruitgang bij het afspelen</string>
 	<string name="export_description">Deze verhaallijn exporteren</string> <!-- doesn't matter about narrative/media - only used in MediaPhone -->
 
 </resources>

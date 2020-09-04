@@ -8,7 +8,7 @@
 	<string name="parent_directory">Diretório principal</string>
 	<string name="directory_browser_error">Erro: não foi possível encontrar um diretório temporário – verifique se o dispositivo ou cartão SD tem espaço livre disponível</string>
 
-	<!-- menu item -->
+	<!-- menu items -->
 	<string name="menu_save">Salvar</string>
 	<string name="menu_cancel">Cancelar</string>
 
@@ -17,6 +17,7 @@
 	<string name="rew_description">Rebobinar</string>
 	<string name="play_description">Reproduzir / pausar</string>
 	<string name="ffwd_description">Avanço rápido</string>
+	<string name="progress_description">Progresso da reprodução</string>
 	<string name="export_description">Exportar esta narrativa</string> <!-- doesn't matter about narrative/media - only used in MediaPhone -->
 
 </resources>

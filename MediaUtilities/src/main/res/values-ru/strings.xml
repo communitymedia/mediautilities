@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
 	<!-- TODO: remove these strings into individual projects to make translation easier -->
@@ -8,7 +8,7 @@
 	<string name="parent_directory">Директория предыдущего уровня</string>
 	<string name="directory_browser_error">Ошибка: папка не открывается - повторите попытку</string>
 
-	<!-- menu item -->
+	<!-- menu items -->
 	<string name="menu_save">Сохранить</string>
 	<string name="menu_cancel">Отменить</string>
 
@@ -17,6 +17,7 @@
 	<string name="rew_description">Перемотать назад</string>
 	<string name="play_description">Воспроизвести / пауза</string>
 	<string name="ffwd_description">Перемотать вперед</string>
-	<string name="export_description">Экспортировать настоящую историю</string> <!--doesn't matter about narrative/media - only used in MediaPhone-->
+	<string name="progress_description">Прогресс воспроизведения</string>
+	<string name="export_description">Экспортировать настоящую историю</string> <!-- doesn't matter about narrative/media - only used in MediaPhone -->
 
 </resources>

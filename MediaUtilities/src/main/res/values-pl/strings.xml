@@ -8,7 +8,7 @@
 	<string name="parent_directory">Ścieżka nadrzędna</string>
 	<string name="directory_browser_error">Błąd: nie można odnaleźć tymczasowego folderu – proszę upewnić się że karta pamięci nie jest pełna</string>
 
-	<!-- menu item -->
+	<!-- menu items -->
 	<string name="menu_save">Zapisz</string>
 	<string name="menu_cancel">Odrzuć</string>
 
@@ -17,6 +17,7 @@
 	<string name="rew_description">Przewiń</string>
 	<string name="play_description">Odtwarzaj/pauzuj</string>
 	<string name="ffwd_description">Szybko do przodu</string>
+	<string name="progress_description">Postępy w odtwarzaniu</string>
 	<string name="export_description">Eksportuj tą narrację</string> <!-- doesn't matter about narrative/media - only used in MediaPhone -->
 
 </resources>
