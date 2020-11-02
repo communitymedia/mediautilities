@@ -13,6 +13,8 @@ body {
 }
 
 #player {
+	width:100vw;
+	height:100vh;
 	font-family:sans-serif;
 	font-size:100%;
 }
@@ -35,6 +37,7 @@ body {
 	height:100%;
 	overflow:hidden;
 	z-index:-1;
+	cursor:pointer;
 }
 
 #player p {
@@ -44,8 +47,8 @@ body {
 	margin:0 0 42px 0; /* 37px nav height + 5px nav padding */
 	box-sizing:border-box;
 	padding:16px;
-	text-align:center;
 	color:#fff;
+	text-align:center;
 	z-index:-1;
 }
 
@@ -105,6 +108,7 @@ input[type='range'] {
 	vertical-align:middle;
 	border:1px solid #555;
 	border-radius:10px;
+	padding:0 1px; /* thumb appearance */
 	background:#ddd;
 	background-image:linear-gradient(#000, #222);
 	cursor:pointer;
@@ -116,7 +120,17 @@ input[type='range']::-webkit-slider-thumb {
 	height:10px;
 	border:none;
 	border-radius:5px;
-	margin:1px; /* to prevent going right to the edges for appearance */
+	background-color:#444;
+	background-image:linear-gradient(to bottom, #fff 0%, #ddd 50%, #aaa 100%);
+	cursor:pointer;
+}
+
+/* webkit can't cope with combining these, so must be separated */
+input[type='range']::-moz-range-thumb {
+	width:10px;
+	height:10px;
+	border:none;
+	border-radius:5px;
 	background-color:#444;
 	background-image:linear-gradient(to bottom, #fff 0%, #ddd 50%, #aaa 100%);
 	cursor:pointer;
@@ -133,24 +147,47 @@ input[type='range']::-webkit-slider-thumb {
 	cursor:pointer;
 }
 
+#play-overlay {
+	display:none;
+	width:30%;
+	height:30vh;
+	max-width:128px;
+	max-height:128px;
+	position:absolute;
+	top:0;
+	left:0;
+	bottom:0;
+	right:0;
+	margin:auto;
+	border:none;
+	outline:inherit;
+	background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100%' height='100%' viewBox='0 0 10 10'><circle cx='5' cy='5' r='5' fill='%23fff' fill-opacity='0.8'/><path d='M8.67 5L3 8.57V1.43L8.67 5z' fill='%23444'/></svg>") no-repeat center;
+	cursor:pointer;
+}
+
+#play-overlay:hover {
+	filter:brightness(80%);
+}
+
 .play {
 	background:#aaa;
-	background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10'><path d='M8.97 5l-7.94 5V0l7.94 5z'/></svg>"),linear-gradient(to bottom, #fff 0%, #ddd 50%, #aaa 100%);
+	background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10'><path d='M8.97 5l-7.94 5V0l7.94 5z'/></svg>") no-repeat center,linear-gradient(to bottom, #fff 0%, #ddd 50%, #aaa 100%);
 }
 
 .pause {
 	background:#aaa;
-	background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10'><path d='M2 0h2v10H2zm4 0h2v10H6z'/></svg>"),linear-gradient(to bottom, #fff 0%, #ddd 50%, #aaa 100%);
+	background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10'><path d='M2 0h2v10H2zm4 0h2v10H6z'/></svg>") no-repeat center,linear-gradient(to bottom, #fff 0%, #ddd 50%, #aaa 100%);
 }
 </style>
 <script>
 var play_narrative = function() {
+	const frame_element_types = ['img', 'audio', 'p'];
 	var frames = [];
-	var frame_element_types = ['img', 'audio', 'p'];
-	var audio_elements = []
+	var audio_elements = [];
 	var current_frame = 0;
 	var num_frames = 0;
 	var next_frame_timer = 0;
+	var audio_initialised = false;
 	var progress_bar = null;
 	var playing = false;
 
@@ -166,37 +203,46 @@ var play_narrative = function() {
 
 	function load_audio(audio_elements, play_audio) {
 		var max_duration = 0;
-		try {
-			for (var i = 0; i < audio_elements.length; i++) {
-				if (play_audio) {
-					// compatibility with browsers that can't cope with audio
-					if(!!document.createElement('audio').canPlayType) {
-						var mimeType = audio_elements[i].src.split(';')[0].split(':')[1];
-						if (audio_elements[i].canPlayType(mimeType)) {
-							audio_elements[i].play();
-							set_audio_start(audio_elements[i]);
+		if (can_play_audio()) {
+			try {
+				for (var i = 0; i < audio_elements.length; i++) {
+					const audio = audio_elements[i];
+					if (play_audio) {
+						const mimeType = get_base64_mime_type(audio.src);
+						if (audio.canPlayType(mimeType)) {
+							audio.play();
+							set_audio_start(audio);
 						} else {
 							throw 'Incompatible audio format: ' + mimeType;
 						}
+					} else {
+						audio.pause();
+						set_audio_start(audio);
 					}
-				} else {
-					audio_elements[i].pause();
-					set_audio_start(audio_elements[i]);
+					if (audio.duration > max_duration) {
+						max_duration = audio.duration;
+					}
 				}
-				if (audio_elements[i].duration > max_duration) {
-					max_duration = audio_elements[i].duration;
-				}
+			} catch(e) {
+				try {
+					console.log('Unable to play audio format - skipping (error: ' + e + ')');
+				} catch(e2) {}
 			}
-		} catch(e) {
-			try {
-				console.log('Unable to play audio format - skipping (error: ' + e + ')');
-			} catch(e2) {}
 		}
 		return max_duration * 1000; // convert to milliseconds
 	}
 
+	function can_play_audio() {
+		// compatibility with browsers that can't cope with audio
+		return !!document.createElement('audio').canPlayType;
+	}
+
+	function get_base64_mime_type(source) {
+		return source.split(';')[0].split(':')[1]
+	}
+
 	function set_audio_start(audio) {
-		var audio_start = audio.getAttribute('data-audio-start');
+		const audio_start = audio.getAttribute('data-audio-start');
 		if (audio_start > 0) {
 			audio.currentTime = audio_start / 1000; // convert to seconds
 		} else {
@@ -207,7 +253,7 @@ var play_narrative = function() {
 	function get_max_duration(frame) {
 		var max_duration = 0;
 		for (var i = 0; i < frame_element_types.length; i++) {
-			var frame_media = frame.getElementsByTagName(frame_element_types[i]);
+			const frame_media = frame.getElementsByTagName(frame_element_types[i]);
 			if (frame_media) {
 				for (var j = 0; j < frame_media.length; j++) {
 					var new_duration = frame_media[j].getAttribute('data-frame-duration');
@@ -221,7 +267,7 @@ var play_narrative = function() {
 	}
 
 	function set_current_frame(index) {
-		current_frame = parseInt(index.toString(), 10); // for coping with index strings from the progress bar
+		current_frame = parseInt(index.toString(), 10); // handle progress bar index strings
 		clearTimeout(next_frame_timer);
 
 		hide_other_frames(current_frame);
@@ -232,11 +278,11 @@ var play_narrative = function() {
 			load_audio(audio_elements, false); // stop previous audio
 		}
 
-		var frame = frames[current_frame];
+		const frame = frames[current_frame];
 		audio_elements = frame.getElementsByTagName('audio');
 		load_audio(audio_elements, playing);
 
-		var frame_duration = get_max_duration(frame);
+		const frame_duration = get_max_duration(frame);
 		if (playing && current_frame < num_frames) {
 			next_frame_timer = setTimeout(next_frame, frame_duration);
 		} else {
@@ -269,6 +315,25 @@ var play_narrative = function() {
 	}
 
 	function play_pause() {
+		if (!audio_initialised) { // preload audio on user gesture so it works later
+			const global_audio = document.getElementsByTagName('audio');
+			try {
+				if (can_play_audio()) {
+					for (var i = 0; i < global_audio.length; i++) {
+						const audio = global_audio[i];
+						const mimeType = audio.src.split(';')[0].split(':')[1];
+						if (audio.canPlayType(mimeType)) {
+							audio.muted = true
+							audio.play();
+							audio.pause();
+							audio.muted = false;
+							set_audio_start(audio);
+						}
+					}
+				}
+			} catch(e) {}
+			audio_initialised = true;
+		}
 		if (current_frame >= num_frames - 1) {
 			current_frame = 0;
 		}
@@ -280,8 +345,10 @@ var play_narrative = function() {
 	function update_play_button() {
 		if (playing) {
 			document.getElementById('play-pause').className = 'pause';
+			document.getElementById('play-overlay').style.display = 'none';
 		} else {
 			document.getElementById('play-pause').className = 'play';
+			document.getElementById('play-overlay').style.display = 'block';
 		}
 	}
 
@@ -298,40 +365,47 @@ var play_narrative = function() {
 		if (num_frames > 0) {
 			progress_bar.oninput = manual_frame_change;
 			progress_bar.max = num_frames - 1;
+
 			set_current_frame(0);
+			const play_overlay = document.getElementById('play-overlay');
+			play_overlay.style.display = 'block';
+			play_overlay.onclick = play_pause;
 			document.getElementById('play-pause').onclick = play_pause;
+			document.getElementById('player').onclick = play_pause;
+
+			document.onkeydown = function(event) {
+				event = event || window.event;
+				switch (event.keyCode) {
+					case 32: // space
+						play_pause();
+						return false;
+					case 37: // left arrow
+						previous_frame();
+						return false;
+					case 39: // right arrow
+						next_frame();
+						return false;
+				}
+			};
+
+			// play_pause(); // autoplay on load - disabled as it means audio will not play
 		}
-
-		document.onkeydown = function(event) {
-			event = event || window.event;
-			switch (event.keyCode) {
-				case 32: // space
-					play_pause();
-					return false;
-				case 37: // left arrow
-					previous_frame();
-					return false;
-				case 39: // right arrow
-					next_frame();
-					return false;
-			}
-		};
-		document.getElementById('player').onclick = play_pause;
-
-		// play_pause(); // autoplay on load - disabled as it means audio will not play; needs investigation (see also Safari)
 	};
 }();
 window.onload = play_narrative;
 </script>
 </head>
 <body>
+<div id="overlay">
+<button id="play-overlay" class="play"><icon class="wave2"></icon></button>
+</div>
 <div id="navigation">
 <button id="play-pause" class="play" type="button"></button>
 <input id="play-progress" type="range" min="0" max="0" value="0">
 </div>
 <div id="player">
 <noscript>
-<p class="full-screen" class="no-javascript">Please enable JavaScript for playback</p>
+<p id="no-javascript" class="full-screen">Please enable JavaScript for playback</p>
 </noscript>
 [PARTS]
 </div>

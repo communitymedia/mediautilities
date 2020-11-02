@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/MediaUtilities/MediaUtilities.iml" filepath="$PROJECT_DIR$/.idea/modules/MediaUtilities/MediaUtilities.iml" group="mediautilities/MediaUtilities" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/mediautilities.iml" filepath="$PROJECT_DIR$/.idea/modules/mediautilities.iml" group="mediautilities" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/mediautilities.iml" filepath="$PROJECT_DIR$/.idea/modules/mediautilities.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/MediaUtilities/mediautilities.MediaUtilities.iml" filepath="$PROJECT_DIR$/.idea/modules/MediaUtilities/mediautilities.MediaUtilities.iml" />
     </modules>
   </component>
 </project>
