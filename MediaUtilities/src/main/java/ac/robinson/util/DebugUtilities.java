@@ -20,22 +20,24 @@
 
 package ac.robinson.util;
 
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
+import android.content.ActivityNotFoundException;
+import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Point;
+import android.net.Uri;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
+import android.widget.Toast;
 
-import java.text.SimpleDateFormat;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Locale;
-import java.util.TimeZone;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+
+import androidx.annotation.Nullable;
 
 public class DebugUtilities {
 	public static String getLogTag(Object o) {
@@ -79,15 +81,44 @@ public class DebugUtilities {
 		}
 	}
 
-	public static String getDeviceDebugSummary(WindowManager windowManager, Resources resources) {
-		Point screenSize = UIUtilities.getScreenSize(windowManager);
+	public static String getDeviceDebugSummary(@Nullable WindowManager windowManager, Resources resources) {
+		Point screenSize = null;
+		if (windowManager != null) {
+			screenSize = UIUtilities.getScreenSize(windowManager);
+		}
 		return Build.MODEL + ", " + getDeviceBrandProduct() + ", v" + Build.VERSION.SDK_INT + " (" + Build.VERSION.RELEASE +
-				"), " + Build.CPU_ABI + ", " + screenSize.x + "x" + screenSize.y + "-" +
+				"), " + Build.CPU_ABI + ", " + (screenSize != null ? (screenSize.x + "x" + screenSize.y + "-") : "") +
 				getScreenDensityString(resources).replace("dpi", "") + "-" + getScreenSizeString(resources).substring(0, 1);
 	}
 
 	public static String getDeviceBrandProduct() {
 		return Build.BRAND + "/" + Build.PRODUCT + "/" + Build.DEVICE;
+	}
+
+	public static void createCrashReportEmail(Context context, String to, String subject, String body,
+											  @Nullable Throwable throwable) {
+		StringWriter stringWriter = new StringWriter();
+		if (throwable != null) {
+			PrintWriter printWriter = new PrintWriter(stringWriter);
+			throwable.printStackTrace(printWriter);
+		}
+
+		body += "\n\n" + stringWriter.toString() + "\n\n" + getDeviceDebugSummary(null, context.getResources());
+		String mailTo = "mailto:" + to + "?subject=" + Uri.encode(subject) + "&body=" + Uri.encode(body);
+		Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+		emailIntent.setData(Uri.parse(mailTo));
+
+		//TODO: on some devices this content duplicates the mailto above; on others it replaces it. But it is necessary
+		//TODO: to work around a bug in Gmail where the body is sometimes not included at all (!)
+		// see: https://medium.com/better-programming/the-imperfect-android-send-email-action-59610dfd1c2d
+		emailIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
+		emailIntent.putExtra(Intent.EXTRA_TEXT, body);
+
+		try {
+			context.startActivity(Intent.createChooser(emailIntent, "Submit bug report"));
+		} catch (ActivityNotFoundException e) {
+			Toast.makeText(context, "Error: unable to create bug report email", Toast.LENGTH_SHORT).show();
+		}
 	}
 
 	// some devices have a bug where the internal storage folder requires storage permission to be granted
