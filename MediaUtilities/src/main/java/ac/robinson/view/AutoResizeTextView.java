@@ -35,6 +35,7 @@ import android.util.TypedValue;
 import ac.robinson.mediautilities.R;
 import androidx.appcompat.widget.AppCompatTextView;
 
+// TODO: replace with AppCompat TextView auto resizing: https://stackoverflow.com/a/46952703/
 public class AutoResizeTextView extends AppCompatTextView {
 
 	// max height and min/max text size are loaded from XML attrs on create; these values are defaults

@@ -55,11 +55,13 @@ class MP4DrawSurface {
 	private final int mTextColourWithImage;
 	private final int mTextColourNoImage;
 	private final int mTextBackgroundColour;
-	private final int mTextSpacing;
-	private final int mTextCornerRadius;
+
 	private final boolean mTextBackgroundSpanWidth;
 	private final int mTextMaxFontSize;
-	private final int mTextMaxCharsPerLine;
+	private final int mTextMaxPercentageHeightWithImage;
+	private final int mTextSpacing;
+	private final int mTextCornerRadius;
+
 	private final int mAudioIconResourceId;
 
 	private FrameMediaContainer mCurrentFrame;
@@ -117,11 +119,13 @@ class MP4DrawSurface {
 		mTextColourWithImage = (Integer) settings.get(MediaUtilities.KEY_TEXT_COLOUR_WITH_IMAGE);
 		mTextColourNoImage = (Integer) settings.get(MediaUtilities.KEY_TEXT_COLOUR_NO_IMAGE);
 		mTextBackgroundColour = (Integer) settings.get(MediaUtilities.KEY_TEXT_BACKGROUND_COLOUR);
-		mTextSpacing = (Integer) settings.get(MediaUtilities.KEY_TEXT_SPACING);
-		mTextCornerRadius = (Integer) settings.get(MediaUtilities.KEY_TEXT_CORNER_RADIUS);
+
 		mTextBackgroundSpanWidth = (Boolean) settings.get(MediaUtilities.KEY_TEXT_BACKGROUND_SPAN_WIDTH);
 		mTextMaxFontSize = (Integer) settings.get(MediaUtilities.KEY_MAX_TEXT_FONT_SIZE);
-		mTextMaxCharsPerLine = (Integer) settings.get(MediaUtilities.KEY_MAX_TEXT_CHARACTERS_PER_LINE);
+		mTextMaxPercentageHeightWithImage = (Integer) settings.get(MediaUtilities.KEY_MAX_TEXT_PERCENTAGE_HEIGHT_WITH_IMAGE);
+		mTextSpacing = (Integer) settings.get(MediaUtilities.KEY_TEXT_SPACING);
+		mTextCornerRadius = (Integer) settings.get(MediaUtilities.KEY_TEXT_CORNER_RADIUS);
+
 		mAudioIconResourceId = (Integer) settings.get(MediaUtilities.KEY_AUDIO_RESOURCE_ID);
 
 		mCurrentFrameBitmap = Bitmap.createBitmap(mCanvasWidth, mCanvasHeight, Bitmap.Config.ARGB_8888);
@@ -293,13 +297,15 @@ class MP4DrawSurface {
 				}
 			}
 
-			// TODO: we don't actually pass the value of @dimen/export_maximum_text_height_with_image
 			if (!TextUtils.isEmpty(nextFrame.mTextContent)) {
-				BitmapUtilities.drawScaledText(nextFrame.mTextContent, mCurrentFrameCanvas, mCurrentFramePaint,
-						nextFrame.mForegroundColour < 0 ? nextFrame.mForegroundColour :
-								(imageLoaded ? mTextColourWithImage : mTextColourNoImage),
+				int textColour = nextFrame.mForegroundColour < 0 ? nextFrame.mForegroundColour :
+						(imageLoaded ? mTextColourWithImage : mTextColourNoImage);
+				int textMaxHeightWithImage = (mCanvasHeight * mTextMaxPercentageHeightWithImage / 100);
+				int textHeight =
+						textMaxHeightWithImage <= 0 ? mCanvasHeight : (imageLoaded ? textMaxHeightWithImage : mCanvasHeight);
+				BitmapUtilities.drawScaledText(nextFrame.mTextContent, mCurrentFrameCanvas, mCurrentFramePaint, textColour,
 						(imageLoaded ? mTextBackgroundColour : 0), mTextSpacing, mTextCornerRadius, imageLoaded, 0,
-						mTextBackgroundSpanWidth, mCanvasHeight, mTextMaxFontSize, mTextMaxCharsPerLine);
+						mTextBackgroundSpanWidth, textHeight, mTextMaxFontSize);
 
 			} else if (!imageLoaded) {
 				// quicker to do this than load the SVG for narratives that have no audio

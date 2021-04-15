@@ -68,6 +68,10 @@ public class BitmapUtilities {
 
 	public static final float DOWNSCALE_RATIO = 6; // if using DOWNSCALE, will multiply the sample ratio by this value
 
+	// patterns used to match whitespaces and newlines for drawScaledText()
+	private static Pattern WHITESPACE_PATTERN;
+	private static Pattern NEWLINE_PATTERN;
+
 	public static class CacheTypeContainer {
 		public Bitmap.CompressFormat type;
 
@@ -584,43 +588,56 @@ public class BitmapUtilities {
 	}
 
 	/**
-	 * Draw inputText on outputCanvas using outputPaint in textColour. A rounded rectangle in backgroundColour is drawn behind
-	 * the inputText with corners of backgroundCornerRadius pixels and backgroundPadding pixels of padding on every side of the
-	 * inputText.
+	 * Draw inputText on outputCanvas using outputPaint in textColour. String.trim() will be called on inputText before drawing.
+	 * A rounded rectangle in backgroundColour is drawn behind the inputText with corners of backgroundCornerRadius pixels and
+	 * backgroundPadding pixels of padding on every side of the inputText.
 	 * <p>
-	 * The inputText will be centred on outputCanvas by default, but can be offset horizontally by leftMargin pixels if needed.
-	 * If alignBottom is true, the inputText will be drawn at the bottom of the canvas (rather than vertically centred). If
-	 * backgroundMatchCanvasWidth is true then the width of the rounded rectangle will be the same as the width of outputCanvas
-	 * (typically used with a backgroundCornerRadius of 0). The height of the background rectangle (and consequently the
-	 * inputText it  contains) can be constrained to no more than maxHeight if needed, and similarly the pixel size of the font
-	 * can be limited to maxFontSize.
+	 * The inputText will be centred on outputCanvas by default, but can be offset horizontally by textLeftMargin pixels if
+	 * needed. If alignBottom is true, the inputText (and background) will be drawn at the bottom of the canvas (rather than
+	 * vertically centred). If backgroundMatchCanvasWidth is true then the width of the rounded rectangle will be the same as
+	 * the width of outputCanvas (typically used with a backgroundCornerRadius of 0). The height of the background rectangle
+	 * (and consequently the inputText it  contains) can be constrained to no more than maxHeight if needed, and similarly the
+	 * pixel size of the font can be limited to maxFontSize.
 	 *
 	 * @param inputText                  The String that will be drawn. Newlines and other special characters are okay. Nothing
 	 *                                   will be drawn for a String that contains only space characters, and the display of
 	 *                                   space characters at the beginning and end of individual lines of text is based on that
-	 *                                   of StaticLayout (i.e., they are often, though not always, trimmed away)
+	 *                                   of StaticLayout (i.e., they are usually, though not always, trimmed away).
 	 * @param outputCanvas               The Canvas to draw the inputText and background on
 	 * @param outputPaint                The Paint to use to draw the inputText (note: its textSize and colour will be changed)
 	 * @param textColour                 The colour to use to draw the inputText (via Paint.setColor())
 	 * @param backgroundColour           The colour to use to draw the background rectangle (via Paint.setColor())
-	 * @param backgroundPadding          The padding (pixels) to apply on every side of the background rectangle
-	 * @param backgroundCornerRadius     The radius (pixels) of the inputText background rectangle (via Canvas.drawRoundRect)
-	 * @param backgroundMatchCanvasWidth Whether the background rectangle's width should be the same as that of outputCanvas
-	 *                                   (default is false). If true, leftMargin is ignored
+	 * @param backgroundPadding          The padding (pixels, >= 0) to apply on every side of the background rectangle
+	 * @param backgroundCornerRadius     The radius (pixels, >= 0) of the inputText background rectangle (Canvas.drawRoundRect)
 	 * @param alignBottom                Whether to align the rectangle to the bottom of outputCanvas (default is false)
-	 * @param leftMargin                 A margin (pixels) to apply to the horizontal positioning of the inputText and
-	 *                                   background rectangle. Ignored if < 0 or if backgroundMatchCanvasWidth is true
+	 * @param textLeftMargin             A margin (pixels) to apply to the horizontal positioning of the inputText and (if
+	 *                                   backgroundMatchCanvasWidth is false) the background rectangle. A positive value will
+	 *                                   shift text to the right; negative will shift to the left. Note that the text will be
+	 *                                   centred in the remaining space *after* applying the margin, so the actual margin may be
+	 *                                   more than the value given. The background rectangle's position is only affected if
+	 *                                   backgroundMatchCanvasWidth is false.
+	 * @param backgroundMatchCanvasWidth Whether the background rectangle's width should be the same as that of outputCanvas.
+	 *                                   Most applicable to shorter pieces of text that could have backgrounds tightly aligned
+	 *                                   to the text (default is false)
 	 * @param maxHeight                  The maximum height (pixels) of the background rectangle (and consequently the
 	 *                                   inputText it contains), or <= 0 for no limit (i.e., outputCanvas height is the limit)
 	 * @param maxFontSize                The maximum font size to use (via Paint.setTextSize()), or <= 0 for no limit
 	 * @return The height of the object that was drawn
 	 */
-	public static float drawScaledText(@NonNull String inputText, @NonNull Canvas outputCanvas, @NonNull Paint outputPaint,
-									   int textColour, int backgroundColour, float backgroundPadding,
-									   float backgroundCornerRadius, boolean backgroundMatchCanvasWidth, boolean alignBottom,
-									   float leftMargin, float maxHeight, float maxFontSize) {
+	public static int drawScaledText(@NonNull String inputText, @NonNull Canvas outputCanvas, @NonNull Paint outputPaint,
+									 int textColour, int backgroundColour, float backgroundPadding, float backgroundCornerRadius,
+									 boolean alignBottom, float textLeftMargin, boolean backgroundMatchCanvasWidth,
+									 float maxHeight, float maxFontSize) {
 
 		if (TextUtils.isEmpty(inputText)) {
+			return 0;
+		}
+
+		// space-only lines at the start or end of the text can lead to incorrect vertical centring; while we could account for
+		// this by, e.g., adding an additional character for measurement only, it becomes increasingly complex to account for
+		// both the desired spaces and StaticLayout's occasional undesirable extra spacing - because of this, we trim the text
+		String trimmedInputText = inputText.trim();
+		if (TextUtils.isEmpty(trimmedInputText)) {
 			return 0;
 		}
 
@@ -631,31 +648,40 @@ public class BitmapUtilities {
 		int canvasHeight = outputCanvas.getHeight();
 
 		// we use floor() of the width because StaticLayout needs an integer width and we want to make sure there is enough space
-		float clippedLeftMargin = Math.max(leftMargin, 0);
-		float maxTextWidth = (float) Math.floor(
-				(backgroundMatchCanvasWidth ? canvasWidth : (canvasWidth - clippedLeftMargin)) - (2 * backgroundPadding));
-		float maxTextHeight = (maxHeight > 0 ? maxHeight : canvasHeight) - (2 * backgroundPadding);
+		float clippedBackgroundPadding = Math.max(backgroundPadding, 0);
+		float clippedBackgroundCornerRadius = Math.max(backgroundCornerRadius, 0);
+		float maxTextWidth = (float) Math.floor(canvasWidth - Math.abs(textLeftMargin) - (2 * clippedBackgroundPadding));
+		float maxTextHeight =
+				(maxHeight > 0 ? Math.min(maxHeight, canvasHeight) : canvasHeight) - (2 * clippedBackgroundPadding);
 		if (maxTextWidth <= 0 || maxTextHeight <= 0) {
 			return 0; // we can't draw if there's no space available
 		}
 
-		// split the input string on space characters, but keep the space character at the end of each substring
+		// cache, but lazily initiate our regex patterns - newline so we respect any user-provided newline characters;
+		// whitespace (which also includes newlines) to split words for calculating font size
+		if (NEWLINE_PATTERN == null) {
+			NEWLINE_PATTERN = Pattern.compile("\\r\\n|[\\n\\x0B\\x0C\\r\\u0085\\u2028\\u2029]");
+		}
+		if (WHITESPACE_PATTERN == null) {
+			WHITESPACE_PATTERN = Pattern.compile(
+					"\r\n|[\\n\\x0B\\x0C\\r\\u0085\\u2028\\u2029\\p{javaWhitespace}\\p{javaSpaceChar}]");
+		}
+
+		// split the input string on space characters, but keep the space character at the end of each substring - this avoids
+		// having to add a space character in testFontSize() without knowing exactly which character code to add
 		List<String> wordList = new ArrayList<>();
-		Pattern whitespacePattern = Pattern.compile("[\\p{javaWhitespace}\\p{javaSpaceChar}]");
-		Matcher matcher = whitespacePattern.matcher(inputText);
+		Matcher matcher = WHITESPACE_PATTERN.matcher(trimmedInputText);
 		int subStart = 0;
 		int subEnd;
 		while (matcher.find()) {
 			subEnd = matcher.start() + 1;
-			wordList.add(inputText.substring(subStart, subEnd));
+			wordList.add(trimmedInputText.substring(subStart, subEnd));
 			subStart = subEnd;
 		}
-		if (subStart < inputText.length()) {
-			wordList.add(inputText.substring(subStart));
+		if (subStart < trimmedInputText.length()) {
+			wordList.add(trimmedInputText.substring(subStart));
 		}
 		String[] textWords = wordList.toArray(new String[0]);
-
-		int textNewLines = inputText.split("\n").length - 1; // count forced newlines
 
 		// find the largest font size that will let us draw the given text within the rectangle area available
 		float lowerFontSize = 0;
@@ -663,8 +689,7 @@ public class BitmapUtilities {
 		float currentFontSize = upperFontSize; // start with upper before bisecting as short texts will almost always be max size
 		int directionAdjustment = 0;
 		while (upperFontSize - lowerFontSize >= 0.5) {
-			directionAdjustment = testFontSize(textWords, textNewLines, maxTextWidth, maxTextHeight, textPaint, fontMetrics,
-					currentFontSize);
+			directionAdjustment = testFontSize(textWords, maxTextWidth, maxTextHeight, textPaint, fontMetrics, currentFontSize);
 			if (directionAdjustment > 0) {
 				lowerFontSize = currentFontSize;
 			} else {
@@ -677,62 +702,63 @@ public class BitmapUtilities {
 		// is larger than what will fit)
 		textPaint.setTextSize(directionAdjustment < 0 ? lowerFontSize : currentFontSize);
 
-		TightlyBoundedStaticLayout textLayout = new TightlyBoundedStaticLayout(inputText, textPaint, (int) maxTextWidth,
+		TightlyBoundedStaticLayout textLayout = new TightlyBoundedStaticLayout(trimmedInputText, textPaint, (int) maxTextWidth,
 				Layout.Alignment.ALIGN_CENTER, 1, 0, false);
-		textLayout.increaseWidthTo(canvasWidth); // simpler horizontal centring (and easier full-width drawing)
 		RectF textBounds = new RectF(textLayout.getTightBounds()); // StaticLayout doesn't always bound close to the text
 
-		// measuring is not always horizontally centred (probably related to the underlying reason why we need to use
-		// getTightBounds() in the first place); to combat this we reset to the horizontal centre of the canvas
-		// note: StaticLayout's centre alignment is often 1-2px offset from the actual centre, but we ignore this minor error
-		textBounds.offsetTo((canvasWidth - textBounds.width()) / 2f, textBounds.top);
-		textBounds.inset(backgroundMatchCanvasWidth ? -textBounds.left : -backgroundPadding, -backgroundPadding);
-
+		// offset the canvas to centre the text
+		float canvasHorizontalTranslation = ((canvasWidth + textLeftMargin - textLayout.getWidth()) / 2f);
 		outputCanvas.save();
-		outputCanvas.translate(backgroundMatchCanvasWidth ? 0 : clippedLeftMargin,
-				alignBottom ? (canvasHeight - textBounds.height() - textBounds.top) :
+		outputCanvas.translate(canvasHorizontalTranslation,
+				alignBottom ? (canvasHeight - textBounds.height() - textBounds.top - clippedBackgroundPadding) :
 						((canvasHeight - textLayout.getHeight()) / 2f));
 
+		// note: StaticLayout's centre alignment is often 1-2px offset from the actual centre, but we ignore this minor error,
+		// which is only really visible when padding is zero
+		textBounds.offsetTo((textLayout.getWidth() - textBounds.width()) / 2f, textBounds.top);
+		textBounds.inset(-clippedBackgroundPadding, -clippedBackgroundPadding);
+		if (backgroundMatchCanvasWidth) {
+			textBounds.left = -canvasHorizontalTranslation;
+			textBounds.right = canvasWidth - canvasHorizontalTranslation;
+		}
+
 		textPaint.setColor(backgroundColour);
-		outputCanvas.drawRoundRect(textBounds, backgroundCornerRadius, backgroundCornerRadius, textPaint);
+		outputCanvas.drawRoundRect(textBounds, clippedBackgroundCornerRadius, clippedBackgroundCornerRadius, textPaint);
 
 		textPaint.setColor(textColour);
 		textLayout.draw(outputCanvas);
 
 		outputCanvas.restore();
 
-		return textBounds.height();
+		return (int) Math.ceil(textBounds.height());
 	}
 
 	/**
-	 * Tests whether the given array of textWords with forcedNewLines number of additional hard newlines (i.e., \n characters)
-	 * will fit within the box of maxWidth x maxHeight at the given fontSize. Uses (and modifies, via setTextSize()) textPaint
-	 * and fontMetrics to achieve this.
+	 * Tests whether the given array of textWords will fit within the box of maxWidth x maxHeight at the given fontSize. Uses
+	 * (and modifies, via setTextSize()) textPaint and fontMetrics to achieve this.
 	 * <p>
 	 * Inspired by https://forum.processing.org/two/discussion/13105/
 	 *
-	 * @param textWords      An array of words that roughly matches the way that StaticLayout will reflow the String
-	 * @param forcedNewlines The number of \n characters present in the source String
-	 * @param maxWidth       The maximum available width to draw in (pixels)
-	 * @param maxHeight      The maximum available height to draw in (pixels)
-	 * @param textPaint      A Paint to use for testing text sizes (its text size will be modified)
-	 * @param fontMetrics    A FontMetrics object to use for measuring fonts (will be updated with the current Paint's settings)
-	 * @param fontSize       The font size to test
+	 * @param textWords   An array of words that roughly matches the way that StaticLayout will reflow the String
+	 * @param maxWidth    The maximum available width to draw in (pixels)
+	 * @param maxHeight   The maximum available height to draw in (pixels)
+	 * @param textPaint   A Paint to use for testing text sizes (its text size will be modified)
+	 * @param fontMetrics A FontMetrics object to use for measuring fonts (will be updated with the current Paint's settings)
+	 * @param fontSize    The font size to test
 	 * @return -1 if the font size needs to be reduced to fit the text; 1 if the font size can be increased (i.e., the text
 	 * already fits)
 	 */
-	private static int testFontSize(String[] textWords, int forcedNewlines, float maxWidth, float maxHeight, TextPaint textPaint,
+	private static int testFontSize(String[] textWords, float maxWidth, float maxHeight, TextPaint textPaint,
 									Paint.FontMetrics fontMetrics, float fontSize) {
 		textPaint.setTextSize(fontSize);
 		textPaint.getFontMetrics(fontMetrics);
 
-		// calculate the maximum number of lines we have available based on the font size and hard newlines in the source text
-		// we floor() so that we can definitely fit the text into the available space (depending on the number of newlines and
-		// the layout of the text this might mean we don't quite optimise the full space, but it is good enough for our usage)
+		// calculate the maximum number of lines we have available based on the given font size - we floor() so that we can
+		// definitely fit the text into the available space (depending on the number of newlines and the layout of the text this
+		// might mean we don't quite optimise the full space, but it is good enough for our usage)
 		// note: used to use (fontMetrics.bottom - fontMetrics.top) + fontMetrics.leading, which accounts for all *possible*
 		// characters in the current font; using descent and ascent relies on Android's recommended distance instead
-		int maxLines =
-				(int) Math.floor(maxHeight / ((fontMetrics.descent - fontMetrics.ascent) + fontMetrics.leading)) - forcedNewlines;
+		int maxLines = (int) Math.floor(maxHeight / ((fontMetrics.descent - fontMetrics.ascent) + fontMetrics.leading));
 
 		int nextWord = 0;
 		int currentLine = 1;
@@ -743,20 +769,30 @@ public class BitmapUtilities {
 				String testString = textWords[nextWord];
 
 				// check if this single word is already too wide at the current font size - if so, must reduce font size
+				// note: we use measureText rather than getTextBounds so that spaces and padding are included
+				// useful discussion at https://stackoverflow.com/questions/7549182/
 				if (textPaint.measureText(testString) > maxWidth) {
 					return -1;
 				}
 
-				// add words one-by-one to our test string until it overflows the available width
-				boolean fitWidth = true;
-				while (fitWidth) {
+				// add words one-by-one to our test string until it overflows the available width or a newline is found
+				while (true) {
 					if (textPaint.measureText(testString) > maxWidth) {
-						currentLine++;
-						fitWidth = false;
+						currentLine++; // current line is too wide - move to the next line and begin with the current word
+						break;
 					} else {
 						if (nextWord < textWords.length - 1) {
 							nextWord++;
+
+							// if we find a newline character, move to the next word *and* the next line
+							Matcher matcher = NEWLINE_PATTERN.matcher(testString);
+							if (matcher.find()) {
+								currentLine++;
+								break;
+							}
+
 							testString += textWords[nextWord];
+
 						} else {
 							return 1; // there is still space available that we didn't use - increase font size
 						}
@@ -767,6 +803,9 @@ public class BitmapUtilities {
 	}
 
 	/**
+	 * @deprecated
+	 * Use {@link #drawScaledText(String, Canvas, Paint, int, int, float, float, boolean, float, boolean, float, float) instead}
+	 *
 	 * Note: the paint's textSize and alignment will be changed...
 	 *
 	 * @return The height of the drawn text, including padding

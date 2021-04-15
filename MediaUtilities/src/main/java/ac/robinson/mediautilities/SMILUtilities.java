@@ -301,8 +301,8 @@ public class SMILUtilities {
 		final int textCornerRadius = (Integer) settings.get(MediaUtilities.KEY_TEXT_CORNER_RADIUS);
 		final boolean textBackgroundSpanWidth = (Boolean) settings.get(MediaUtilities.KEY_TEXT_BACKGROUND_SPAN_WIDTH);
 		final int textMaxFontSize = (Integer) settings.get(MediaUtilities.KEY_MAX_TEXT_FONT_SIZE);
-		final int textMaxCharsPerLine = (Integer) settings.get(MediaUtilities.KEY_MAX_TEXT_CHARACTERS_PER_LINE);
-		final int textMaxHeightWithImage = (Integer) settings.get(MediaUtilities.KEY_MAX_TEXT_HEIGHT_WITH_IMAGE);
+		final int textMaxPercentageHeightWithImage = (Integer) settings.get(
+				MediaUtilities.KEY_MAX_TEXT_PERCENTAGE_HEIGHT_WITH_IMAGE);
 		final int audioResourceId = (Integer) settings.get(MediaUtilities.KEY_AUDIO_RESOURCE_ID);
 
 		// start the XML (before adding so we know if there's a problem)
@@ -492,10 +492,14 @@ public class SMILUtilities {
 					// TODO: the text background isn't really necessary here, as transparency breaks SMIL so all text
 					//  background is black by default... remove? (but bear in mind height is only calculated properly
 					//  when there's a background to draw)
+					int textColour = frame.mForegroundColour < 0 ? frame.mForegroundColour :
+							(imageLoaded ? textColourWithImage : textColourNoImage);
+					int textMaxHeightWithImage = (outputHeight * textMaxPercentageHeightWithImage / 100);
+					int textMaxHeight =
+							textMaxHeightWithImage <= 0 ? outputHeight : (imageLoaded ? textMaxHeightWithImage : outputHeight);
 					int textHeight = BitmapUtilities.drawScaledText(frame.mTextContent, textBitmapCanvas, textBitmapPaint,
-							(imageLoaded ? textColourWithImage : textColourNoImage), (imageLoaded ? textBackgroundColour : 0),
-							textSpacing, textCornerRadius, imageLoaded, 0, textBackgroundSpanWidth, textMaxHeightWithImage,
-							textMaxFontSize, textMaxCharsPerLine);
+							textColour, (imageLoaded ? textBackgroundColour : 0), textSpacing, textCornerRadius, imageLoaded, 0,
+							textBackgroundSpanWidth, textMaxHeight, textMaxFontSize);
 
 					// crop to the actual size of the text to show as much as possible of the image
 					Bitmap textBitmapCropped;

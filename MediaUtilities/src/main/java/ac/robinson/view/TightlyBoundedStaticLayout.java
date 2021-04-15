@@ -71,7 +71,7 @@ public class TightlyBoundedStaticLayout extends StaticLayout {
 		CharSequence s = getText().subSequence(firstCharOnLine, lastCharOnLine);
 
 		// measure the text - top and bottom are measured from the baseline; left and right are measured from 0
-		// note: strings that consist only of space characters may return a zero-width box
+		// note: start/end spaces are ignored - strings that consist only of space characters will return a zero-width box
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 			getPaint().getTextBounds(s, 0, s.length(), bounds);
 		} else {
