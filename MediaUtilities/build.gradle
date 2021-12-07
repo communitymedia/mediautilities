@@ -20,10 +20,10 @@ android {
 }
 
 dependencies {
-	def appcompat_version = '1.3.1'
+	def appcompat_version = '1.4.0'
 	implementation "androidx.appcompat:appcompat:$appcompat_version"
 	// implementation "androidx.appcompat:appcompat-resources:$appcompat_version" // not needed for our use-case
 
-	implementation 'androidx.exifinterface:exifinterface:1.3.2' // for detecting image orientation
-	implementation 'androidx.core:core:1.6.0' // for ContextCompat, ViewCompat and BlendModeColorFilterCompat
+	implementation 'androidx.exifinterface:exifinterface:1.3.3' // for detecting image orientation
+	implementation 'androidx.core:core:1.7.0' // for ContextCompat, ViewCompat and BlendModeColorFilterCompat
 }
