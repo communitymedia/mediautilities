@@ -1,13 +1,13 @@
 apply plugin: 'com.android.library'
 
 android {
-	compileSdkVersion 30
+	compileSdkVersion 31
 
 	defaultConfig {
 		minSdkVersion 14
-		targetSdkVersion 30
-		versionCode 22
-		versionName '1.6.6'
+		targetSdkVersion 31
+		versionCode 23
+		versionName '1.6.7'
 	}
 
 	buildTypes {
@@ -20,7 +20,7 @@ android {
 }
 
 dependencies {
-	def appcompat_version = '1.4.0'
+	def appcompat_version = '1.4.1'
 	implementation "androidx.appcompat:appcompat:$appcompat_version"
 	// implementation "androidx.appcompat:appcompat-resources:$appcompat_version" // not needed for our use-case
 

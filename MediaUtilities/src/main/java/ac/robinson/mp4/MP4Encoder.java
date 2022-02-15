@@ -21,8 +21,10 @@
 package ac.robinson.mp4;
 
 import android.content.res.Resources;
+import android.graphics.Point;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
+import android.media.MediaCodecList;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
 import android.opengl.GLES20;
@@ -84,7 +86,7 @@ public class MP4Encoder {
 
 	// surface for drawing images/text
 	private MP4DrawSurface mDrawSurface;
-	private float[] mModelViewProjectionMatrix = new float[16];
+	private final float[] mModelViewProjectionMatrix = new float[16];
 
 	// audio state
 	private int mAudioBufferSize;
@@ -96,6 +98,19 @@ public class MP4Encoder {
 	private boolean mAudioEnded;
 	private boolean mEndOfOutputReached;
 
+	// latest SDK requirements - see: https://source.android.com/compatibility/android-cdd.pdf section 5.2
+	// SDK 21: https://source.android.com/compatibility/5.1/android-5.1-cdd.pdf (same as most recent, v31)
+	// SDK 18 (our minimum): https://source.android.com/compatibility/4.3/android-4.3-cdd.pdf
+	// see also: https://developer.android.com/guide/topics/media/media-formats#video-encoding
+	private static final Point[] SAFE_VIDEO_RESOLUTIONS = new Point[]{
+			new Point(1920, 1080), // [ currently not used ]
+			new Point(1280, 720),  // our 'high' (device support recommended, but not required until recent SDK levels)
+			new Point(1024, 576),  // our 'medium' - not detailed in spec, but often supported
+			new Point(720, 480),   // our 'medium' (required for H.264/H.265 only)
+			new Point(640, 360),   // our 'low' (required for VP8/VP9 only)
+			new Point(480, 360)    // our 'low' (recommended on SDK v18-v20 only; H.264)
+	};
+
 	public boolean createMP4(Resources resources, File outputFile, ArrayList<FrameMediaContainer> videoFrames,
 							 AudioUtilities.CombinedAudioTrack combinedAudioTrack, Map<Integer, Object> settings) {
 
@@ -104,8 +119,8 @@ public class MP4Encoder {
 		}
 
 		// should really do proper checking on these
-		final int outputWidth = (Integer) settings.get(MediaUtilities.KEY_OUTPUT_WIDTH);
-		final int outputHeight = (Integer) settings.get(MediaUtilities.KEY_OUTPUT_HEIGHT);
+		final int requestedOutputWidth = (Integer) settings.get(MediaUtilities.KEY_OUTPUT_WIDTH);
+		final int requestedOutputHeight = (Integer) settings.get(MediaUtilities.KEY_OUTPUT_HEIGHT);
 
 		boolean hasAudio = combinedAudioTrack.mCombinedPCMFile != null;
 		int audioSampleRate = hasAudio ? (int) combinedAudioTrack.mCombinedPCMAudioFormat.getSampleRate() : 0;
@@ -116,20 +131,35 @@ public class MP4Encoder {
 			totalDuration += frame.mFrameMaxDuration; // better fit I frames to image changes
 		}
 		int iFrameInterval = (int) ((totalDuration / videoFrames.size()) / 1000f);
-		Log.d(LOG_TAG, "Setting I frame interval to " + iFrameInterval);
 
-		Log.d(LOG_TAG,
-				"Creating " + VIDEO_MIME_TYPE + "+" + AUDIO_MIME_TYPE + " output, " + outputWidth + "x" + outputHeight + " at " +
-						FRAME_RATE + " fps, " + BIT_RATE + "bps, i-frame interval " + iFrameInterval + ", " +
-						(hasAudio ? "with" : "no") + " audio");
+		Log.d(LOG_TAG, "Creating " + VIDEO_MIME_TYPE + "+" + AUDIO_MIME_TYPE + " output, " + requestedOutputWidth + "x" +
+				requestedOutputHeight + " at " + FRAME_RATE + " fps, " + BIT_RATE + "bps, i-frame interval " + iFrameInterval +
+				", " + (hasAudio ? "with" : "no") + " audio");
+
+		// in prepareEncoder we have two options to get an appropriate video encoder: createEncoderByType or findEncoderForFormat
+		// however, these are not equivalent, and give different results on the same device - for example, findEncoderForFormat
+		// can claim that a device doesn't support a particular resolution, but the same encoder sourced via createEncoderByType
+		// may well succeed in creating the video regardless; so, we try both options, preferring createEncoderByType and
+		// falling back to findEncoderForFormat, and further trying a selection of 'safe' resolutions (i.e., video resizing)
+		// note: this can lead to the strange situation where choosing 'medium' quality for export leads to a higher actual
+		// export resolution than 'high' if the medium quality option succeeds via createEncoderByType but the high quality
+		// option fails here and only succeeds via findEncoderForFormat
+		// TODO: handle this inconsistency by trying our own resolutions in descending order before using findEncoderForFormat?
+		boolean allowResizingVideo = settings.containsKey(MediaUtilities.KEY_RESIZE_VIDEO);
+		ArrayList<FrameMediaContainer> originalVideoFrames = new ArrayList<>(videoFrames); // need a copy as we remove() on use
 
 		try {
 			// initialise - throws IOException if either audio or video encoders couldn't be created
-			prepareEncoder(outputFile, outputWidth, outputHeight, iFrameInterval, audioSampleRate);
+			Point actualOutputSize = prepareEncoder(outputFile, requestedOutputWidth, requestedOutputHeight, iFrameInterval,
+					audioSampleRate, allowResizingVideo);
+			if (actualOutputSize.x != requestedOutputWidth || actualOutputSize.y != requestedOutputHeight) {
+				Log.d(LOG_TAG, "Unable to create video at requested size " + requestedOutputWidth + "x" + requestedOutputHeight +
+						"; setting " + "size to " + actualOutputSize.x + "x" + actualOutputSize.y);
+			}
 
 			// set up video output
 			mInputSurface.makeCurrent();
-			initialiseDrawSurface(resources, outputWidth, outputHeight, settings);
+			initialiseDrawSurface(resources, actualOutputSize.x, actualOutputSize.y, settings);
 
 			if (hasAudio) {
 				// use audio buffer size that means audio blocks are the same length as video ones (for simpler synchronisation)
@@ -240,9 +270,18 @@ public class MP4Encoder {
 					" video frames; " + Math.round((videoFrameCount / (videoPresentationTimeNs / 1000000000.0))) + " fps");
 
 		} catch (Exception e) {
-			Log.e(LOG_TAG, "MP4 encoding loop exception - aborting");
-			e.printStackTrace();
-			return false;
+			if (settings.containsKey(MediaUtilities.KEY_RESIZE_VIDEO)) {
+				Log.e(LOG_TAG, "MP4 encoding loop exception - aborting");
+				return false; // we've already tried resizing once; just give up
+			}
+
+			// as outlined above, we allow resizing of the video output on our second attempt to try to ensure creation succeeds
+			Log.e(LOG_TAG, "MP4 encoding loop exception - retrying with video resizing enabled");
+			IOUtilities.closeStream(audioInputStream);
+			releaseRecordingResources();
+			settings.put(MediaUtilities.KEY_RESIZE_VIDEO, true);
+			return createMP4(resources, outputFile, originalVideoFrames, combinedAudioTrack, settings);
+
 		} finally {
 			IOUtilities.closeStream(audioInputStream);
 			releaseRecordingResources();
@@ -351,7 +390,10 @@ public class MP4Encoder {
 				if (!mStarted) {
 					Log.e(LOG_TAG, "Stopping muxer before it was started");
 				}
-				mMuxer.stop();
+				try {
+					mMuxer.stop();
+				} catch (IllegalStateException ignored) {
+				}
 				mMuxer.release();
 				mMuxer = null;
 				mStarted = false;
@@ -376,28 +418,79 @@ public class MP4Encoder {
 	 * <p>
 	 * An audioSampleRate value <= 0 indicates that there is no audio stream
 	 */
-	private void prepareEncoder(File outputFile, int videoWidth, int videoHeight, int iFrameInterval,
-								int audioSampleRate) throws IOException {
+	private Point prepareEncoder(File outputFile, int videoWidth, int videoHeight, int iFrameInterval, int audioSampleRate,
+								 boolean resizeVideo) throws IOException {
 		mVideoBufferInfo = new MediaCodec.BufferInfo();
 		mVideoTrackInfo = new TrackInfo();
 
 		// configure video output
 		// failing to specify some of these properties can cause the MediaCodec configure() call to throw an unhelpful exception
 		MediaFormat videoFormat = MediaFormat.createVideoFormat(VIDEO_MIME_TYPE, videoWidth, videoHeight);
-		//videoFormat.setInteger();
 		videoFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
-		videoFormat.setInteger(MediaFormat.KEY_BIT_RATE, BIT_RATE);
+		videoFormat.setInteger(MediaFormat.KEY_BIT_RATE, BIT_RATE); // TODO: probably should be calculated for variable w/h
 		videoFormat.setInteger(MediaFormat.KEY_FRAME_RATE, FRAME_RATE);
 		videoFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, iFrameInterval);
 
+		int resizedWidth = videoWidth;
+		int resizedHeight = videoHeight;
+
 		// create a MediaCodec encoder, and configure it with our format; then get a Surface we can use for input and wrap it
 		// with a class that handles the EGL work
-		mVideoEncoder = MediaCodec.createEncoderByType(VIDEO_MIME_TYPE);
+		if (!resizeVideo) {
+			mVideoEncoder = MediaCodec.createEncoderByType(VIDEO_MIME_TYPE);
+
+		} else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+			// on a second attempt at video creation we do some (limited) validation of the requested video width/height and
+			// check whether the encoder claims to support the given resolution, sticking to some known safe values
+			if (Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP) {
+				// see documentation for findEncoderForFormat(android.media.MediaFormat) - SDK v21 cannot contain a frame rate
+				videoFormat.setString(MediaFormat.KEY_FRAME_RATE, null);
+			}
+
+			String selectedEncoder = null;
+			MediaCodecList mediaCodecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
+			for (int i = 0; i < SAFE_VIDEO_RESOLUTIONS.length; i++) {
+				// we allow flexible sizing of the exported video's smaller dimension to allow it to exactly match the device's
+				// photo sizes; here we assume that if encoding of a given width is okay then the height used can be variable;
+				// and, if a given size is okay in landscape then it is okay in portrait (both potentially big ifs...)
+				int maxDimension = Math.max(resizedWidth, resizedHeight);
+				if (maxDimension == SAFE_VIDEO_RESOLUTIONS[i].x) {
+					videoFormat.setInteger(MediaFormat.KEY_WIDTH, resizedWidth);
+					videoFormat.setInteger(MediaFormat.KEY_HEIGHT, resizedHeight);
+
+					selectedEncoder = mediaCodecList.findEncoderForFormat(videoFormat);
+					if (selectedEncoder != null) {
+						break;
+					}
+
+					if (i + 1 < SAFE_VIDEO_RESOLUTIONS.length) {
+						float scaleFactor = maxDimension / (float) SAFE_VIDEO_RESOLUTIONS[i + 1].x;
+						resizedWidth = Math.round(resizedWidth / scaleFactor);
+						resizedHeight = Math.round(resizedHeight / scaleFactor);
+					}
+				}
+			}
+
+			if (selectedEncoder != null) {
+				mVideoEncoder = MediaCodec.createByCodecName(selectedEncoder);
+			} else {
+				throw new IOException("Video format unsupported");
+			}
+
+			if (Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP) {
+				videoFormat.setInteger(MediaFormat.KEY_FRAME_RATE, FRAME_RATE); // restore original frame rate
+			}
+		} else {
+			// can't query supported formats pre-v21 - could somehow do retry-on-error, but probably not worth it for old SDKs?
+			throw new IOException("Video format unsupported");
+		}
+
 		mVideoEncoder.configure(videoFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
 		mInputSurface = new MP4CodecInputSurface(mVideoEncoder.createInputSurface());
 		mVideoEncoder.start();
 
 		if (audioSampleRate > 0) {
+			// TODO: check support in a similar way to video encoding resolutions?
 			mAudioBufferInfo = new MediaCodec.BufferInfo();
 			mAudioTrackInfo = new TrackInfo();
 
@@ -430,6 +523,8 @@ public class MP4Encoder {
 			mAudioTrackInfo.mIndex = -1;
 			mAudioTrackInfo.mMuxerWrapper = mMuxerWrapper;
 		}
+
+		return new Point(resizedWidth, resizedHeight);
 	}
 
 	private void initialiseDrawSurface(Resources resources, int canvasWidth, int canvasHeight, Map<Integer, Object> settings) {
@@ -473,7 +568,10 @@ public class MP4Encoder {
 
 	private void stopAndReleaseVideoEncoder() {
 		if (mVideoEncoder != null) {
-			mVideoEncoder.stop();
+			try {
+				mVideoEncoder.stop();
+			} catch (IllegalStateException ignored) {
+			}
 			mVideoEncoder.release();
 			mVideoEncoder = null;
 		}
@@ -482,7 +580,10 @@ public class MP4Encoder {
 	private void stopAndReleaseAudioEncoder() {
 		mLastEncodedAudioTimeStamp = 0;
 		if (mAudioEncoder != null) {
-			mAudioEncoder.stop();
+			try {
+				mAudioEncoder.stop();
+			} catch (IllegalStateException ignored) {
+			}
 			mAudioEncoder.release();
 			mAudioEncoder = null;
 		}
