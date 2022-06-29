@@ -55,15 +55,16 @@ public class MediaUtilities {
 	}
 
 	// message IDs (see: http://stackoverflow.com/questions/3432649/)
-	public static final int MSG_RECEIVED_SMIL_FILE = 1;
-	public static final int MSG_RECEIVED_HTML_FILE = 2;
-	public static final int MSG_RECEIVED_MOV_FILE = 3;
-	public static final int MSG_RECEIVED_IMPORT_FILE = 4;
+	public static final int MSG_RECEIVED_PARTIAL_SMIL_FILE = 1;
+	public static final int MSG_RECEIVED_COMPLETE_SMIL_FILE = 2;
+	public static final int MSG_RECEIVED_HTML_FILE = 3;
+	public static final int MSG_RECEIVED_MOV_FILE = 4;
+	public static final int MSG_RECEIVED_IMPORT_FILE = 5;
 
-	public static final int MSG_REGISTER_CLIENT = 5;
-	public static final int MSG_HINT_NEW_FILE = 6;
-	public static final int MSG_DISCONNECT_CLIENT = 7;
-	public static final int MSG_IMPORT_SERVICE_REGISTERED = 8;
+	public static final int MSG_REGISTER_CLIENT = 6;
+	public static final int MSG_HINT_NEW_FILE = 7;
+	public static final int MSG_DISCONNECT_CLIENT = 8;
+	public static final int MSG_IMPORT_SERVICE_REGISTERED = 9;
 
 	public static final String KEY_OBSERVER_CLASS = "bluetooth_observer_class";
 	public static final String KEY_OBSERVER_PATH = "bluetooth_directory_path";

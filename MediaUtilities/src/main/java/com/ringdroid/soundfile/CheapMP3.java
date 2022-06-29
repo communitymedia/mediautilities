@@ -25,9 +25,9 @@ import ac.robinson.util.IOUtilities;
 /**
  * CheapMP3 represents an MP3 file by doing a "cheap" scan of the file, parsing the frame headers only and getting an
  * extremely rough estimate of the volume level of each frame.
- *
- * TODO: Useful unit tests might be to look for sync in various places: FF FA FF FB 00 FF FA FF FF FA ([ 00 ] * 12) FF
- * FA ([ 00 ] * 13) FF FA
+ * <p>
+ * TODO: Useful unit tests might be to look for sync in various places:
+ *  FF FA FF FB 00 FF FA FF FF FA ([ 00 ] * 12) FF FA ([ 00 ] * 13) FF FA
  */
 public class CheapMP3 extends CheapSoundFile {
 	public static Factory getFactory() {
@@ -37,7 +37,7 @@ public class CheapMP3 extends CheapSoundFile {
 			}
 
 			public String[] getSupportedExtensions() {
-				return new String[] { "mp3" };
+				return new String[]{ "mp3" };
 			}
 		};
 	}
@@ -145,8 +145,9 @@ public class CheapMP3 extends CheapSoundFile {
 					offset += stream.read(buffer, offset, 12 - offset);
 				}
 				int bufferOffset = 0;
-				while (bufferOffset < 12 && buffer[bufferOffset] != -1)
+				while (bufferOffset < 12 && buffer[bufferOffset] != -1) {
 					bufferOffset++;
+				}
 
 				if (mProgressListener != null) {
 					boolean keepGoing = mProgressListener.reportProgress(pos * 1.0 / mFileSize);
@@ -156,10 +157,10 @@ public class CheapMP3 extends CheapSoundFile {
 				}
 
 				if (bufferOffset > 0) {
-					// We didn't find a sync code (0xFF) at position 0;
-					// shift the buffer over and try again
-					for (int i = 0; i < 12 - bufferOffset; i++)
+					// We didn't find a sync code (0xFF) at position 0; shift the buffer over and try again
+					for (int i = 0; i < 12 - bufferOffset; i++) {
 						buffer[i] = buffer[bufferOffset + i];
+					}
 					pos += bufferOffset;
 					offset = 12 - bufferOffset;
 					continue;
@@ -173,8 +174,9 @@ public class CheapMP3 extends CheapSoundFile {
 					mpgVersion = 2;
 				} else {
 					bufferOffset = 1;
-					for (int i = 0; i < 12 - bufferOffset; i++)
+					for (int i = 0; i < 12 - bufferOffset; i++) {
 						buffer[i] = buffer[bufferOffset + i];
+					}
 					pos += bufferOffset;
 					offset = 12 - bufferOffset;
 					continue;
@@ -195,8 +197,9 @@ public class CheapMP3 extends CheapSoundFile {
 
 				if (bitRate == 0 || sampleRate == 0) {
 					bufferOffset = 2;
-					for (int i = 0; i < 12 - bufferOffset; i++)
+					for (int i = 0; i < 12 - bufferOffset; i++) {
 						buffer[i] = buffer[bufferOffset + i];
+					}
 					pos += bufferOffset;
 					offset = 12 - bufferOffset;
 					continue;
@@ -231,25 +234,25 @@ public class CheapMP3 extends CheapSoundFile {
 				mFrameOffsets[mNumFrames] = pos;
 				mFrameLens[mNumFrames] = frameLen;
 				mFrameGains[mNumFrames] = gain;
-				if (gain < mMinGain)
+				if (gain < mMinGain) {
 					mMinGain = gain;
-				if (gain > mMaxGain)
+				}
+				if (gain > mMaxGain) {
 					mMaxGain = gain;
+				}
 
 				mNumFrames++;
 				if (mNumFrames == mMaxFrames) {
-					// We need to grow our arrays. Rather than naively
-					// doubling the array each time, we estimate the exact
-					// number of frames we need and add 10% padding. In
-					// practice this seems to work quite well, only one
-					// resize is ever needed, however to avoid pathological
-					// cases we make sure to always double the size at a minimum.
+					// We need to grow our arrays. Rather than naively doubling the array each time, we estimate the exact
+					// number of frames we need and add 10% padding. In practice this seems to work quite well, only one resize
+					// is ever needed, however to avoid pathological cases we make sure to always double the size at a minimum.
 
 					mAvgBitRate = mBitrateSum / mNumFrames;
 					int totalFramesGuess = ((mFileSize / mAvgBitRate) * sampleRate) / 144000;
 					int newMaxFrames = totalFramesGuess * 11 / 10;
-					if (newMaxFrames < mMaxFrames * 2)
+					if (newMaxFrames < mMaxFrames * 2) {
 						newMaxFrames = mMaxFrames * 2;
+					}
 
 					int[] newOffsets = new int[newMaxFrames];
 					int[] newLens = new int[newMaxFrames];
@@ -271,10 +274,11 @@ public class CheapMP3 extends CheapSoundFile {
 			}
 
 			// We're done reading the file, do some postprocessing
-			if (mNumFrames > 0)
+			if (mNumFrames > 0) {
 				mAvgBitRate = mBitrateSum / mNumFrames;
-			else
+			} else {
 				mAvgBitRate = 0;
+			}
 
 		} finally {
 			IOUtilities.closeStream(stream);
@@ -291,8 +295,9 @@ public class CheapMP3 extends CheapSoundFile {
 
 			int maxFrameLen = 0;
 			for (int i = 0; i < numFrames; i++) {
-				if (mFrameLens[startFrame + i] > maxFrameLen)
+				if (mFrameLens[startFrame + i] > maxFrameLen) {
 					maxFrameLen = mFrameLens[startFrame + i];
+				}
 			}
 			byte[] buffer = new byte[maxFrameLen];
 			int pos = 0;
@@ -313,8 +318,8 @@ public class CheapMP3 extends CheapSoundFile {
 		}
 	}
 
-	static private int[] BITRATES_MPEG1_L3 = { 0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 0 };
-	static private int[] BITRATES_MPEG2_L3 = { 0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160, 0 };
-	static private int[] SAMPLERATES_MPEG1_L3 = { 44100, 48000, 32000, 0 };
-	static private int[] SAMPLERATES_MPEG2_L3 = { 22050, 24000, 16000, 0 };
+	static private final int[] BITRATES_MPEG1_L3 = { 0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 0 };
+	static private final int[] BITRATES_MPEG2_L3 = { 0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160, 0 };
+	static private final int[] SAMPLERATES_MPEG1_L3 = { 44100, 48000, 32000, 0 };
+	static private final int[] SAMPLERATES_MPEG2_L3 = { 22050, 24000, 16000, 0 };
 }

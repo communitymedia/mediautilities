@@ -64,6 +64,12 @@ public class StringUtilities {
 
 	public static String millisecondsToTimeString(long milliseconds, boolean includeMilliseconds, boolean highPrecision) {
 		// overestimating is better than just rounding
+		boolean negative = false;
+		if (milliseconds < 0) {
+			negative = true;
+			milliseconds *= -1;
+		}
+
 		@SuppressWarnings("IntegerDivisionInFloatingPointContext") int secondsIn = (int) Math.ceil(milliseconds / 1000);
 		int millisecondsIn = ((int) milliseconds - (secondsIn * 1000));
 
@@ -73,7 +79,8 @@ public class StringUtilities {
 		int seconds = remainder % 60;
 
 		// TODO: use StringBuilder for efficiency?
-		return (hours > 0 ? hours + ":" : "") + (hours > 0 ? String.format(Locale.US, int2sd, minutes) : minutes) + ":" +
+		return (negative ? "-" : "") + (hours > 0 ? hours + ":" : "") +
+				(hours > 0 ? String.format(Locale.US, int2sd, minutes) : minutes) + ":" +
 				String.format(Locale.US, int2sd, seconds) + (includeMilliseconds ? "." +
 				(highPrecision ? String.format(Locale.US, int3sd, millisecondsIn) :
 						String.format(Locale.US, int1sd, millisecondsIn / 100)) : "");

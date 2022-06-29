@@ -19,6 +19,7 @@ package com.ringdroid.soundfile;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
@@ -28,7 +29,7 @@ import ac.robinson.util.IOUtilities;
  * CheapAMR is a CheapSoundFile implementation for AMR (Adaptive Multi-Rate) encoded sound files, which is one of the
  * native formats supported by Android's MediaRecorder library. It supports files with a full 3GPP header, and also
  * files with only a basic AMR header.
- *
+ * <p>
  * While there are 8 bitrates and several other frame types in AMR, this implementation currently only supports
  * frametype=1, MR515, 10.3 kbits / sec, which is the format encoded on Android 1.0 phones. In the future it may be
  * necessary to support other bitrates.
@@ -41,7 +42,7 @@ public class CheapAMR extends CheapSoundFile {
 			}
 
 			public String[] getSupportedExtensions() {
-				return new String[] { "3gpp", "3gp", "amr" };
+				return new String[]{ "3gpp", "3gp", "amr" };
 			}
 		};
 	}
@@ -107,8 +108,7 @@ public class CheapAMR extends CheapSoundFile {
 		return "AMR";
 	}
 
-	public void readFile(File inputFile, boolean readHeaderOnly) throws java.io.FileNotFoundException,
-			java.io.IOException {
+	public void readFile(File inputFile, boolean readHeaderOnly) throws java.io.FileNotFoundException, java.io.IOException {
 		super.readFile(inputFile, readHeaderOnly);
 		mNumFrames = 0;
 		mMaxFrames = 64; // This will grow as needed
@@ -136,8 +136,8 @@ public class CheapAMR extends CheapSoundFile {
 			byte[] header = new byte[12];
 			stream.read(header, 0, 6);
 			mOffset += 6;
-			if (header[0] == '#' && header[1] == '!' && header[2] == 'A' && header[3] == 'M' && header[4] == 'R'
-					&& header[5] == '\n') {
+			if (header[0] == '#' && header[1] == '!' && header[2] == 'A' && header[3] == 'M' && header[4] == 'R' &&
+					header[5] == '\n') {
 				if (!readHeaderOnly) {
 					parseAMR(stream, mFileSize - 6);
 				}
@@ -146,12 +146,10 @@ public class CheapAMR extends CheapSoundFile {
 			stream.read(header, 6, 6);
 			mOffset += 6;
 
-			if (header[4] == 'f' && header[5] == 't' && header[6] == 'y' && header[7] == 'p' && header[8] == '3'
-					&& header[9] == 'g' && header[10] == 'p' && header[11] == '4') {
+			if (header[4] == 'f' && header[5] == 't' && header[6] == 'y' && header[7] == 'p' && header[8] == '3' &&
+					header[9] == 'g' && header[10] == 'p' && header[11] == '4') {
 
-				int boxLen = ((0xff & header[0]) << 24) | ((0xff & header[1]) << 16) | ((0xff & header[2]) << 8)
-						| ((0xff & header[3]));
-
+				int boxLen = (int) bytesToDec(header, 0, 4);
 				if (boxLen >= 4 && boxLen <= mFileSize - 8) {
 					stream.skip(boxLen - 12);
 					mOffset += boxLen - 12;
@@ -165,18 +163,18 @@ public class CheapAMR extends CheapSoundFile {
 	}
 
 	private void parse3gpp(InputStream stream, int maxLen, boolean readHeaderOnly) throws java.io.IOException {
-		if (maxLen < 8)
+		if (maxLen < 8) {
 			return;
+		}
 
 		byte[] boxHeader = new byte[8];
 		stream.read(boxHeader, 0, 8);
 		mOffset += 8;
 
-		int boxLen = ((0xff & boxHeader[0]) << 24) | ((0xff & boxHeader[1]) << 16) | ((0xff & boxHeader[2]) << 8)
-				| ((0xff & boxHeader[3]));
-
-		if (boxLen > maxLen || boxLen <= 0)
+		int boxLen = (int) bytesToDec(boxHeader, 0, 4);
+		if (boxLen > maxLen || boxLen <= 0) {
 			return;
+		}
 
 		if (boxHeader[4] == 'm' && boxHeader[5] == 'd' && boxHeader[6] == 'a' && boxHeader[7] == 't') {
 			if (!readHeaderOnly) {
@@ -224,7 +222,6 @@ public class CheapAMR extends CheapSoundFile {
 		stream.read(frameTypeHeader, 0, 1);
 		mOffset += 1;
 		int frameType = ((0xff & frameTypeHeader[0]) >> 3) % 0x0F;
-		@SuppressWarnings("unused")
 		int frameQuality = ((0xff & frameTypeHeader[0]) >> 2) & 0x01;
 		int blockSize = BLOCK_SIZES[frameType];
 
@@ -258,13 +255,16 @@ public class CheapAMR extends CheapSoundFile {
 		switch (frameType) {
 			case 0:
 				mBitRate = 5;
+
+				// @formatter:off
 				gain = new int[4];
-				gain[0] = 0x01 * bits[28] + 0x02 * bits[29] + 0x04 * bits[30] + 0x08 * bits[31] + 0x10 * bits[46]
-						+ 0x20 * bits[47] + 0x40 * bits[48] + 0x80 * bits[49];
+				gain[0] = 0x01 * bits[28] + 0x02 * bits[29] + 0x04 * bits[30] + 0x08 * bits[31] +
+						  0x10 * bits[46] + 0x20 * bits[47] + 0x40 * bits[48] + 0x80 * bits[49];
 				gain[1] = gain[0];
-				gain[2] = 0x01 * bits[32] + 0x02 * bits[33] + 0x04 * bits[34] + 0x08 * bits[35] + 0x10 * bits[40]
-						+ 0x20 * bits[41] + 0x40 * bits[42] + 0x80 * bits[43];
+				gain[2] = 0x01 * bits[32] + 0x02 * bits[33] + 0x04 * bits[34] + 0x08 * bits[35] +
+						  0x10 * bits[40] + 0x20 * bits[41] + 0x40 * bits[42] + 0x80 * bits[43];
 				gain[3] = gain[2];
+				// @formatter:on
 
 				for (int i = 0; i < 4; i++) {
 					int index = gain[i] * 4 + (i & 1) * 2 + 1;
@@ -279,7 +279,8 @@ public class CheapAMR extends CheapSoundFile {
 					tmp += ((frac * 24660) >> 15) * 2;
 					int quaEner = ((tmp * 8192) + 0x8000) >> 16;
 
-					int gcode0 = (385963008 + prevEner[0] * 5571 + prevEner[1] * 4751 + prevEner[2] * 2785 + prevEner[3] * 1556) >> 15;
+					int gcode0 =
+							(385963008 + prevEner[0] * 5571 + prevEner[1] * 4751 + prevEner[2] * 2785 + prevEner[3] * 1556) >> 15;
 
 					prevEner[3] = prevEner[2];
 					prevEner[2] = prevEner[1];
@@ -295,18 +296,21 @@ public class CheapAMR extends CheapSoundFile {
 
 			case 1:
 				mBitRate = 5;
+				// @formatter:off
 				gain = new int[4];
-				gain[0] = 0x01 * bits[24] + 0x02 * bits[25] + 0x04 * bits[26] + 0x08 * bits[36] + 0x10 * bits[45]
-						+ 0x20 * bits[55];
-				gain[1] = 0x01 * bits[27] + 0x02 * bits[28] + 0x04 * bits[29] + 0x08 * bits[37] + 0x10 * bits[46]
-						+ 0x20 * bits[56];
-				gain[2] = 0x01 * bits[30] + 0x02 * bits[31] + 0x04 * bits[32] + 0x08 * bits[38] + 0x10 * bits[47]
-						+ 0x20 * bits[57];
-				gain[3] = 0x01 * bits[33] + 0x02 * bits[34] + 0x04 * bits[35] + 0x08 * bits[39] + 0x10 * bits[48]
-						+ 0x20 * bits[58];
+				gain[0] = 0x01 * bits[24] + 0x02 * bits[25] + 0x04 * bits[26] + 0x08 *
+						  bits[36] + 0x10 * bits[45] + 0x20 * bits[55];
+				gain[1] = 0x01 * bits[27] + 0x02 * bits[28] + 0x04 * bits[29] + 0x08 *
+						  bits[37] + 0x10 * bits[46] + 0x20 * bits[56];
+				gain[2] = 0x01 * bits[30] + 0x02 * bits[31] + 0x04 * bits[32] + 0x08 *
+						  bits[38] + 0x10 * bits[47] + 0x20 * bits[57];
+				gain[3] = 0x01 * bits[33] + 0x02 * bits[34] + 0x04 * bits[35] + 0x08 *
+						  bits[39] + 0x10 * bits[48] + 0x20 * bits[58];
+				// @formatter:on
 
 				for (int i = 0; i < 4; i++) {
-					int gcode0 = (385963008 + prevEner[0] * 5571 + prevEner[1] * 4751 + prevEner[2] * 2785 + prevEner[3] * 1556) >> 15;
+					int gcode0 =
+							(385963008 + prevEner[0] * 5571 + prevEner[1] * 4751 + prevEner[2] * 2785 + prevEner[3] * 1556) >> 15;
 					int quaEner = QUA_ENER_MR515[gain[i]];
 					int gFac = GAIN_FAC_MR515[gain[i]];
 
@@ -457,10 +461,12 @@ public class CheapAMR extends CheapSoundFile {
 		mFrameOffsets[mNumFrames] = offset;
 		mFrameLens[mNumFrames] = frameSize;
 		mFrameGains[mNumFrames] = gain;
-		if (gain < mMinGain)
+		if (gain < mMinGain) {
 			mMinGain = gain;
-		if (gain > mMaxGain)
+		}
+		if (gain > mMaxGain) {
 			mMaxGain = gain;
+		}
 
 		mNumFrames++;
 		if (mNumFrames == mMaxFrames) {
@@ -500,8 +506,9 @@ public class CheapAMR extends CheapSoundFile {
 
 			int maxFrameLen = 0;
 			for (int i = 0; i < numFrames; i++) {
-				if (mFrameLens[startFrame + i] > maxFrameLen)
+				if (mFrameLens[startFrame + i] > maxFrameLen) {
 					maxFrameLen = mFrameLens[startFrame + i];
+				}
 			}
 			byte[] buffer = new byte[maxFrameLen];
 			int pos = 0;
@@ -543,6 +550,7 @@ public class CheapAMR extends CheapSoundFile {
 		}
 	}
 
+	// @formatter:off
 	void getMR122Params(int[] bits, int[] adaptiveIndex, int[] adaptiveGain, int[] fixedGain, int[][] pulse) {
 		adaptiveIndex[0] = 0x01 * bits[45] + 0x02 * bits[43] + 0x04 * bits[41] + 0x08 * bits[39] + 0x10 * bits[37]
 				+ 0x20 * bits[35] + 0x40 * bits[33] + 0x80 * bits[31] + 0x100 * bits[29];
@@ -694,12 +702,13 @@ public class CheapAMR extends CheapSoundFile {
 
 	static private int[] QUA_GAIN_PITCH = { 0, 3277, 6556, 8192, 9830, 11469, 12288, 13107, 13926, 14746, 15565, 16384,
 			17203, 18022, 18842, 19661 };
+	// @formatter:on
 
 	// this is a hack, destructively altering the original CheapSoundFile but it works for our purpose, so no real need
 	// to fix just yet
-	public long addSoundFile(CheapSoundFile newFile) {
+	public long addSoundFile(CheapSoundFile newFile) throws IOException {
 		if (!(newFile instanceof CheapAMR)) {
-			return -1L; // TODO: throw
+			throw new java.io.IOException("Incompatible file format");
 		}
 		CheapAMR newAMRFile = (CheapAMR) newFile;
 
@@ -732,7 +741,7 @@ public class CheapAMR extends CheapSoundFile {
 		mFrameGains = newGains;
 		mFileSize += newAMRFile.getFileSizeBytes();
 
-		return (mNumFrames * 1000) / (getSampleRate() / getSamplesPerFrame());
+		return (mNumFrames * 1000L) / (getSampleRate() / getSamplesPerFrame());
 	}
 
 	/*

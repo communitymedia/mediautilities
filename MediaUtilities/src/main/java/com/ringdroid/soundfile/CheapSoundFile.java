@@ -18,6 +18,7 @@ package com.ringdroid.soundfile;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,7 +30,7 @@ import java.util.Locale;
  * volume level of each frame. Each subclass is able to: - open a sound file - return the sample rate and number of
  * frames - return an approximation of the volume level of each frame - write a new sound file with a subset of the
  * frames
- *
+ * <p>
  * A frame should represent no less than 1 ms and no more than 100 ms of audio. This is compatible with the native frame
  * sizes of most audio file formats already, but if not, this class should expose virtual frames in that size range.
  */
@@ -43,13 +44,15 @@ public class CheapSoundFile {
 	}
 
 	public interface Factory {
-		public CheapSoundFile create();
+		CheapSoundFile create();
 
-		public String[] getSupportedExtensions();
+		String[] getSupportedExtensions();
 	}
 
-	static Factory[] sSubclassFactories = new Factory[] { CheapAAC.getFactory(), CheapAMR.getFactory() };
-	// CheapMP3.getFactory(), CheapWAV.getFactory(), };
+	static Factory[] sSubclassFactories = new Factory[]{
+			CheapAAC.getFactory(), CheapAMR.getFactory()
+			/* , CheapMP3.getFactory(), CheapWAV.getFactory() // MP3 and WAV do not support addSoundFile */
+	};
 
 	static ArrayList<String> sSupportedExtensions = new ArrayList<>();
 	static HashMap<String, Factory> sExtensionMap = new HashMap<>();
@@ -65,7 +68,7 @@ public class CheapSoundFile {
 
 	/**
 	 * Static method to create the appropriate CheapSoundFile subclass given a filename.
-	 *
+	 * <p>
 	 * TODO: make this more modular rather than hardcoding the logic
 	 */
 	public static CheapSoundFile create(String fileName, ProgressListener progressListener)
@@ -75,7 +78,7 @@ public class CheapSoundFile {
 
 	/**
 	 * Static method to create the appropriate CheapSoundFile subclass given a filename.
-	 *
+	 * <p>
 	 * TODO: make this more modular rather than hardcoding the logic
 	 */
 	public static CheapSoundFile create(String fileName, boolean readHeaderOnly, ProgressListener progressListener)
@@ -120,8 +123,7 @@ public class CheapSoundFile {
 	protected CheapSoundFile() {
 	}
 
-	public void readFile(File inputFile, boolean readHeaderOnly) throws java.io.FileNotFoundException,
-			java.io.IOException {
+	public void readFile(File inputFile, boolean readHeaderOnly) throws java.io.FileNotFoundException, java.io.IOException {
 		mInputFile = inputFile;
 	}
 
@@ -177,8 +179,9 @@ public class CheapSoundFile {
 		return -1;
 	}
 
-	private static final char[] HEX_CHARS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd',
-			'e', 'f' };
+	private static final char[] HEX_CHARS = {
+			'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
+	};
 
 	public static String bytesToHex(byte[] hash) {
 		char[] buf = new char[hash.length * 2];
@@ -189,8 +192,17 @@ public class CheapSoundFile {
 		return new String(buf);
 	}
 
-	public String computeMd5OfFirst10Frames() throws java.io.FileNotFoundException, java.io.IOException,
-			java.security.NoSuchAlgorithmException {
+	public static long bytesToDec(byte[] number, int start, int length) {
+		long result = 0;
+		int end = start + length;
+		for (int i = start; i < end; i++) {
+			result = (result << 8) | (number[i] & 0xff);
+		}
+		return result;
+	}
+
+	public String computeMd5OfFirst10Frames()
+			throws java.io.FileNotFoundException, java.io.IOException, java.security.NoSuchAlgorithmException {
 		int[] frameOffsets = getFrameOffsets();
 		int[] frameLens = getFrameLens();
 		int numFrames = frameLens.length;
@@ -225,7 +237,7 @@ public class CheapSoundFile {
 		return mInputFile;
 	}
 
-	public long addSoundFile(CheapSoundFile newFile) {
+	public long addSoundFile(CheapSoundFile newFile) throws IOException {
 		return -1L;
 	}
 }

@@ -19,12 +19,12 @@ package com.ringdroid.soundfile;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import ac.robinson.util.IOUtilities;
-import android.annotation.SuppressLint;
 
 /**
  * CheapAAC is a CheapSoundFile implementation for AAC (Advanced Audio Codec) encoded sound files. It supports files
@@ -39,7 +39,7 @@ public class CheapAAC extends CheapSoundFile {
 			}
 
 			public String[] getSupportedExtensions() {
-				return new String[] { "aac", "m4a" };
+				return new String[]{ "aac", "m4a" };
 			}
 		};
 	}
@@ -70,8 +70,9 @@ public class CheapAAC extends CheapSoundFile {
 	public static final int kTKHD = 0x746b6864;
 	public static final int kTRAK = 0x7472616b;
 
-	public static final int[] kRequiredAtoms = { kDINF, kHDLR, kMDHD, kMDIA, kMINF, kMOOV, kMVHD, kSMHD, kSTBL, kSTSD,
-			kSTSZ, kSTTS, kTKHD, kTRAK, };
+	public static final int[] kRequiredAtoms = {
+			kDINF, kHDLR, kMDHD, kMDIA, kMINF, kMOOV, kMVHD, kSMHD, kSTBL, kSTSD, kSTSZ, kSTTS, kTKHD, kTRAK,
+	};
 
 	public static final int[] kSaveDataAtoms = { kDINF, kHDLR, kMDHD, kMVHD, kSMHD, kTKHD, kSTSD, };
 
@@ -84,7 +85,6 @@ public class CheapAAC extends CheapSoundFile {
 	private HashMap<Integer, Atom> mAtomMap;
 
 	// Member variables containing sound file info
-	@SuppressWarnings("unused")
 	private int mBitrate;
 	private int mSampleRate;
 	private int mChannels;
@@ -148,7 +148,7 @@ public class CheapAAC extends CheapSoundFile {
 		return "AAC";
 	}
 
-	public String atomToString(int atomType) {
+	public static String atomToString(int atomType) {
 		String str = "";
 		str += (char) ((atomType >> 24) & 0xff);
 		str += (char) ((atomType >> 16) & 0xff);
@@ -157,9 +157,7 @@ public class CheapAAC extends CheapSoundFile {
 		return str;
 	}
 
-	@SuppressLint("UseSparseArrays")
-	public void readFile(File inputFile, boolean readHeaderOnly) throws java.io.FileNotFoundException,
-			java.io.IOException {
+	public void readFile(File inputFile, boolean readHeaderOnly) throws java.io.FileNotFoundException, java.io.IOException {
 		super.readFile(inputFile, readHeaderOnly);
 		mChannels = 0;
 		mSampleRate = 0;
@@ -254,16 +252,16 @@ public class CheapAAC extends CheapSoundFile {
 
 			byte[] atomHeader = new byte[8];
 			stream.read(atomHeader, 0, 8);
-			int atomLen = ((0xff & atomHeader[0]) << 24) | ((0xff & atomHeader[1]) << 16)
-					| ((0xff & atomHeader[2]) << 8) | ((0xff & atomHeader[3]));
+			int atomLen = (int) bytesToDec(atomHeader, 0, 4);
+
 			/*
 			 * System.out.println("atomType = " + (char)atomHeader[4] + (char)atomHeader[5] + (char)atomHeader[6] +
 			 * (char)atomHeader[7] + "  " + "offset = " + mOffset + "  " + "atomLen = " + atomLen);
 			 */
-			if (atomLen > maxLen)
+			if (atomLen > maxLen) {
 				atomLen = maxLen;
-			int atomType = ((0xff & atomHeader[4]) << 24) | ((0xff & atomHeader[5]) << 16)
-					| ((0xff & atomHeader[6]) << 8) | ((0xff & atomHeader[7]));
+			}
+			int atomType = (int) bytesToDec(atomHeader, 4, 4);
 
 			Atom atom = new Atom();
 			atom.start = mOffset;
@@ -279,8 +277,24 @@ public class CheapAAC extends CheapSoundFile {
 			} else if (atomType == kSTTS) {
 				parseStts(stream, atomLen - 8);
 			} else if (atomType == kMDAT) {
+				if (atomLen == 1) {
+					// MDAT length of 1 means the next 8 bytes are used for the length
+					// see: https://developer.apple.com/library/archive/documentation/QuickTime/QTFF/QTFFChap1/qtff1.html
+					// TODO: although we read this format, startAtom always writes a standard length - update if needed (64bit)
+					byte[] extendedLength = new byte[8];
+					stream.read(extendedLength, 0, 8);
+
+					// note cast vs. length: we don't support files larger than 32-bit ints here or in any CheapSoundFile classes
+					atomLen = (int) bytesToDec(extendedLength, 0, 8);
+					mAtomMap.get(atomType).len = atomLen;
+					mOffset += 8;
+					mMdatLength = atomLen - 16;
+					/* System.out.println("extended MDAT: " + mMdatLength); */
+				} else {
+					mMdatLength = atomLen - 8;
+					/* System.out.println("standard MDAT: " + mMdatLength); */
+				}
 				mMdatOffset = mOffset;
-				mMdatLength = atomLen - 8;
 			} else {
 				for (int savedAtomType : kSaveDataAtoms) {
 					if (savedAtomType == atomType) {
@@ -317,9 +331,7 @@ public class CheapAAC extends CheapSoundFile {
 		byte[] sttsData = new byte[16];
 		stream.read(sttsData, 0, 16);
 		mOffset += 16;
-		mSamplesPerFrame = ((0xff & sttsData[12]) << 24) | ((0xff & sttsData[13]) << 16) | ((0xff & sttsData[14]) << 8)
-				| ((0xff & sttsData[15]));
-
+		mSamplesPerFrame = (int) bytesToDec(sttsData, 12, 4);
 		/* System.out.println("STTS samples per frame: " + mSamplesPerFrame); */
 	}
 
@@ -327,8 +339,7 @@ public class CheapAAC extends CheapSoundFile {
 		byte[] stszHeader = new byte[12];
 		stream.read(stszHeader, 0, 12);
 		mOffset += 12;
-		mNumFrames = ((0xff & stszHeader[8]) << 24) | ((0xff & stszHeader[9]) << 16) | ((0xff & stszHeader[10]) << 8)
-				| ((0xff & stszHeader[11]));
+		mNumFrames = (int) bytesToDec(stszHeader, 8, 4);
 		/* System.out.println("mNumFrames = " + mNumFrames); */
 
 		mFrameOffsets = new int[mNumFrames];
@@ -338,20 +349,16 @@ public class CheapAAC extends CheapSoundFile {
 		stream.read(frameLenBytes, 0, 4 * mNumFrames);
 		mOffset += 4 * mNumFrames;
 		for (int i = 0; i < mNumFrames; i++) {
-			mFrameLens[i] = ((0xff & frameLenBytes[4 * i + 0]) << 24) | ((0xff & frameLenBytes[4 * i + 1]) << 16)
-					| ((0xff & frameLenBytes[4 * i + 2]) << 8) | ((0xff & frameLenBytes[4 * i + 3]));
+			mFrameLens[i] = (int) bytesToDec(frameLenBytes, 4 * i, 4);
 			/* System.out.println("FrameLen[" + i + "] = " + mFrameLens[i]); */
 		}
 	}
 
 	void parseMp4aFromStsd() {
 		byte[] stsdData = mAtomMap.get(kSTSD).data;
-		mChannels = ((0xff & stsdData[32]) << 8) | ((0xff & stsdData[33]));
-		mSampleRate = ((0xff & stsdData[40]) << 8) | ((0xff & stsdData[41]));
-
-		/*
-		 * System.out.println("%% channels = " + mChannels + ", " + "sampleRate = " + mSampleRate);
-		 */
+		mChannels = (int) bytesToDec(stsdData, 32, 2);
+		mSampleRate = (int) bytesToDec(stsdData, 40, 2);
+		/* System.out.println("%% channels = " + mChannels + ", " + "sampleRate = " + mSampleRate); */
 	}
 
 	void parseMdat(InputStream stream, int maxLen) throws java.io.IOException {
@@ -360,9 +367,7 @@ public class CheapAAC extends CheapSoundFile {
 		for (int i = 0; i < mNumFrames; i++) {
 			mFrameOffsets[i] = mOffset;
 			/* System.out.println("&&& start: " + (mOffset - initialOffset)); */
-			/*
-			 * System.out.println("&&& start + len: " + (mOffset - initialOffset + mFrameLens[i]));
-			 */
+			/* System.out.println("&&& start + len: " + (mOffset - initialOffset + mFrameLens[i])); */
 			/* System.out.println("&&& maxLen: " + maxLen); */
 
 			if (mOffset - initialOffset + mFrameLens[i] > maxLen - 8) {
@@ -370,10 +375,12 @@ public class CheapAAC extends CheapSoundFile {
 			} else {
 				readFrameAndComputeGain(stream, i);
 			}
-			if (mFrameGains[i] < mMinGain)
+			if (mFrameGains[i] < mMinGain) {
 				mMinGain = mFrameGains[i];
-			if (mFrameGains[i] > mMaxGain)
+			}
+			if (mFrameGains[i] > mMaxGain) {
 				mMaxGain = mFrameGains[i];
+			}
 
 			if (mProgressListener != null) {
 				boolean keepGoing = mProgressListener.reportProgress(mOffset * 1.0 / mFileSize);
@@ -398,9 +405,7 @@ public class CheapAAC extends CheapSoundFile {
 		stream.read(data, 0, 4);
 		mOffset += 4;
 
-		/*
-		 * System.out.println( "Block " + frameIndex + ": " + data[0] + " " + data[1] + " " + data[2] + " " + data[3]);
-		 */
+		/* System.out.println( "Block " + frameIndex + ": " + data[0] + " " + data[1] + " " + data[2] + " " + data[3]); */
 
 		int idSynEle = (0xe0 & data[0]) >> 5;
 		/* System.out.println("idSynEle = " + idSynEle); */
@@ -414,7 +419,6 @@ public class CheapAAC extends CheapSoundFile {
 			case 1: // ID_CPE: stereo
 				int windowSequence = (0x60 & data[1]) >> 5;
 				/* System.out.println("windowSequence = " + windowSequence); */
-				@SuppressWarnings("unused")
 				int windowShape = (0x10 & data[1]) >> 4;
 				/* System.out.println("windowShape = " + windowShape); */
 
@@ -442,9 +446,7 @@ public class CheapAAC extends CheapSoundFile {
 				}
 
 				/* System.out.println("maxSfb = " + maxSfb); */
-				/*
-				 * System.out.println("scaleFactorGrouping = " + scaleFactorGrouping);
-				 */
+				/* System.out.println("scaleFactorGrouping = " + scaleFactorGrouping); */
 				/* System.out.println("maskPresent = " + maskPresent); */
 				/* System.out.println("startBit = " + startBit); */
 
@@ -471,8 +473,7 @@ public class CheapAAC extends CheapSoundFile {
 					/* System.out.println("new startBit = " + startBit); */
 				}
 
-				// We may need to fill our buffer with more than the 4
-				// bytes we've already read, here.
+				// We may need to fill our buffer with more than the 4 bytes we've already read, here.
 				int bytesNeeded = 1 + ((startBit + 7) / 8);
 				byte[] oldData = data;
 				data = new byte[bytesNeeded];
@@ -489,10 +490,7 @@ public class CheapAAC extends CheapSoundFile {
 					int b0 = (b + startBit) / 8;
 					int b1 = 7 - ((b + startBit) % 8);
 					int add = (((1 << b1) & data[b0]) >> b1) << (7 - b);
-					/*
-					 * System.out.println("Bit " + (b + startBit) + " " + "b0 " + b0 + " " + "b1 " + b1 + " " + "add " +
-					 * add);
-					 */
+					/* System.out.println("Bit " + (b + startBit) + " " + "b0 " + b0 + " " + "b1 " + b1 + " " + "add " + add); */
 					firstChannelGain += add;
 				}
 				/* System.out.println("firstChannelGain = " + firstChannelGain); */
@@ -556,31 +554,35 @@ public class CheapAAC extends CheapSoundFile {
 			in = new FileInputStream(mInputFile);
 			out = new FileOutputStream(outputFile);
 
-			setAtomData(kFTYP, new byte[] { 'M', '4', 'A', ' ', 0, 0, 0, 0, 'M', '4', 'A', ' ', 'm', 'p', '4', '2',
-					'i', 's', 'o', 'm', 0, 0, 0, 0 });
+			// @formatter:off
+			setAtomData(kFTYP, new byte[] {
+					'M', '4', 'A', ' ',
+					0, 0, 0, 0,
+					'M', '4', 'A', ' ',
+					'm', 'p', '4', '2',
+					'i', 's', 'o', 'm',
+					0, 0, 0, 0
+			});
 
-			setAtomData(kSTTS, new byte[] { 0,
-					0,
-					0,
-					0, // version / flags
-					0,
-					0,
-					0,
-					1, // entry count
+			// TODO: note that we don't currently detect or handle variable sample durations in the STTS atom, so can expect
+			//  unpredictable behaviour if editing/appending files with this format (which will be replaced with a single value)
+			setAtomData(kSTTS, new byte[] {
+					0, 0, 0, 0, // version / flags
+					0, 0, 0, 1, // entry count
 					(byte) ((numFrames >> 24) & 0xff), (byte) ((numFrames >> 16) & 0xff),
 					(byte) ((numFrames >> 8) & 0xff), (byte) (numFrames & 0xff),
 					(byte) ((mSamplesPerFrame >> 24) & 0xff), (byte) ((mSamplesPerFrame >> 16) & 0xff),
-					(byte) ((mSamplesPerFrame >> 8) & 0xff), (byte) (mSamplesPerFrame & 0xff) });
+					(byte) ((mSamplesPerFrame >> 8) & 0xff), (byte) (mSamplesPerFrame & 0xff)
+			});
 
-			setAtomData(kSTSC, new byte[] { 0, 0, 0,
-					0, // version / flags
-					0, 0, 0,
-					1, // entry count
-					0, 0, 0,
-					1, // first chunk
+			setAtomData(kSTSC, new byte[] {
+					0, 0, 0, 0, // version / flags
+					0, 0, 0, 1, // entry count
+					0, 0, 0, 1, // first chunk
 					(byte) ((numFrames >> 24) & 0xff), (byte) ((numFrames >> 16) & 0xff),
 					(byte) ((numFrames >> 8) & 0xff), (byte) (numFrames & 0xff), 0, 0, 0, 1 // Smaple desc index
-					});
+			});
+			// @formatter:on
 
 			byte[] stszData = new byte[12 + 4 * numFrames];
 			stszData[8] = (byte) ((numFrames >> 24) & 0xff);
@@ -595,21 +597,26 @@ public class CheapAAC extends CheapSoundFile {
 			}
 			setAtomData(kSTSZ, stszData);
 
-			int mdatOffset = 144 + 4 * numFrames + mAtomMap.get(kSTSD).len + mAtomMap.get(kSTSC).len
-					+ mAtomMap.get(kMVHD).len + mAtomMap.get(kTKHD).len + mAtomMap.get(kMDHD).len
-					+ mAtomMap.get(kHDLR).len + mAtomMap.get(kSMHD).len + mAtomMap.get(kDINF).len;
+			int mdatOffset = 144 + 4 * numFrames + mAtomMap.get(kSTSD).len + mAtomMap.get(kSTSC).len + mAtomMap.get(kMVHD).len +
+					mAtomMap.get(kTKHD).len + mAtomMap.get(kMDHD).len + mAtomMap.get(kHDLR).len + mAtomMap.get(kSMHD).len +
+					mAtomMap.get(kDINF).len;
 
 			/* System.out.println("Mdat offset: " + mdatOffset); */
 
-			setAtomData(kSTCO, new byte[] { 0, 0, 0,
-					0, // version / flags
-					0, 0, 0,
-					1, // entry count
-					(byte) ((mdatOffset >> 24) & 0xff), (byte) ((mdatOffset >> 16) & 0xff),
-					(byte) ((mdatOffset >> 8) & 0xff), (byte) (mdatOffset & 0xff), });
+			// @formatter:off
+			setAtomData(kSTCO, new byte[]{
+					0, 0, 0, 0, // version / flags
+					0, 0, 0, 1, // entry count
+					(byte) ((mdatOffset >> 24) & 0xff),
+					(byte) ((mdatOffset >> 16) & 0xff),
+					(byte) ((mdatOffset >> 8) & 0xff),
+					(byte) (mdatOffset & 0xff),
+			});
+			// @formatter:on
 
-			mAtomMap.get(kSTBL).len = 8 + mAtomMap.get(kSTSD).len + mAtomMap.get(kSTTS).len + mAtomMap.get(kSTSC).len
-					+ mAtomMap.get(kSTSZ).len + mAtomMap.get(kSTCO).len;
+			mAtomMap.get(kSTBL).len =
+					8 + mAtomMap.get(kSTSD).len + mAtomMap.get(kSTTS).len + mAtomMap.get(kSTSC).len + mAtomMap.get(kSTSZ).len +
+							mAtomMap.get(kSTCO).len;
 
 			mAtomMap.get(kMINF).len = 8 + mAtomMap.get(kDINF).len + mAtomMap.get(kSMHD).len + mAtomMap.get(kSTBL).len;
 
@@ -652,12 +659,13 @@ public class CheapAAC extends CheapSoundFile {
 					}
 				}
 			}
-			startAtom(out, kMDAT);
+			startAtom(out, kMDAT);  // TODO: if longer file sizes are ever supported, this will need to write the extended length
 
 			int maxFrameLen = 0;
 			for (int i = 0; i < numFrames; i++) {
-				if (mFrameLens[startFrame + i] > maxFrameLen)
+				if (mFrameLens[startFrame + i] > maxFrameLen) {
 					maxFrameLen = mFrameLens[startFrame + i];
+				}
 			}
 			byte[] buffer = new byte[maxFrameLen];
 			int pos = 0;
@@ -698,20 +706,20 @@ public class CheapAAC extends CheapSoundFile {
 		}
 	}
 
-	private long byteToUnsignedInt(byte[] data, int start) {
-		return (((0xff & data[start]) << 24) | ((0xff & data[start + 1]) << 16) | ((0xff & data[start + 2]) << 8) | (0xff & data[start + 3]));
-	}
-
 	private byte[] unsignedIntToByte(long unsignedInt) {
-		return new byte[] { (byte) ((unsignedInt >> 24) & 0xff), (byte) ((unsignedInt >> 16) & 0xff),
-				(byte) ((unsignedInt >> 8) & 0xff), (byte) (unsignedInt & 0xff) };
+		return new byte[]{
+				(byte) ((unsignedInt >> 24) & 0xff),
+				(byte) ((unsignedInt >> 16) & 0xff),
+				(byte) ((unsignedInt >> 8) & 0xff),
+				(byte) (unsignedInt & 0xff)
+		};
 	}
 
 	// this is a hack, destructively altering the original CheapSoundFile but it works for our purpose, so no real need
 	// to fix just yet
-	public long addSoundFile(CheapSoundFile newFile) {
+	public long addSoundFile(CheapSoundFile newFile) throws IOException {
 		if (!(newFile instanceof CheapAAC)) {
-			return -1L; // TODO: throw
+			throw new java.io.IOException("Incompatible file format");
 		}
 		CheapAAC newAACFile = (CheapAAC) newFile;
 
@@ -748,41 +756,52 @@ public class CheapAAC extends CheapSoundFile {
 		HashMap<Integer, Atom> newAtomMap = newAACFile.getAtomMap();
 
 		Atom mvhd = mAtomMap.get(kMVHD);
+		Atom mvhdToAdd = newAtomMap.get(kMVHD);
 		Atom tkhd = mAtomMap.get(kTKHD);
 
-		long currentDuration = byteToUnsignedInt(mvhd.data, 16);
-		long durationToAdd = byteToUnsignedInt(newAtomMap.get(kMVHD).data, 16);
+		long currentMVHDTimescale = bytesToDec(mvhd.data, 12, 4);
+		long currentMVHDDuration = bytesToDec(mvhd.data, 16, 4);
+		long timescaleToAddMVHD = bytesToDec(mvhdToAdd.data, 12, 4);
+		long durationToAddMVHD = bytesToDec(mvhdToAdd.data, 16, 4);
 
-		long newDuration = currentDuration + durationToAdd;
-		byte[] newDurationByte = unsignedIntToByte(newDuration);
+		long scaledDurationToAddMVHD = (long) ((double) durationToAddMVHD / timescaleToAddMVHD * currentMVHDTimescale);
+		long newMVHDDuration = currentMVHDDuration + scaledDurationToAddMVHD;
+		/* System.out.println("MVHD original duration: " + currentMVHDDuration + "; with timescale: " + currentMVHDTimescale); */
+		/* System.out.println("MVHD added duration: " + durationToAddMVHD + "; with timescale: " + timescaleToAddMVHD); */
+		/* System.out.println("Scaled new duration: " + scaledDurationToAddMVHD + "; new MVHD/TKHD total: " + newMVHDDuration); */
 
-		mvhd.data[16] = newDurationByte[0];
-		mvhd.data[17] = newDurationByte[1];
-		mvhd.data[18] = newDurationByte[2];
-		mvhd.data[19] = newDurationByte[3];
+		byte[] newMVHDDurationByte = unsignedIntToByte(newMVHDDuration);
 
-		tkhd.data[20] = newDurationByte[0];
-		tkhd.data[21] = newDurationByte[1];
-		tkhd.data[22] = newDurationByte[2];
-		tkhd.data[23] = newDurationByte[3];
+		// MDHD contains the length and overall timescale
+		mvhd.data[16] = newMVHDDurationByte[0];
+		mvhd.data[17] = newMVHDDurationByte[1];
+		mvhd.data[18] = newMVHDDurationByte[2];
+		mvhd.data[19] = newMVHDDurationByte[3];
 
-		// mdhd atom is scaled to account for sample rate
+		// TKHD seems to always have the same duration as MVHD (with no scaling value)
+		tkhd.data[20] = newMVHDDurationByte[0];
+		tkhd.data[21] = newMVHDDurationByte[1];
+		tkhd.data[22] = newMVHDDurationByte[2];
+		tkhd.data[23] = newMVHDDurationByte[3];
+
+		// MDHD atom is scaled with the sample rate - we assume both files have the same sample rate (verified at record time...)
 		Atom mdhd = mAtomMap.get(kMDHD);
-		long currentTimescale = byteToUnsignedInt(mdhd.data, 12);
+		long currentMDHDDuration = bytesToDec(mdhd.data, 16, 4);
+		long durationToAddMDHD = bytesToDec(newAtomMap.get(kMDHD).data, 16, 4);
 
-		long newScaledDuration = (currentTimescale * newDuration) / 1000;
-		byte[] newScaledDurationByte = unsignedIntToByte(newScaledDuration);
+		/* System.out.println("MDHD original duration: " + currentMDHDDuration + "; adding: " + durationToAddMDHD); */
+		byte[] newMDHDDurationByte = unsignedIntToByte(currentMDHDDuration + durationToAddMDHD);
 
-		mdhd.data[16] = newScaledDurationByte[0];
-		mdhd.data[17] = newScaledDurationByte[1];
-		mdhd.data[18] = newScaledDurationByte[2];
-		mdhd.data[19] = newScaledDurationByte[3];
+		mdhd.data[16] = newMDHDDurationByte[0];
+		mdhd.data[17] = newMDHDDurationByte[1];
+		mdhd.data[18] = newMDHDDurationByte[2];
+		mdhd.data[19] = newMDHDDurationByte[3];
 
-		// Log.d("atoms", " " + currentDuration + " / " + durationToAdd + " / " + currentTimescale + " / " +
-		// newScaledDuration);
 		// TODO: are there any other atoms we *must* combine...?
 
-		return newDuration;
+		long newAACDuration = (long) (newMVHDDuration / (currentMVHDTimescale / 1000f));
+		/* System.out.println("New AAC duration: " + newAACDuration); */
+		return newAACDuration;
 	}
 
 	/*

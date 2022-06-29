@@ -201,7 +201,8 @@ public class ImportingService extends Service {
 				case MediaUtilities.MSG_RECEIVED_IMPORT_FILE:
 				case MediaUtilities.MSG_RECEIVED_HTML_FILE:
 				case MediaUtilities.MSG_RECEIVED_MOV_FILE:
-				case MediaUtilities.MSG_RECEIVED_SMIL_FILE:
+				case MediaUtilities.MSG_RECEIVED_PARTIAL_SMIL_FILE:
+				case MediaUtilities.MSG_RECEIVED_COMPLETE_SMIL_FILE:
 					ImportingService service = mService.get();
 					if (service != null) {
 						service.forwardMessage(msg.what, importedFileName);

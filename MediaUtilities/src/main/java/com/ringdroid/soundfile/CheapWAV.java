@@ -34,7 +34,7 @@ public class CheapWAV extends CheapSoundFile {
 			}
 
 			public String[] getSupportedExtensions() {
-				return new String[] { "wav" };
+				return new String[]{ "wav" };
 			}
 		};
 	}
@@ -48,6 +48,7 @@ public class CheapWAV extends CheapSoundFile {
 	private int mFileSize;
 	private int mSampleRate;
 	private int mChannels;
+
 	// Member variables used during initialization
 	private int mOffset;
 
@@ -97,10 +98,10 @@ public class CheapWAV extends CheapSoundFile {
 	/**
 	 * Note: readHeaderOnly is currently ignored for WAV files
 	 */
-	// @SuppressWarnings("resource") is to suppress complaint about stream closure (handled by closeStream in finally)
-	@SuppressWarnings("resource")
 	public void readFile(File inputFile, boolean readHeaderOnly) throws java.io.FileNotFoundException, java.io.IOException {
 		super.readFile(inputFile, readHeaderOnly);
+
+		// No need to handle filesizes larger than can fit in a 32-bit int
 		mFileSize = (int) mInputFile.length();
 
 		if (mFileSize < 128) {
@@ -113,8 +114,8 @@ public class CheapWAV extends CheapSoundFile {
 			byte[] header = new byte[12];
 			stream.read(header, 0, 12);
 			mOffset += 12;
-			if (header[0] != 'R' || header[1] != 'I' || header[2] != 'F' || header[3] != 'F' || header[8] != 'W'
-					|| header[9] != 'A' || header[10] != 'V' || header[11] != 'E') {
+			if (header[0] != 'R' || header[1] != 'I' || header[2] != 'F' || header[3] != 'F' || header[8] != 'W' ||
+					header[9] != 'A' || header[10] != 'V' || header[11] != 'E') {
 				throw new java.io.IOException("Not a WAV file");
 			}
 
@@ -125,8 +126,9 @@ public class CheapWAV extends CheapSoundFile {
 				stream.read(chunkHeader, 0, 8);
 				mOffset += 8;
 
-				int chunkLen = ((0xff & chunkHeader[7]) << 24) | ((0xff & chunkHeader[6]) << 16)
-						| ((0xff & chunkHeader[5]) << 8) | ((0xff & chunkHeader[4]));
+				int chunkLen =
+						((0xff & chunkHeader[7]) << 24) | ((0xff & chunkHeader[6]) << 16) | ((0xff & chunkHeader[5]) << 8) |
+								((0xff & chunkHeader[4]));
 
 				if (chunkHeader[0] == 'f' && chunkHeader[1] == 'm' && chunkHeader[2] == 't' && chunkHeader[3] == ' ') {
 					if (chunkLen < 16 || chunkLen > 1024) {
@@ -139,15 +141,13 @@ public class CheapWAV extends CheapSoundFile {
 
 					int format = ((0xff & fmt[1]) << 8) | ((0xff & fmt[0]));
 					mChannels = ((0xff & fmt[3]) << 8) | ((0xff & fmt[2]));
-					mSampleRate = ((0xff & fmt[7]) << 24) | ((0xff & fmt[6]) << 16) | ((0xff & fmt[5]) << 8)
-							| ((0xff & fmt[4]));
+					mSampleRate = ((0xff & fmt[7]) << 24) | ((0xff & fmt[6]) << 16) | ((0xff & fmt[5]) << 8) | ((0xff & fmt[4]));
 
 					if (format != 1) {
 						throw new java.io.IOException("Unsupported WAV file encoding");
 					}
 
-				} else if (chunkHeader[0] == 'd' && chunkHeader[1] == 'a' && chunkHeader[2] == 't'
-						&& chunkHeader[3] == 'a') {
+				} else if (chunkHeader[0] == 'd' && chunkHeader[1] == 'a' && chunkHeader[2] == 't' && chunkHeader[3] == 'a') {
 					if (mChannels == 0 || mSampleRate == 0) {
 						throw new java.io.IOException("Bad WAV file: data chunk before fmt chunk");
 					}
@@ -221,7 +221,7 @@ public class CheapWAV extends CheapSoundFile {
 
 			long totalDataLen = totalAudioLen + 36;
 			long longSampleRate = mSampleRate;
-			long byteRate = mSampleRate * 2 * mChannels;
+			long byteRate = mSampleRate * 2L * mChannels;
 
 			byte[] header = new byte[44];
 			header[0] = 'R'; // RIFF/WAVE header
