@@ -2,11 +2,11 @@ apply plugin: 'com.android.library'
 
 android {
 	namespace 'ac.robinson.mediautilities'
-	compileSdkVersion 32
+	compileSdkVersion 33
 
 	defaultConfig {
 		minSdkVersion 14
-		targetSdkVersion 32
+		targetSdkVersion 33
 		versionCode 24
 		versionName '1.6.9'
 	}
