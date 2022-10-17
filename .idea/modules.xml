@@ -4,6 +4,9 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/mediautilities.iml" filepath="$PROJECT_DIR$/.idea/modules/mediautilities.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/MediaUtilities/mediautilities.MediaUtilities.iml" filepath="$PROJECT_DIR$/.idea/modules/MediaUtilities/mediautilities.MediaUtilities.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/MediaUtilities/mediautilities.MediaUtilities.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/MediaUtilities/mediautilities.MediaUtilities.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/MediaUtilities/mediautilities.MediaUtilities.main.iml" filepath="$PROJECT_DIR$/.idea/modules/MediaUtilities/mediautilities.MediaUtilities.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/MediaUtilities/mediautilities.MediaUtilities.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/MediaUtilities/mediautilities.MediaUtilities.unitTest.iml" />
     </modules>
   </component>
 </project>
