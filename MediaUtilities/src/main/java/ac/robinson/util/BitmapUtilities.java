@@ -588,6 +588,17 @@ public class BitmapUtilities {
 	}
 
 	/**
+	 * Allow usage of drawScaledText without specifying a typeface.
+	 */
+	public static int drawScaledText(@NonNull String inputText, @NonNull Canvas outputCanvas, @NonNull Paint outputPaint,
+									 int textColour, int backgroundColour, float backgroundPadding, float backgroundCornerRadius,
+									 boolean alignBottom, float textLeftMargin, boolean backgroundMatchCanvasWidth,
+									 float maxHeight, float maxFontSize) {
+		return drawScaledText(inputText, outputCanvas, outputPaint, textColour, backgroundColour, backgroundPadding,
+				backgroundCornerRadius, alignBottom, textLeftMargin, backgroundMatchCanvasWidth, maxHeight, maxFontSize, null);
+	}
+
+	/**
 	 * Draw inputText on outputCanvas using outputPaint in textColour. String.trim() will be called on inputText before drawing.
 	 * A rounded rectangle in backgroundColour is drawn behind the inputText with corners of backgroundCornerRadius pixels and
 	 * backgroundPadding pixels of padding on every side of the inputText.
@@ -604,7 +615,7 @@ public class BitmapUtilities {
 	 *                                   space characters at the beginning and end of individual lines of text is based on that
 	 *                                   of StaticLayout (i.e., they are usually, though not always, trimmed away).
 	 * @param outputCanvas               The Canvas to draw the inputText and background on
-	 * @param outputPaint                The Paint to use to draw the inputText (note: its textSize and colour will be changed)
+	 * @param outputPaint                The Paint to use to draw the inputText
 	 * @param textColour                 The colour to use to draw the inputText (via Paint.setColor())
 	 * @param backgroundColour           The colour to use to draw the background rectangle (via Paint.setColor())
 	 * @param backgroundPadding          The padding (pixels, >= 0) to apply on every side of the background rectangle
@@ -622,12 +633,13 @@ public class BitmapUtilities {
 	 * @param maxHeight                  The maximum height (pixels) of the background rectangle (and consequently the
 	 *                                   inputText it contains), or <= 0 for no limit (i.e., outputCanvas height is the limit)
 	 * @param maxFontSize                The maximum font size to use (via Paint.setTextSize()), or <= 0 for no limit
+	 * @param typeface                   A custom typeface to use, or null to use outputPaint's existing typeface
 	 * @return The height of the object that was drawn
 	 */
 	public static int drawScaledText(@NonNull String inputText, @NonNull Canvas outputCanvas, @NonNull Paint outputPaint,
 									 int textColour, int backgroundColour, float backgroundPadding, float backgroundCornerRadius,
 									 boolean alignBottom, float textLeftMargin, boolean backgroundMatchCanvasWidth,
-									 float maxHeight, float maxFontSize) {
+									 float maxHeight, float maxFontSize, Typeface typeface) {
 
 		if (TextUtils.isEmpty(inputText)) {
 			return 0;
@@ -642,6 +654,9 @@ public class BitmapUtilities {
 		}
 
 		TextPaint textPaint = new TextPaint(outputPaint);
+		if (typeface != null) {
+			textPaint.setTypeface(typeface);
+		}
 		Paint.FontMetrics fontMetrics = textPaint.getFontMetrics();
 
 		int canvasWidth = outputCanvas.getWidth();
@@ -803,12 +818,10 @@ public class BitmapUtilities {
 	}
 
 	/**
-	 * @deprecated
-	 * Use {@link #drawScaledText(String, Canvas, Paint, int, int, float, float, boolean, float, boolean, float, float) instead}
-	 *
-	 * Note: the paint's textSize and alignment will be changed...
-	 *
 	 * @return The height of the drawn text, including padding
+	 * @deprecated Use {@link #drawScaledText(String, Canvas, Paint, int, int, float, float, boolean, float, boolean, float, float, Typeface) instead}
+	 * <p>
+	 * Note: the paint's textSize and alignment will be changed...
 	 */
 	@Deprecated
 	public static int drawScaledText(String textString, Canvas textCanvas, Paint textPaint, int textColour, int backgroundColour,

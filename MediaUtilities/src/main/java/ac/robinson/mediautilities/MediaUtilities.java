@@ -82,10 +82,11 @@ public class MediaUtilities {
 	public static final int KEY_TEXT_SPACING = 8;
 	public static final int KEY_TEXT_CORNER_RADIUS = 9;
 	public static final int KEY_TEXT_BACKGROUND_SPAN_WIDTH = 10;
-	public static final int KEY_MAX_TEXT_FONT_SIZE = 11;
-	public static final int KEY_MAX_TEXT_PERCENTAGE_HEIGHT_WITH_IMAGE = 12;
-	public static final int KEY_IMAGE_QUALITY = 13;
-	public static final int KEY_AUDIO_RESOURCE_ID = 14;
-	public static final int KEY_RESAMPLE_AUDIO = 15;
-	public static final int KEY_RESIZE_VIDEO = 16;
+	public static final int KEY_TEXT_FONT_PATH = 11;
+	public static final int KEY_MAX_TEXT_FONT_SIZE = 12;
+	public static final int KEY_MAX_TEXT_PERCENTAGE_HEIGHT_WITH_IMAGE = 13;
+	public static final int KEY_IMAGE_QUALITY = 14;
+	public static final int KEY_AUDIO_RESOURCE_ID = 15;
+	public static final int KEY_RESAMPLE_AUDIO = 16;
+	public static final int KEY_RESIZE_VIDEO = 17;
 }

@@ -26,6 +26,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
 import android.text.TextUtils;
@@ -33,6 +34,7 @@ import android.text.TextUtils;
 import com.larvalabs.svgandroid.SVG;
 import com.larvalabs.svgandroid.SVGParser;
 
+import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -61,6 +63,7 @@ class MP4DrawSurface {
 	private final int mTextMaxPercentageHeightWithImage;
 	private final int mTextSpacing;
 	private final int mTextCornerRadius;
+	private final Typeface mTextTypeface;
 
 	private final int mAudioIconResourceId;
 
@@ -125,6 +128,14 @@ class MP4DrawSurface {
 		mTextMaxPercentageHeightWithImage = (Integer) settings.get(MediaUtilities.KEY_MAX_TEXT_PERCENTAGE_HEIGHT_WITH_IMAGE);
 		mTextSpacing = (Integer) settings.get(MediaUtilities.KEY_TEXT_SPACING);
 		mTextCornerRadius = (Integer) settings.get(MediaUtilities.KEY_TEXT_CORNER_RADIUS);
+
+		String typefacePath = (String) settings.get(MediaUtilities.KEY_TEXT_FONT_PATH);
+		if (!TextUtils.isEmpty(typefacePath)) {
+			File fontFile = new File(typefacePath);
+			mTextTypeface = fontFile.exists() ? Typeface.createFromFile(fontFile) : null;
+		} else {
+			mTextTypeface = null;
+		}
 
 		mAudioIconResourceId = (Integer) settings.get(MediaUtilities.KEY_AUDIO_RESOURCE_ID);
 
@@ -305,7 +316,7 @@ class MP4DrawSurface {
 						textMaxHeightWithImage <= 0 ? mCanvasHeight : (imageLoaded ? textMaxHeightWithImage : mCanvasHeight);
 				BitmapUtilities.drawScaledText(nextFrame.mTextContent, mCurrentFrameCanvas, mCurrentFramePaint, textColour,
 						(imageLoaded ? mTextBackgroundColour : 0), mTextSpacing, mTextCornerRadius, imageLoaded, 0,
-						mTextBackgroundSpanWidth, textHeight, mTextMaxFontSize);
+						mTextBackgroundSpanWidth, textHeight, mTextMaxFontSize, mTextTypeface);
 
 			} else if (!imageLoaded) {
 				// quicker to do this than load the SVG for narratives that have no audio

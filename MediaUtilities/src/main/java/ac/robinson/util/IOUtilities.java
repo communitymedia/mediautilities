@@ -33,6 +33,8 @@ import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.webkit.MimeTypeMap;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
@@ -48,6 +50,8 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 public class IOUtilities {
 	public static final int IO_BUFFER_SIZE = 4 * 1024;
@@ -80,16 +84,18 @@ public class IOUtilities {
 	}
 
 	public static void copyFile(InputStream in, OutputStream out) throws IOException {
+		BufferedInputStream inBuf = new BufferedInputStream(in, IO_BUFFER_SIZE);
+		BufferedOutputStream outBuf = new BufferedOutputStream(out);
 		byte[] buf = new byte[IO_BUFFER_SIZE];
 		int len;
 
 		// copy the bits from input stream to output stream
-		while ((len = in.read(buf)) > 0) {
-			out.write(buf, 0, len);
+		while ((len = inBuf.read(buf)) > 0) {
+			outBuf.write(buf, 0, len);
 		}
 
-		in.close(); // TODO: should we do this here?
-		out.close();
+		inBuf.close();
+		outBuf.close();
 	}
 
 	public static boolean moveFile(File sourceLocation, File targetLocation) {
@@ -417,5 +423,34 @@ public class IOUtilities {
 			}
 		}
 		return audioDuration;
+	}
+
+	public static boolean zipFiles(String[] inputFilePaths, String zipFilePath) {
+		ZipOutputStream outZip = null;
+		try {
+			outZip = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(zipFilePath)));
+			byte[] buf = new byte[IO_BUFFER_SIZE];
+
+			int i;
+			BufferedInputStream inFile = null;
+			for (String file : inputFilePaths) {
+				try {
+					inFile = new BufferedInputStream(new FileInputStream(file), IO_BUFFER_SIZE);
+					outZip.putNextEntry(new ZipEntry(file.substring(file.lastIndexOf("/") + 1)));
+					while ((i = inFile.read(buf, 0, IO_BUFFER_SIZE)) != -1) {
+						outZip.write(buf, 0, i);
+					}
+					outZip.closeEntry();
+				} finally {
+					IOUtilities.closeStream(inFile);
+				}
+			}
+
+		} catch (Exception e) {
+			return false;
+		} finally {
+			IOUtilities.closeStream(outZip);
+		}
+		return true;
 	}
 }
