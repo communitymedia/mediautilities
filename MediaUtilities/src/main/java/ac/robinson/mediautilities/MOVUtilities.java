@@ -25,6 +25,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
@@ -87,6 +88,13 @@ public class MOVUtilities {
 				MediaUtilities.KEY_MAX_TEXT_PERCENTAGE_HEIGHT_WITH_IMAGE);
 		final int textSpacing = (Integer) settings.get(MediaUtilities.KEY_TEXT_SPACING);
 		final int textCornerRadius = (Integer) settings.get(MediaUtilities.KEY_TEXT_CORNER_RADIUS);
+
+		final String typefacePath = (String) settings.get(MediaUtilities.KEY_TEXT_FONT_PATH);
+		Typeface textTypeface = null;
+		if (!TextUtils.isEmpty(typefacePath)) {
+			File fontFile = new File(typefacePath);
+			textTypeface = fontFile.exists() ? Typeface.createFromFile(fontFile) : null;
+		}
 
 		final int audioIconResourceId = (Integer) settings.get(MediaUtilities.KEY_AUDIO_RESOURCE_ID);
 		final int audioResamplingRate = (Integer) settings.get(MediaUtilities.KEY_RESAMPLE_AUDIO);
@@ -184,7 +192,7 @@ public class MOVUtilities {
 							textMaxHeightWithImage <= 0 ? outputHeight : (imageLoaded ? textMaxHeightWithImage : outputHeight);
 					BitmapUtilities.drawScaledText(frame.mTextContent, baseCanvas, basePaint, textColour,
 							(imageLoaded ? textBackgroundColour : 0), textSpacing, textCornerRadius, imageLoaded, 0,
-							textBackgroundSpanWidth, textHeight, textMaxFontSize);
+							textBackgroundSpanWidth, textHeight, textMaxFontSize, textTypeface);
 
 				} else if (!imageLoaded) {
 					// quicker to do this than load the SVG for narratives that have no audio

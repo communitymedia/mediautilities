@@ -303,6 +303,13 @@ public class SMILUtilities {
 		final int textMaxFontSize = (Integer) settings.get(MediaUtilities.KEY_MAX_TEXT_FONT_SIZE);
 		final int textMaxPercentageHeightWithImage = (Integer) settings.get(
 				MediaUtilities.KEY_MAX_TEXT_PERCENTAGE_HEIGHT_WITH_IMAGE);
+		final String typefacePath = (String) settings.get(MediaUtilities.KEY_TEXT_FONT_PATH);
+		Typeface textTypeface = null;
+		if (!TextUtils.isEmpty(typefacePath)) {
+			File fontFile = new File(typefacePath);
+			textTypeface = fontFile.exists() ? Typeface.createFromFile(fontFile) : null;
+		}
+
 		final int audioResourceId = (Integer) settings.get(MediaUtilities.KEY_AUDIO_RESOURCE_ID);
 
 		// start the XML (before adding so we know if there's a problem)
@@ -499,7 +506,7 @@ public class SMILUtilities {
 							textMaxHeightWithImage <= 0 ? outputHeight : (imageLoaded ? textMaxHeightWithImage : outputHeight);
 					int textHeight = BitmapUtilities.drawScaledText(frame.mTextContent, textBitmapCanvas, textBitmapPaint,
 							textColour, (imageLoaded ? textBackgroundColour : 0), textSpacing, textCornerRadius, imageLoaded, 0,
-							textBackgroundSpanWidth, textMaxHeight, textMaxFontSize);
+							textBackgroundSpanWidth, textMaxHeight, textMaxFontSize, textTypeface);
 
 					// crop to the actual size of the text to show as much as possible of the image
 					Bitmap textBitmapCropped;

@@ -135,6 +135,7 @@ public class ImageCacheUtilities {
 				drawable.setCallback(null);
 			}
 		}
+		sArtCache.clear();
 	}
 
 	private static Bitmap loadIcon(File cacheDirectory, String id) {
