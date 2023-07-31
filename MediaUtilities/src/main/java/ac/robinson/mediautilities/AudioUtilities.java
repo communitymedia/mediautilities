@@ -133,7 +133,7 @@ public class AudioUtilities {
 			trackCount = Math.max(trackCount, localCount);
 		}
 
-		if (trackCount <= 0) {
+		if (trackCount == 0) {
 			exportedTrack.mTemporaryFilesToDelete = filesToDelete;
 			return exportedTrack; // no audio present - nothing to do
 		}

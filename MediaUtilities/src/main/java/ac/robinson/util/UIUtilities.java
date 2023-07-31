@@ -45,9 +45,7 @@ import android.widget.Toast;
 
 import java.util.List;
 
-import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 public class UIUtilities {
 
@@ -172,15 +170,12 @@ public class UIUtilities {
 		if ((window.getAttributes().flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) !=
 				WindowManager.LayoutParams.FLAG_FULLSCREEN) {
 			Handler handler = new Handler();
-			handler.post(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						WindowManager.LayoutParams attrs = window.getAttributes();
-						attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
-						window.setAttributes(attrs);
-					} catch (Throwable ignored) {
-					}
+			handler.post(() -> {
+				try {
+					WindowManager.LayoutParams attrs = window.getAttributes();
+					attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
+					window.setAttributes(attrs);
+				} catch (Throwable ignored) {
 				}
 			});
 		}
@@ -190,15 +185,12 @@ public class UIUtilities {
 		if ((window.getAttributes().flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) ==
 				WindowManager.LayoutParams.FLAG_FULLSCREEN) {
 			Handler handler = new Handler();
-			handler.post(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						WindowManager.LayoutParams attrs = window.getAttributes();
-						attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
-						window.setAttributes(attrs);
-					} catch (Throwable ignored) {
-					}
+			handler.post(() -> {
+				try {
+					WindowManager.LayoutParams attrs = window.getAttributes();
+					attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
+					window.setAttributes(attrs);
+				} catch (Throwable ignored) {
 				}
 			});
 		}
@@ -224,12 +216,7 @@ public class UIUtilities {
 		Handler handler = new Handler();
 		final Toast toast = Toast.makeText(context, id, Toast.LENGTH_LONG);
 		toast.show();
-		handler.postDelayed(new Runnable() {
-			@Override
-			public void run() {
-				toast.cancel();
-			}
-		}, duration);
+		handler.postDelayed(toast::cancel, duration);
 	}
 
 	public static void showFormattedToast(Context context, int id, Object... args) {
@@ -320,30 +307,27 @@ public class UIUtilities {
 	// see: https://stackoverflow.com/a/50775459/1993220 and https://chris.banes.dev/2019/04/12/insets-listeners-to-layouts/
 	public static void addFullscreenMarginsCorrectorListener(final Activity activity, final int rootView,
 															 final MarginCorrectorHolder[] insetViews) {
-		ViewCompat.setOnApplyWindowInsetsListener(activity.findViewById(rootView), new OnApplyWindowInsetsListener() {
-			@Override
-			public WindowInsetsCompat onApplyWindowInsets(View v, WindowInsetsCompat insets) {
-				// perhaps related to notch handling (see themes-v28) for some reason this gets called twice, once all zero
-				int left = insets.getSystemWindowInsetLeft();
-				int top = insets.getSystemWindowInsetTop();
-				int right = insets.getSystemWindowInsetRight();
-				int bottom = insets.getSystemWindowInsetBottom();
+		ViewCompat.setOnApplyWindowInsetsListener(activity.findViewById(rootView), (v, insets) -> {
+			// perhaps related to notch handling (see themes-v28) for some reason this gets called twice, once all zero
+			int left = insets.getSystemWindowInsetLeft();
+			int top = insets.getSystemWindowInsetTop();
+			int right = insets.getSystemWindowInsetRight();
+			int bottom = insets.getSystemWindowInsetBottom();
 
-				if (left != 0 || top != 0 || right != 0 || bottom != 0) {
-					for (MarginCorrectorHolder viewContainer : insetViews) {
-						View controlsView = activity.findViewById(viewContainer.mViewId);
-						if (controlsView.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
-							ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) controlsView.getLayoutParams();
-							p.setMargins((viewContainer.mIgnoreLeft ? p.leftMargin : left + viewContainer.mAddLeft),
-									(viewContainer.mIgnoreTop ? p.topMargin : top + viewContainer.mAddTop),
-									(viewContainer.mIgnoreRight ? p.rightMargin : right + viewContainer.mAddRight),
-									(viewContainer.mIgnoreBottom ? p.bottomMargin : bottom + viewContainer.mAddBottom));
-							controlsView.requestLayout();
-						}
+			if (left != 0 || top != 0 || right != 0 || bottom != 0) {
+				for (MarginCorrectorHolder viewContainer : insetViews) {
+					View controlsView = activity.findViewById(viewContainer.mViewId);
+					if (controlsView.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+						ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) controlsView.getLayoutParams();
+						p.setMargins((viewContainer.mIgnoreLeft ? p.leftMargin : left + viewContainer.mAddLeft),
+								(viewContainer.mIgnoreTop ? p.topMargin : top + viewContainer.mAddTop),
+								(viewContainer.mIgnoreRight ? p.rightMargin : right + viewContainer.mAddRight),
+								(viewContainer.mIgnoreBottom ? p.bottomMargin : bottom + viewContainer.mAddBottom));
+						controlsView.requestLayout();
 					}
 				}
-				return insets.consumeSystemWindowInsets();
 			}
+			return insets.consumeSystemWindowInsets();
 		});
 	}
 }

@@ -28,11 +28,11 @@ import androidx.annotation.NonNull;
 
 public class AnimateDrawable extends Drawable {
 
-	private Drawable mDrawable;
+	private final Drawable mDrawable;
 	private boolean mMutated;
 
 	private Animation mAnimation;
-	private Transformation mTransformation = new Transformation();
+	private final Transformation mTransformation = new Transformation();
 
 	public AnimateDrawable(Drawable target) {
 		mDrawable = target;

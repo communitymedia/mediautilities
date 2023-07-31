@@ -57,14 +57,14 @@ public class SelectDirectoryActivity extends ListActivity {
 	public static final String START_PATH = "start_path";
 	public static final String RESULT_PATH = "result_path";
 
-	private static String[] SYSTEM_PATHS = {
+	private static final String[] SYSTEM_PATHS = {
 			"/storage/emulated/0" // TODO: are there others?
 	};
 
 	private HorizontalScrollView mPathViewHolder;
 	private TextView mPathView;
-	private ArrayList<HashMap<String, String>> mFileList = new ArrayList<>();
-	private List<String> mPaths = new ArrayList<>();
+	private final ArrayList<HashMap<String, String>> mFileList = new ArrayList<>();
+	private final List<String> mPaths = new ArrayList<>();
 
 	private File mCurrentPath = ROOT;
 
@@ -100,30 +100,22 @@ public class SelectDirectoryActivity extends ListActivity {
 			return;
 		}
 
-		Arrays.sort(files, new Comparator<File>() {
-			@Override
-			public int compare(File o1, File o2) {
-				if (o1.isDirectory()) {
-					if (o2.isDirectory()) {
-						return o1.getName().compareToIgnoreCase(o2.getName());
-					} else {
-						return -1;
-					}
-				} else if (o2.isDirectory()) {
-					return 1;
-				} else {
+		Arrays.sort(files, (o1, o2) -> {
+			if (o1.isDirectory()) {
+				if (o2.isDirectory()) {
 					return o1.getName().compareToIgnoreCase(o2.getName());
+				} else {
+					return -1;
 				}
+			} else if (o2.isDirectory()) {
+				return 1;
+			} else {
+				return o1.getName().compareToIgnoreCase(o2.getName());
 			}
 		});
 
 		mPathView.setText(getString(R.string.current_location, stripSystemPath(mCurrentPath)));
-		mPathViewHolder.post(new Runnable() {
-			@Override
-			public void run() {
-				mPathViewHolder.fullScroll(View.FOCUS_RIGHT);
-			}
-		});
+		mPathViewHolder.post(() -> mPathViewHolder.fullScroll(View.FOCUS_RIGHT));
 
 		if (!mCurrentPath.equals(ROOT)) {
 			addItem("/bi/" + getString(R.string.parent_directory));

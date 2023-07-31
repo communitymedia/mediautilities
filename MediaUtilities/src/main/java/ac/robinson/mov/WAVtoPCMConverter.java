@@ -48,8 +48,6 @@ public final class WAVtoPCMConverter {
 	 * @param input  the input file to convert
 	 * @param output the output stream to write to
 	 */
-	// @SuppressWarnings("resource") is to suppress complaint about stream closure (handled by closeStream in finally)
-	@SuppressWarnings("resource")
 	public static void convertFile(File input, OutputStream output, WAVConfiguration config) throws IOException {
 		int fileSize = (int) input.length();
 		if (fileSize < 128) {

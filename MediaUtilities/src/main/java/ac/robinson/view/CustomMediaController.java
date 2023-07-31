@@ -65,7 +65,7 @@ public class CustomMediaController extends FrameLayout {
 	public static final int DEFAULT_VISIBILITY_TIMEOUT = 3000;
 
 	private MediaPlayerControl mPlayer;
-	private Context mContext;
+	private final Context mContext;
 	private View mAnchor;
 	private View mRoot;
 	private SeekBar mProgress;
@@ -75,7 +75,7 @@ public class CustomMediaController extends FrameLayout {
 	private int mDefaultTimeout = DEFAULT_VISIBILITY_TIMEOUT;
 	private static final int FADE_OUT = 1;
 	private static final int SHOW_PROGRESS = 2;
-	private boolean mUseFastForward;
+	private final boolean mUseFastForward;
 	private boolean mFromXml;
 	private boolean mListenersSet;
 	private View.OnClickListener mNextListener, mPrevListener;
@@ -329,7 +329,7 @@ public class CustomMediaController extends FrameLayout {
 	}
 
 	@SuppressLint("HandlerLeak") // it *is* static...
-	private static Handler mHandler = new Handler() {
+	private static final Handler mHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
@@ -426,11 +426,9 @@ public class CustomMediaController extends FrameLayout {
 		return super.dispatchKeyEvent(event);
 	}
 
-	private View.OnClickListener mPauseListener = new View.OnClickListener() {
-		public void onClick(View v) {
-			show();
-			doPauseResume();
-		}
+	private final View.OnClickListener mPauseListener = v -> {
+		show();
+		doPauseResume();
 	};
 
 	private void updatePausePlay() {
@@ -463,7 +461,7 @@ public class CustomMediaController extends FrameLayout {
 	// we use mDragging for the duration of the dragging session to avoid jumps in position in case of ongoing playback
 	// - the second scenario is the user operating the scroll ball; in this case there *won't* be onStartTrackingTouch
 	// or onStopTrackingTouch notifications, we'll simply apply the updated position without suspending regular updates
-	private OnSeekBarChangeListener mSeekListener = new OnSeekBarChangeListener() {
+	private final OnSeekBarChangeListener mSeekListener = new OnSeekBarChangeListener() {
 		public void onStartTrackingTouch(SeekBar bar) {
 			mDragging = true;
 
@@ -527,7 +525,7 @@ public class CustomMediaController extends FrameLayout {
 		super.setEnabled(enabled);
 	}
 
-	private View.OnClickListener mRewListener = new View.OnClickListener() {
+	private final View.OnClickListener mRewListener = new View.OnClickListener() {
 		public void onClick(View v) {
 			if (mPlayer == null) {
 				return;
@@ -541,7 +539,7 @@ public class CustomMediaController extends FrameLayout {
 		}
 	};
 
-	private View.OnClickListener mFfwdListener = new View.OnClickListener() {
+	private final View.OnClickListener mFfwdListener = new View.OnClickListener() {
 		public void onClick(View v) {
 			if (mPlayer == null) {
 				return;

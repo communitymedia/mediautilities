@@ -42,7 +42,7 @@ public class CenteredImageTextButton extends Button {
 	private boolean mLayoutChanged;
 	private DrawablePosition mDrawablePosition;
 
-	private Rect mTextBounds = new Rect();
+	private final Rect mTextBounds = new Rect();
 
 	// extra (optional) padding between the icon and the text
 	private int mIconPadding;

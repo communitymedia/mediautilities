@@ -61,11 +61,7 @@ public class CrossFadeDrawable extends Drawable {
 		mStart = start;
 		mEnd = end;
 		mHandler = new Handler();
-		mInvalidater = new Runnable() {
-			public void run() {
-				invalidateSelf();
-			}
-		};
+		mInvalidater = this::invalidateSelf;
 	}
 
 	/**

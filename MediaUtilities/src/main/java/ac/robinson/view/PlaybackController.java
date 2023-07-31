@@ -267,11 +267,9 @@ public class PlaybackController extends FrameLayout {
 		return super.dispatchKeyEvent(event);
 	}
 
-	private View.OnClickListener mPauseListener = new View.OnClickListener() {
-		public void onClick(View v) {
-			doPauseResume();
-			refreshController();
-		}
+	private final View.OnClickListener mPauseListener = v -> {
+		doPauseResume();
+		refreshController();
 	};
 
 	public void setRecordingMode(boolean recording) {
@@ -328,7 +326,7 @@ public class PlaybackController extends FrameLayout {
 	// we use mDragging for the duration of the dragging session to avoid jumps in position in case of ongoing playback
 	// - the second scenario is the user operating the scroll ball; in this case there *won't* be onStartTrackingTouch
 	// or onStopTrackingTouch notifications, we'll simply apply the updated position without suspending regular updates
-	private OnSeekBarChangeListener mSeekListener = new OnSeekBarChangeListener() {
+	private final OnSeekBarChangeListener mSeekListener = new OnSeekBarChangeListener() {
 		public void onStartTrackingTouch(SeekBar bar) {
 			mDragging = true;
 
@@ -364,7 +362,7 @@ public class PlaybackController extends FrameLayout {
 		}
 	};
 
-	private View.OnClickListener mRewListener = new View.OnClickListener() {
+	private final View.OnClickListener mRewListener = new View.OnClickListener() {
 		public void onClick(View v) {
 			if (mPlayerControl == null) {
 				return;
@@ -385,7 +383,7 @@ public class PlaybackController extends FrameLayout {
 		}
 	};
 
-	private View.OnClickListener mFfwdListener = new View.OnClickListener() {
+	private final View.OnClickListener mFfwdListener = new View.OnClickListener() {
 		public void onClick(View v) {
 			if (mPlayerControl == null) {
 				return;

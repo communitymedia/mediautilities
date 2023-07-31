@@ -88,7 +88,7 @@ public class DebugUtilities {
 		}
 		return Build.MODEL + ", " + getDeviceBrandProduct() + ", v" + Build.VERSION.SDK_INT + " (" + Build.VERSION.RELEASE +
 				"), " + Build.CPU_ABI + ", " + (screenSize != null ? (screenSize.x + "x" + screenSize.y + "-") : "") +
-				getScreenDensityString(resources).replace("dpi", "") + "-" + getScreenSizeString(resources).substring(0, 1);
+				getScreenDensityString(resources).replace("dpi", "") + "-" + getScreenSizeString(resources).charAt(0);
 	}
 
 	public static String getDeviceBrandProduct() {
@@ -103,7 +103,7 @@ public class DebugUtilities {
 			throwable.printStackTrace(printWriter);
 		}
 
-		body += "\n\n" + stringWriter.toString() + "\n\n" + getDeviceDebugSummary(null, context.getResources());
+		body += "\n\n" + stringWriter + "\n\n" + getDeviceDebugSummary(null, context.getResources());
 		String mailTo = "mailto:" + to + "?subject=" + Uri.encode(subject) + "&body=" + Uri.encode(body);
 		Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
 		emailIntent.setData(Uri.parse(mailTo));

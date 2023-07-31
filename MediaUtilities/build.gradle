@@ -2,17 +2,16 @@ apply plugin: 'com.android.library'
 
 android {
 	namespace 'ac.robinson.mediautilities'
-	compileSdkVersion 33
+	compileSdk 33
 
 	defaultConfig {
 		minSdkVersion 14
 		targetSdkVersion 33
-		versionCode 27
-		versionName '1.7.2'
+		versionCode 28
+		versionName '1.7.3'
 	}
 
 	buildTypes {
-		all {}
 		release {
 			minifyEnabled false
 			consumerProguardFiles 'proguard-mediautilities.txt'

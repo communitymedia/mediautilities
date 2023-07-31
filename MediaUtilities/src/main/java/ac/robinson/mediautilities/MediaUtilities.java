@@ -23,7 +23,6 @@ package ac.robinson.mediautilities;
 public class MediaUtilities {
 
 	public static final String APPLICATION_NAME = "mediautilities";
-	public static final String LOG_TAG = APPLICATION_NAME;
 
 	// class options
 	public static final boolean MOV_USE_SEGMENTED_AUDIO = true;
