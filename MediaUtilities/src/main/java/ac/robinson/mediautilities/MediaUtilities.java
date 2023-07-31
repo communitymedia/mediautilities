@@ -32,6 +32,7 @@ public class MediaUtilities {
 	public static final String SMIL_FILE_EXTENSION = ".smil";
 	public static final String SYNC_FILE_EXTENSION = ".sync.jpg";
 	public static final String HTML_FILE_EXTENSION = ".html";
+	public static final String ZIP_FILE_EXTENSION = ".zip";
 	public static final String MP4_FILE_EXTENSION = ".mp4";
 	public static final String MOV_FILE_EXTENSION = ".mov";
 	public static final String SUBTITLE_FILE_EXTENSION = ".srt";

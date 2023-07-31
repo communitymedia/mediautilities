@@ -51,6 +51,7 @@ import java.util.Locale;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 public class IOUtilities {
@@ -425,10 +426,10 @@ public class IOUtilities {
 		return audioDuration;
 	}
 
-	public static boolean zipFiles(String[] inputFilePaths, String zipFilePath) {
+	public static boolean zipFiles(String[] inputFilePaths, File zipFile) {
 		ZipOutputStream outZip = null;
 		try {
-			outZip = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(zipFilePath)));
+			outZip = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(zipFile)));
 			byte[] buf = new byte[IO_BUFFER_SIZE];
 
 			int i;
@@ -450,6 +451,37 @@ public class IOUtilities {
 			return false;
 		} finally {
 			IOUtilities.closeStream(outZip);
+		}
+		return true;
+	}
+
+	public static boolean unzipFiles(InputStream inputStream, File outputFolder) {
+		ZipInputStream inZip = null;
+		try {
+			inZip = new ZipInputStream(new BufferedInputStream(inputStream));
+			byte[] buf = new byte[IO_BUFFER_SIZE];
+
+			ZipEntry currentEntry;
+			while ((currentEntry = inZip.getNextEntry()) != null) {
+				if (!currentEntry.isDirectory()) {
+					BufferedOutputStream outFile = null;
+					try {
+						int i;
+						outFile = new BufferedOutputStream(new FileOutputStream(new File(outputFolder, currentEntry.getName())));
+						while ((i = inZip.read(buf)) != -1) {
+							outFile.write(buf, 0, i);
+						}
+					} finally {
+						IOUtilities.closeStream(outFile);
+					}
+				}
+				inZip.closeEntry();
+			}
+
+		} catch (Exception e) {
+			return false;
+		} finally {
+			IOUtilities.closeStream(inZip);
 		}
 		return true;
 	}
