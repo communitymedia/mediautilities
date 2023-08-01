@@ -90,8 +90,8 @@ public class SVGView extends View {
 			mBitmapChanged = false;
 			try {
 				SVG svg = SVGParser.getSVGFromResource(getResources(), mResourceId);
-				mBackgroundBitmap = svg.getBitmap(
-						r - l - getPaddingLeft() - getPaddingRight(), b - t - getPaddingBottom() - getPaddingTop());
+				mBackgroundBitmap = svg.getBitmap(r - l - getPaddingLeft() - getPaddingRight(),
+						b - t - getPaddingBottom() - getPaddingTop());
 			} catch (Throwable th) {
 				mBackgroundBitmap = null; // out of memory...
 			}

@@ -284,7 +284,7 @@ public class SMILUtilities {
 													   Map<Integer, Object> settings) {
 
 		ArrayList<Uri> filesToSend = new ArrayList<>();
-		if (framesToSend == null || framesToSend.size() <= 0) {
+		if (framesToSend == null || framesToSend.size() == 0) {
 			return filesToSend;
 		}
 		boolean fileError = false;
@@ -439,8 +439,7 @@ public class SMILUtilities {
 				if (frame.mImagePath != null && new File(frame.mImagePath).exists()) {
 					// output files must be in a public directory for sending (/data/ directory will *not* work)
 					if (IOUtilities.isInternalPath(frame.mImagePath)) { // so we can send private files
-						savedFile = copySmilFileToOutput(frame.mImagePath, outputDirectory, narrativeName,
-								frame.mFrameSequenceId,
+						savedFile = copySmilFileToOutput(frame.mImagePath, outputDirectory, narrativeName, frame.mFrameSequenceId,
 								0, IOUtilities.getFileExtension(frame.mImagePath));
 					} else {
 						savedFile = new File(frame.mImagePath);
@@ -479,8 +478,7 @@ public class SMILUtilities {
 										frame.mSpanningAudioRoot ? SpanType.SPAN_ROOT : SpanType.SPAN_EXTENSION,
 										frame.mEndsPreviousSpanningAudio);
 							} else {
-								addSmilTag(smilSerializer, tagNamespace, "audio", savedFile.getName(), 0,
-										frame.mFrameMaxDuration,
+								addSmilTag(smilSerializer, tagNamespace, "audio", savedFile.getName(), 0, frame.mFrameMaxDuration,
 										null, true, SpanType.SPAN_NONE, frame.mEndsPreviousSpanningAudio);
 							}
 							audioIndex += 1;
@@ -572,7 +570,8 @@ public class SMILUtilities {
 			addSmilTag(smilSerializer, tagNamespace, "meta-data", storyPlayerFile.getName(), 0, 2, "fill-area", false,
 					SpanType.SPAN_NONE, false);
 			addSmilTag(smilSerializer, tagNamespace, "meta-data", syncFile.getName(), 0, 2, "fill-area", false,
-					SpanType.SPAN_NONE, false);
+					SpanType.SPAN_NONE,
+					false);
 			addSmilTag(smilSerializer, tagNamespace, "img", tempBackgroundFile.getName(), 0, 2, "fill-area", false,
 					SpanType.SPAN_NONE, false);
 			smilSerializer.endTag(tagNamespace, "par");
@@ -661,8 +660,7 @@ public class SMILUtilities {
 	}
 
 	private static void addRegion(XmlSerializer smilSerializer, String tagNamespace, String regionId, String regionLeft,
-								  String regionTop, String regionWidth, String regionHeight,
-								  String regionFit) throws IOException {
+								  String regionTop, String regionWidth, String regionHeight, String regionFit) throws IOException {
 		smilSerializer.startTag(tagNamespace, "region");
 		smilSerializer.attribute(tagNamespace, "id", regionId);
 		smilSerializer.attribute(tagNamespace, "top", regionTop);
@@ -696,8 +694,7 @@ public class SMILUtilities {
 			// begin values, as detailed at https://www.w3.org/TR/SMIL2/smil-timing.html#Timing-DurValueSemantics, but neither
 			// player seems to be able to handle these
 			smilSerializer.attribute(tagNamespace, "clip-begin", SMIL_NORMAL_PLAY_TIME_STRING + begin + SMIL_MILLISECOND_STRING);
-			smilSerializer.attribute(tagNamespace, "clip-end",
-					SMIL_NORMAL_PLAY_TIME_STRING + duration + SMIL_MILLISECOND_STRING);
+			smilSerializer.attribute(tagNamespace, "clip-end", SMIL_NORMAL_PLAY_TIME_STRING + duration + SMIL_MILLISECOND_STRING);
 		} else {
 			smilSerializer.attribute(tagNamespace, "dur", duration + SMIL_MILLISECOND_STRING);
 		}

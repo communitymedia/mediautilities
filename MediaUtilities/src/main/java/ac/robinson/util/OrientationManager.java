@@ -76,7 +76,7 @@ public class OrientationManager {
 	}
 
 	// see: http://blog.androgames.net/135/android-orientation-tutorial/
-	private static SensorEventListener mSensorEventListener = new SensorEventListener() {
+	private static final SensorEventListener mSensorEventListener = new SensorEventListener() {
 
 		/** The side that is currently up */
 		private Side currentSide = null;

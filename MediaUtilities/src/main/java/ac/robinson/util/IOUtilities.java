@@ -127,8 +127,7 @@ public class IOUtilities {
 	}
 
 	public static byte[] readFileToByteArray(File file) throws IOException {
-		RandomAccessFile f = new RandomAccessFile(file, "r");
-		try {
+		try (RandomAccessFile f = new RandomAccessFile(file, "r")) {
 			// get and check length
 			long longlength = f.length();
 			int length = (int) longlength;
@@ -140,8 +139,6 @@ public class IOUtilities {
 			byte[] data = new byte[length];
 			f.readFully(data);
 			return data;
-		} finally {
-			f.close();
 		}
 	}
 

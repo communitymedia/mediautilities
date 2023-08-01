@@ -144,7 +144,9 @@ public class HTMLUtilities {
 						for (String audioPath : frame.mAudioPaths) {
 							if (!audioLoaded && !imageLoaded && !textLoaded) {
 								// must be before audio TODO: does this affect text?
-								playerOutputFileWriter.write("<img class=\"audio-icon\" src=\"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'/>\">\n");
+								playerOutputFileWriter.write(
+										"<img class=\"audio-icon\" src=\"data:image/svg+xml,<svg xmlns='http://www.w3" +
+												".org/2000/svg'/>\">\n");
 							}
 
 							String fileExtension = IOUtilities.getFileExtension(audioPath);
@@ -190,6 +192,8 @@ public class HTMLUtilities {
 			filesToSend.add(Uri.fromFile(outputFile));
 			return filesToSend;
 		}
+
+		//noinspection RedundantOperationOnEmptyContainer
 		filesToSend.clear();
 		return filesToSend;
 	}

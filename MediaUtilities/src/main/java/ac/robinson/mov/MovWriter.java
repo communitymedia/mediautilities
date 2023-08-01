@@ -375,11 +375,11 @@ public abstract class MovWriter {
 				float previousOffset = 0;
 				for (int i = 0, n = audioOffsets.length; i < n; i++) {
 					if (audioOffsets[i] > previousOffset) {
-						editListAtom.addEditListTableEntry((int) ((audioOffsets[i] - previousOffset) *
-								DEFAULT_TIME_SCALE), -1, 1f);
+						editListAtom.addEditListTableEntry((int) ((audioOffsets[i] - previousOffset) * DEFAULT_TIME_SCALE), -1,
+								1f);
 					}
-					editListAtom.addEditListTableEntry((int) (audioLengths[i] * DEFAULT_TIME_SCALE), (int) (audioStarts[i] *
-							myTimeScale), 1f);
+					editListAtom.addEditListTableEntry((int) (audioLengths[i] * DEFAULT_TIME_SCALE),
+							(int) (audioStarts[i] * myTimeScale), 1f);
 					previousOffset = audioOffsets[i] + audioLengths[i];
 				}
 				editAtom.add(editListAtom);
@@ -473,7 +473,7 @@ public abstract class MovWriter {
 	/**
 	 * The output stream we write the movie data to.
 	 */
-	private MeasuredOutputStream out;
+	private final MeasuredOutputStream out;
 
 	/**
 	 * The file we're writing to.
@@ -838,7 +838,8 @@ public abstract class MovWriter {
 	 * @param reverseBytePairs whether every two bytes should be switched (to convert from one endian to another)
 	 * @return the number of bytes written.
 	 */
-	protected static synchronized long write(OutputStream out, InputStream in, long maxBytes, boolean reverseBytePairs) throws IOException {
+	protected static synchronized long write(OutputStream out, InputStream in, long maxBytes, boolean reverseBytePairs)
+			throws IOException {
 		byte[] block = new byte[4096];
 
 		long written = 0;

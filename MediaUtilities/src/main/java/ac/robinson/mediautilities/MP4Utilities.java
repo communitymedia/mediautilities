@@ -37,8 +37,7 @@ public class MP4Utilities {
 
 	private static final String LOG_TAG = "MP4Utilities";
 
-	public static ArrayList<Uri> generateNarrativeMP4(Resources res, File outputFile,
-													  ArrayList<FrameMediaContainer> framesToSend,
+	public static ArrayList<Uri> generateNarrativeMP4(Resources res, File outputFile, ArrayList<FrameMediaContainer> framesToSend,
 													  Map<Integer, Object> settings) {
 
 		ArrayList<Uri> filesToSend = new ArrayList<>();
@@ -53,9 +52,8 @@ public class MP4Utilities {
 		ArrayList<File> filesToDelete = new ArrayList<>();
 
 		try {
-			AudioUtilities.CombinedAudioTrack resampledAudioTrack =
-					AudioUtilities.createCombinedNarrativeAudioTrack(framesToSend, audioResamplingRate, outputFile
-					.getParentFile());
+			AudioUtilities.CombinedAudioTrack resampledAudioTrack = AudioUtilities.createCombinedNarrativeAudioTrack(framesToSend,
+					audioResamplingRate, outputFile.getParentFile());
 
 			MP4Encoder mp4Encoder = new MP4Encoder();
 			fileError = !mp4Encoder.createMP4(res, outputFile, framesToSend, resampledAudioTrack, settings);
@@ -79,6 +77,8 @@ public class MP4Utilities {
 			filesToSend.add(Uri.fromFile(outputFile));
 			return filesToSend;
 		}
+
+		//noinspection RedundantOperationOnEmptyContainer
 		filesToSend.clear();
 		return filesToSend;
 	}

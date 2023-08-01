@@ -62,8 +62,7 @@ public class MOVUtilities {
 
 	private static final String LOG_TAG = "MOVUtilities";
 
-	public static ArrayList<Uri> generateNarrativeMOV(Resources res, File outputFile,
-													  ArrayList<FrameMediaContainer> framesToSend,
+	public static ArrayList<Uri> generateNarrativeMOV(Resources res, File outputFile, ArrayList<FrameMediaContainer> framesToSend,
 													  Map<Integer, Object> settings) {
 
 		ArrayList<Uri> filesToSend = new ArrayList<>();
@@ -152,7 +151,8 @@ public class MOVUtilities {
 					filesToDelete.addAll(segmentFiles);
 				} else {
 					ArrayList<File> individualFiles = addNarrativeAudioAsIndividualTracks(framesToSend,
-							outputFile.getParentFile(), outputFileWriter);
+							outputFile.getParentFile(),
+							outputFileWriter);
 					filesToDelete.addAll(individualFiles);
 				}
 			}
@@ -236,6 +236,8 @@ public class MOVUtilities {
 			filesToSend.add(Uri.fromFile(outputFile));
 			return filesToSend;
 		}
+
+		//noinspection RedundantOperationOnEmptyContainer
 		filesToSend.clear();
 		return filesToSend;
 	}
@@ -304,8 +306,7 @@ public class MOVUtilities {
 
 						} catch (IOException e) {
 							decodingError = true;
-							Log.d(LOG_TAG,
-									"Error creating individual M4A audio track - IOException: " + e.getLocalizedMessage());
+							Log.d(LOG_TAG, "Error creating individual M4A audio track - IOException: " + e.getLocalizedMessage());
 						} catch (Exception e) {
 							decodingError = true;
 							Log.d(LOG_TAG, "Error creating individual M4A audio track - general " + "Exception");
@@ -328,8 +329,7 @@ public class MOVUtilities {
 
 						} catch (IOException e) {
 							decodingError = true;
-							Log.d(LOG_TAG,
-									"Error creating individual MP3 audio track - IOException: " + e.getLocalizedMessage());
+							Log.d(LOG_TAG, "Error creating individual MP3 audio track - IOException: " + e.getLocalizedMessage());
 						} catch (Exception e) {
 							decodingError = true;
 							Log.d(LOG_TAG, "Error creating individual MP3 audio track - general " + "Exception");
@@ -350,8 +350,7 @@ public class MOVUtilities {
 
 						} catch (IOException e) {
 							decodingError = true;
-							Log.d(LOG_TAG,
-									"Error creating individual WAV audio track - IOException: " + e.getLocalizedMessage());
+							Log.d(LOG_TAG, "Error creating individual WAV audio track - IOException: " + e.getLocalizedMessage());
 						} catch (Exception e) {
 							decodingError = true;
 							Log.d(LOG_TAG, "Error creating individual WAV audio track - general Exception");
@@ -513,8 +512,7 @@ public class MOVUtilities {
 								outputPCMFile.delete();
 							}
 							outputPCMFile = null;
-							Log.d(LOG_TAG,
-									"Error creating segmented MOV audio track - couldn't create base " + currentTrackType +
+							Log.d(LOG_TAG, "Error creating segmented MOV audio track - couldn't create base " + currentTrackType +
 									" file");
 							continue;
 						}
@@ -552,8 +550,8 @@ public class MOVUtilities {
 							// get the format - output from PCM converter is mono signed little-endian integers
 							if (audioFormat == null) { // TODO: we assume all MP4 components are the same
 								// format
-								audioFormat = new AudioFormat(pcmConverter.getSampleRate(), pcmConverter.getSampleSize(), 1,
-										true, false);
+								audioFormat = new AudioFormat(pcmConverter.getSampleRate(), pcmConverter.getSampleSize(), 1, true,
+										false);
 								Log.d(LOG_TAG,
 										"Outputting M4A: " + pcmConverter.getSampleRate() + ", " + pcmConverter.getSampleSize() +
 												", 1, signed, little endian");

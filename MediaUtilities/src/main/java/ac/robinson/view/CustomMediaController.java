@@ -194,10 +194,7 @@ public class CustomMediaController extends FrameLayout {
 
 		mProgress = v.findViewById(R.id.mediacontroller_progress);
 		if (mProgress != null) {
-			if (mProgress instanceof SeekBar) {
-				SeekBar seeker = mProgress;
-				seeker.setOnSeekBarChangeListener(mSeekListener);
-			}
+			mProgress.setOnSeekBarChangeListener(mSeekListener);
 			mProgress.setMax(1000);
 		}
 

@@ -114,7 +114,7 @@ public class MP4Encoder {
 	public boolean createMP4(Resources resources, File outputFile, ArrayList<FrameMediaContainer> videoFrames,
 							 AudioUtilities.CombinedAudioTrack combinedAudioTrack, Map<Integer, Object> settings) {
 
-		if (videoFrames == null || videoFrames.size() <= 0) {
+		if (videoFrames == null || videoFrames.size() == 0) {
 			return false;
 		}
 
@@ -690,7 +690,7 @@ public class MP4Encoder {
 						encodedData.limit(bufferInfo.offset + bufferInfo.size);
 						if (encoder == mAudioEncoder) {
 							if (bufferInfo.presentationTimeUs < mLastEncodedAudioTimeStamp) {
-								bufferInfo.presentationTimeUs = mLastEncodedAudioTimeStamp += 23219; // magical AAC encoded frame
+								bufferInfo.presentationTimeUs = mLastEncodedAudioTimeStamp + 23219; // magical AAC encoded frame
 							}
 							mLastEncodedAudioTimeStamp = bufferInfo.presentationTimeUs;
 						}

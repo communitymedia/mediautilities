@@ -91,6 +91,7 @@ public class CameraUtilities {
 						}
 						cameraConfiguration.numberOfCameras = cameraCount;
 						// Integer so that we can compare to null when checking orientation
+						//noinspection UnnecessaryBoxing
 						cameraConfiguration.cameraOrientationDegrees = Integer.valueOf(cameraInfo.orientation);
 					} catch (RuntimeException e) {
 						Log.e(LOG_TAG, "Camera failed to open: " + e.getLocalizedMessage());

@@ -302,10 +302,8 @@ public class BitmapUtilities {
 			unscaledBitmap = Bitmap.createBitmap(unscaledBitmap, 0, 0, unscaledBitmap.getWidth(), unscaledBitmap.getHeight(),
 					imageMatrix, true);
 		}
-		Rect srcRect = calculateSrcRect(unscaledBitmap.getWidth(), unscaledBitmap.getHeight(), dstWidth, dstHeight,
-				scalingLogic);
-		Rect dstRect = calculateDstRect(unscaledBitmap.getWidth(), unscaledBitmap.getHeight(), dstWidth, dstHeight,
-				scalingLogic);
+		Rect srcRect = calculateSrcRect(unscaledBitmap.getWidth(), unscaledBitmap.getHeight(), dstWidth, dstHeight, scalingLogic);
+		Rect dstRect = calculateDstRect(unscaledBitmap.getWidth(), unscaledBitmap.getHeight(), dstWidth, dstHeight, scalingLogic);
 		Bitmap scaledBitmap = Bitmap.createBitmap(dstRect.width(), dstRect.height(),
 				ImageCacheUtilities.mBitmapFactoryOptions.inPreferredConfig);
 		Canvas canvas = new Canvas(scaledBitmap);
@@ -666,8 +664,7 @@ public class BitmapUtilities {
 		float clippedBackgroundPadding = Math.max(backgroundPadding, 0);
 		float clippedBackgroundCornerRadius = Math.max(backgroundCornerRadius, 0);
 		float maxTextWidth = (float) Math.floor(canvasWidth - Math.abs(textLeftMargin) - (2 * clippedBackgroundPadding));
-		float maxTextHeight =
-				(maxHeight > 0 ? Math.min(maxHeight, canvasHeight) : canvasHeight) - (2 * clippedBackgroundPadding);
+		float maxTextHeight = (maxHeight > 0 ? Math.min(maxHeight, canvasHeight) : canvasHeight) - (2 * clippedBackgroundPadding);
 		if (maxTextWidth <= 0 || maxTextHeight <= 0) {
 			return 0; // we can't draw if there's no space available
 		}

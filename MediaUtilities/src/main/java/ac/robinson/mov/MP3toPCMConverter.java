@@ -77,7 +77,8 @@ public class MP3toPCMConverter {
 	 * @param startMs time to start reading the MP3 from, 0 for the start
 	 * @param endMs   time to stop reading the MP3 from, or -1 for the end
 	 */
-	public static void convertFile(File input, OutputStream output, MP3Configuration config, int startMs, int endMs) throws IOException {
+	public static void convertFile(File input, OutputStream output, MP3Configuration config, int startMs, int endMs)
+			throws IOException {
 		float totalMs = 0;
 		boolean seeking = true;
 

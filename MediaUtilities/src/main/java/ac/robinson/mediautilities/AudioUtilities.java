@@ -37,7 +37,6 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 
 import ac.robinson.mov.MP3toPCMConverter;
 import ac.robinson.mov.MP4toPCMConverter;
@@ -144,10 +143,8 @@ public class AudioUtilities {
 			for (int i = 0, n = fileSampleRates.size(); i < n; i++) {
 				sortedSampleRates.add(fileSampleRates.keyAt(i));
 			}
-			Collections.sort(sortedSampleRates, new Comparator<Integer>() {
-				public int compare(Integer i1, Integer i2) {
-					return fileSampleRates.get(i1) > fileSampleRates.get(i2) ? -1 : 1; // if equal, just pick any
-				}
+			Collections.sort(sortedSampleRates, (i1, i2) -> {
+				return fileSampleRates.get(i1) > fileSampleRates.get(i2) ? -1 : 1; // if equal, just pick any
 			});
 
 			sampleRate = sortedSampleRates.get(0);
@@ -201,7 +198,7 @@ public class AudioUtilities {
 
 				boolean audioFound = false;
 				boolean decodingError = false;
-				AudioType currentAudioType;
+				AudioUtilities.AudioType currentAudioType = AudioUtilities.AudioType.NONE;
 
 				int audioId = -1;
 				for (String audioPath : frame.mAudioPaths) {
@@ -273,11 +270,10 @@ public class AudioUtilities {
 
 									// use SSRC to resample PCM audio - note that two passes are required for accuracy
 									new SSRC(tempDirectory, temporaryPCMInputStream, temporaryPCMOutputStream,
-											ByteOrder.LITTLE_ENDIAN, pcmConverter
-											.getSampleRate(), (int) globalAudioFormat.getSampleRate(),
-											pcmConverter.getSampleSize(), globalAudioFormat
-											.getSampleSizeInBits(), 1, currentPCMFile.length(), 0, 0, 0, true, false, false,
-											true);
+											ByteOrder.LITTLE_ENDIAN, pcmConverter.getSampleRate(),
+											(int) globalAudioFormat.getSampleRate(), pcmConverter.getSampleSize(),
+											globalAudioFormat.getSampleSizeInBits(), 1, currentPCMFile.length(), 0, 0, 0, true,
+											false, false, true);
 
 									// this is now the PCM file to use
 									if (currentPCMFile != null) {
@@ -297,7 +293,8 @@ public class AudioUtilities {
 
 							Log.d(LOG_TAG, "Outputting M4A: " + globalAudioFormat.getSampleRate() + ", " +
 									globalAudioFormat.getSampleSizeInBits() + " from " + pcmConverter.getSampleRate() + "," +
-									" " + pcmConverter.getSampleSize());
+									" " +
+									pcmConverter.getSampleSize());
 						} catch (Exception e) {
 							decodingError = true;
 							Log.d(LOG_TAG, "Error creating combined M4A audio track: " + e.getLocalizedMessage());
@@ -324,10 +321,10 @@ public class AudioUtilities {
 
 									// use SSRC to resample PCM audio - note that two passes are required for accuracy
 									new SSRC(tempDirectory, temporaryPCMInputStream, temporaryPCMOutputStream,
-											ByteOrder.LITTLE_ENDIAN, mp3Config.sampleFrequency, (int) globalAudioFormat
-											.getSampleRate(), mp3Config.sampleSize, globalAudioFormat.getSampleSizeInBits(), 1,
-											currentPCMFile
-											.length(), 0, 0, 0, true, false, false, true);
+											ByteOrder.LITTLE_ENDIAN, mp3Config.sampleFrequency,
+											(int) globalAudioFormat.getSampleRate(), mp3Config.sampleSize,
+											globalAudioFormat.getSampleSizeInBits(), 1, currentPCMFile.length(), 0, 0, 0, true,
+											false, false, true);
 
 									// this is now the PCM file to use
 									if (currentPCMFile != null) {
@@ -373,10 +370,10 @@ public class AudioUtilities {
 
 									// use SSRC to resample PCM audio - note that two passes are required for accuracy
 									new SSRC(tempDirectory, temporaryPCMInputStream, temporaryPCMOutputStream,
-											ByteOrder.LITTLE_ENDIAN, wavConfig.sampleFrequency, (int) globalAudioFormat
-											.getSampleRate(), wavConfig.sampleSize, globalAudioFormat.getSampleSizeInBits(), 1,
-											currentPCMFile
-											.length(), 0, 0, 0, true, false, false, true);
+											ByteOrder.LITTLE_ENDIAN, wavConfig.sampleFrequency,
+											(int) globalAudioFormat.getSampleRate(), wavConfig.sampleSize,
+											globalAudioFormat.getSampleSizeInBits(), 1, currentPCMFile.length(), 0, 0, 0, true,
+											false, false, true);
 
 									// this is now the PCM file to use
 									if (currentPCMFile != null) {

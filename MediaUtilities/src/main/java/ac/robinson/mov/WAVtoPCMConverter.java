@@ -74,7 +74,7 @@ public final class WAVtoPCMConverter {
 
 				int chunkLen =
 						((0xff & chunkHeader[7]) << 24) | ((0xff & chunkHeader[6]) << 16) | ((0xff & chunkHeader[5]) << 8) |
-								((0xff & chunkHeader[4]));
+						((0xff & chunkHeader[4]));
 
 				if (chunkHeader[0] == 'f' && chunkHeader[1] == 'm' && chunkHeader[2] == 't' && chunkHeader[3] == ' ') {
 					if (chunkLen < 16 || chunkLen > 1024) {
@@ -165,7 +165,7 @@ public final class WAVtoPCMConverter {
 
 				int chunkLen =
 						((0xff & chunkHeader[7]) << 24) | ((0xff & chunkHeader[6]) << 16) | ((0xff & chunkHeader[5]) << 8) |
-								((0xff & chunkHeader[4]));
+						((0xff & chunkHeader[4]));
 
 				if (chunkHeader[0] == 'f' && chunkHeader[1] == 'm' && chunkHeader[2] == 't' && chunkHeader[3] == ' ') {
 					if (chunkLen < 16 || chunkLen > 1024) {

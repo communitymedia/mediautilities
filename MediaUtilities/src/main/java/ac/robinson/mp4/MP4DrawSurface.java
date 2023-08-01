@@ -48,7 +48,7 @@ import ac.robinson.util.BitmapUtilities;
 
 // Based on examples at http://bigflake.com/mediacodec/CameraToMpegTest.java.txt and http://magroune.net/?p=63
 class MP4DrawSurface {
-	private Resources mResources;
+	private final Resources mResources;
 
 	private final int mCanvasWidth;
 	private final int mCanvasHeight;
@@ -68,13 +68,13 @@ class MP4DrawSurface {
 	private final int mAudioIconResourceId;
 
 	private FrameMediaContainer mCurrentFrame;
-	private Bitmap mCurrentFrameBitmap;
-	private Canvas mCurrentFrameCanvas;
-	private Paint mCurrentFramePaint;
+	private final Bitmap mCurrentFrameBitmap;
+	private final Canvas mCurrentFrameCanvas;
+	private final Paint mCurrentFramePaint;
 	private SVG mAudioSVG;
 
 	private final FloatBuffer mCubeTextureCoordinates;
-	private int mTextureDataHandle;
+	private final int mTextureDataHandle;
 
 	// @formatter:off
 	private static final String VERTEX_SHADER_CODE =
@@ -102,14 +102,14 @@ class MP4DrawSurface {
 
 	// number of coordinates per vertex in this array
 	private static final int COORDS_PER_VERTEX = 2;
-	private static float[] sSpriteCoords = {
+	private static final float[] sSpriteCoords = {
 			-0.15f, 0.15f,  // top left
 			-0.15f, -0.15f, // bottom left
 			0.15f, -0.15f,  // bottom right
 			0.15f, 0.15f    //top right
 	};
 
-	private static short[] sDrawOrder = { 0, 1, 2, 0, 2, 3 }; // order to draw vertices
+	private static final short[] sDrawOrder = { 0, 1, 2, 0, 2, 3 }; // order to draw vertices
 
 
 	public MP4DrawSurface(Resources resources, int canvasWidth, int canvasHeight, Map<Integer, Object> settings) {

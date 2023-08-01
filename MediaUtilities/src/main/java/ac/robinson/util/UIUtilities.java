@@ -64,11 +64,8 @@ public class UIUtilities {
 	 * Get the current rotation of the screen, either 0, 90, 180 or 270 degrees
 	 */
 	public static int getScreenRotationDegrees(WindowManager windowManager) {
-		int degrees = 0;
+		int degrees;
 		switch (windowManager.getDefaultDisplay().getRotation()) {
-			case Surface.ROTATION_0:
-				degrees = 0;
-				break;
 			case Surface.ROTATION_90:
 				degrees = 90;
 				break;
@@ -78,7 +75,9 @@ public class UIUtilities {
 			case Surface.ROTATION_270:
 				degrees = 270;
 				break;
+			case Surface.ROTATION_0:
 			default:
+				degrees = 0;
 				break;
 		}
 		return degrees;
@@ -288,8 +287,7 @@ public class UIUtilities {
 			this(viewId, ignoreLeft, ignoreTop, ignoreRight, ignoreBottom, 0, 0, 0, 0);
 		}
 
-		public MarginCorrectorHolder(int viewId, boolean ignoreLeft, boolean ignoreTop, boolean ignoreRight,
-									 boolean ignoreBottom,
+		public MarginCorrectorHolder(int viewId, boolean ignoreLeft, boolean ignoreTop, boolean ignoreRight, boolean ignoreBottom,
 									 int addLeft, int addTop, int addRight, int addBottom) {
 			mViewId = viewId;
 			mIgnoreLeft = ignoreLeft;

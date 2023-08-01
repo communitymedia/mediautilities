@@ -114,7 +114,7 @@ public class ImportingService extends Service {
 		if (mBluetoothObserver == null) {
 			try {
 				Class<?> activityClass = Class.forName(mBluetoothObserverClassName);
-				Constructor<?> constructor = activityClass.getConstructor(new Class[]{ String.class, Handler.class });
+				Constructor<?> constructor = activityClass.getConstructor(String.class, Handler.class);
 				mBluetoothObserver = (FileObserver) constructor.newInstance(mBluetoothDirectoryPath, mBluetoothFileHandler);
 				forwardMessage(MediaUtilities.MSG_IMPORT_SERVICE_REGISTERED, null);
 			} catch (Exception e) {
