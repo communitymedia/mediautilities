@@ -461,15 +461,19 @@ public class IOUtilities {
 			ZipEntry currentEntry;
 			while ((currentEntry = inZip.getNextEntry()) != null) {
 				if (!currentEntry.isDirectory()) {
-					BufferedOutputStream outFile = null;
+					BufferedOutputStream outStream = null;
 					try {
 						int i;
-						outFile = new BufferedOutputStream(new FileOutputStream(new File(outputFolder, currentEntry.getName())));
+						File outFile = new File(outputFolder, currentEntry.getName());
+						if (!outFile.getCanonicalPath().startsWith(outputFolder.getCanonicalPath())) {
+							throw new SecurityException("Extracted zip file path does not match intended folder; aborting");
+						}
+						outStream = new BufferedOutputStream(new FileOutputStream(outFile));
 						while ((i = inZip.read(buf)) != -1) {
-							outFile.write(buf, 0, i);
+							outStream.write(buf, 0, i);
 						}
 					} finally {
-						IOUtilities.closeStream(outFile);
+						IOUtilities.closeStream(outStream);
 					}
 				}
 				inZip.closeEntry();
