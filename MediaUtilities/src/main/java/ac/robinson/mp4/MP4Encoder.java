@@ -114,7 +114,7 @@ public class MP4Encoder {
 	public boolean createMP4(Resources resources, File outputFile, ArrayList<FrameMediaContainer> videoFrames,
 							 AudioUtilities.CombinedAudioTrack combinedAudioTrack, Map<Integer, Object> settings) {
 
-		if (videoFrames == null || videoFrames.size() == 0) {
+		if (videoFrames == null || videoFrames.isEmpty()) {
 			return false;
 		}
 
@@ -184,7 +184,7 @@ public class MP4Encoder {
 			FrameMediaContainer currentNarrativeFrame;
 			do {
 				currentNarrativeFrame = videoFrames.remove(0);
-			} while (videoFrames.size() > 0 && currentNarrativeFrame.mFrameMaxDuration <= 0); // skip zero-length items
+			} while (!videoFrames.isEmpty() && currentNarrativeFrame.mFrameMaxDuration <= 0); // skip zero-length items
 			long currentFrameEndNs = currentNarrativeFrame.mFrameMaxDuration * 1000000L;
 
 			mAudioEnded = false;
@@ -219,7 +219,7 @@ public class MP4Encoder {
 						Log.d(LOG_TAG, "Switching narrative frames; " + videoFrames.size() + " remaining; video time: " +
 								videoPresentationTimeNs + "; current frame time: " + currentFrameEndNs);
 					}
-					if (videoFrames.size() > 0) {
+					if (!videoFrames.isEmpty()) {
 						currentNarrativeFrame = videoFrames.remove(0);
 						if (currentNarrativeFrame.mFrameMaxDuration > 0) {
 							videoPresentationTimeNs = currentFrameEndNs;

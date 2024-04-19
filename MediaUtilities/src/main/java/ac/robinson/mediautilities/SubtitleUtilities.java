@@ -50,7 +50,7 @@ public class SubtitleUtilities {
 			long currentTime = 0;
 			outputStream = new BufferedWriter(new FileWriter(subtitleFile));
 			for (FrameMediaContainer frame : contentList) {
-				if ((frame.mAudioPaths.size() > 0 || frame.mImagePath != null) && !TextUtils.isEmpty(frame.mTextContent)) {
+				if ((!frame.mAudioPaths.isEmpty() || frame.mImagePath != null) && !TextUtils.isEmpty(frame.mTextContent)) {
 					outputStream.write(subtitleCount + "\n");
 					outputStream.write(millisecondsToSrtString(currentTime) + " --> " +
 							millisecondsToSrtString(currentTime + frame.mFrameMaxDuration) + "\n");

@@ -59,7 +59,7 @@ public class OrientationManager {
 
 	public static boolean isSupported(SensorManager sensorManager) {
 		if (mOrientationSupported == null) {
-			mOrientationSupported = sensorManager.getSensorList(Sensor.TYPE_ORIENTATION).size() > 0;
+			mOrientationSupported = !sensorManager.getSensorList(Sensor.TYPE_ORIENTATION).isEmpty();
 		}
 		return mOrientationSupported;
 	}
@@ -67,7 +67,7 @@ public class OrientationManager {
 	public static void startListening(SensorManager sensorManager, OrientationListener orientationListener) {
 		mSensorManager = sensorManager;
 		List<Sensor> sensors = mSensorManager.getSensorList(Sensor.TYPE_ORIENTATION);
-		if (sensors.size() > 0) {
+		if (!sensors.isEmpty()) {
 			mOrientationSensor = sensors.get(0);
 			mIsListening = mSensorManager.registerListener(mSensorEventListener, mOrientationSensor,
 					SensorManager.SENSOR_DELAY_NORMAL);

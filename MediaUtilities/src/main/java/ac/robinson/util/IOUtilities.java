@@ -304,7 +304,7 @@ public class IOUtilities {
 			bufferedReader = new BufferedReader(new InputStreamReader(fileStream));
 			while ((currentLine = bufferedReader.readLine()) != null && fileString.length() < snippetLength) {
 				currentLine = replacementPattern.matcher(currentLine).replaceAll(spaceString).trim();
-				if (currentLine.length() > 0) {
+				if (!currentLine.isEmpty()) {
 					fileString.append(currentLine);
 					fileString.append(spaceString);
 				}

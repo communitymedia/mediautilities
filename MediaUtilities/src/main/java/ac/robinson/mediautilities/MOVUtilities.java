@@ -66,7 +66,7 @@ public class MOVUtilities {
 													  Map<Integer, Object> settings) {
 
 		ArrayList<Uri> filesToSend = new ArrayList<>();
-		if (framesToSend == null || framesToSend.size() == 0) {
+		if (framesToSend == null || framesToSend.isEmpty()) {
 			return filesToSend;
 		}
 		boolean fileError = false;
