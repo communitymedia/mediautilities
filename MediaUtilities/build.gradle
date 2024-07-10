@@ -7,8 +7,8 @@ android {
 	defaultConfig {
 		minSdkVersion 14
 		targetSdkVersion 34
-		versionCode 31
-		versionName '1.7.5'
+		versionCode 32
+		versionName '1.7.6'
 	}
 
 	buildTypes {
@@ -21,6 +21,7 @@ android {
 
 dependencies {
 	def appcompat_version = '1.6.1'
+	//noinspection GradleDependency - upgrading to 1.7.0 and beyond requires API 21; we want to keep a lower minimum
 	implementation "androidx.appcompat:appcompat:$appcompat_version"
 	// implementation "androidx.appcompat:appcompat-resources:$appcompat_version" // not needed for our use-case
 
