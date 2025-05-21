@@ -74,6 +74,18 @@ public class AudioUtilities {
 		for (FrameMediaContainer frame : framesToSend) {
 			int localCount = 0;
 			int audioId = -1;
+
+			// workaround for a bug where spanning audio items are not the first item in the list, meaning the longer
+			// duration of a spanning audio item leads to a negative calculated duration and, as a result, a failure to
+			// export; the solution is simply to move any spanning items to the front of the list
+			if (frame.mSpanningAudioIndex >= 0) {
+				String spanningAudioPath = frame.mAudioPaths.remove(frame.mSpanningAudioIndex);
+				frame.mAudioPaths.add(0, spanningAudioPath);
+				int spanningAudioDuration = frame.mAudioDurations.remove(frame.mSpanningAudioIndex);
+				frame.mAudioDurations.add(0, spanningAudioDuration);
+				frame.mSpanningAudioIndex = 0;
+			}
+
 			for (String type : frame.mAudioPaths) {
 				audioId += 1;
 				int audioDuration = frame.mAudioDurations.get(audioId);
