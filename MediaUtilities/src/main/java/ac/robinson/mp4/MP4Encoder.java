@@ -40,6 +40,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import ac.robinson.mediautilities.AudioUtilities;
@@ -249,6 +251,10 @@ public class MP4Encoder {
 					if (mEndOfOutputReached) {
 						// make sure that the last video frame is presented at the same time as the last audio frame's end
 						mInputSurface.setPresentationTime(mAudioPresentationTimeUs * 1000);
+						if (VERBOSE) {
+							Log.d(LOG_TAG, "Setting last video frame's presentation time to " +
+									(mAudioPresentationTimeUs * 1000));
+						}
 					}
 				}
 
@@ -334,6 +340,16 @@ public class MP4Encoder {
 	private static class TrackInfo {
 		private int mIndex = 0;
 		private MediaMuxerWrapper mMuxerWrapper;
+		private final List<PendingSample> pendingSamples = new LinkedList<>();  // buffer for samples before muxer start
+	}
+
+	private static class PendingSample {
+		ByteBuffer data;
+		MediaCodec.BufferInfo info;
+		PendingSample(ByteBuffer data, MediaCodec.BufferInfo info) {
+			this.data = data;
+			this.info = info;
+		}
 	}
 
 	private static class MediaMuxerWrapper {
@@ -355,9 +371,7 @@ public class MP4Encoder {
 			mNumTracksAdded++;
 			int trackIndex = mMuxer.addTrack(format);
 			if (mNumTracksAdded == TOTAL_NUM_TRACKS) {
-				if (VERBOSE) {
-					Log.i(LOG_TAG, "All tracks added, starting muxer");
-				}
+				Log.i(LOG_TAG, "All " + mNumTracksAdded + " tracks added, starting muxer");
 				mMuxer.start();
 				mStarted = true;
 			}
@@ -367,9 +381,7 @@ public class MP4Encoder {
 		private void finishTrack() {
 			mNumTracksFinished++;
 			if (mNumTracksFinished == TOTAL_NUM_TRACKS) {
-				if (VERBOSE) {
-					Log.i(LOG_TAG, "All tracks finished, stopping muxer");
-				}
+				Log.i(LOG_TAG, "All" + mNumTracksAdded + "tracks finished, stopping muxer");
 				stop();
 			}
 		}
@@ -499,7 +511,7 @@ public class MP4Encoder {
 			audioFormat.setString(MediaFormat.KEY_MIME, AUDIO_MIME_TYPE);
 			audioFormat.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
 			audioFormat.setInteger(MediaFormat.KEY_SAMPLE_RATE, audioSampleRate);
-			audioFormat.setInteger(MediaFormat.KEY_CHANNEL_COUNT, 1); // TODO: *always* mono?
+			audioFormat.setInteger(MediaFormat.KEY_CHANNEL_COUNT, 1); // TODO: currently always mono; add stereo?
 			audioFormat.setInteger(MediaFormat.KEY_BIT_RATE, (int) (audioSampleRate *
 					(128000 / 44100f))); // TODO: will this always be okay (i.e., scaling bitrate based on typical 44.1kHz rate?
 			audioFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 16384); // TODO: *always* 16kB?
@@ -611,7 +623,7 @@ public class MP4Encoder {
 
 		while (true) {
 			if (VERBOSE) {
-				Log.d(LOG_TAG, "drain" + ((encoder == mVideoEncoder) ? "Video" : "Audio") + "Encoder(" + endOfStream + ")");
+				Log.d(LOG_TAG, "Drain" + ((encoder == mVideoEncoder) ? "Video" : "Audio") + "Encoder(" + endOfStream + ")");
 			}
 
 			int encoderStatus = encoder.dequeueOutputBuffer(bufferInfo, TIMEOUT_USEC);
@@ -640,16 +652,12 @@ public class MP4Encoder {
 
 				} else {
 					MediaFormat newFormat = encoder.getOutputFormat();
-					if (VERBOSE) {
-						Log.d(LOG_TAG, ((encoder == mVideoEncoder) ? "Video" : "Audio") + " output format: " + newFormat);
-					}
+					Log.d(LOG_TAG, ((encoder == mVideoEncoder) ? "Video" : "Audio") + " output format: " + newFormat);
 
 					// now that we have the Magic Goodies, start the muxer
 					trackInfo.mIndex = muxerWrapper.addTrack(newFormat);
 					if (!muxerWrapper.allTracksAdded()) {
-						if (VERBOSE) {
-							Log.d(LOG_TAG, "Breaking to wait for all encoders to send output formats");
-						}
+						Log.d(LOG_TAG, "Breaking to wait for all encoders to send output formats");
 						break; // allow all encoders to send output format changed before attempting to write samples
 					}
 				}
@@ -668,22 +676,30 @@ public class MP4Encoder {
 
 				if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {
 					// codec config data was fed to the muxer when we got INFO_OUTPUT_FORMAT_CHANGED status; ignore this time
-					if (VERBOSE) {
-						Log.d(LOG_TAG, "Ignoring additional " + ((encoder == mVideoEncoder) ? "video" : "audio") +
-								" BUFFER_FLAG_CODEC_CONFIG");
-					}
+					MediaFormat newFormat = encoder.getOutputFormat();
+					Log.d(LOG_TAG, "Ignoring additional " + ((encoder == mVideoEncoder) ? "video" : "audio") +
+								" BUFFER_FLAG_CODEC_CONFIG with format " + newFormat);
 					bufferInfo.size = 0;
 				}
 
 				if (bufferInfo.size != 0) {
 					if (!trackInfo.mMuxerWrapper.mStarted) {
-						// TODO: this does still happen, albeit very rarely, but especially on shorter narratives - why?
-						Log.e(LOG_TAG, "Muxer not started; dropping " + ((encoder == mVideoEncoder) ? "video" : "audio") + " " +
-								"frames");
-						// disabled for now as this happens far too often (tradeoff of slightly out of sync tracks is worth it
-						// until we can find a way to ensure all tracks are started before data is received)
-						// throw new RuntimeException("Frames dropped before starting muxer");
+						Log.d(LOG_TAG, "Muxer not started; caching " + bufferInfo.size + " pending " +
+								((encoder == mVideoEncoder) ? "video" : "audio") + " frames");
+						ByteBuffer pendingData = ByteBuffer.allocate(bufferInfo.size);
+						pendingData.put(encodedData);
+						MediaCodec.BufferInfo pendingInfo = new MediaCodec.BufferInfo();
+						pendingInfo.set(0, bufferInfo.size, bufferInfo.presentationTimeUs, bufferInfo.flags);
+						trackInfo.pendingSamples.add(new PendingSample(pendingData, pendingInfo));
+
 					} else {
+						// write any pending samples first
+						while (!trackInfo.pendingSamples.isEmpty()) {
+							PendingSample sample = trackInfo.pendingSamples.remove(0);
+							sample.data.position(0);
+							muxerWrapper.mMuxer.writeSampleData(trackInfo.mIndex, sample.data, sample.info);
+						}
+
 						// adjust the ByteBuffer values to match BufferInfo
 						// (only needed before v21 - see note in MediaCodec.getOutputBuffers)
 						encodedData.position(bufferInfo.offset);
@@ -719,9 +735,7 @@ public class MP4Encoder {
 						mEndOfOutputReached = true;
 					} else {
 						muxerWrapper.finishTrack();
-						if (VERBOSE) {
-							Log.d(LOG_TAG, "End of " + ((encoder == mVideoEncoder) ? "video" : "audio") + " stream reached");
-						}
+						Log.d(LOG_TAG, "End of " + ((encoder == mVideoEncoder) ? "video" : "audio") + " stream reached");
 						if (encoder == mVideoEncoder) {
 							Log.i(LOG_TAG, "Stopping and releasing video encoder");
 							stopAndReleaseVideoEncoder();

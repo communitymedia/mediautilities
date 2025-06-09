@@ -57,15 +57,32 @@ public class MP4toPCMConverter {
 		return track.getSampleSize();
 	}
 
-	public void convertFile(OutputStream output) throws IOException {
+	public void convertFile(OutputStream output, boolean forceMono) throws IOException {
 		final Decoder dec = new Decoder(track.getDecoderSpecificInfo());
 		Frame audioFrame;
 		final SampleBuffer buf = new SampleBuffer();
+		int channelCount = track.getChannelCount();
+
 		while (track.hasMoreFrames()) {
 			audioFrame = track.readNextFrame();
 			dec.decodeFrame(audioFrame.getData(), buf);
 			buf.setBigEndian(false); // we need little endian
-			output.write(buf.getData());
+			byte[] data = buf.getData();
+
+			if (forceMono && channelCount == 2) {
+				// Downmix stereo to mono (16-bit PCM)
+				byte[] monoData = new byte[data.length / 2];
+				for (int i = 0, j = 0; i < data.length; i += 4, j += 2) {
+					int left = (data[i + 1] << 8) | (data[i] & 0xFF);
+					int right = (data[i + 3] << 8) | (data[i + 2] & 0xFF);
+					int mono = (left + right) / 2;
+					monoData[j] = (byte) (mono & 0xFF);
+					monoData[j + 1] = (byte) ((mono >> 8) & 0xFF);
+				}
+				output.write(monoData);
+			} else {
+				output.write(data);
+			}
 		}
 	}
 }

@@ -295,7 +295,7 @@ public class MOVUtilities {
 							// first we need to extract PCM audio from the M4A file
 							inputRandomAccessFile = new RandomAccessFile(inputAudioFile, "r");
 							MP4toPCMConverter pcmConverter = new MP4toPCMConverter(inputRandomAccessFile);
-							pcmConverter.convertFile(outputPCMStream);
+							pcmConverter.convertFile(outputPCMStream, true);
 
 							// get the format of the audio - PCM output is mono signed little-endian integers
 							audioFormat = new AudioFormat(pcmConverter.getSampleRate(), pcmConverter.getSampleSize(), 1, true,
@@ -545,7 +545,7 @@ public class MOVUtilities {
 							// first we need to extract PCM audio from the M4A file
 							inputRandomAccessFile = new RandomAccessFile(inputAudioFile, "r");
 							MP4toPCMConverter pcmConverter = new MP4toPCMConverter(inputRandomAccessFile);
-							pcmConverter.convertFile(currentPCMStream);
+							pcmConverter.convertFile(currentPCMStream, true);
 
 							// get the format - output from PCM converter is mono signed little-endian integers
 							if (audioFormat == null) { // TODO: we assume all MP4 components are the same

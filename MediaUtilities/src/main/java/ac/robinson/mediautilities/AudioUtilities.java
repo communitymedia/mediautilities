@@ -20,6 +20,7 @@
 
 package ac.robinson.mediautilities;
 
+import android.os.Build;
 import android.util.Log;
 import android.util.SparseIntArray;
 
@@ -41,6 +42,7 @@ import java.util.Collections;
 import ac.robinson.mov.MP3toPCMConverter;
 import ac.robinson.mov.MP4toPCMConverter;
 import ac.robinson.mov.WAVtoPCMConverter;
+import ac.robinson.mp4.AudioToPCMConverter;
 import ac.robinson.util.AndroidUtilities;
 import ac.robinson.util.IOUtilities;
 import vavi.sound.pcm.resampling.ssrc.SSRC;
@@ -264,15 +266,26 @@ public class AudioUtilities {
 					if (currentAudioType == AudioType.M4A) {
 						RandomAccessFile inputRandomAccessFile = null;
 						try {
-							// first we need to extract PCM audio from the M4A file
+							// first we need to extract PCM audio from the M4A file - use the native methods if present
 							// output from PCM converter is mono signed little-endian integers
-							inputRandomAccessFile = new RandomAccessFile(inputAudioFile, "r");
-							MP4toPCMConverter pcmConverter = new MP4toPCMConverter(inputRandomAccessFile);
-							pcmConverter.convertFile(currentPCMStream);
+							int pcmSampleRate = -1;
+							int pcmSampleSize = -1;
+							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+								AudioToPCMConverter pcmConverter = new AudioToPCMConverter(inputAudioFile);
+								pcmConverter.convertFile(currentPCMStream, true);
+								pcmSampleRate = pcmConverter.getSampleRate();
+								pcmSampleSize = pcmConverter.getSampleSize();
+							} else {
+								inputRandomAccessFile = new RandomAccessFile(inputAudioFile, "r");
+								MP4toPCMConverter pcmConverter = new MP4toPCMConverter(inputRandomAccessFile);
+								pcmConverter.convertFile(currentPCMStream, true);
+								pcmSampleRate = pcmConverter.getSampleRate();
+								pcmSampleSize = pcmConverter.getSampleSize();
+							}
 
 							// if the sample rate or sample size don't match our output, use SSRC to resample the audio
-							if (pcmConverter.getSampleRate() != globalAudioFormat.getSampleRate() ||
-									pcmConverter.getSampleSize() != globalAudioFormat.getSampleSizeInBits()) {
+							if (pcmSampleRate != globalAudioFormat.getSampleRate() ||
+									pcmSampleSize != globalAudioFormat.getSampleSizeInBits()) {
 
 								Log.d(LOG_TAG, "Resampling M4A audio");
 								try {
@@ -282,9 +295,9 @@ public class AudioUtilities {
 
 									// use SSRC to resample PCM audio - note that two passes are required for accuracy
 									new SSRC(tempDirectory, temporaryPCMInputStream, temporaryPCMOutputStream,
-											ByteOrder.LITTLE_ENDIAN, pcmConverter.getSampleRate(),
-											(int) globalAudioFormat.getSampleRate(), pcmConverter.getSampleSize(),
-											globalAudioFormat.getSampleSizeInBits(), 1, currentPCMFile.length(), 0, 0, 0, true,
+											ByteOrder.LITTLE_ENDIAN, pcmSampleRate, (int) globalAudioFormat.getSampleRate(),
+											pcmSampleSize, globalAudioFormat.getSampleSizeInBits(),
+											1, currentPCMFile.length(), 0, 0, 0, true,
 											false, false, true);
 
 									// this is now the PCM file to use
@@ -304,9 +317,8 @@ public class AudioUtilities {
 							}
 
 							Log.d(LOG_TAG, "Outputting M4A: " + globalAudioFormat.getSampleRate() + ", " +
-									globalAudioFormat.getSampleSizeInBits() + " from " + pcmConverter.getSampleRate() + "," +
-									" " +
-									pcmConverter.getSampleSize());
+									globalAudioFormat.getSampleSizeInBits() + " from " + pcmSampleSize + "," +
+									" " + pcmSampleSize);
 						} catch (Exception e) {
 							decodingError = true;
 							Log.d(LOG_TAG, "Error creating combined M4A audio track: " + e.getLocalizedMessage());
