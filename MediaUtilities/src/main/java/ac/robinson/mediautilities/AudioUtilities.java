@@ -99,11 +99,17 @@ public class AudioUtilities {
 					if (automaticSampleRate) {
 						RandomAccessFile inputRandomAccessFile = null;
 						try {
-							inputRandomAccessFile = new RandomAccessFile(inputAudioFile, "r");
-							MP4toPCMConverter pcmConverter = new MP4toPCMConverter(inputRandomAccessFile);
-							fileSampleRates.put(pcmConverter.getSampleRate(),
-									audioDuration + fileSampleRates.get(pcmConverter.getSampleRate(), 0));
-							Log.d(LOG_TAG, "M4A type: " + pcmConverter.getSampleRate() + ", " + audioDuration);
+							int pcmSampleRate;
+							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+								AudioToPCMConverter pcmConverter = new AudioToPCMConverter(inputAudioFile);
+								pcmSampleRate = pcmConverter.getSampleRate();
+							} else {
+								inputRandomAccessFile = new RandomAccessFile(inputAudioFile, "r");
+								MP4toPCMConverter pcmConverter = new MP4toPCMConverter(inputRandomAccessFile);
+								pcmSampleRate = pcmConverter.getSampleRate();
+							}
+							fileSampleRates.put(pcmSampleRate, audioDuration + fileSampleRates.get(pcmSampleRate, 0));
+							Log.d(LOG_TAG, "M4A type: " + pcmSampleRate + ", " + audioDuration);
 						} catch (Exception ignored) {
 						} finally {
 							IOUtilities.closeStream(inputRandomAccessFile);
@@ -114,11 +120,17 @@ public class AudioUtilities {
 					fileExtension = MediaUtilities.MP3_FILE_EXTENSIONS[0];
 					if (automaticSampleRate) {
 						try {
-							MP3toPCMConverter.MP3Configuration mp3Config = new MP3toPCMConverter.MP3Configuration();
-							MP3toPCMConverter.getFileConfig(inputAudioFile, mp3Config);
-							fileSampleRates.put(mp3Config.sampleFrequency,
-									audioDuration + fileSampleRates.get(mp3Config.sampleFrequency, 0));
-							Log.d(LOG_TAG, "MP3 type: " + mp3Config.sampleFrequency + ", " + audioDuration);
+							int pcmSampleRate;
+							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+								AudioToPCMConverter pcmConverter = new AudioToPCMConverter(inputAudioFile);
+								pcmSampleRate = pcmConverter.getSampleRate();
+							} else {
+								MP3toPCMConverter.MP3Configuration mp3Config = new MP3toPCMConverter.MP3Configuration();
+								MP3toPCMConverter.getFileConfig(inputAudioFile, mp3Config);
+								pcmSampleRate = mp3Config.sampleFrequency;
+							}
+							fileSampleRates.put(pcmSampleRate, audioDuration + fileSampleRates.get(pcmSampleRate, 0));
+							Log.d(LOG_TAG, "MP3 type: " + pcmSampleRate + ", " + audioDuration);
 						} catch (Exception ignored) {
 						}
 					}
@@ -158,7 +170,8 @@ public class AudioUtilities {
 				sortedSampleRates.add(fileSampleRates.keyAt(i));
 			}
 			Collections.sort(sortedSampleRates, (i1, i2) -> {
-				return fileSampleRates.get(i1) > fileSampleRates.get(i2) ? -1 : 1; // if equal, just pick any
+                //noinspection ComparatorMethodParameterNotUsed
+                return fileSampleRates.get(i1) > fileSampleRates.get(i2) ? -1 : 1; // if equal, just pick any
 			});
 
 			sampleRate = sortedSampleRates.get(0);
@@ -256,9 +269,8 @@ public class AudioUtilities {
 						if (currentPCMFile != null) {
 							currentPCMFile.delete();
 						}
-						Log.d(LOG_TAG,
-								"Error creating combined MOV audio track - couldn't create individual " + audioFileExtension +
-										" files");
+						Log.d(LOG_TAG, "Error creating combined MOV audio track - couldn't create individual " +
+								audioFileExtension + " files");
 						continue;
 					}
 
@@ -330,12 +342,23 @@ public class AudioUtilities {
 						try {
 							// first we need to extract PCM audio from the MP3 file
 							// output from PCM converter is mono signed 16-bit little-endian integers
-							MP3toPCMConverter.MP3Configuration mp3Config = new MP3toPCMConverter.MP3Configuration();
-							MP3toPCMConverter.convertFile(inputAudioFile, currentPCMStream, mp3Config);
+							int pcmSampleRate = -1;
+							int pcmSampleSize = -1;
+							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+								AudioToPCMConverter pcmConverter = new AudioToPCMConverter(inputAudioFile);
+								pcmConverter.convertFile(currentPCMStream, true);
+								pcmSampleRate = pcmConverter.getSampleRate();
+								pcmSampleSize = pcmConverter.getSampleSize();
+							} else {
+								MP3toPCMConverter.MP3Configuration mp3Config = new MP3toPCMConverter.MP3Configuration();
+								MP3toPCMConverter.convertFile(inputAudioFile, currentPCMStream, mp3Config);
+								pcmSampleRate = mp3Config.sampleFrequency;
+								pcmSampleSize = mp3Config.sampleSize;
+							}
 
 							// if the sample rate or sample size don't match our output, use SSRC to resample the audio
-							if (mp3Config.sampleFrequency != globalAudioFormat.getSampleRate() ||
-									mp3Config.sampleSize != globalAudioFormat.getSampleSizeInBits()) {
+							if (pcmSampleRate != globalAudioFormat.getSampleRate() ||
+									pcmSampleSize != globalAudioFormat.getSampleSizeInBits()) {
 
 								Log.d(LOG_TAG, "Resampling MP3 audio");
 								try {
@@ -345,8 +368,8 @@ public class AudioUtilities {
 
 									// use SSRC to resample PCM audio - note that two passes are required for accuracy
 									new SSRC(tempDirectory, temporaryPCMInputStream, temporaryPCMOutputStream,
-											ByteOrder.LITTLE_ENDIAN, mp3Config.sampleFrequency,
-											(int) globalAudioFormat.getSampleRate(), mp3Config.sampleSize,
+											ByteOrder.LITTLE_ENDIAN, pcmSampleRate,
+											(int) globalAudioFormat.getSampleRate(), pcmSampleSize,
 											globalAudioFormat.getSampleSizeInBits(), 1, currentPCMFile.length(), 0, 0, 0, true,
 											false, false, true);
 
@@ -367,8 +390,8 @@ public class AudioUtilities {
 							}
 
 							Log.d(LOG_TAG, "Outputting MP3: " + globalAudioFormat.getSampleRate() + ", " +
-									globalAudioFormat.getSampleSizeInBits() + " from " + mp3Config.sampleFrequency + ", " +
-									mp3Config.sampleSize);
+									globalAudioFormat.getSampleSizeInBits() + " from " + pcmSampleRate + ", " +
+									pcmSampleSize);
 
 						} catch (Exception e) {
 							decodingError = true;
