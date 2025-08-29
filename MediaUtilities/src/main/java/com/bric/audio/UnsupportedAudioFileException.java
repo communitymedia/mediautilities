@@ -15,7 +15,7 @@ package com.bric.audio;
  * @version 1.9 03/12/19
  * @since 1.3
  */
-/*
+/**
  * An <code>UnsupportedAudioFileException</code> is an exception indicating that an operation failed because a file did
  * not contain valid data of a recognized file type and format.
  * @version 1.9 03/12/19

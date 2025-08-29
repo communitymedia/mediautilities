@@ -78,7 +78,6 @@ public class MP4Utilities {
 			return filesToSend;
 		}
 
-		//noinspection RedundantOperationOnEmptyContainer
 		filesToSend.clear();
 		return filesToSend;
 	}

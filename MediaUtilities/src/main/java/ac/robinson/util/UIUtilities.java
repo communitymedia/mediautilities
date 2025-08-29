@@ -315,9 +315,8 @@ public class UIUtilities {
 			if (left != 0 || top != 0 || right != 0 || bottom != 0) {
 				for (MarginCorrectorHolder viewContainer : insetViews) {
 					View controlsView = activity.findViewById(viewContainer.mViewId);
-					if (controlsView.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
-						ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) controlsView.getLayoutParams();
-						p.setMargins((viewContainer.mIgnoreLeft ? p.leftMargin : left + viewContainer.mAddLeft),
+					if (controlsView.getLayoutParams() instanceof ViewGroup.MarginLayoutParams p) {
+                        p.setMargins((viewContainer.mIgnoreLeft ? p.leftMargin : left + viewContainer.mAddLeft),
 								(viewContainer.mIgnoreTop ? p.topMargin : top + viewContainer.mAddTop),
 								(viewContainer.mIgnoreRight ? p.rightMargin : right + viewContainer.mAddRight),
 								(viewContainer.mIgnoreBottom ? p.bottomMargin : bottom + viewContainer.mAddBottom));

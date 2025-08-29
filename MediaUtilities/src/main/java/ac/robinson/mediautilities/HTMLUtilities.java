@@ -193,7 +193,6 @@ public class HTMLUtilities {
 			return filesToSend;
 		}
 
-		//noinspection RedundantOperationOnEmptyContainer
 		filesToSend.clear();
 		return filesToSend;
 	}

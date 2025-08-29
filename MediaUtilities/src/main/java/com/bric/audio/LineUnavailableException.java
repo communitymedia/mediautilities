@@ -32,7 +32,7 @@ package com.bric.audio;
  * @author Kara Kytle
  * @since 1.3
  */
-/*
+/**
  * A <code>LinenavailableException</code> is an exception indicating that a line annot be opened because it is
  * unavailable. This situation arises most commonly when a line is requested when it is already in use by another
  * application.

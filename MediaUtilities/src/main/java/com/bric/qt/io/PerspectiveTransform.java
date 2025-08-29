@@ -301,6 +301,7 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
 	 *             if flatmatrix is too small
 	 * @deprecated as of JAI 1.1 Use double[][] getMatrix(double[][] matrix) instead.
 	 */
+	@Deprecated
 	public double[] getMatrix(double[] flatmatrix) {
 		if (flatmatrix == null) {
 			flatmatrix = new double[9];

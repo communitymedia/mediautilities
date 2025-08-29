@@ -237,7 +237,6 @@ public class MOVUtilities {
 			return filesToSend;
 		}
 
-		//noinspection RedundantOperationOnEmptyContainer
 		filesToSend.clear();
 		return filesToSend;
 	}
