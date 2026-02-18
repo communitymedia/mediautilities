@@ -3,12 +3,12 @@ apply plugin: 'com.android.library'
 android {
 	namespace = 'ac.robinson.mediautilities'
 	compileSdk = 36
+	enableKotlin = false
 
 	defaultConfig {
 		minSdkVersion 14
-		targetSdkVersion 36
-		versionCode 37
-		versionName '1.8.1'
+		versionCode 38
+		versionName '1.8.2'
 	}
 
 	compileOptions {

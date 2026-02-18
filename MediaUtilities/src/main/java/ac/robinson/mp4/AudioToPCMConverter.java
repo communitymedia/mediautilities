@@ -148,6 +148,8 @@ public class AudioToPCMConverter {
                 if ((info.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
                     outputEOS = true;
                 }
+            } else if (outputBufferId == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
+                outputBuffers = codec.getOutputBuffers();
             }
         }
 

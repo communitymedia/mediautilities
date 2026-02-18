@@ -111,14 +111,14 @@ public abstract class MovWriter {
 	}
 
 	class VideoTrack {
-		List<VideoSample> samples = new Vector<>();
+		final List<VideoSample> samples = new Vector<>();
 		protected int w = -1, h = -1;
 		long totalDuration;
-		TimeToSampleAtom stts = new TimeToSampleAtom();
-		SampleSizeAtom stsz = new SampleSizeAtom();
-		SampleToChunkAtom stsc = new SampleToChunkAtom();
-		ChunkOffsetAtom stco = new ChunkOffsetAtom();
-		SyncSampleAtom stss = new SyncSampleAtom();
+		final TimeToSampleAtom stts = new TimeToSampleAtom();
+		final SampleSizeAtom stsz = new SampleSizeAtom();
+		final SampleToChunkAtom stsc = new SampleToChunkAtom();
+		final ChunkOffsetAtom stco = new ChunkOffsetAtom();
+		final SyncSampleAtom stss = new SyncSampleAtom();
 
 		void writeToMoovRoot(ParentAtom moovRoot, int trackIndex) {
 			ParentAtom trakAtom = new ParentAtom("trak");
@@ -273,20 +273,20 @@ public abstract class MovWriter {
 		// we might need to convert the endian-ness
 		boolean reverseBytePairs;
 
-		long myTimeScale;
-		TimeToSampleAtom stts = new TimeToSampleAtom();
-		SampleSizeAtom stsz = new SampleSizeAtom();
-		SampleToChunkAtom stsc = new SampleToChunkAtom();
-		ChunkOffsetAtom stco = new ChunkOffsetAtom();
+		final long myTimeScale;
+		final TimeToSampleAtom stts = new TimeToSampleAtom();
+		final SampleSizeAtom stsz = new SampleSizeAtom();
+		final SampleToChunkAtom stsc = new SampleToChunkAtom();
+		final ChunkOffsetAtom stco = new ChunkOffsetAtom();
 		int sampleMultiplier;
 
 		/**
 		 * Whether to use an Edit List (or a silent track) to arrange the audio
 		 **/
 		boolean useEditList = false; // edit lists will be used for multi-part audio regardless of this value
-		float[] audioOffsets;
-		float[] audioStarts;
-		float[] audioLengths;
+		final float[] audioOffsets;
+		final float[] audioStarts;
+		final float[] audioLengths;
 
 		/**
 		 * audioOffsets specifies where in the movie file each audio segment should be played; audioStarts and audioEnds
@@ -478,7 +478,7 @@ public abstract class MovWriter {
 	/**
 	 * The file we're writing to.
 	 */
-	File dest;
+    final File dest;
 
 	/**
 	 * Whether close() has been called yet.
@@ -488,7 +488,7 @@ public abstract class MovWriter {
 	/**
 	 * The video track.
 	 */
-	protected VideoTrack videoTrack = new VideoTrack();
+	protected final VideoTrack videoTrack = new VideoTrack();
 
 	/**
 	 * The audio tracks to include.

@@ -175,8 +175,8 @@ public class PlaybackController extends FrameLayout {
 	}
 
 	// handler and runnable for updating the progress bar
-	Handler mProgressHandler = new Handler();
-	Runnable mProgressRunnable = new Runnable() {
+    final Handler mProgressHandler = new Handler();
+	final Runnable mProgressRunnable = new Runnable() {
 		@Override
 		public void run() {
 			if (mPlayerControl == null) {

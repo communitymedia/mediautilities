@@ -42,7 +42,7 @@ public class MediaUtilities {
 	public static final String[] M4A_FILE_EXTENSIONS = { "m4a", "aac" };
 	public static final String[] MP3_FILE_EXTENSIONS = { "mp3" };
 	public static final String[] WAV_FILE_EXTENSIONS = { "wav" };
-	public static String[] MOV_AUDIO_FILE_EXTENSIONS;
+	public static final String[] MOV_AUDIO_FILE_EXTENSIONS;
 
 	static {
 		int totalLength = M4A_FILE_EXTENSIONS.length + MP3_FILE_EXTENSIONS.length + WAV_FILE_EXTENSIONS.length;

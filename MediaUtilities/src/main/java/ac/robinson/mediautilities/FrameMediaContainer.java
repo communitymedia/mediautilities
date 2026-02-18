@@ -35,12 +35,12 @@ public class FrameMediaContainer {
 	}
 
 	public String mParentId = null;
-	public String mFrameId;
-	public int mFrameSequenceId;
+	public final String mFrameId;
+	public final int mFrameSequenceId;
 	public int mFrameMaxDuration = 0; // milliseconds
 
-	public int mBackgroundColour = 0;
-	public int mForegroundColour = 0;
+	public final int mBackgroundColour = 0;
+	public final int mForegroundColour = 0;
 
 	public String mTextContent = null;
 	public SpanType mSpanningTextType = SpanType.SPAN_NONE;
@@ -50,8 +50,8 @@ public class FrameMediaContainer {
 	public SpanType mSpanningImageType = SpanType.SPAN_NONE;
 
 	// image and text items can simply span or not span; audio is more complex, because we can have both types in one frame
-	public ArrayList<Integer> mAudioDurations = new ArrayList<>();
-	public ArrayList<String> mAudioPaths = new ArrayList<>();
+	public final ArrayList<Integer> mAudioDurations = new ArrayList<>();
+	public final ArrayList<String> mAudioPaths = new ArrayList<>();
 	public int mSpanningAudioIndex = -1; // only one spanning item per frame; if this is not -1 then that item spans
 	public int mSpanningAudioStart = 0; // hint for SMIL/HTML exports to indicate where (ms) audio should start on spanned frames
 	public boolean mSpanningAudioRoot = false; // whether this spanning audio item is the first part, or inherited

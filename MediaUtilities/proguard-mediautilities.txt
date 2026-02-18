@@ -1,4 +1,5 @@
 # so proguard doesn't remove the BoxImpl classes (used via reflection)
+#noinspection ExpensiveKeepRuleInspection
 -keep public class net.sourceforge.jaad.mp4.boxes.** {
 	public protected private *;
 }

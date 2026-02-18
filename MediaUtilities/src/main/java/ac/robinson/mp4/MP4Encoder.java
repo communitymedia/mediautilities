@@ -333,7 +333,7 @@ public class MP4Encoder {
 			}
 		} catch (Throwable t) {
 			Log.e(LOG_TAG, "sendAudioToEncoder exception");
-			t.printStackTrace();
+			// t.printStackTrace();
 		}
 	}
 
@@ -344,8 +344,8 @@ public class MP4Encoder {
 	}
 
 	private static class PendingSample {
-		ByteBuffer data;
-		MediaCodec.BufferInfo info;
+		final ByteBuffer data;
+		final MediaCodec.BufferInfo info;
 		PendingSample(ByteBuffer data, MediaCodec.BufferInfo info) {
 			this.data = data;
 			this.info = info;
