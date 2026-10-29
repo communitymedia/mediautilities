@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 
 android {
 	namespace = 'ac.robinson.mediautilities'
-	compileSdk = 36
+	compileSdk = 37
 	enableKotlin = false
 
 	defaultConfig {
