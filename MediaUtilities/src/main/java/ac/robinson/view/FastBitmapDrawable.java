@@ -35,6 +35,7 @@ public class FastBitmapDrawable extends Drawable {
 	}
 
 	@Override
+	@SuppressWarnings("deprecation") // required override
 	public int getOpacity() {
 		return PixelFormat.TRANSLUCENT;
 	}

@@ -21,6 +21,7 @@ package net.sourceforge.jaad.mp4.api;
 
 import java.io.EOFException;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -208,13 +209,17 @@ public abstract class Track {
 	protected <T> void parseSampleEntry(Box sampleEntry, Class<T> clazz) {
 		T type;
 		try {
-			type = clazz.newInstance();
+			type = clazz.getDeclaredConstructor().newInstance();
 			if (sampleEntry.getClass().isInstance(type)) {
 				System.out.println("true");
 			}
 		} catch (InstantiationException ex) {
 			ex.printStackTrace();
 		} catch (IllegalAccessException ex) {
+			ex.printStackTrace();
+		} catch (NoSuchMethodException ex) {
+			ex.printStackTrace();
+		} catch (InvocationTargetException ex) {
 			ex.printStackTrace();
 		}
 	}

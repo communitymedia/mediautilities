@@ -34,6 +34,7 @@ import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.Surface;
@@ -168,7 +169,7 @@ public class UIUtilities {
 	public static void setFullScreen(final Window window) {
 		if ((window.getAttributes().flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) !=
 				WindowManager.LayoutParams.FLAG_FULLSCREEN) {
-			Handler handler = new Handler();
+			Handler handler = new Handler(Looper.getMainLooper());
 			handler.post(() -> {
 				try {
 					WindowManager.LayoutParams attrs = window.getAttributes();
@@ -183,7 +184,7 @@ public class UIUtilities {
 	public static void setNonFullScreen(final Window window) {
 		if ((window.getAttributes().flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) ==
 				WindowManager.LayoutParams.FLAG_FULLSCREEN) {
-			Handler handler = new Handler();
+			Handler handler = new Handler(Looper.getMainLooper());
 			handler.post(() -> {
 				try {
 					WindowManager.LayoutParams attrs = window.getAttributes();
@@ -212,7 +213,7 @@ public class UIUtilities {
 	}
 
 	public static void showToast(Context context, int id, int duration) {
-		Handler handler = new Handler();
+		Handler handler = new Handler(Looper.getMainLooper());
 		final Toast toast = Toast.makeText(context, id, Toast.LENGTH_LONG);
 		toast.show();
 		handler.postDelayed(toast::cancel, duration);

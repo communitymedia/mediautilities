@@ -87,8 +87,16 @@ public class DebugUtilities {
 			screenSize = UIUtilities.getScreenSize(windowManager);
 		}
 		return Build.MODEL + ", " + getDeviceBrandProduct() + ", v" + Build.VERSION.SDK_INT + " (" + Build.VERSION.RELEASE +
-				"), " + Build.CPU_ABI + ", " + (screenSize != null ? (screenSize.x + "x" + screenSize.y + "-") : "") +
+				"), " + getPrimaryAbi() + ", " + (screenSize != null ? (screenSize.x + "x" + screenSize.y + "-") : "") +
 				getScreenDensityString(resources).replace("dpi", "") + "-" + getScreenSizeString(resources).charAt(0);
+	}
+
+	@SuppressWarnings("deprecation") // Build.CPU_ABI is needed before API 21
+	private static String getPrimaryAbi() {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && Build.SUPPORTED_ABIS.length > 0) {
+			return Build.SUPPORTED_ABIS[0];
+		}
+		return Build.CPU_ABI;
 	}
 
 	public static String getDeviceBrandProduct() {

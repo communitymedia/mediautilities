@@ -39,6 +39,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 
 @SuppressLint("AppCompatCustomView")
 public class GestureImageView extends ImageView  {
@@ -405,7 +406,7 @@ public class GestureImageView extends ImageView  {
 		}
 		if(id != 0) {
 			this.resId = id;
-			setImageDrawable(getContext().getResources().getDrawable(id));
+			setImageDrawable(ContextCompat.getDrawable(getContext(), id));
 		}
 	}
 
@@ -516,6 +517,7 @@ public class GestureImageView extends ImageView  {
 	}
 
 	@Override
+	@SuppressWarnings("deprecation") // required override
 	public void setAlpha(int alpha) {
 		this.alpha = alpha;
 		if(drawable != null) {

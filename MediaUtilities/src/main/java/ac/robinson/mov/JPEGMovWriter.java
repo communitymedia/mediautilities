@@ -19,7 +19,6 @@
  */
 package ac.robinson.mov;
 
-import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 
 import com.bric.qt.io.VideoSampleDescriptionEntry;
@@ -72,10 +71,9 @@ public class JPEGMovWriter extends MovWriter {
 	 * @param jpegQuality a value from [0,1] indicating the quality of this image. A value of 1 represents a losslessly
 	 *                    encoded image.
 	 */
-	@SuppressLint("UseValueOf")
 	public synchronized void addFrame(float duration, Bitmap bi, float jpegQuality) throws IOException {
 		Map<String, Object> settings = new Hashtable<>(1);
-		settings.put(PROPERTY_QUALITY, new Float(jpegQuality));
+		settings.put(PROPERTY_QUALITY, Float.valueOf(jpegQuality));
 		super.addFrame(duration, bi, settings);
 	}
 

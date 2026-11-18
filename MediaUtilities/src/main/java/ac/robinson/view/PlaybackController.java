@@ -24,6 +24,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -175,7 +176,7 @@ public class PlaybackController extends FrameLayout {
 	}
 
 	// handler and runnable for updating the progress bar
-    final Handler mProgressHandler = new Handler();
+    final Handler mProgressHandler = new Handler(Looper.getMainLooper());
 	final Runnable mProgressRunnable = new Runnable() {
 		@Override
 		public void run() {

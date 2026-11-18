@@ -19,6 +19,7 @@ package ac.robinson.view;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
@@ -326,7 +327,7 @@ public class CustomMediaController extends FrameLayout {
 	}
 
 	@SuppressLint("HandlerLeak") // it *is* static...
-	private static final Handler mHandler = new Handler() {
+	private static final Handler mHandler = new Handler(Looper.getMainLooper()) {
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {

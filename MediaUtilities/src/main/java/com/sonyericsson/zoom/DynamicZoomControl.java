@@ -32,6 +32,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.os.SystemClock;
 
 /**
@@ -90,7 +91,7 @@ public class DynamicZoomControl implements Observer {
 	private float mPanMaxY;
 
 	/** Handler for posting runnables */
-	private final Handler mHandler = new Handler();
+	private final Handler mHandler = new Handler(Looper.getMainLooper());
 
 	/** Creates new zoom control */
 	public DynamicZoomControl() {

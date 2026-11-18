@@ -23,6 +23,7 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.SystemClock;
 
 import androidx.annotation.NonNull;
@@ -60,7 +61,7 @@ public class CrossFadeDrawable extends Drawable {
 	public CrossFadeDrawable(Bitmap start, Bitmap end) {
 		mStart = start;
 		mEnd = end;
-		mHandler = new Handler();
+		mHandler = new Handler(Looper.getMainLooper());
 		mInvalidater = this::invalidateSelf;
 	}
 
@@ -232,6 +233,7 @@ public class CrossFadeDrawable extends Drawable {
 	}
 
 	@Override
+	@SuppressWarnings("deprecation") // required override
 	public void setDither(boolean dither) {
 		mStartPaint.setDither(true);
 		mEndPaint.setDither(true);
@@ -254,6 +256,7 @@ public class CrossFadeDrawable extends Drawable {
 		mEndPaint.setColorFilter(cf);
 	}
 
+	@SuppressWarnings("deprecation") // required override
 	public int getOpacity() {
 		return PixelFormat.TRANSLUCENT;
 	}

@@ -127,6 +127,7 @@ import net.sourceforge.jaad.mp4.boxes.impl.sampleentries.codec.SMVSpecificBox;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.ConsoleHandler;
@@ -518,9 +519,11 @@ public class BoxFactory implements BoxTypes {
 
 		BoxImpl box = null;
 		try {
-			box = boxClass.newInstance();
+			box = boxClass.getDeclaredConstructor().newInstance();
 		} catch (InstantiationException e) {
 		} catch (IllegalAccessException e) {
+		} catch (NoSuchMethodException e) {
+		} catch (InvocationTargetException e) {
 		}
 
 		if (box != null) {
@@ -549,7 +552,7 @@ public class BoxFactory implements BoxTypes {
 				}
 			} else {
 				try {
-					box = cl.newInstance();
+					box = cl.getDeclaredConstructor().newInstance();
 				} catch (Exception e) {
 					LOGGER.log(Level.SEVERE, "BoxFactory: could not instantiate box " + typeToString(type), e);
 				}

@@ -31,6 +31,7 @@ import android.os.Bundle;
 import android.os.FileObserver;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.util.Log;
@@ -179,6 +180,7 @@ public class ImportingService extends Service {
 		private final WeakReference<ImportingService> mService;
 
 		public BluetoothFileHandler(ImportingService service) {
+			super(Looper.getMainLooper());
 			mService = new WeakReference<>(service);
 		}
 
@@ -218,6 +220,7 @@ public class ImportingService extends Service {
 		private final WeakReference<ImportingService> mService;
 
 		public ClientMessageHandler(ImportingService service) {
+			super(Looper.getMainLooper());
 			mService = new WeakReference<>(service);
 		}
 

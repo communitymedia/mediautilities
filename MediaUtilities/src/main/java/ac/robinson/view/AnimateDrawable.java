@@ -87,6 +87,7 @@ public class AnimateDrawable extends Drawable {
 	}
 
 	@Override
+	@SuppressWarnings("deprecation") // required override
 	public int getOpacity() {
 		return mDrawable != null ? mDrawable.getOpacity() : PixelFormat.TRANSPARENT;
 	}
@@ -99,6 +100,7 @@ public class AnimateDrawable extends Drawable {
 	}
 
 	@Override
+	@SuppressWarnings("deprecation") // required override
 	public void setDither(boolean dither) {
 		if (mDrawable != null) {
 			mDrawable.setDither(dither);
