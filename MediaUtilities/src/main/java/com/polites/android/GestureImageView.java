@@ -18,6 +18,7 @@ package com.polites.android;
 import java.io.InputStream;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.database.Cursor;
@@ -39,6 +40,7 @@ import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 
+@SuppressLint("AppCompatCustomView")
 public class GestureImageView extends ImageView  {
 
 	public static final String GLOBAL_NS = "http://schemas.android.com/apk/res/android";
@@ -538,7 +540,7 @@ public class GestureImageView extends ImageView  {
 				Cursor cur = getContext().getContentResolver().query(mUri, orientationColumn, null, null, null);
 
 				if (cur != null && cur.moveToFirst()) {
-					imageOrientation = cur.getInt(cur.getColumnIndex(orientationColumn[0]));
+					imageOrientation = cur.getInt(cur.getColumnIndexOrThrow(orientationColumn[0]));
 				}
 
 				InputStream in = null;

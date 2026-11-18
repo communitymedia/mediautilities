@@ -30,6 +30,7 @@ package com.sonyericsson.zoom;
 import java.util.Observable;
 import java.util.Observer;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -41,6 +42,7 @@ import android.widget.ImageView;
 /**
  * View capable of drawing an image at different zoom state levels
  */
+@SuppressLint("AppCompatCustomView")
 public class ImageZoomView extends ImageView implements Observer {
 
 	/** Rectangle used (and re-used) for cropping source image. */
